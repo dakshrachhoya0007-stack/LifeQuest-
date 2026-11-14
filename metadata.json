@@ -1,0 +1,6 @@
+{
+  "name": "LIFEQUEST - Fantasy RPG Fitness & Habit Platform",
+  "description": "Transform real-world healthy habits, workouts, and nutrition into epic RPG adventures in the world of Aetheria with Aether Vision AI fitness tracking.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

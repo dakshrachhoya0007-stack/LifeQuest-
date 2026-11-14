@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@theme {
+  --font-cinzel: 'Cinzel', serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* Custom scrollbars and fantasy glow accents */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0d0b14;
+}
+::-webkit-scrollbar-thumb {
+  background: #27213d;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #493c6f;
+}
+
+@keyframes ascendantRunePulse {
+  0%, 100% {
+    opacity: 0.72;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+}
+
+@keyframes divineHaloSpin {
+  0% {
+    transform: rotate(0deg) scale(1);
+    opacity: 0.78;
+  }
+  50% {
+    transform: rotate(180deg) scale(1.04);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+    opacity: 0.78;
+  }
+}
+
+@keyframes celestialNebulaDrift {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(-2px) scale(1.04);
+    opacity: 1;
+  }
+}
+
+@keyframes eternalCosmicShift {
+  0%, 100% {
+    filter: hue-rotate(0deg) brightness(1);
+    transform: scale(1);
+  }
+  50% {
+    filter: hue-rotate(24deg) brightness(1.12);
+    transform: scale(1.035);
+  }
+}
+
+.animate-ascendant-pulse {
+  animation: ascendantRunePulse 2.8s ease-in-out infinite;
+}
+
+.animate-divine-halo {
+  animation: divineHaloSpin 14s linear infinite;
+}
+
+.animate-celestial-drift {
+  animation: celestialNebulaDrift 3.6s ease-in-out infinite;
+}
+
+.animate-eternal-shift {
+  animation: eternalCosmicShift 4.5s ease-in-out infinite;
+}
+
