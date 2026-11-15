@@ -28,6 +28,7 @@ import {
   ChevronDown,
   Target,
 } from 'lucide-react';
+import { LegendTitleBadge } from '../Social/LegendTitleBadge';
 
 const EMBLEM_OPTIONS = [
   { id: 'Shield', label: 'Shield', Icon: Shield },
@@ -67,6 +68,7 @@ export const GuildsView: React.FC = () => {
     createGuildChallenge,
     searchChampions,
     openPublicProfile,
+    equippedLegendMap,
   } = useGame();
 
   const [selectedGuildId, setSelectedGuildId] = useState<string | null>(null);
@@ -648,7 +650,7 @@ export const GuildsView: React.FC = () => {
                                 />
                               </button>
                               <div className="min-w-0">
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 flex-wrap">
                                   <button
                                     type="button"
                                     onClick={() => openPublicProfile(member.userId)}
@@ -656,6 +658,12 @@ export const GuildsView: React.FC = () => {
                                   >
                                     {member.username}
                                   </button>
+                                  <LegendTitleBadge
+                                    title={member.legendTitle || equippedLegendMap[member.userId]?.titleTag}
+                                    style={member.legendTitleStyle || equippedLegendMap[member.userId]?.titleStyle}
+                                    emblemIcon={member.legendEmblem || equippedLegendMap[member.userId]?.emblemIcon}
+                                    size="xs"
+                                  />
                                   <span
                                     className={`text-[11px] capitalize font-semibold ${
                                       member.role === 'leader'

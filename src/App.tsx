@@ -9,7 +9,6 @@ import { DataMigrationModal } from './components/Auth/DataMigrationModal';
 import { SupabaseConfigModal } from './components/Auth/SupabaseConfigModal';
 import { OnboardingWizard } from './components/Onboarding/OnboardingWizard';
 import { DashboardView } from './components/Dashboard/DashboardView';
-import { QuestsView } from './components/Quests/QuestsView';
 import { CharacterView } from './components/Character/CharacterView';
 import { FitnessView } from './components/Fitness/FitnessView';
 import { NutritionView } from './components/Nutrition/NutritionView';
@@ -19,15 +18,14 @@ import { StoreView } from './components/Store/StoreView';
 import { BuffsView } from './components/ActiveBuffs/BuffsView';
 import { BossBattleView } from './components/BossBattle/BossBattleView';
 import { StorylineView } from './components/Storyline/StorylineView';
-import { LeaderboardView } from './components/Leaderboard/LeaderboardView';
-import { DiscoverPlayersView } from './components/Social/DiscoverPlayersView';
+import { SocialHubView } from './components/Social/SocialHubView';
 import { PublicProfileModal } from './components/Social/PublicProfileModal';
 import { GuildsView } from './components/Guilds/GuildsView';
-import { ChatView } from './components/Chat/ChatView';
-import { AchievementsView } from './components/Achievements/AchievementsView';
+import { ProgressionHubView } from './components/Progression/ProgressionHubView';
 import { SettingsView } from './components/Settings/SettingsView';
 import { HeroSelectionModal } from './components/HeroSelect/HeroSelectionModal';
 import { InteractiveTutorialOverlay } from './components/Tutorial/InteractiveTutorialOverlay';
+import { GlobalLegendUnlockModal } from './components/Achievements/GlobalLegendUnlockModal';
 
 const MainAppContent: React.FC = () => {
   const {
@@ -49,6 +47,7 @@ const MainAppContent: React.FC = () => {
     clearAuthCallbackError,
     loginWithGoogleWithSupabase,
     selectedHeroId,
+    heroLocked,
     showHeroSelectModal,
     setShowHeroSelectModal,
     selectPlayableHero,
@@ -98,18 +97,19 @@ const MainAppContent: React.FC = () => {
           onReturningPlayer={() => setShowAuthModal(true, 'login')}
         />
         <AuthModal
-          isOpen={true}
+          isOpen={showAuthModal}
           initialMode={authMode}
-          canClose={false}
-          onClose={() => setShowAuthModal(true, authMode)}
+          canClose={true}
+          onClose={() => setShowAuthModal(false)}
           onSuccessRegister={() => {}}
-          onOpenSupabaseConfig={() => setShowSupabaseConfigModal(true)}
         />
-        <SupabaseConfigModal
-          isOpen={showSupabaseConfigModal}
-          onClose={() => setShowSupabaseConfigModal(false)}
-          onConfigUpdated={recheckAuthSession}
-        />
+        {import.meta.env.DEV && showSupabaseConfigModal && (
+          <SupabaseConfigModal
+            isOpen={showSupabaseConfigModal}
+            onClose={() => setShowSupabaseConfigModal(false)}
+            onConfigUpdated={recheckAuthSession}
+          />
+        )}
       </>
     );
   }
@@ -126,7 +126,12 @@ const MainAppContent: React.FC = () => {
     }
     switch (activeTab) {
       case 'dashboard': return <DashboardView />;
-      case 'quests': return <QuestsView />;
+      case 'progression':
+      case 'quests':
+      case 'daily-report':
+      case 'achievements':
+      case 'hall-of-legends':
+        return <ProgressionHubView />;
       case 'character': return <CharacterView />;
       case 'fitness': return <FitnessView />;
       case 'nutrition': return <NutritionView />;
@@ -136,11 +141,12 @@ const MainAppContent: React.FC = () => {
       case 'buffs': return <BuffsView />;
       case 'boss-battles': return <BossBattleView />;
       case 'storyline': return <StorylineView />;
-      case 'leaderboard': return <LeaderboardView />;
-      case 'friends': return <DiscoverPlayersView />;
+      case 'social':
+      case 'leaderboard':
+      case 'friends':
+      case 'chat':
+        return <SocialHubView />;
       case 'guilds': return <GuildsView />;
-      case 'chat': return <ChatView />;
-      case 'achievements': return <AchievementsView />;
       case 'settings': return <SettingsView />;
       default: return <DashboardView />;
     }
@@ -165,7 +171,6 @@ const MainAppContent: React.FC = () => {
         initialMode={authMode}
         onClose={() => setShowAuthModal(false)}
         onSuccessRegister={() => {}}
-        onOpenSupabaseConfig={() => setShowSupabaseConfigModal(true)}
       />
 
       <DataMigrationModal
@@ -175,23 +180,27 @@ const MainAppContent: React.FC = () => {
         onSkip={skipMigration}
       />
 
-      <SupabaseConfigModal
-        isOpen={showSupabaseConfigModal}
-        onClose={() => setShowSupabaseConfigModal(false)}
-        onConfigUpdated={recheckAuthSession}
-      />
+      {import.meta.env.DEV && showSupabaseConfigModal && (
+        <SupabaseConfigModal
+          isOpen={showSupabaseConfigModal}
+          onClose={() => setShowSupabaseConfigModal(false)}
+          onConfigUpdated={recheckAuthSession}
+        />
+      )}
 
       <PublicProfileModal />
 
       <HeroSelectionModal
-        isOpen={showHeroSelectModal}
+        isOpen={showHeroSelectModal && !heroLocked}
         initialHeroId={selectedHeroId}
-        hasExistingProgress={true}
+        heroLocked={heroLocked}
+        canClose={false}
         onConfirm={selectPlayableHero}
         onClose={() => setShowHeroSelectModal(false)}
       />
 
       <InteractiveTutorialOverlay />
+      <GlobalLegendUnlockModal />
     </div>
   );
 };

@@ -3,15 +3,17 @@ import {
   CharacterClass,
   EquippedGear,
   EquipmentSlotType,
+  PlayableHeroId,
   Weapon,
   WeaponCategory,
 } from '../../types/game';
-import { getRpgAvatarForClass } from '../../assets/images';
+import { getHeroArtwork } from '../../assets/images';
 import { EquipmentIllustration } from '../../assets/equipmentArtwork';
 import { getRarityStyle, isBeyondMythicRarity } from '../../utils/rarityStyles';
 import { Plus, Shield, Sparkles, Swords } from 'lucide-react';
 
 interface RpgCharacterStageProps {
+  heroId?: PlayableHeroId;
   characterClass: CharacterClass;
   characterName: string;
   level: number;
@@ -48,6 +50,7 @@ const CLASS_ATMOSPHERE: Record<CharacterClass, { accent: string; badge: string; 
 };
 
 export const RpgCharacterStage: React.FC<RpgCharacterStageProps> = ({
+  heroId,
   characterClass,
   characterName,
   level,
@@ -59,7 +62,7 @@ export const RpgCharacterStage: React.FC<RpgCharacterStageProps> = ({
   onSelectItem,
   onOpenStore,
 }) => {
-  const portraitSrc = getRpgAvatarForClass(characterClass);
+  const portraitSrc = getHeroArtwork(heroId, characterClass);
   const classTheme = CLASS_ATMOSPHERE[characterClass] || CLASS_ATMOSPHERE.Warrior;
 
   const mainWeapon =

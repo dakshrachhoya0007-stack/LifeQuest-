@@ -20,6 +20,8 @@ export const InteractiveTutorialOverlay: React.FC = () => {
   const {
     tutorialState,
     activeTab,
+    socialSubTab,
+    progressionSubTab,
     setActiveTab,
     nextTutorialStep,
     prevTutorialStep,
@@ -37,10 +39,21 @@ export const InteractiveTutorialOverlay: React.FC = () => {
   // Automatically navigate to the current tutorial step's real section
   useEffect(() => {
     if (!tutorialState.isOpen || !currentStep) return;
-    if (activeTab !== currentStep.targetTab) {
+    const isOnTarget =
+      activeTab === currentStep.targetTab ||
+      (activeTab === 'progression' &&
+        (currentStep.targetTab === 'quests' || currentStep.targetTab === 'achievements') &&
+        progressionSubTab === currentStep.targetTab) ||
+      (activeTab === 'social' &&
+        (currentStep.targetTab === 'leaderboard' ||
+          currentStep.targetTab === 'friends' ||
+          currentStep.targetTab === 'chat') &&
+        socialSubTab === currentStep.targetTab);
+
+    if (!isOnTarget) {
       setActiveTab(currentStep.targetTab);
     }
-  }, [tutorialState.isOpen, stepIndex, currentStep, activeTab, setActiveTab]);
+  }, [tutorialState.isOpen, stepIndex, currentStep, activeTab, progressionSubTab, socialSubTab, setActiveTab]);
 
   // Measure and scroll target UI element into view with clean spotlight rect
   useEffect(() => {
@@ -94,7 +107,7 @@ export const InteractiveTutorialOverlay: React.FC = () => {
       window.removeEventListener('resize', onResize);
       window.removeEventListener('scroll', onResize);
     };
-  }, [tutorialState.isOpen, stepIndex, currentStep, activeTab]);
+  }, [tutorialState.isOpen, stepIndex, currentStep, activeTab, progressionSubTab, socialSubTab]);
 
   if (!tutorialState.isOpen || !currentStep) return null;
 

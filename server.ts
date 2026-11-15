@@ -9,7 +9,16 @@ import { GoogleGenAI, Type } from '@google/genai';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const PORT = Number(process.env.PORT || 3000);
+const getPort = (): number => {
+  const portFlagIdx = process.argv.indexOf('--port');
+  if (portFlagIdx !== -1 && process.argv[portFlagIdx + 1]) {
+    const parsed = Number(process.argv[portFlagIdx + 1]);
+    if (!Number.isNaN(parsed) && parsed > 0) return parsed;
+  }
+  return Number(process.env.DEFAULT_APP_PORT || 3000);
+};
+
+const PORT = getPort();
 const GEMINI_MODEL = 'gemini-4-hydrogen';
 
 const VALID_EXERCISE_TYPES = new Set([
@@ -588,6 +597,646 @@ async function startServer() {
       const { status, message } = extractErrorStatus(err);
       res.status(status).json({ error: message });
     }
+  });
+
+  // 3. Server-Side AI Dynamic Daily Quest Generator (Feature 10)
+  const VALID_QUEST_CATEGORIES = new Set([
+    'physical',
+    'intellectual',
+    'discipline',
+    'personal_growth',
+    'social',
+  ]);
+  const VALID_QUEST_DIFFICULTIES = new Set(['easy', 'medium', 'challenging', 'special']);
+  const VALID_EVIDENCE_TYPES = new Set([
+    'workout_minutes',
+    'workout_sessions',
+    'vision_reps',
+    'habit_completions',
+    'meal_logs',
+    'water_glasses',
+    'friend_interaction',
+    'study_or_skill_reflection',
+    'personal_reflection',
+  ]);
+
+  const defaultEvidenceForCategory = (cat: string): string => {
+    switch (cat) {
+      case 'physical':
+        return 'workout_minutes';
+      case 'intellectual':
+        return 'study_or_skill_reflection';
+      case 'discipline':
+        return 'habit_completions';
+      case 'personal_growth':
+        return 'personal_reflection';
+      case 'social':
+        return 'friend_interaction';
+      default:
+        return 'personal_reflection';
+    }
+  };
+
+  app.post('/api/ai/generate-daily-quests', async (req: Request, res: Response) => {
+    try {
+      const body = req.body || {};
+      const periodKey = String(body.periodKey || new Date().toISOString().split('T')[0]);
+      const player = body.player || {};
+      const checkIn = body.checkIn || {};
+      const recentTitles: string[] = Array.isArray(body.recentQuestTitles)
+        ? body.recentQuestTitles.map(String).slice(0, 30)
+        : [];
+
+      const streak = Number(player.currentStreak || 0);
+      const level = Number(player.level || 1);
+      const yCompRate = Number(player.yesterdayCompletionRate ?? 0.5);
+      const missedDays = Number(player.missedDaysEstimate || 0);
+      const energyLevel = String(checkIn.energyLevel || 'medium');
+
+      let adaptiveTier: 'gentle_comeback' | 'supportive' | 'balanced' | 'escalating' = 'balanced';
+      if (missedDays >= 2 || (streak === 0 && yCompRate < 0.25)) {
+        adaptiveTier = 'gentle_comeback';
+      } else if (yCompRate < 0.45 || energyLevel === 'low') {
+        adaptiveTier = 'supportive';
+      } else if (streak >= 5 && yCompRate >= 0.75 && energyLevel !== 'low') {
+        adaptiveTier = 'escalating';
+      }
+
+      const availableMinutes = Math.min(
+        180,
+        Math.max(10, Math.round(Number(checkIn.availableMinutes || 45)))
+      );
+
+      const ai = getGeminiClient();
+
+      const systemInstruction = [
+        'You are the Aetheria Quest Architect, an intelligent, empathetic RPG Mentor generating personalized daily real-life quests for LIFEQUEST.',
+        'REQUIREMENTS:',
+        '1. Generate EXACTLY 5 daily quests covering ALL 5 distinct categories once each: physical, intellectual, discipline, personal_growth, social.',
+        '2. Difficulty balance across the 5 quests:',
+        '   - 1 easy quest (difficulty="easy", isSpecialChallenge=false)',
+        '   - 2 medium quests (difficulty="medium", isSpecialChallenge=false)',
+        '   - 1 challenging quest (difficulty="challenging", isSpecialChallenge=false)',
+        '   - 1 Special Daily Challenge (difficulty="special", isSpecialChallenge=true)',
+        '3. ADAPTIVE DIFFICULTY:',
+        `   Current computed adaptive tier: "${adaptiveTier}".`,
+        '   - If gentle_comeback: lower friction, short achievable wins (5-15 min), encouraging comeback tone.',
+        '   - If supportive: realistic medium steps tied directly to habits/incomplete tasks.',
+        '   - If balanced: brisk rewarding routine fitting the player availableMinutes.',
+        '   - If escalating: stretch goals with memorable RPG flair, never unsafe or overwhelming.',
+        '4. NEVER repeat any quest title from recentQuestTitles.',
+        '5. Map evidenceType strictly based on how progress can be verified honestly:',
+        '   - Physical workout duration: "workout_minutes" (unitLabel="min", maxProgress 10..60) or "workout_sessions" (unitLabel="session", maxProgress=1..2) or "vision_reps" (unitLabel="reps", maxProgress 15..60)',
+        '   - Discipline / habits / hydration / meals: "habit_completions" (unitLabel="habit", maxProgress=1..3), "meal_logs" (unitLabel="meal", maxProgress=1..3), or "water_glasses" (unitLabel="glasses", maxProgress=4..8)',
+        '   - Intellectual / study / reading: "study_or_skill_reflection" (unitLabel="session", maxProgress=1)',
+        '   - Personal Growth / confidence / planning: "personal_reflection" (unitLabel="milestone", maxProgress=1)',
+        '   - Social / real-world connection or fellowship: "friend_interaction" (unitLabel="connection", maxProgress=1) or "personal_reflection" (unitLabel="outreach", maxProgress=1)',
+        '6. Tailor each personalizationReason specifically to the player habits, goals, incomplete tasks, energyLevel, and availableMinutes.',
+      ].join('\n');
+
+      const userPrompt = JSON.stringify({
+        periodKey,
+        adaptiveTier,
+        checkIn: {
+          availableMinutes,
+          energyLevel,
+          focusNote: String(checkIn.focusNote || '').slice(0, 200),
+        },
+        playerContext: {
+          username: String(player.username || 'Champion'),
+          characterClass: String(player.characterClass || 'Warrior'),
+          level,
+          currentStreak: streak,
+          personalGoals: Array.isArray(player.personalGoals) ? player.personalGoals : [],
+          preferredActivities: Array.isArray(player.preferredActivities) ? player.preferredActivities : [],
+          habits: Array.isArray(player.habits) ? player.habits.slice(0, 12) : [],
+          incompleteClassicQuests: Array.isArray(player.incompleteClassicQuests) ? player.incompleteClassicQuests : [],
+          recentAchievements: Array.isArray(player.recentAchievements) ? player.recentAchievements : [],
+          yesterdaySummary: player.yesterdaySummary || {},
+          struggleCategories: Array.isArray(player.struggleCategories) ? player.struggleCategories : [],
+          preferredCategories: Array.isArray(player.preferredCategories) ? player.preferredCategories : [],
+        },
+        recentQuestTitles: recentTitles,
+      });
+
+      const response = await ai.models.generateContent({
+        model: GEMINI_MODEL,
+        contents: { parts: [{ text: userPrompt }] },
+        config: {
+          systemInstruction,
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              mentorGreeting: { type: Type.STRING },
+              quests: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    title: { type: Type.STRING },
+                    description: { type: Type.STRING },
+                    category: { type: Type.STRING },
+                    difficulty: { type: Type.STRING },
+                    objectiveLabel: { type: Type.STRING },
+                    evidenceType: { type: Type.STRING },
+                    maxProgress: { type: Type.INTEGER },
+                    unitLabel: { type: Type.STRING },
+                    estimatedMinutes: { type: Type.INTEGER },
+                    playerXpReward: { type: Type.INTEGER },
+                    forgeXpReward: { type: Type.INTEGER },
+                    goldReward: { type: Type.INTEGER },
+                    isSpecialChallenge: { type: Type.BOOLEAN },
+                    personalizationReason: { type: Type.STRING },
+                  },
+                  required: [
+                    'title',
+                    'description',
+                    'category',
+                    'difficulty',
+                    'objectiveLabel',
+                    'evidenceType',
+                    'maxProgress',
+                    'unitLabel',
+                    'estimatedMinutes',
+                    'playerXpReward',
+                    'forgeXpReward',
+                    'goldReward',
+                    'isSpecialChallenge',
+                    'personalizationReason',
+                  ],
+                },
+              },
+            },
+            required: ['mentorGreeting', 'quests'],
+          },
+        },
+      });
+
+      const parsed = parseGeminiJson<any>(response.text);
+      const rawQuests = Array.isArray(parsed.quests) ? parsed.quests : [];
+      if (rawQuests.length === 0) {
+        res.status(502).json({ error: 'Quest generation returned an empty slate. Please retry.' });
+        return;
+      }
+
+      const requiredCategories = ['physical', 'intellectual', 'discipline', 'personal_growth', 'social'];
+      const seenTitles = new Set(recentTitles.map(t => t.toLowerCase().trim()));
+      let specialAssigned = false;
+
+      const sanitized = rawQuests.slice(0, 5).map((q: any, idx: number) => {
+        const category = VALID_QUEST_CATEGORIES.has(q.category)
+          ? String(q.category)
+          : requiredCategories[idx % requiredCategories.length];
+
+        let isSpecial = Boolean(q.isSpecialChallenge) || q.difficulty === 'special';
+        if (isSpecial && specialAssigned) isSpecial = false;
+        if (idx === rawQuests.slice(0, 5).length - 1 && !specialAssigned) isSpecial = true;
+        if (isSpecial) specialAssigned = true;
+
+        const difficulty = isSpecial
+          ? 'special'
+          : VALID_QUEST_DIFFICULTIES.has(q.difficulty) && q.difficulty !== 'special'
+          ? String(q.difficulty)
+          : idx === 0
+          ? 'easy'
+          : idx >= 3
+          ? 'challenging'
+          : 'medium';
+
+        let evidenceType = VALID_EVIDENCE_TYPES.has(q.evidenceType)
+          ? String(q.evidenceType)
+          : defaultEvidenceForCategory(category);
+
+        // Ensure intellectual & personal_growth use genuine reflection evidence unless valid
+        if (category === 'intellectual' && !['study_or_skill_reflection', 'personal_reflection'].includes(evidenceType)) {
+          evidenceType = 'study_or_skill_reflection';
+        }
+        if (category === 'personal_growth' && !['personal_reflection', 'study_or_skill_reflection', 'habit_completions'].includes(evidenceType)) {
+          evidenceType = 'personal_reflection';
+        }
+
+        let maxProgress = Math.max(1, Math.min(200, Math.round(Number(q.maxProgress || 1))));
+        if (evidenceType === 'study_or_skill_reflection' || evidenceType === 'personal_reflection') {
+          maxProgress = 1;
+        } else if (evidenceType === 'habit_completions' || evidenceType === 'meal_logs') {
+          maxProgress = Math.min(3, Math.max(1, maxProgress));
+        } else if (evidenceType === 'workout_sessions') {
+          maxProgress = Math.min(2, Math.max(1, maxProgress));
+        } else if (evidenceType === 'workout_minutes') {
+          maxProgress = Math.min(Math.max(10, availableMinutes), Math.max(10, maxProgress));
+        } else if (evidenceType === 'water_glasses') {
+          maxProgress = Math.min(8, Math.max(4, maxProgress));
+        }
+
+        const baseMultiplier =
+          difficulty === 'special' ? 1.55 : difficulty === 'challenging' ? 1.3 : difficulty === 'medium' ? 1.0 : 0.75;
+        const playerXpReward = Math.min(180, Math.max(25, Math.round(Number(q.playerXpReward || 45 * baseMultiplier))));
+        const forgeXpReward = Math.min(140, Math.max(15, Math.round(Number(q.forgeXpReward || 30 * baseMultiplier))));
+        const goldReward = Math.min(160, Math.max(20, Math.round(Number(q.goldReward || 32 * baseMultiplier))));
+
+        let title = String(q.title || `${category} Daily Trial`).trim().slice(0, 110);
+        if (seenTitles.has(title.toLowerCase())) {
+          title = `${title} (${periodKey.slice(5)})`;
+        }
+        seenTitles.add(title.toLowerCase());
+
+        return {
+          id: `dq-${periodKey}-${idx + 1}-${Math.random().toString(36).slice(2, 6)}`,
+          periodKey,
+          title,
+          description: String(q.description || 'Complete this personalized real-world objective with integrity.').slice(0, 420),
+          category,
+          difficulty,
+          objectiveLabel: String(q.objectiveLabel || 'Complete today’s objective').slice(0, 160),
+          evidenceType,
+          progress: 0,
+          maxProgress,
+          unitLabel: String(q.unitLabel || 'step').slice(0, 32),
+          estimatedMinutes: Math.min(90, Math.max(5, Math.round(Number(q.estimatedMinutes || 15)))),
+          playerXpReward,
+          forgeXpReward,
+          goldReward,
+          isSpecialChallenge: isSpecial,
+          personalizationReason: String(
+            q.personalizationReason || 'Tailored to your recent habits, goals, and current momentum.'
+          ).slice(0, 260),
+          adaptiveTier,
+          completed: false,
+          claimed: false,
+          createdAt: new Date().toISOString(),
+        };
+      });
+
+      res.json({
+        adaptiveTier,
+        mentorGreeting: String(
+          parsed.mentorGreeting ||
+            'Your daily scroll has been forged from your genuine realm chronicle.'
+        ).slice(0, 260),
+        quests: sanitized,
+      });
+    } catch (err: any) {
+      const { status, message } = extractErrorStatus(err);
+      res.status(status).json({ error: message });
+    }
+  });
+
+  // 4. Server-Side AI Daily Quest Report (Feature 11)
+  app.post('/api/ai/daily-quest-report', async (req: Request, res: Response) => {
+    try {
+      const body = req.body || {};
+      const reportDate = String(body.reportDate || new Date().toISOString().split('T')[0]);
+      const yesterdayDate = String(body.yesterdayDate || reportDate);
+      const metrics = body.metrics || {};
+
+      const ai = getGeminiClient();
+
+      const systemInstruction = [
+        'You are the Aetheria Royal Chronicler & RPG Mentor writing a Player Daily Quest Report.',
+        'STRICT GROUNDING RULES:',
+        '1. Base EVERY statement exclusively on the provided real recorded metrics JSON.',
+        '2. NEVER invent workouts, quests, XP, achievements, or habits that are 0 or absent in the metrics.',
+        '3. When a category had 0 completions or no activity yesterday, acknowledge it honestly and gently offer a low-friction next step—never fabricate progress.',
+        '4. Organize into: yesterdayPerformance summary, personalStrengths (at least 1 grounded observation), areasForImprovement (gentle actionable feedback), todayRecommendations (focused & realistic), and dailyRpgEvaluation (warm mentor narrative tying real-life effort to RPG character progression).',
+      ].join('\n');
+
+      const response = await ai.models.generateContent({
+        model: GEMINI_MODEL,
+        contents: {
+          parts: [
+            {
+              text: JSON.stringify({
+                reportDate,
+                yesterdayDate,
+                metrics,
+              }),
+            },
+          ],
+        },
+        config: {
+          systemInstruction,
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              headline: { type: Type.STRING },
+              adaptiveTone: { type: Type.STRING },
+              yesterdaySummary: { type: Type.STRING },
+              personalStrengths: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    title: { type: Type.STRING },
+                    detail: { type: Type.STRING },
+                    category: { type: Type.STRING },
+                  },
+                  required: ['title', 'detail', 'category'],
+                },
+              },
+              areasForImprovement: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    area: { type: Type.STRING },
+                    observation: { type: Type.STRING },
+                    gentleAction: { type: Type.STRING },
+                  },
+                  required: ['area', 'observation', 'gentleAction'],
+                },
+              },
+              todayRecommendations: {
+                type: Type.OBJECT,
+                properties: {
+                  primaryFocus: { type: Type.STRING },
+                  realisticGoals: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                  },
+                  specialChallengeAdvice: { type: Type.STRING },
+                  suggestedMinutes: { type: Type.INTEGER },
+                },
+                required: ['primaryFocus', 'realisticGoals', 'specialChallengeAdvice', 'suggestedMinutes'],
+              },
+              dailyRpgEvaluation: {
+                type: Type.OBJECT,
+                properties: {
+                  mentorTitle: { type: Type.STRING },
+                  narrative: { type: Type.STRING },
+                  longTermConnection: { type: Type.STRING },
+                },
+                required: ['mentorTitle', 'narrative', 'longTermConnection'],
+              },
+            },
+            required: [
+              'headline',
+              'adaptiveTone',
+              'yesterdaySummary',
+              'personalStrengths',
+              'areasForImprovement',
+              'todayRecommendations',
+              'dailyRpgEvaluation',
+            ],
+          },
+        },
+      });
+
+      const parsed = parseGeminiJson<any>(response.text);
+
+      const qComp = Math.max(0, Number(metrics.yesterdayQuestsCompleted || 0));
+      const qTot = Math.max(0, Number(metrics.yesterdayQuestsTotal || 0));
+      const hComp = Math.max(0, Number(metrics.yesterdayHabitsCompleted || 0));
+      const wLogged = Math.max(0, Number(metrics.yesterdayWorkouts || 0));
+      const mLogged = Math.max(0, Number(metrics.yesterdayMeals || 0));
+      const cScore = Math.min(100, Math.max(0, Math.round(Number(metrics.consistencyScore || 0))));
+
+      res.json({
+        reportDate,
+        yesterdayDate,
+        headline: String(parsed.headline || 'Daily Chronicle of Progression'),
+        adaptiveTone: String(parsed.adaptiveTone || 'Balanced Guidance'),
+        yesterdayPerformance: {
+          questsCompleted: qComp,
+          questsTotal: qTot,
+          habitsCompleted: hComp,
+          workoutsLogged: wLogged,
+          mealsLogged: mLogged,
+          playerXpEarned: Math.max(0, Number(metrics.yesterdayPlayerXp || 0)),
+          forgeXpEarned: Math.max(0, Number(metrics.yesterdayForgeXp || 0)),
+          goldEarned: Math.max(0, Number(metrics.yesterdayGold || 0)),
+          achievementsUnlocked: Math.max(0, Number(metrics.yesterdayAchievements || 0)),
+          consistencyScore: cScore,
+          summary: String(parsed.yesterdaySummary || ''),
+        },
+        personalStrengths: Array.isArray(parsed.personalStrengths)
+          ? parsed.personalStrengths.slice(0, 4).map((s: any) => ({
+              title: String(s.title || 'Steady Dedication'),
+              detail: String(s.detail || ''),
+              category: String(s.category || 'Discipline'),
+            }))
+          : [],
+        areasForImprovement: Array.isArray(parsed.areasForImprovement)
+          ? parsed.areasForImprovement.slice(0, 4).map((a: any) => ({
+              area: String(a.area || 'Daily Balance'),
+              observation: String(a.observation || ''),
+              gentleAction: String(a.gentleAction || ''),
+            }))
+          : [],
+        todayRecommendations: {
+          primaryFocus: String(parsed.todayRecommendations?.primaryFocus || 'Steady Rhythm'),
+          realisticGoals: Array.isArray(parsed.todayRecommendations?.realisticGoals)
+            ? parsed.todayRecommendations.realisticGoals.map(String).slice(0, 4)
+            : [],
+          specialChallengeAdvice: String(
+            parsed.todayRecommendations?.specialChallengeAdvice || 'Take one deliberate step toward your Special Daily Challenge.'
+          ),
+          suggestedMinutes: Math.min(
+            180,
+            Math.max(10, Math.round(Number(parsed.todayRecommendations?.suggestedMinutes || 30)))
+          ),
+        },
+        dailyRpgEvaluation: {
+          mentorTitle: String(parsed.dailyRpgEvaluation?.mentorTitle || 'Chronicle Evaluation'),
+          narrative: String(parsed.dailyRpgEvaluation?.narrative || ''),
+          longTermConnection: String(parsed.dailyRpgEvaluation?.longTermConnection || ''),
+        },
+        generatedAt: new Date().toISOString(),
+      });
+    } catch (err: any) {
+      const { status, message } = extractErrorStatus(err);
+      res.status(status).json({ error: message });
+    }
+  });
+
+  // 5. Server-Side Atomic Ledger for Global Exclusive Achievements (Pre-Migration Fallback)
+  const LEDGER_FILE_PATH = path.join(__dirname, '.lifequest_legends_ledger.json');
+  interface LegendsLedgerFile {
+    claims: Record<string, { achievementId: string; ownerId: string; ownerUsername: string; claimedAt: string }>;
+    equippedByUser: Record<string, { achievementId: string; titleTag: string; titleStyle: string; emblemIcon: string }>;
+    announcements: Array<{
+      id: string;
+      achievementId: string;
+      achievementName: string;
+      titleTag: string;
+      titleStyle: string;
+      emblemIcon: string;
+      rarity: string;
+      ownerId: string;
+      ownerUsername: string;
+      announcedAt: string;
+    }>;
+  }
+
+  let ledgerLock: Promise<void> = Promise.resolve();
+  const withLedgerLock = async <T>(fn: () => Promise<T> | T): Promise<T> => {
+    let release!: () => void;
+    const prev = ledgerLock;
+    ledgerLock = new Promise<void>(resolve => {
+      release = resolve;
+    });
+    await prev;
+    try {
+      return await fn();
+    } finally {
+      release();
+    }
+  };
+
+  const readLedger = (): LegendsLedgerFile => {
+    try {
+      if (fs.existsSync(LEDGER_FILE_PATH)) {
+        const raw = fs.readFileSync(LEDGER_FILE_PATH, 'utf8');
+        const parsed = JSON.parse(raw);
+        return {
+          claims: parsed?.claims || {},
+          equippedByUser: parsed?.equippedByUser || {},
+          announcements: Array.isArray(parsed?.announcements) ? parsed.announcements : [],
+        };
+      }
+    } catch {
+      // ignore corrupted ledger read
+    }
+    return { claims: {}, equippedByUser: {}, announcements: [] };
+  };
+
+  const writeLedger = (data: LegendsLedgerFile) => {
+    fs.writeFileSync(LEDGER_FILE_PATH, JSON.stringify(data, null, 2), 'utf8');
+  };
+
+  app.get('/api/legends/state', async (_req: Request, res: Response) => {
+    const ledger = await withLedgerLock(() => readLedger());
+    res.json({
+      claims: Object.values(ledger.claims),
+      equippedByUser: ledger.equippedByUser,
+      announcements: ledger.announcements.slice(0, 25),
+    });
+  });
+
+  app.post('/api/legends/claim', async (req: Request, res: Response) => {
+    const {
+      achievementId,
+      achievementName,
+      titleTag,
+      titleStyle,
+      emblemIcon,
+      rarity,
+      ownerId,
+      ownerUsername,
+      threshold,
+      progressValue,
+    } = req.body || {};
+
+    if (!achievementId || !ownerId || !ownerUsername) {
+      res.status(400).json({ success: false, error: 'Missing required claim fields.' });
+      return;
+    }
+
+    const reqThreshold = Math.max(1, Number(threshold || 1));
+    const verifiedProg = Number(progressValue || 0);
+    if (verifiedProg < reqThreshold) {
+      res.status(400).json({
+        success: false,
+        error: `Requirement not yet met (${verifiedProg}/${reqThreshold}).`,
+      });
+      return;
+    }
+
+    const result = await withLedgerLock(() => {
+      const ledger = readLedger();
+      const existing = ledger.claims[String(achievementId)];
+      if (existing) {
+        return {
+          status: 409,
+          payload: {
+            success: false,
+            alreadyClaimedGlobally: true,
+            ownerId: existing.ownerId,
+            ownerUsername: existing.ownerUsername,
+            claimedAt: existing.claimedAt,
+            error: `This Global Exclusive Achievement has already been permanently claimed by ${existing.ownerUsername}.`,
+          },
+        };
+      }
+
+      const claimedAt = new Date().toISOString();
+      const claimRecord = {
+        achievementId: String(achievementId),
+        ownerId: String(ownerId),
+        ownerUsername: String(ownerUsername),
+        claimedAt,
+      };
+      ledger.claims[String(achievementId)] = claimRecord;
+      ledger.equippedByUser[String(ownerId)] = {
+        achievementId: String(achievementId),
+        titleTag: String(titleTag || 'LEGEND'),
+        titleStyle: String(titleStyle || 'gold'),
+        emblemIcon: String(emblemIcon || 'Crown'),
+      };
+      ledger.announcements.unshift({
+        id: `ann-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        achievementId: String(achievementId),
+        achievementName: String(achievementName || achievementId),
+        titleTag: String(titleTag || 'LEGEND'),
+        titleStyle: String(titleStyle || 'gold'),
+        emblemIcon: String(emblemIcon || 'Crown'),
+        rarity: String(rarity || 'Legendary'),
+        ownerId: String(ownerId),
+        ownerUsername: String(ownerUsername),
+        announcedAt: claimedAt,
+      });
+      ledger.announcements = ledger.announcements.slice(0, 50);
+      writeLedger(ledger);
+
+      return {
+        status: 200,
+        payload: {
+          success: true,
+          ownership: claimRecord,
+          announcements: ledger.announcements.slice(0, 25),
+          equippedByUser: ledger.equippedByUser,
+        },
+      };
+    });
+
+    res.status(result.status).json(result.payload);
+  });
+
+  app.post('/api/legends/equip', async (req: Request, res: Response) => {
+    const { ownerId, achievementId, titleTag, titleStyle, emblemIcon } = req.body || {};
+    if (!ownerId) {
+      res.status(400).json({ success: false, error: 'Missing ownerId.' });
+      return;
+    }
+
+    const result = await withLedgerLock(() => {
+      const ledger = readLedger();
+      if (!achievementId) {
+        delete ledger.equippedByUser[String(ownerId)];
+        writeLedger(ledger);
+        return { status: 200, payload: { success: true } };
+      }
+
+      const existing = ledger.claims[String(achievementId)];
+      if (!existing || existing.ownerId !== String(ownerId)) {
+        return {
+          status: 403,
+          payload: { success: false, error: 'You do not own this Global Exclusive Title.' },
+        };
+      }
+
+      ledger.equippedByUser[String(ownerId)] = {
+        achievementId: String(achievementId),
+        titleTag: String(titleTag || 'LEGEND'),
+        titleStyle: String(titleStyle || 'gold'),
+        emblemIcon: String(emblemIcon || 'Crown'),
+      };
+      writeLedger(ledger);
+      return { status: 200, payload: { success: true } };
+    });
+
+    res.status(result.status).json(result.payload);
   });
 
   // Dev Vite middleware vs Production static build

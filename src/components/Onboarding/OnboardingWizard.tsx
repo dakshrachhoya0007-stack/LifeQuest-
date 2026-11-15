@@ -336,7 +336,7 @@ export const OnboardingWizard: React.FC = () => {
                 STEP 1: CHARACTER PROFILE
               </h2>
               <p className="text-sm text-slate-400">
-                Choose your public hero username, in-realm character name, class archetype, and portrait avatar.
+                Choose your public hero username, in-realm character name, starting class archetype, and portrait avatar. After completing setup, you will inspect full character artwork and permanently bind your champion.
               </p>
             </div>
 

@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import {
   characterWarriorAvatarImg,
-  getRpgAvatarForClass,
+  getHeroArtwork,
   resolveAssetUrl,
 } from '../../assets/images';
+import { getHeroById } from '../../data/heroesData';
 import {
   CharacterClass,
   UnitSystem,
@@ -26,9 +27,9 @@ import {
   LogOut,
   Save,
   Check,
-  Database,
   Cloud,
   RefreshCw,
+  Lock,
 } from 'lucide-react';
 
 export const SettingsView: React.FC = () => {
@@ -42,11 +43,13 @@ export const SettingsView: React.FC = () => {
     logout,
     cloudStatus,
     lastSavedAt,
-    setShowSupabaseConfigModal,
     triggerManualCloudSave,
     startTutorial,
+    selectedHeroId,
+    heroLocked,
     setShowHeroSelectModal,
   } = useGame();
+  const boundHero = getHeroById(selectedHeroId);
 
   const [username, setUsername] = useState(user?.username || '');
   const [characterName, setCharacterName] = useState(user?.characterName || user?.username || '');
@@ -163,7 +166,7 @@ export const SettingsView: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-purple-400 bg-purple-950/70 border border-purple-800/60 px-2.5 py-0.5 rounded">
-              Realm Configuration
+              Hero Preferences
             </span>
             <span className="text-xs text-purple-300 font-semibold">Preferences & Privacy</span>
           </div>
@@ -195,19 +198,20 @@ export const SettingsView: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-xl bg-[#130f24] border border-purple-900/70">
             <div className="flex items-center gap-3">
               <img
-                src={getRpgAvatarForClass(characterClass)}
-                alt={`${characterClass} RPG Portrait`}
+                src={getHeroArtwork(selectedHeroId, characterClass)}
+                alt={`${boundHero.name} Portrait`}
+                referrerPolicy="no-referrer"
                 className="w-14 h-14 rounded-xl object-cover object-top border-2 border-purple-500 shadow"
               />
               <div className="min-w-0">
                 <span className="text-[10px] uppercase tracking-wider text-purple-300 font-bold block">
-                  RPG Character Portrait
+                  Bound Champion Portrait
                 </span>
                 <span className="text-xs font-bold text-white block truncate">
-                  {characterClass} Archetype
+                  {boundHero.name} · {characterClass}
                 </span>
                 <span className="text-[10px] text-slate-400 block">
-                  Used in Armory & Combat
+                  Used across Realm &amp; Combat
                 </span>
               </div>
             </div>
@@ -257,17 +261,33 @@ export const SettingsView: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block font-medium text-slate-300 mb-1">Character Class Archetype</label>
+                <label className="block font-medium text-slate-300 mb-1 flex items-center justify-between">
+                  <span>Character Class Archetype</span>
+                  {heroLocked && (
+                    <span className="text-[10px] text-[#C5A15A] font-semibold inline-flex items-center gap-1">
+                      <Lock className="w-3 h-3" />
+                      Locked
+                    </span>
+                  )}
+                </label>
                 <select
                   value={characterClass}
+                  disabled={heroLocked}
                   onChange={e => setCharacterClass(e.target.value as CharacterClass)}
-                  className="w-full bg-[#130f24] border border-purple-900 rounded-xl px-3 py-2.5 text-white focus:outline-none"
+                  className={`w-full bg-[#130f24] border border-purple-900 rounded-xl px-3 py-2.5 text-white focus:outline-none ${
+                    heroLocked ? 'opacity-65 cursor-not-allowed' : ''
+                  }`}
                 >
                   <option value="Warrior">Warrior (Physical power, calisthenics)</option>
                   <option value="Mage">Mage (Mindfulness, focus, hydration)</option>
                   <option value="Ranger">Ranger (Walking, running, agility)</option>
                   <option value="Guardian">Guardian (Sleep, recovery, preservation)</option>
                 </select>
+                {heroLocked && (
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    Permanently bound to {boundHero.name}.
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block font-medium text-slate-300 mb-1">Activity Level</label>
@@ -553,16 +573,18 @@ export const SettingsView: React.FC = () => {
 
         {/* Audio, Privacy & Data Management */}
         <div className="space-y-6">
-          {/* Interactive Guided Tutorial & Hero Selection */}
+          {/* Interactive Guided Tutorial & Hero Oath */}
           <div className="bg-[#0e0a1b] border border-purple-950 rounded-2xl p-6 shadow-md space-y-3">
             <h3 className="font-['Cinzel'] font-bold text-base text-slate-100 flex items-center gap-2">
               <Shield className="w-4 h-4 text-[#C5A15A]" />
-              GUIDED TUTORIAL &amp; 3D CHAMPION
+              GUIDED TUTORIAL &amp; HERO OATH
             </h3>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Replay the interactive 11-step tour of Aetheria or switch between the five playable 3D heroes at any time without losing any level, XP, Gold, or equipment.
+              {heroLocked
+                ? `Replay the interactive 11-step tour of Aetheria at any time without affecting your level, XP, Gold, or equipment. Your champion oath is permanently bound to ${boundHero.name}.`
+                : 'Replay the interactive 11-step tour of Aetheria or complete your one-time champion selection to permanently bind your hero to your account.'}
             </p>
-            <div className="flex flex-wrap gap-2.5 pt-1">
+            <div className="flex flex-wrap items-center gap-2.5 pt-1">
               <button
                 type="button"
                 onClick={() => startTutorial(0)}
@@ -570,13 +592,20 @@ export const SettingsView: React.FC = () => {
               >
                 Replay Interactive Tutorial
               </button>
-              <button
-                type="button"
-                onClick={() => setShowHeroSelectModal(true)}
-                className="px-4 py-2 rounded-xl bg-[#251638] hover:bg-[#7046A5]/45 border border-[#C5A15A]/40 text-[#C5A15A] font-['Cinzel'] font-bold text-xs tracking-wider transition-colors"
-              >
-                Open 3D Hero Selection
-              </button>
+              {heroLocked ? (
+                <span className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#161124] border border-[#C5A15A]/30 text-[#C5A15A] text-xs font-['Cinzel'] font-semibold">
+                  <Lock className="w-3.5 h-3.5" />
+                  Oath Bound: {boundHero.name}
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowHeroSelectModal(true)}
+                  className="px-4 py-2 rounded-xl bg-[#251638] hover:bg-[#7046A5]/45 border border-[#C5A15A]/40 text-[#C5A15A] font-['Cinzel'] font-bold text-xs tracking-wider transition-colors"
+                >
+                  Choose Permanent Champion
+                </button>
+              )}
             </div>
           </div>
 
@@ -589,7 +618,7 @@ export const SettingsView: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-xs font-semibold text-white block">RPG Sound Effects</span>
-                <span className="text-[11px] text-slate-400">Synthesizes Web Audio API sound fx on rep counts and battle hits</span>
+                <span className="text-[11px] text-slate-400">Play sound effects for rep counts, quests, and battle hits</span>
               </div>
               <button
                 onClick={toggleSound}
@@ -611,16 +640,16 @@ export const SettingsView: React.FC = () => {
               AETHER VISION PRIVACY CHARTER
             </h3>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Camera access is strictly opt-in and operates exclusively when a workout is active. Pose landmarks are computed inside your local browser sandbox. Raw video is never stored, uploaded to external cloud servers, or analyzed for facial recognition.
+              Camera access is strictly opt-in and active only during workouts. Movement tracking runs privately on your device—raw video is never stored, uploaded, or used for facial recognition.
             </p>
           </div>
 
-          {/* Supabase Cloud Persistence Status & Controls */}
+          {/* Cloud Save & Progress Sync */}
           <div className="bg-[#0e0a1b] border border-purple-950 rounded-2xl p-6 shadow-md space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="font-['Cinzel'] font-bold text-base text-slate-100 flex items-center gap-2">
-                <Database className="w-4 h-4 text-purple-400" />
-                SUPABASE CLOUD PERSISTENCE
+                <Cloud className="w-4 h-4 text-purple-400" />
+                CLOUD SAVE &amp; SYNC
               </h3>
               <span
                 className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${
@@ -634,39 +663,31 @@ export const SettingsView: React.FC = () => {
                 }`}
               >
                 {cloudStatus === 'saved'
-                  ? 'Cloud Synced'
+                  ? 'Saved'
                   : cloudStatus === 'saving'
-                  ? 'Saving to Cloud...'
+                  ? 'Saving...'
                   : cloudStatus === 'error'
-                  ? 'Sync Error'
-                  : 'Unconfigured / Local'}
+                  ? 'Sync Issue'
+                  : 'Offline Mode'}
               </span>
             </div>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Real-time synchronization preserves your weapons, habit streaks, fitness reps, and kingdom progress across all your devices using Supabase PostgreSQL & Row Level Security.
+              Automatic saving keeps your hero, forged weapons, habit streaks, workouts, and realm progress safely synced across all your devices.
             </p>
             {lastSavedAt && (
-              <div className="text-[11px] text-purple-300/80 font-mono">
-                Last Cloud Save: {lastSavedAt.toLocaleTimeString()} ({lastSavedAt.toLocaleDateString()})
+              <div className="text-[11px] text-purple-300/80 font-mono tabular-nums">
+                Last Saved: {lastSavedAt.toLocaleTimeString()} ({lastSavedAt.toLocaleDateString()})
               </div>
             )}
             <div className="flex flex-wrap gap-2 pt-1">
               <button
                 type="button"
-                onClick={() => setShowSupabaseConfigModal(true)}
-                className="px-3.5 py-2 rounded-xl border border-purple-700/60 bg-purple-950/50 hover:bg-purple-900/60 text-purple-200 text-xs font-semibold flex items-center gap-1.5 transition-colors"
-              >
-                <Database className="w-3.5 h-3.5" />
-                Configure Database & Schema
-              </button>
-              <button
-                type="button"
                 disabled={manualSyncing}
                 onClick={handleManualSync}
-                className="px-3.5 py-2 rounded-xl border border-purple-700/60 bg-purple-950/30 hover:bg-purple-900/40 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                className="px-3.5 py-2 rounded-xl border border-purple-700/60 bg-purple-950/40 hover:bg-purple-900/50 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-colors"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${manualSyncing ? 'animate-spin' : ''}`} />
-                {manualSyncing ? 'Syncing...' : 'Sync Now'}
+                {manualSyncing ? 'Syncing...' : 'Sync Progress'}
               </button>
             </div>
           </div>
@@ -675,7 +696,7 @@ export const SettingsView: React.FC = () => {
           <div className="bg-[#0e0a1b] border border-purple-950 rounded-2xl p-6 shadow-md space-y-3">
             <h3 className="font-['Cinzel'] font-bold text-base text-slate-100 flex items-center gap-2">
               <Shield className="w-4 h-4 text-purple-400" />
-              DATA MANAGEMENT
+              ACCOUNT &amp; DATA
             </h3>
             <div className="flex flex-wrap items-center gap-2">
               <button
@@ -683,7 +704,7 @@ export const SettingsView: React.FC = () => {
                 className="px-4 py-2 rounded-xl border border-purple-700/60 bg-purple-950/40 text-purple-200 hover:text-white text-xs font-semibold flex items-center gap-1.5"
               >
                 <Download className="w-3.5 h-3.5" />
-                Export Game Backup (JSON)
+                Download Progress Backup
               </button>
 
               <button

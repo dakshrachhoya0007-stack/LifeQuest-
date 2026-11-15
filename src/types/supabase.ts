@@ -56,6 +56,10 @@ export interface Database {
           show_equipment: boolean;
           show_stats: boolean;
           show_guild: boolean;
+          presence_status: string;
+          auto_away_enabled: boolean;
+          auto_away_minutes: number;
+          privacy_settings: Json;
           legacy_migrated: boolean;
           last_active_at: string;
           created_at: string;
@@ -91,6 +95,10 @@ export interface Database {
           show_equipment?: boolean;
           show_stats?: boolean;
           show_guild?: boolean;
+          presence_status?: string;
+          auto_away_enabled?: boolean;
+          auto_away_minutes?: number;
+          privacy_settings?: Json;
           last_active_at?: string;
           updated_at?: string;
         };
@@ -989,6 +997,23 @@ export interface Database {
       };
       rpc_ascend_weapon_rarity: {
         Args: { p_weapon_id: string; p_idempotency_key?: string };
+        Returns: Json;
+      };
+      rpc_update_presence: {
+        Args: {
+          p_status?: string | null;
+          p_auto_away_enabled?: boolean | null;
+          p_auto_away_minutes?: number | null;
+          p_heartbeat_only?: boolean;
+        };
+        Returns: Json;
+      };
+      rpc_get_presence_batch: {
+        Args: { p_user_ids: string[] };
+        Returns: Json;
+      };
+      rpc_update_privacy_settings: {
+        Args: { p_privacy_settings: Json };
         Returns: Json;
       };
     };

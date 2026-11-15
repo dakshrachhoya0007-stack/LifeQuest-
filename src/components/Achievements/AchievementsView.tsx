@@ -13,7 +13,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 
-export const AchievementsView: React.FC = () => {
+export const AchievementsView: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
   const { achievements, claimAchievement } = useGame();
 
   const getAchievementIcon = (iconName: string) => {
@@ -30,31 +30,59 @@ export const AchievementsView: React.FC = () => {
   };
 
   const unlockedCount = achievements.filter(a => a.unlocked).length;
+  const claimedCount = achievements.filter(a => a.claimed).length;
 
   return (
     <div className="space-y-6 animate-in fade-in pb-12">
-      {/* Banner */}
-      <div
-        data-tutorial-id="achievements-rewards"
-        className="rounded-2xl bg-gradient-to-r from-[#170e2f] via-[#100a20] to-[#1a1236] border border-purple-900/60 p-6 shadow-xl"
-      >
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      {/* Banner / Progress Toolbar */}
+      {embedded ? (
+        <div
+          data-tutorial-id="achievements-rewards"
+          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#0e0a1b] border border-purple-950/90 rounded-2xl p-4"
+        >
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-amber-400 bg-amber-950/60 border border-amber-700/50 px-2.5 py-0.5 rounded">
-                Heroic Pantheon
-              </span>
-              <span className="text-xs text-purple-300 font-semibold">{unlockedCount} of {achievements.length} Unlocked</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-white">
-              ACHIEVEMENTS & REWARDS
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1">
-              Earn permanent badges of distinction and substantial Player XP and Forge XP by conquering healthy milestones across real life and the realm.
+            <h2 className="font-['Cinzel'] font-bold text-base text-white">
+              Achievements &amp; Milestones
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Conquer heroic milestones across habits, training, and exploration to earn trophy bounties.
             </p>
           </div>
+          <div className="flex items-center gap-4 text-xs tabular-nums shrink-0">
+            <div className="text-right">
+              <span className="text-[11px] text-slate-400 block">Unlocked</span>
+              <span className="font-mono font-bold text-amber-300">{unlockedCount} / {achievements.length}</span>
+            </div>
+            <div className="w-px h-7 bg-purple-900/60" />
+            <div className="text-right">
+              <span className="text-[11px] text-slate-400 block">Claimed</span>
+              <span className="font-mono font-bold text-emerald-300">{claimedCount} / {achievements.length}</span>
+            </div>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div
+          data-tutorial-id="achievements-rewards"
+          className="rounded-2xl bg-gradient-to-r from-[#170e2f] via-[#100a20] to-[#1a1236] border border-purple-900/60 p-6 shadow-xl"
+        >
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-amber-400 bg-amber-950/60 border border-amber-700/50 px-2.5 py-0.5 rounded">
+                  Heroic Pantheon
+                </span>
+                <span className="text-xs text-purple-300 font-semibold">{unlockedCount} of {achievements.length} Unlocked</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-white">
+                ACHIEVEMENTS & REWARDS
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1">
+                Earn permanent badges of distinction and substantial Player XP and Forge XP by conquering healthy milestones across real life and the realm.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

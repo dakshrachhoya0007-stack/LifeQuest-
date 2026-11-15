@@ -1,0 +1,843 @@
+import React, { useMemo, useState } from 'react';
+import {
+  Activity,
+  Camera,
+  CheckCircle2,
+  Circle,
+  Droplets,
+  Flame,
+  Footprints,
+  Plus,
+  Target,
+  X,
+  Zap,
+} from 'lucide-react';
+import { useGame } from '../../context/GameContext';
+import { ExerciseType, FitnessSession } from '../../types/game';
+import { getPeriodKeyForFrequency } from '../../services/unifiedBackendService';
+
+const DAILY_TARGET_MINUTES_BY_LEVEL: Record<string, number> = {
+  sedentary: 15,
+  light: 25,
+  moderate: 35,
+  very_active: 50,
+};
+
+// Conservative MET-aligned kcal/min lookup used strictly on logged sessions
+const KCAL_PER_MIN_BY_TYPE: Record<ExerciseType, number> = {
+  walking: 4.0,
+  yoga: 3.2,
+  squat: 6.5,
+  pushup: 6.8,
+  lunge: 6.5,
+  knee_raise: 6.0,
+  jumping_jack: 8.0,
+  gym: 7.0,
+  cycling: 8.2,
+  running: 9.8,
+};
+
+const getLocalDateKey = (dateInput: Date | string, timeZone?: string): string => {
+  const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
+  try {
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: timeZone || undefined,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(date);
+  } catch {
+    return date.toISOString().split('T')[0];
+  }
+};
+
+const getShortDayLabel = (dateInput: Date, timeZone?: string): string => {
+  try {
+    return new Intl.DateTimeFormat('en-US', {
+      timeZone: timeZone || undefined,
+      weekday: 'short',
+    }).format(dateInput);
+  } catch {
+    return dateInput.toLocaleDateString('en-US', { weekday: 'short' });
+  }
+};
+
+const estimateCaloriesFromSessions = (sessions: FitnessSession[]): number => {
+  return Math.round(
+    sessions.reduce((sum, s) => {
+      const rate = KCAL_PER_MIN_BY_TYPE[s.exerciseType] || 6.0;
+      const mins = Math.max(0, s.durationMinutes || 0);
+      return sum + mins * rate;
+    }, 0)
+  );
+};
+
+export const FitnessCommandCenter: React.FC = () => {
+  const {
+    user,
+    stats,
+    fitnessSessions,
+    logFitnessSession,
+    habits,
+    toggleHabitComplete,
+    isHabitClaimedForCurrentPeriod,
+    quests,
+    claimQuest,
+    dynamicDailyQuests,
+    claimDynamicQuest,
+    waterGlasses,
+    addWaterGlass,
+    setActiveTab,
+    setProgressionSubTab,
+  } = useGame();
+
+  const [showLogModal, setShowLogModal] = useState(false);
+  const [exerciseType, setExerciseType] = useState<ExerciseType>('walking');
+  const [exerciseName, setExerciseName] = useState('Morning Brisk Walk');
+  const [durationMinutes, setDurationMinutes] = useState(25);
+  const [distanceInput, setDistanceInput] = useState('');
+  const [notes, setNotes] = useState('');
+  const [selectedDayIndex, setSelectedDayIndex] = useState<number>(6);
+  const [claimingHabitId, setClaimingHabitId] = useState<string | null>(null);
+  const [notice, setNotice] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
+
+  const tz = user?.timezone;
+  const isImperial = user?.preferredUnits === 'imperial';
+  const dailyGoalMinutes =
+    DAILY_TARGET_MINUTES_BY_LEVEL[user?.activityLevel || 'moderate'] || 35;
+
+  const todayKey = useMemo(() => getPeriodKeyForFrequency('daily', tz), [tz]);
+
+  const todaySessions = useMemo(
+    () =>
+      fitnessSessions.filter(s => getLocalDateKey(s.timestamp, tz) === todayKey),
+    [fitnessSessions, tz, todayKey]
+  );
+
+  const todayMinutes = useMemo(
+    () => todaySessions.reduce((sum, s) => sum + (s.durationMinutes || 0), 0),
+    [todaySessions]
+  );
+  const todayReps = useMemo(
+    () => todaySessions.reduce((sum, s) => sum + (s.repetitions || 0), 0),
+    [todaySessions]
+  );
+  const todayDistanceKm = useMemo(
+    () => todaySessions.reduce((sum, s) => sum + (s.distanceKm || 0), 0),
+    [todaySessions]
+  );
+  const todayWalkRunDistanceKm = useMemo(
+    () =>
+      todaySessions
+        .filter(s => s.exerciseType === 'walking' || s.exerciseType === 'running')
+        .reduce((sum, s) => sum + (s.distanceKm || 0), 0),
+    [todaySessions]
+  );
+  const todayEstimatedSteps =
+    todayWalkRunDistanceKm > 0 ? Math.round(todayWalkRunDistanceKm * 1312) : null;
+  const todayCaloriesBurned = estimateCaloriesFromSessions(todaySessions);
+  const todayVerifiedCount = todaySessions.filter(s => s.verifiedWithAetherVision).length;
+
+  const dailyGoalPercent = Math.min(
+    100,
+    Math.round((todayMinutes / Math.max(1, dailyGoalMinutes)) * 100)
+  );
+
+  // Rolling 7-day breakdown ending today in user timezone
+  const weeklyDays = useMemo(() => {
+    const days: Array<{
+      dateKey: string;
+      label: string;
+      minutes: number;
+      sessions: FitnessSession[];
+    }> = [];
+    const now = new Date();
+    for (let offset = 6; offset >= 0; offset--) {
+      const d = new Date(now.getTime() - offset * 86400000);
+      const key = getLocalDateKey(d, tz);
+      const daySessions = fitnessSessions.filter(s => getLocalDateKey(s.timestamp, tz) === key);
+      const mins = daySessions.reduce((sum, s) => sum + (s.durationMinutes || 0), 0);
+      days.push({
+        dateKey: key,
+        label: offset === 0 ? 'Today' : getShortDayLabel(d, tz),
+        minutes: mins,
+        sessions: daySessions,
+      });
+    }
+    return days;
+  }, [fitnessSessions, tz]);
+
+  const maxWeeklyMinutes = Math.max(
+    dailyGoalMinutes,
+    ...weeklyDays.map(d => d.minutes)
+  );
+  const weeklyTotalMinutes = weeklyDays.reduce((sum, d) => sum + d.minutes, 0);
+  const weeklyActiveDays = weeklyDays.filter(d => d.minutes > 0 || d.sessions.length > 0).length;
+
+  const fitnessHabits = useMemo(
+    () => habits.filter(h => h.category === 'fitness').slice(0, 4),
+    [habits]
+  );
+
+  const fitnessQuests = useMemo(() => {
+    const aiPhysical = dynamicDailyQuests
+      .filter(q => q.category === 'physical')
+      .map(q => ({
+        id: q.id,
+        kind: 'dynamic' as const,
+        title: q.title,
+        progress: q.progress,
+        maxProgress: q.maxProgress,
+        completed: q.completed,
+        claimed: q.claimed,
+        rewardLabel: `+${q.playerXpReward} XP`,
+      }));
+    const classicFitness = quests
+      .filter(q => q.category === 'fitness')
+      .map(q => ({
+        id: q.id,
+        kind: 'classic' as const,
+        title: q.title,
+        progress: q.progress,
+        maxProgress: q.maxProgress,
+        completed: q.completed,
+        claimed: q.claimed,
+        rewardLabel: `+${q.playerXpReward} XP`,
+      }));
+    return [...aiPhysical, ...classicFitness].slice(0, 3);
+  }, [dynamicDailyQuests, quests]);
+
+  const activityOptions: Array<{ type: ExerciseType; label: string }> = [
+    { type: 'walking', label: 'Walking' },
+    { type: 'running', label: 'Running' },
+    { type: 'cycling', label: 'Cycling' },
+    { type: 'gym', label: 'Gym Strength' },
+    { type: 'yoga', label: 'Yoga & Mobility' },
+    { type: 'squat', label: 'Squats' },
+    { type: 'pushup', label: 'Push-ups' },
+  ];
+
+  const handleLogWorkout = (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsedDist = distanceInput ? parseFloat(distanceInput) : undefined;
+    const distanceKm =
+      parsedDist && !Number.isNaN(parsedDist) && parsedDist > 0
+        ? isImperial
+          ? Number((parsedDist * 1.60934).toFixed(2))
+          : parsedDist
+        : undefined;
+
+    logFitnessSession({
+      exerciseType,
+      exerciseName: exerciseName.trim() || 'Training Session',
+      durationMinutes: Math.max(1, Math.min(300, durationMinutes)),
+      distanceKm,
+      verifiedWithAetherVision: false,
+      notes: notes.trim() || 'Logged from Fitness Command Center.',
+    });
+
+    setShowLogModal(false);
+    setDistanceInput('');
+    setNotes('');
+    setNotice({
+      type: 'success',
+      text: 'Workout recorded. Character Attributes and Fitness Progress updated.',
+    });
+    setTimeout(() => setNotice(null), 3500);
+  };
+
+  const handleToggleFitnessHabit = async (habitId: string) => {
+    if (claimingHabitId) return;
+    setClaimingHabitId(habitId);
+    const res = await toggleHabitComplete(habitId);
+    setClaimingHabitId(null);
+    if (!res.success && res.error) {
+      setNotice({ type: 'error', text: res.error });
+    } else if (res.success) {
+      setNotice({ type: 'success', text: 'Fitness discipline habit logged for this period.' });
+    }
+    setTimeout(() => setNotice(null), 3200);
+  };
+
+  // Circular progress ring math
+  const ringRadius = 56;
+  const ringCircumference = 2 * Math.PI * ringRadius;
+  const ringOffset = ringCircumference * (1 - dailyGoalPercent / 100);
+
+  const selectedDay = weeklyDays[selectedDayIndex] || weeklyDays[weeklyDays.length - 1];
+
+  return (
+    <section
+      aria-label="Fitness Command Center"
+      className="rounded-2xl bg-[#0B0814] border border-[#C5A15A]/22 shadow-2xl overflow-hidden"
+    >
+      {/* Header Bar */}
+      <div className="px-5 sm:px-7 py-5 border-b border-[#C5A15A]/15 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <span className="text-[11px] font-['Cinzel'] font-bold uppercase tracking-widest text-[#C5A15A] block">
+            Physical Conditioning &amp; Real-Life Progression
+          </span>
+          <h2 className="font-['Cinzel'] font-black text-lg sm:text-xl text-[#F2ECE1] mt-0.5">
+            Fitness Command Center
+          </h2>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          <button
+            type="button"
+            onClick={() => setShowLogModal(true)}
+            className="px-4 py-2 rounded-lg bg-[#181228] hover:bg-[#251638] border border-[#C5A15A]/30 text-xs font-semibold text-[#F2ECE1] flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5 text-[#C5A15A]" />
+            Log Workout
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('aether-vision')}
+            className="px-4 py-2 rounded-lg bg-[#C5A15A] hover:bg-[#d8b46d] text-[#0D0A14] text-xs font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0"
+          >
+            <Camera className="w-3.5 h-3.5" />
+            Aether Vision Training
+          </button>
+        </div>
+      </div>
+
+      {notice && (
+        <div
+          className={`mx-5 sm:mx-7 mt-4 p-3 rounded-lg border text-xs ${
+            notice.type === 'error'
+              ? 'bg-rose-950/70 border-rose-700/70 text-rose-200'
+              : 'bg-emerald-950/70 border-emerald-700/70 text-emerald-200'
+          }`}
+        >
+          {notice.text}
+        </div>
+      )}
+
+      {/* Main 3-Zone Fitness Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-[#C5A15A]/14">
+        {/* ZONE 1 (4 cols): Daily Activity Ring & Genuine Today Metrics */}
+        <div className="lg:col-span-4 p-5 sm:p-6 space-y-5">
+          <div className="flex items-center justify-between">
+            <h3 className="font-['Cinzel'] font-bold text-xs tracking-wider uppercase text-[#F2ECE1] flex items-center gap-2">
+              <Activity className="w-4 h-4 text-[#C5A15A]" />
+              Today’s Activity
+            </h3>
+            <span className="text-[11px] font-mono text-[#D9D2C5]/60 capitalize tabular-nums">
+              Target {dailyGoalMinutes} min
+            </span>
+          </div>
+
+          {/* Circular Progress Ring + Headline Readout */}
+          <div className="flex items-center gap-5">
+            <div className="relative w-32 h-32 shrink-0 flex items-center justify-center">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 132 132">
+                <defs>
+                  <linearGradient id="fitnessRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#7046A5" />
+                    <stop offset="100%" stopColor="#C5A15A" />
+                  </linearGradient>
+                </defs>
+                <circle
+                  cx="66"
+                  cy="66"
+                  r={ringRadius}
+                  fill="none"
+                  stroke="#1A1429"
+                  strokeWidth="9"
+                />
+                <circle
+                  cx="66"
+                  cy="66"
+                  r={ringRadius}
+                  fill="none"
+                  stroke="url(#fitnessRingGrad)"
+                  strokeWidth="9"
+                  strokeLinecap="round"
+                  strokeDasharray={ringCircumference}
+                  strokeDashoffset={ringOffset}
+                  className="transition-all duration-700"
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <span className="font-mono font-black text-2xl text-[#F2ECE1] tabular-nums leading-none">
+                  {todayMinutes}
+                </span>
+                <span className="text-[10px] text-[#C5A15A] uppercase tracking-wider mt-1">
+                  of {dailyGoalMinutes} min
+                </span>
+                <span className="text-[10px] font-mono text-[#D9D2C5]/60 tabular-nums mt-0.5">
+                  {dailyGoalPercent}%
+                </span>
+              </div>
+            </div>
+
+            <div className="min-w-0 flex-1 space-y-2.5 text-xs">
+              <div>
+                <span className="text-[11px] text-[#D9D2C5]/55 block">Workouts Today</span>
+                <span className="font-mono font-bold text-sm text-[#F2ECE1] tabular-nums">
+                  {todaySessions.length} {todaySessions.length === 1 ? 'session' : 'sessions'}
+                  {todayVerifiedCount > 0 && (
+                    <span className="text-[11px] text-[#C5A15A] font-normal ml-1.5">
+                      ({todayVerifiedCount} Vision)
+                    </span>
+                  )}
+                </span>
+              </div>
+
+              <div>
+                <span className="text-[11px] text-[#D9D2C5]/55 block">Reps &amp; Distance Today</span>
+                <span className="font-mono font-semibold text-[#D9D2C5] tabular-nums">
+                  {todayReps > 0 ? `${todayReps} reps` : '0 reps'}
+                  {todayDistanceKm > 0 && (
+                    <>
+                      {' · '}
+                      {isImperial
+                        ? `${(todayDistanceKm / 1.60934).toFixed(1)} mi`
+                        : `${todayDistanceKm.toFixed(1)} km`}
+                    </>
+                  )}
+                </span>
+              </div>
+
+              <div>
+                <span className="text-[11px] text-[#D9D2C5]/55 block">Exercise Burn (Est.)</span>
+                <span className="font-mono font-semibold text-[#C5A15A] tabular-nums">
+                  {todayCaloriesBurned > 0
+                    ? `${todayCaloriesBurned.toLocaleString()} kcal`
+                    : '0 kcal (log workout)'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Transparent Real Measurements List (No fake sensors) */}
+          <div className="pt-4 border-t border-[#C5A15A]/14 space-y-2.5 text-xs">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[#D9D2C5]/70 flex items-center gap-1.5">
+                <Footprints className="w-3.5 h-3.5 text-[#C5A15A]" />
+                Steps
+              </span>
+              <span className="font-mono text-[#D9D2C5] tabular-nums text-right">
+                {todayEstimatedSteps !== null
+                  ? `~${todayEstimatedSteps.toLocaleString()} (from distance)`
+                  : 'Log walk or run distance'}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[#D9D2C5]/70 flex items-center gap-1.5">
+                <Droplets className="w-3.5 h-3.5 text-sky-400" />
+                Hydration Today
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="font-mono font-semibold text-sky-300 tabular-nums">
+                  {waterGlasses} / 8 glasses
+                </span>
+                <button
+                  type="button"
+                  onClick={addWaterGlass}
+                  className="px-2 py-0.5 rounded bg-[#181228] hover:bg-[#251638] border border-sky-400/35 text-[11px] font-semibold text-sky-200 transition-colors"
+                  title="Record 1 glass of water"
+                >
+                  +1
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ZONE 2 (5 cols): 7-Day Activity Overview & Consistency */}
+        <div className="lg:col-span-5 p-5 sm:p-6 space-y-5 flex flex-col justify-between">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <h3 className="font-['Cinzel'] font-bold text-xs tracking-wider uppercase text-[#F2ECE1] flex items-center gap-2">
+                  <Flame className="w-4 h-4 text-[#C5A15A]" />
+                  Weekly Activity Overview
+                </h3>
+                <p className="text-[11px] text-[#D9D2C5]/55 mt-0.5">
+                  Rolling 7-day active minutes from logged workouts
+                </p>
+              </div>
+              <span className="font-mono text-xs font-bold text-[#C5A15A] tabular-nums">
+                {weeklyTotalMinutes} min · {weeklyActiveDays}/7 days
+              </span>
+            </div>
+
+            {/* Interactive 7-Day Bar Chart */}
+            <div className="pt-2">
+              <div className="h-32 flex items-end justify-between gap-2 sm:gap-3">
+                {weeklyDays.map((day, idx) => {
+                  const barHeightPct =
+                    day.minutes > 0
+                      ? Math.max(12, Math.round((day.minutes / maxWeeklyMinutes) * 100))
+                      : 5;
+                  const isSelected = idx === selectedDayIndex;
+                  const hasActivity = day.minutes > 0 || day.sessions.length > 0;
+
+                  return (
+                    <button
+                      key={day.dateKey}
+                      type="button"
+                      onClick={() => setSelectedDayIndex(idx)}
+                      className="flex-1 h-full flex flex-col items-center justify-end gap-1.5 group focus:outline-none"
+                      title={`${day.label}: ${day.minutes} mins (${day.sessions.length} sessions)`}
+                    >
+                      <span
+                        className={`text-[10px] font-mono tabular-nums transition-opacity ${
+                          isSelected || day.minutes > 0
+                            ? 'text-[#C5A15A] opacity-100'
+                            : 'text-[#D9D2C5]/35 opacity-70 group-hover:opacity-100'
+                        }`}
+                      >
+                        {day.minutes > 0 ? `${day.minutes}m` : '0'}
+                      </span>
+                      <div className="w-full max-w-[34px] flex-1 bg-[#140F22] rounded-t-md flex items-end overflow-hidden border border-white/6">
+                        <div
+                          className={`w-full rounded-t-md transition-all duration-500 ${
+                            hasActivity
+                              ? isSelected
+                                ? 'bg-gradient-to-t from-[#7046A5] to-[#C5A15A]'
+                                : 'bg-gradient-to-t from-[#4E3175] to-[#B68A4C] group-hover:to-[#C5A15A]'
+                              : 'bg-[#251D38]/70'
+                          }`}
+                          style={{ height: `${barHeightPct}%` }}
+                        />
+                      </div>
+                      <span
+                        className={`text-[10px] font-medium whitespace-nowrap ${
+                          isSelected ? 'text-[#F2ECE1] font-bold' : 'text-[#D9D2C5]/55'
+                        }`}
+                      >
+                        {day.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Selected Day Detail Readout */}
+              <div className="mt-3 pt-2.5 border-t border-white/8 flex items-center justify-between text-[11px] text-[#D9D2C5]/75 tabular-nums">
+                <span>
+                  <strong className="text-[#F2ECE1]">{selectedDay.label}</strong>
+                  {' · '}
+                  {selectedDay.sessions.length}{' '}
+                  {selectedDay.sessions.length === 1 ? 'workout' : 'workouts'}
+                </span>
+                <span className="truncate max-w-[220px] text-[#C5A15A]">
+                  {selectedDay.sessions.length > 0
+                    ? selectedDay.sessions.map(s => s.exerciseName).join(', ')
+                    : 'No sessions recorded'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Exercise Consistency KPI Strip & Daily Fitness Habits */}
+          <div className="space-y-3 pt-3 border-t border-[#C5A15A]/14">
+            <div className="grid grid-cols-3 gap-2 text-center font-mono">
+              <div className="p-2 rounded-lg bg-[#120D1F] border border-white/6">
+                <span className="text-[10px] text-[#D9D2C5]/50 uppercase block">Streak</span>
+                <span className="text-sm font-bold text-[#C5A15A] tabular-nums">
+                  {stats.currentStreak}d
+                </span>
+              </div>
+              <div className="p-2 rounded-lg bg-[#120D1F] border border-white/6">
+                <span className="text-[10px] text-[#D9D2C5]/50 uppercase block">Total Sessions</span>
+                <span className="text-sm font-bold text-[#F2ECE1] tabular-nums">
+                  {stats.totalWorkoutsCompleted}
+                </span>
+              </div>
+              <div className="p-2 rounded-lg bg-[#120D1F] border border-white/6">
+                <span className="text-[10px] text-[#D9D2C5]/50 uppercase block">Vision Reps</span>
+                <span className="text-sm font-bold text-[#F2ECE1] tabular-nums">
+                  {stats.totalVerifiedReps.toLocaleString()}
+                </span>
+              </div>
+            </div>
+
+            {fitnessHabits.length > 0 && (
+              <div data-tutorial-id="habits-panel" className="space-y-1.5 pt-1">
+                <span className="text-[10px] font-['Cinzel'] font-bold uppercase tracking-wider text-[#D9D2C5]/60 block">
+                  Physical Consistency Habits
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                  {fitnessHabits.map(habit => {
+                    const claimed = isHabitClaimedForCurrentPeriod(habit);
+                    const busy = claimingHabitId === habit.id;
+                    return (
+                      <button
+                        key={habit.id}
+                        type="button"
+                        disabled={claimed || busy}
+                        onClick={() => handleToggleFitnessHabit(habit.id)}
+                        className={`px-2.5 py-2 rounded-lg border text-left text-xs flex items-center justify-between gap-2 transition-colors ${
+                          claimed
+                            ? 'bg-[#12161E] border-emerald-700/40 text-[#D9D2C5]/55 cursor-default'
+                            : 'bg-[#130E20] hover:bg-[#1C142E] border-[#C5A15A]/20 hover:border-[#C5A15A]/45 text-[#F2ECE1]'
+                        }`}
+                      >
+                        <span className="flex items-center gap-1.5 min-w-0">
+                          {claimed ? (
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                          ) : (
+                            <Circle className="w-3.5 h-3.5 text-[#C5A15A]/65 shrink-0" />
+                          )}
+                          <span className={`truncate ${claimed ? 'line-through' : ''}`}>
+                            {habit.name}
+                          </span>
+                        </span>
+                        <span className="text-[10px] font-mono text-[#C5A15A] shrink-0 tabular-nums">
+                          {habit.streak}d
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ZONE 3 (3 cols): Personal Fitness Goals & Fitness Quest Progress */}
+        <div className="lg:col-span-3 p-5 sm:p-6 space-y-5 flex flex-col justify-between">
+          {/* Personal Fitness Goals */}
+          <div className="space-y-2.5">
+            <h3 className="font-['Cinzel'] font-bold text-xs tracking-wider uppercase text-[#F2ECE1] flex items-center gap-2">
+              <Target className="w-4 h-4 text-[#C5A15A]" />
+              Fitness Goals
+            </h3>
+            <p className="text-[11px] text-[#D9D2C5]/65">
+              Pace: <span className="text-[#C5A15A] capitalize font-medium">{(user?.activityLevel || 'moderate').replace('_', ' ')}</span>
+              {' · '}
+              {dailyGoalMinutes} min/day target
+            </p>
+            {user?.personalGoals && user.personalGoals.length > 0 ? (
+              <ul className="space-y-1.5 pt-1">
+                {user.personalGoals.slice(0, 4).map(goal => (
+                  <li
+                    key={goal}
+                    className="text-xs text-[#D9D2C5]/85 py-1 border-b border-white/6 last:border-b-0"
+                  >
+                    {goal}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs text-[#D9D2C5]/50 leading-relaxed">
+                No personal fitness goals saved yet. Set your focus in Settings.
+              </p>
+            )}
+          </div>
+
+          {/* Fitness-Related Quest Progress Only */}
+          <div className="space-y-3 pt-4 border-t border-[#C5A15A]/14">
+            <div className="flex items-center justify-between gap-2">
+              <h4 className="font-['Cinzel'] font-bold text-xs tracking-wider uppercase text-[#F2ECE1] flex items-center gap-1.5">
+                <Zap className="w-3.5 h-3.5 text-[#C5A15A]" />
+                Physical Quests
+              </h4>
+              <button
+                type="button"
+                onClick={() => {
+                  setProgressionSubTab('quests');
+                  setActiveTab('progression');
+                }}
+                className="text-[11px] text-[#C5A15A] hover:text-[#e3c07c] font-medium transition-colors whitespace-nowrap"
+              >
+                Progression →
+              </button>
+            </div>
+
+            {fitnessQuests.length === 0 ? (
+              <div className="py-4 text-xs text-[#D9D2C5]/55 space-y-2">
+                <p>No active physical quests yet today.</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProgressionSubTab('quests');
+                    setActiveTab('progression');
+                  }}
+                  className="text-[#C5A15A] hover:underline font-medium"
+                >
+                  Generate daily quests →
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {fitnessQuests.map(q => {
+                  const pct = Math.min(
+                    100,
+                    Math.round((q.progress / Math.max(1, q.maxProgress)) * 100)
+                  );
+                  return (
+                    <div key={q.id} className="space-y-1.5">
+                      <div className="flex items-start justify-between gap-2 text-xs">
+                        <span className="font-semibold text-[#F2ECE1] line-clamp-1">
+                          {q.title}
+                        </span>
+                        <span className="font-mono text-[11px] text-[#C5A15A] shrink-0 tabular-nums">
+                          {q.progress}/{q.maxProgress}
+                        </span>
+                      </div>
+                      <div className="w-full h-1.5 rounded-full bg-[#19132B] overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-[#7046A5] to-[#C5A15A] transition-all duration-500"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      {q.completed && !q.claimed ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            q.kind === 'dynamic' ? claimDynamicQuest(q.id) : claimQuest(q.id)
+                          }
+                          className="w-full py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-[11px] font-semibold transition-colors"
+                        >
+                          Claim {q.rewardLabel}
+                        </button>
+                      ) : (
+                        <p className="text-[10px] text-[#D9D2C5]/50 font-mono">
+                          {q.claimed ? 'Completed & claimed' : `Reward: ${q.rewardLabel}`}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Inline Manual Workout Logger Modal */}
+      {showLogModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in"
+          onClick={() => setShowLogModal(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Log Workout Session"
+        >
+          <div
+            className="w-full max-w-md bg-[#0E0A18] border border-[#C5A15A]/35 rounded-2xl p-6 shadow-2xl space-y-4"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-[#C5A15A]/15 pb-3">
+              <h3 className="font-['Cinzel'] font-bold text-base text-[#F2ECE1]">
+                Record Workout Session
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowLogModal(false)}
+                className="p-1.5 rounded-lg text-[#D9D2C5]/60 hover:text-white"
+                aria-label="Close workout modal"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleLogWorkout} className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-[#D9D2C5]/80 mb-1.5">
+                  Activity Type
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {activityOptions.map(opt => (
+                    <button
+                      key={opt.type}
+                      type="button"
+                      onClick={() => {
+                        setExerciseType(opt.type);
+                        setExerciseName(`${opt.label} Session`);
+                      }}
+                      className={`px-3 py-2 rounded-lg border text-xs font-medium text-left transition-colors ${
+                        exerciseType === opt.type
+                          ? 'bg-[#251638] border-[#C5A15A]/65 text-[#F2ECE1]'
+                          : 'bg-[#140F22] border-white/10 text-[#D9D2C5]/75 hover:text-white'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[#D9D2C5]/80 mb-1">
+                  Session Name
+                </label>
+                <input
+                  type="text"
+                  value={exerciseName}
+                  onChange={e => setExerciseName(e.target.value)}
+                  className="w-full bg-[#140F22] border border-[#C5A15A]/25 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#C5A15A]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-[#D9D2C5]/80 mb-1">
+                    Duration (Minutes)
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={300}
+                    value={durationMinutes}
+                    onChange={e => setDurationMinutes(Number(e.target.value))}
+                    className="w-full bg-[#140F22] border border-[#C5A15A]/25 rounded-lg px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-[#C5A15A]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[#D9D2C5]/80 mb-1">
+                    {isImperial ? 'Distance (mi optional)' : 'Distance (km optional)'}
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    placeholder={isImperial ? 'e.g. 2.0' : 'e.g. 3.2'}
+                    value={distanceInput}
+                    onChange={e => setDistanceInput(e.target.value)}
+                    className="w-full bg-[#140F22] border border-[#C5A15A]/25 rounded-lg px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-[#C5A15A]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[#D9D2C5]/80 mb-1">
+                  Notes (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={notes}
+                  onChange={e => setNotes(e.target.value)}
+                  placeholder="How did the session feel?"
+                  className="w-full bg-[#140F22] border border-[#C5A15A]/25 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#C5A15A]"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowLogModal(false)}
+                  className="px-4 py-2 rounded-lg text-xs text-[#D9D2C5]/70 hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-lg bg-[#C5A15A] hover:bg-[#d8b46d] text-[#0D0A14] text-xs font-semibold transition-colors"
+                >
+                  Save Workout
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+};

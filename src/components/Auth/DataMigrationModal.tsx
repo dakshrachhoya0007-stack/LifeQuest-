@@ -27,13 +27,13 @@ export const DataMigrationModal: React.FC<DataMigrationModalProps> = ({
       sound.playClick();
       const success = await onMigrate();
       if (!success) {
-        setError('Migration could not be verified by Supabase Cloud. Check your network or permissions.');
+        setError('Progress transfer could not be completed right now. Please check your connection and try again.');
         setIsMigrating(false);
       } else {
         sound.playVictory();
       }
     } catch (e: any) {
-      setError(e.message || 'Error occurred while migrating data to the cloud.');
+      setError(e.message || 'Error occurred while saving progress to your account.');
       setIsMigrating(false);
     }
   };
@@ -50,7 +50,7 @@ export const DataMigrationModal: React.FC<DataMigrationModalProps> = ({
             LOCAL HERO PROGRESS DETECTED
           </h2>
           <p className="text-xs text-amber-300/90 mt-1.5 font-medium">
-            Migrate your device progress to your persistent Supabase Cloud account
+            Save your device progress to your LifeQuest account
           </p>
         </div>
 
@@ -63,7 +63,7 @@ export const DataMigrationModal: React.FC<DataMigrationModalProps> = ({
             {localSummary || 'Level 1+ Knight with customized character progression & habits.'}
           </div>
           <p className="text-[11px] text-slate-400 leading-relaxed pt-1">
-            Migrating will upload your forged weapons, habits, fitness sessions, and Aether Rank to your secure cloud database. You will then be able to access your character seamlessly across all your phones and computers.
+            Transferring will securely link your forged weapons, habits, fitness sessions, and Aether Rank to your account so you can continue seamlessly across all your devices.
           </p>
         </div>
 
@@ -84,12 +84,12 @@ export const DataMigrationModal: React.FC<DataMigrationModalProps> = ({
             {isMigrating ? (
               <>
                 <RefreshCw className="w-4 h-4 animate-spin" />
-                MIGRATING TO SUPABASE...
+                SAVING TO ACCOUNT...
               </>
             ) : (
               <>
                 <CheckCircle className="w-4 h-4 text-emerald-300" />
-                MIGRATE LOCAL PROGRESS TO CLOUD
+                SAVE PROGRESS TO ACCOUNT
               </>
             )}
           </button>
@@ -100,7 +100,7 @@ export const DataMigrationModal: React.FC<DataMigrationModalProps> = ({
             onClick={onSkip}
             className="w-full py-2.5 px-4 rounded-xl font-semibold text-xs text-slate-400 hover:text-white hover:bg-purple-950/30 transition-colors"
           >
-            Start with Fresh Cloud Knight (Skip Migration)
+            Start Fresh (Skip Transfer)
           </button>
         </div>
       </div>

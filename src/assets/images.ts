@@ -13,6 +13,12 @@ import aetheriaSkyVistaImg from './images/aetheria_sky_vista_1794654027147.jpg';
 import aetheriaCitadelKingdomImg from './images/aetheria_citadel_kingdom_1794654027955.jpg';
 import aetheriaForegroundTerraceImg from './images/aetheria_foreground_terrace_1794654029174.jpg';
 import aetheriaChampionShowcaseImg from './images/aetheria_champion_showcase_1794654029784.jpg';
+import heroFallenKnightImg from './images/hero_fallen_knight_1794719347838.jpg';
+import heroShadowbladeImg from './images/hero_shadowblade_1794719348979.jpg';
+import heroArcaneMageImg from './images/hero_arcane_mage_1794719350182.jpg';
+import heroRangerImg from './images/hero_ranger_1794719350899.jpg';
+import heroPaladinImg from './images/hero_paladin_1794719351246.jpg';
+import type { PlayableHeroId } from '../types/game';
 
 export {
   blacksmithForgeImg,
@@ -30,6 +36,19 @@ export {
   aetheriaCitadelKingdomImg,
   aetheriaForegroundTerraceImg,
   aetheriaChampionShowcaseImg,
+  heroFallenKnightImg,
+  heroShadowbladeImg,
+  heroArcaneMageImg,
+  heroRangerImg,
+  heroPaladinImg,
+};
+
+export const HERO_ARTWORK_BY_ID: Record<PlayableHeroId, string> = {
+  fallen_knight: heroFallenKnightImg,
+  shadowblade: heroShadowbladeImg,
+  arcane_mage: heroArcaneMageImg,
+  ranger: heroRangerImg,
+  paladin: heroPaladinImg,
 };
 
 const ASSET_MAP: Record<string, string> = {
@@ -48,19 +67,44 @@ const ASSET_MAP: Record<string, string> = {
   'aetheria_citadel_kingdom_1794654027955.jpg': aetheriaCitadelKingdomImg,
   'aetheria_foreground_terrace_1794654029174.jpg': aetheriaForegroundTerraceImg,
   'aetheria_champion_showcase_1794654029784.jpg': aetheriaChampionShowcaseImg,
+  'hero_fallen_knight_1794719347838.jpg': heroFallenKnightImg,
+  'hero_shadowblade_1794719348979.jpg': heroShadowbladeImg,
+  'hero_arcane_mage_1794719350182.jpg': heroArcaneMageImg,
+  'hero_ranger_1794719350899.jpg': heroRangerImg,
+  'hero_paladin_1794719351246.jpg': heroPaladinImg,
+};
+
+export const getHeroArtwork = (
+  heroId?: PlayableHeroId | string | null,
+  characterClass?: string | null
+): string => {
+  if (heroId && heroId in HERO_ARTWORK_BY_ID) {
+    return HERO_ARTWORK_BY_ID[heroId as PlayableHeroId];
+  }
+  switch (characterClass) {
+    case 'Mage':
+      return heroArcaneMageImg;
+    case 'Ranger':
+      return heroRangerImg;
+    case 'Guardian':
+      return heroPaladinImg;
+    case 'Warrior':
+    default:
+      return heroFallenKnightImg;
+  }
 };
 
 export const getRpgAvatarForClass = (characterClass?: string): string => {
   switch (characterClass) {
     case 'Mage':
-      return rpgAvatarMageImg;
+      return heroArcaneMageImg;
     case 'Ranger':
-      return rpgAvatarRangerImg;
+      return heroRangerImg;
     case 'Guardian':
-      return rpgAvatarGuardianImg;
+      return heroPaladinImg;
     case 'Warrior':
     default:
-      return characterWarriorAvatarImg;
+      return heroFallenKnightImg;
   }
 };
 
@@ -69,7 +113,7 @@ export const getChampionShowcaseImage = (): string => aetheriaChampionShowcaseIm
 /**
  * Resolves stored or legacy `/src/assets/images/...` paths to the bundled Vite production asset URL.
  */
-export const resolveAssetUrl = (path?: string | null, fallback: string = characterWarriorAvatarImg): string => {
+export const resolveAssetUrl = (path?: string | null, fallback: string = heroFallenKnightImg): string => {
   if (!path) return fallback;
   if (path.includes('/src/assets/images/')) {
     const filename = path.split('/').pop()?.split('?')[0] || '';

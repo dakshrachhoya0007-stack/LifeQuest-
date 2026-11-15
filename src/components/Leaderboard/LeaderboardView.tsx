@@ -13,8 +13,9 @@ import {
   Info,
   Compass,
 } from 'lucide-react';
+import { LegendTitleBadge } from '../Social/LegendTitleBadge';
 
-export const LeaderboardView: React.FC = () => {
+export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
   const {
     fetchLeaderboard,
     friends,
@@ -25,6 +26,7 @@ export const LeaderboardView: React.FC = () => {
     unifiedBackendReady,
     openPublicProfile,
     setActiveTab: setAppTab,
+    equippedLegendMap,
   } = useGame();
 
   const [activeTab, setActiveTab] = useState<LeaderboardScope>('global');
@@ -74,26 +76,17 @@ export const LeaderboardView: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in pb-12">
-      {/* Banner */}
-      <div className="rounded-2xl bg-gradient-to-r from-[#170e2f] via-[#100a20] to-[#1a1236] border border-purple-900/60 p-6 shadow-xl">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      {/* Banner / Scope Toolbar */}
+      {embedded ? (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#0e0a1b] border border-purple-950/90 rounded-2xl p-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-amber-400">
-                Honor of the Realm
-              </span>
-              <span className="text-slate-600">·</span>
-              <span className="text-xs text-purple-300 font-semibold">Unified Web & Mobile Rankings</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-white">
-              AETHERIA HALL OF CHAMPIONS
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1">
-              Rankings reflect healthy habit streaks, quest completions, and verified fitness participation. Click any champion to inspect their public profile.
+            <h2 className="font-['Cinzel'] font-bold text-base text-white">
+              Aetheria Hall of Champions
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Click any champion to inspect their public profile.
             </p>
           </div>
-
-          {/* Filter tabs */}
           <div className="flex flex-wrap items-center gap-1 p-1 bg-[#090714] rounded-xl border border-purple-950">
             {(['global', 'weekly', 'monthly', 'guild', 'friends'] as LeaderboardScope[]).map(tab => (
               <button
@@ -110,13 +103,50 @@ export const LeaderboardView: React.FC = () => {
             ))}
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="rounded-2xl bg-gradient-to-r from-[#170e2f] via-[#100a20] to-[#1a1236] border border-purple-900/60 p-6 shadow-xl">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-amber-400">
+                  Honor of the Realm
+                </span>
+                <span className="text-slate-600">·</span>
+                <span className="text-xs text-purple-300 font-semibold">Unified Web & Mobile Rankings</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-white">
+                AETHERIA HALL OF CHAMPIONS
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1">
+                Rankings reflect healthy habit streaks, quest completions, and verified fitness participation. Click any champion to inspect their public profile.
+              </p>
+            </div>
+
+            {/* Filter tabs */}
+            <div className="flex flex-wrap items-center gap-1 p-1 bg-[#090714] rounded-xl border border-purple-950">
+              {(['global', 'weekly', 'monthly', 'guild', 'friends'] as LeaderboardScope[]).map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg capitalize transition-colors whitespace-nowrap shrink-0 ${
+                    activeTab === tab
+                      ? 'bg-purple-800 text-white shadow'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {!isLiveBackend && !loading && (
         <div className="p-3 rounded-xl bg-amber-950/40 border border-amber-700/50 text-xs text-amber-200 flex items-center gap-2">
           <Info className="w-4 h-4 shrink-0 text-amber-400" />
           <span>
-            Showing your verified personal standing. Run the unified Supabase migration SQL to unlock live multi-player leaderboards and friend search.
+            Showing your personal realm standing. Live multi-player rankings will appear automatically once connected.
           </span>
         </div>
       )}
@@ -192,12 +222,18 @@ export const LeaderboardView: React.FC = () => {
                           alt={player.name}
                           className="w-8 h-8 rounded-full object-cover object-top border border-purple-600 shrink-0"
                         />
-                        <div>
+                        <div className="flex flex-wrap items-center gap-1.5 min-w-0">
                           <span className="font-bold text-slate-100 group-hover:text-amber-300 transition-colors">
                             {player.name}
                           </span>
+                          <LegendTitleBadge
+                            title={player.legendTitle || equippedLegendMap[player.userId]?.titleTag}
+                            style={player.legendTitleStyle || equippedLegendMap[player.userId]?.titleStyle}
+                            emblemIcon={player.legendEmblem || equippedLegendMap[player.userId]?.emblemIcon}
+                            size="xs"
+                          />
                           {player.isCurrent && (
-                            <span className="ml-2 text-[10px] bg-purple-700 text-white px-1.5 py-0.5 rounded font-mono">
+                            <span className="text-[10px] bg-purple-700 text-white px-1.5 py-0.5 rounded font-mono">
                               YOU
                             </span>
                           )}
@@ -299,9 +335,17 @@ export const LeaderboardView: React.FC = () => {
                       className="w-8 h-8 rounded-full object-cover object-top border border-purple-700 shrink-0"
                     />
                     <div className="min-w-0">
-                      <p className="text-xs font-bold text-white truncate group-hover:text-amber-300 transition-colors">
-                        {champ.username}
-                      </p>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <p className="text-xs font-bold text-white truncate group-hover:text-amber-300 transition-colors">
+                          {champ.username}
+                        </p>
+                        <LegendTitleBadge
+                          title={champ.legendTitle || equippedLegendMap[champ.id]?.titleTag}
+                          style={champ.legendTitleStyle || equippedLegendMap[champ.id]?.titleStyle}
+                          emblemIcon={champ.legendEmblem || equippedLegendMap[champ.id]?.emblemIcon}
+                          size="xs"
+                        />
+                      </div>
                       <p className="text-[10px] text-slate-400">
                         Lv.{champ.level} {champ.characterClass} · {champ.aetherRank}
                       </p>
@@ -362,9 +406,17 @@ export const LeaderboardView: React.FC = () => {
                       className="w-8 h-8 rounded-full object-cover object-top border border-purple-600 shrink-0"
                     />
                     <div className="min-w-0">
-                      <p className="text-xs font-bold text-white truncate group-hover:text-amber-300 transition-colors">
-                        {req.champion.username}
-                      </p>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <p className="text-xs font-bold text-white truncate group-hover:text-amber-300 transition-colors">
+                          {req.champion.username}
+                        </p>
+                        <LegendTitleBadge
+                          title={req.champion.legendTitle || equippedLegendMap[req.champion.id]?.titleTag}
+                          style={req.champion.legendTitleStyle || equippedLegendMap[req.champion.id]?.titleStyle}
+                          emblemIcon={req.champion.legendEmblem || equippedLegendMap[req.champion.id]?.emblemIcon}
+                          size="xs"
+                        />
+                      </div>
                       <p className="text-[10px] text-purple-300">
                         Lv.{req.champion.level} {req.champion.characterClass}
                       </p>
@@ -411,9 +463,17 @@ export const LeaderboardView: React.FC = () => {
                       className="w-8 h-8 rounded-full object-cover object-top border border-purple-700 shrink-0"
                     />
                     <div className="min-w-0">
-                      <p className="text-xs font-bold text-white truncate group-hover:text-amber-300 transition-colors">
-                        {f.champion.username}
-                      </p>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <p className="text-xs font-bold text-white truncate group-hover:text-amber-300 transition-colors">
+                          {f.champion.username}
+                        </p>
+                        <LegendTitleBadge
+                          title={f.champion.legendTitle || equippedLegendMap[f.champion.id]?.titleTag}
+                          style={f.champion.legendTitleStyle || equippedLegendMap[f.champion.id]?.titleStyle}
+                          emblemIcon={f.champion.legendEmblem || equippedLegendMap[f.champion.id]?.emblemIcon}
+                          size="xs"
+                        />
+                      </div>
                       <p className="text-[10px] text-slate-400">
                         Lv.{f.champion.level} {f.champion.characterClass} · 🔥 {f.champion.currentStreak}d
                       </p>

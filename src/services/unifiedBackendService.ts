@@ -1,12 +1,21 @@
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { getSupabase } from '../lib/supabase';
 import {
+  AdaptiveDifficultyTier,
   AppNotification,
   BlockedUserSummary,
   ChampionSummary,
   CharacterClass,
   ChatMessage,
+  DailyQuestReportData,
+  DynamicDailyQuest,
+  DynamicQuestCategory,
+  DynamicQuestDifficulty,
+  DynamicQuestEvidenceType,
   FriendRecord,
+  GlobalAchievementOwnership,
+  GlobalLegendAnnouncement,
+  GlobalTitleStyle,
   Guild,
   GuildDetailsData,
   GuildRole,
@@ -241,6 +250,9 @@ export const updateProfilePreferencesServer = async (params: {
 
 export const saveClientPreferencesServer = (preferences: Record<string, any>) =>
   callRpc<any>('rpc_save_client_preferences', { p_preferences: preferences });
+
+export const lockHeroSelectionServer = (heroId: string) =>
+  callRpc<any>('rpc_lock_hero_selection', { p_hero_id: heroId });
 
 export const claimHabitRewardServer = (habitId: string, idempotencyKey = createIdempotencyKey()) =>
   callRpc<any>('rpc_claim_habit_reward', {
@@ -489,6 +501,9 @@ export const fetchLeaderboardServer = async (
       streak: Number(row.streak || 0),
       score: Number(row.score || 0),
       isCurrent: Boolean(row.is_current_user),
+      legendTitle: row.legend_title ?? null,
+      legendTitleStyle: (row.legend_style as GlobalTitleStyle) ?? null,
+      legendEmblem: row.legend_emblem ?? null,
     })),
   };
 };
@@ -728,6 +743,9 @@ export const searchChampionsServer = async (
       guildName: row.guild_name || null,
       guildTag: row.guild_tag || null,
       achievementCount: typeof row.achievement_count === 'number' ? Number(row.achievement_count) : undefined,
+      legendTitle: row.legend_title ?? null,
+      legendTitleStyle: (row.legend_style as GlobalTitleStyle) ?? null,
+      legendEmblem: row.legend_emblem ?? null,
     })),
   };
 };
@@ -804,6 +822,9 @@ export const fetchFriendshipsServer = async (userId: string): Promise<RpcResult<
           level: Number(peer?.level || 1),
           aetherRank: (peer?.aether_rank || 'Dormant') as any,
           currentStreak: Number(peer?.current_streak || 0),
+          legendTitle: peer?.equipped_legend_title ?? peer?.legend_title ?? null,
+          legendTitleStyle: (peer?.equipped_legend_style ?? peer?.legend_style ?? null) as GlobalTitleStyle | null,
+          legendEmblem: peer?.equipped_legend_emblem ?? peer?.legend_emblem ?? null,
         },
       };
     }),
@@ -890,6 +911,9 @@ export const fetchChatMessagesServer = async (
         }),
         channel: row.channel as 'guild' | 'general' | 'whisper',
         isCurrentUser: row.sender_id === currentUserId,
+        senderLegendTitle: sender?.equipped_legend_title ?? sender?.legend_title ?? null,
+        senderLegendStyle: (sender?.equipped_legend_style ?? sender?.legend_style ?? null) as GlobalTitleStyle | null,
+        senderLegendEmblem: sender?.equipped_legend_emblem ?? sender?.legend_emblem ?? null,
       };
     }),
   };
@@ -1009,4 +1033,355 @@ export const subscribeUnifiedRealtime = (
   return () => {
     supabase.removeChannel(channel);
   };
+};
+
+// -----------------------------------------------------------------------------
+// FEATURE 10 & 11: AI DYNAMIC QUESTS & DAILY QUEST REPORT SERVICES
+// -----------------------------------------------------------------------------
+
+const mapDynamicQuestRow = (row: any): DynamicDailyQuest => ({
+  id: String(row.id),
+  periodKey: String(row.period_key || row.periodKey || ''),
+  title: String(row.title || ''),
+  description: String(row.description || ''),
+  category: (row.category || 'discipline') as DynamicQuestCategory,
+  difficulty: (row.difficulty || 'medium') as DynamicQuestDifficulty,
+  objectiveLabel: String(row.objective_label || row.objectiveLabel || ''),
+  evidenceType: (row.evidence_type || row.evidenceType || 'personal_reflection') as DynamicQuestEvidenceType,
+  progress: Number(row.progress || 0),
+  maxProgress: Math.max(1, Number(row.max_progress || row.maxProgress || 1)),
+  unitLabel: String(row.unit_label || row.unitLabel || 'step'),
+  estimatedMinutes: Math.max(5, Number(row.estimated_minutes || row.estimatedMinutes || 15)),
+  playerXpReward: Number(row.player_xp_reward || row.playerXpReward || 30),
+  forgeXpReward: Number(row.forge_xp_reward || row.forgeXpReward || 20),
+  goldReward: Number(row.gold_reward || row.goldReward || 25),
+  isSpecialChallenge: Boolean(row.is_special_challenge ?? row.isSpecialChallenge),
+  personalizationReason: String(row.personalization_reason || row.personalizationReason || ''),
+  adaptiveTier: (row.adaptive_tier || row.adaptiveTier || 'balanced') as AdaptiveDifficultyTier,
+  completed: Boolean(row.completed),
+  claimed: Boolean(row.claimed),
+  evidenceNote: row.evidence_note ?? row.evidenceNote ?? undefined,
+  completedAt: row.completed_at ?? row.completedAt ?? undefined,
+  claimedAt: row.claimed_at ?? row.claimedAt ?? undefined,
+  createdAt: String(row.created_at || row.createdAt || new Date().toISOString()),
+});
+
+export const generateDailyQuestsAiServer = async (payload: {
+  periodKey: string;
+  player: Record<string, any>;
+  checkIn?: {
+    availableMinutes?: number;
+    energyLevel?: 'low' | 'medium' | 'high';
+    focusNote?: string;
+  };
+  recentQuestTitles?: string[];
+}): Promise<
+  RpcResult<{
+    adaptiveTier: AdaptiveDifficultyTier;
+    mentorGreeting: string;
+    quests: DynamicDailyQuest[];
+  }>
+> => {
+  try {
+    const res = await fetch('/api/ai/generate-daily-quests', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      return { ok: false, error: data?.error || 'Could not generate today’s quests.' };
+    }
+    return {
+      ok: true,
+      data: {
+        adaptiveTier: data.adaptiveTier as AdaptiveDifficultyTier,
+        mentorGreeting: String(data.mentorGreeting || ''),
+        quests: Array.isArray(data.quests) ? data.quests.map(mapDynamicQuestRow) : [],
+      },
+    };
+  } catch (err: any) {
+    return { ok: false, error: err?.message || 'Unable to reach AI Quest Architect.' };
+  }
+};
+
+export const generateDailyQuestReportAiServer = async (payload: {
+  reportDate: string;
+  yesterdayDate: string;
+  metrics: Record<string, any>;
+}): Promise<RpcResult<DailyQuestReportData>> => {
+  try {
+    const res = await fetch('/api/ai/daily-quest-report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      return { ok: false, error: data?.error || 'Could not generate Daily Quest Report.' };
+    }
+    return { ok: true, data: data as DailyQuestReportData };
+  } catch (err: any) {
+    return { ok: false, error: err?.message || 'Unable to reach Daily Chronicle chronicler.' };
+  }
+};
+
+export const fetchPlayerDynamicQuestsServer = async (
+  userId: string,
+  periodKey?: string
+): Promise<RpcResult<DynamicDailyQuest[]>> => {
+  const supabase = getSupabase();
+  if (!supabase) return { ok: false, error: 'Supabase not configured' };
+
+  let query = (supabase as any)
+    .from('player_dynamic_quests')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: true });
+
+  if (periodKey) {
+    query = query.eq('period_key', periodKey);
+  } else {
+    query = query.limit(40);
+  }
+
+  const { data, error } = await query;
+  if (error) {
+    return { ok: false, schemaMissing: isBackendSchemaMissingError(error), error: error.message };
+  }
+  return { ok: true, data: (data || []).map(mapDynamicQuestRow) };
+};
+
+export const saveGeneratedDailyQuestsServer = async (
+  periodKey: string,
+  quests: DynamicDailyQuest[]
+): Promise<RpcResult<{ alreadyGenerated: boolean; quests: DynamicDailyQuest[] }>> => {
+  const res = await callRpc<any>('rpc_save_generated_daily_quests', {
+    p_period_key: periodKey,
+    p_quests: quests,
+  });
+  if (!res.ok) return res as any;
+  return {
+    ok: true,
+    data: {
+      alreadyGenerated: Boolean(res.data?.alreadyGenerated),
+      quests: Array.isArray(res.data?.quests) ? res.data.quests.map(mapDynamicQuestRow) : quests,
+    },
+  };
+};
+
+export const updateDynamicQuestProgressServer = (
+  periodKey: string,
+  updates: Array<{ id: string; progress: number; evidenceNote?: string }>
+) =>
+  callRpc<any>('rpc_update_dynamic_quest_progress', {
+    p_period_key: periodKey,
+    p_updates: updates,
+  });
+
+export const claimDynamicQuestServer = (questId: string, periodKey: string) =>
+  callRpc<any>('rpc_claim_dynamic_quest', {
+    p_quest_id: questId,
+    p_period_key: periodKey,
+  });
+
+export const saveDailyReportServer = (reportDate: string, reportData: DailyQuestReportData) =>
+  callRpc<any>('rpc_save_daily_report', {
+    p_report_date: reportDate,
+    p_report_data: reportData,
+  });
+
+export const fetchDailyReportServer = async (
+  userId: string,
+  reportDate: string
+): Promise<RpcResult<DailyQuestReportData | null>> => {
+  const supabase = getSupabase();
+  if (!supabase) return { ok: false, error: 'Supabase not configured' };
+
+  const { data, error } = await (supabase as any)
+    .from('player_daily_reports')
+    .select('report_data')
+    .eq('user_id', userId)
+    .eq('report_date', reportDate)
+    .maybeSingle();
+
+  if (error) {
+    return { ok: false, schemaMissing: isBackendSchemaMissingError(error), error: error.message };
+  }
+  return { ok: true, data: (data?.report_data as DailyQuestReportData) || null };
+};
+
+// -----------------------------------------------------------------------------
+// FEATURE 12: HALL OF LEGENDS (GLOBAL EXCLUSIVE ACHIEVEMENTS)
+// -----------------------------------------------------------------------------
+
+export interface LegendsFallbackState {
+  claims: GlobalAchievementOwnership[];
+  equippedByUser: Record<
+    string,
+    { achievementId: string; titleTag: string; titleStyle: GlobalTitleStyle; emblemIcon: string }
+  >;
+  announcements: GlobalLegendAnnouncement[];
+}
+
+export const fetchLegendsLedgerFallback = async (): Promise<LegendsFallbackState | null> => {
+  try {
+    const res = await fetch('/api/legends/state');
+    if (!res.ok) return null;
+    const data = await res.json();
+    return {
+      claims: Array.isArray(data?.claims) ? data.claims : [],
+      equippedByUser: data?.equippedByUser && typeof data.equippedByUser === 'object' ? data.equippedByUser : {},
+      announcements: Array.isArray(data?.announcements) ? data.announcements : [],
+    };
+  } catch {
+    return null;
+  }
+};
+
+export const fetchHallOfLegendsServer = async (): Promise<
+  RpcResult<{
+    metrics?: Record<string, number>;
+    claims: GlobalAchievementOwnership[];
+    announcements: GlobalLegendAnnouncement[];
+    equippedByUser?: Record<
+      string,
+      { achievementId: string; titleTag: string; titleStyle: GlobalTitleStyle; emblemIcon: string }
+    >;
+    isFallbackLedger?: boolean;
+  }>
+> => {
+  const res = await callRpc<any>('rpc_get_hall_of_legends');
+  if (res.ok && res.data?.success) {
+    return {
+      ok: true,
+      data: {
+        metrics: res.data.metrics || undefined,
+        claims: Array.isArray(res.data.claims) ? res.data.claims : [],
+        announcements: Array.isArray(res.data.announcements) ? res.data.announcements : [],
+        isFallbackLedger: false,
+      },
+    };
+  }
+
+  // Pre-migration fallback to server-side atomic Express ledger
+  if (res.schemaMissing || !res.ok) {
+    const ledger = await fetchLegendsLedgerFallback();
+    if (ledger) {
+      return {
+        ok: true,
+        data: {
+          claims: ledger.claims,
+          announcements: ledger.announcements,
+          equippedByUser: ledger.equippedByUser,
+          isFallbackLedger: true,
+        },
+      };
+    }
+  }
+
+  return { ok: false, error: res.error || 'Could not load Hall of Legends.' };
+};
+
+export const claimGlobalAchievementServer = async (params: {
+  achievementId: string;
+  achievementName: string;
+  titleTag: string;
+  titleStyle: GlobalTitleStyle;
+  emblemIcon: string;
+  rarity: string;
+  ownerId: string;
+  ownerUsername: string;
+  threshold: number;
+  progressValue: number;
+}): Promise<
+  RpcResult<{
+    success: boolean;
+    alreadyClaimedGlobally?: boolean;
+    ownerId?: string;
+    ownerUsername?: string;
+    claimedAt?: string;
+    profile?: any;
+    ownership?: GlobalAchievementOwnership;
+    announcements?: GlobalLegendAnnouncement[];
+    equippedByUser?: Record<string, any>;
+    isFallbackLedger?: boolean;
+    error?: string;
+  }>
+> => {
+  const res = await callRpc<any>('rpc_claim_global_achievement', {
+    p_achievement_id: params.achievementId,
+  });
+
+  if (res.ok) {
+    if (res.data?.success === false) {
+      return {
+        ok: false,
+        error: res.data?.error || 'Could not claim Global Exclusive Achievement.',
+        data: res.data,
+      };
+    }
+    return { ok: true, data: { ...res.data, isFallbackLedger: false } };
+  }
+
+  if (res.schemaMissing) {
+    try {
+      const httpRes = await fetch('/api/legends/claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params),
+      });
+      const payload = await httpRes.json().catch(() => ({}));
+      if (!httpRes.ok || payload?.success === false) {
+        return {
+          ok: false,
+          error: payload?.error || 'Claim rejected.',
+          data: payload,
+        };
+      }
+      return {
+        ok: true,
+        data: { ...payload, isFallbackLedger: true },
+      };
+    } catch (err: any) {
+      return { ok: false, error: err?.message || 'Unable to verify atomic claim.' };
+    }
+  }
+
+  return { ok: false, error: res.error || 'Could not claim Global Exclusive Achievement.' };
+};
+
+export const setEquippedLegendTitleServer = async (params: {
+  ownerId: string;
+  achievementId: string | null;
+  titleTag?: string | null;
+  titleStyle?: GlobalTitleStyle | null;
+  emblemIcon?: string | null;
+}): Promise<RpcResult<any>> => {
+  const res = await callRpc<any>('rpc_set_equipped_legend_title', {
+    p_achievement_id: params.achievementId ?? null,
+  });
+
+  if (res.ok) {
+    return res;
+  }
+
+  if (res.schemaMissing) {
+    try {
+      const httpRes = await fetch('/api/legends/equip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params),
+      });
+      const payload = await httpRes.json().catch(() => ({}));
+      if (!httpRes.ok || payload?.success === false) {
+        return { ok: false, error: payload?.error || 'Could not update equipped legend title.' };
+      }
+      return { ok: true, data: payload };
+    } catch (err: any) {
+      return { ok: false, error: err?.message || 'Could not update equipped legend title.' };
+    }
+  }
+
+  return res;
 };

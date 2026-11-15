@@ -86,3 +86,43 @@
   animation: eternalCosmicShift 4.5s ease-in-out infinite;
 }
 
+@keyframes heroIdleBreathe {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(0, -5px, 0) scale(1.012);
+  }
+}
+
+@keyframes runicRingRotate {
+  from {
+    transform: rotateX(72deg) rotateZ(0deg);
+  }
+  to {
+    transform: rotateX(72deg) rotateZ(360deg);
+  }
+}
+
+.animate-hero-breathe {
+  animation: heroIdleBreathe 6.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-runic-ring {
+  animation: runicRingRotate 48s linear infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-hero-breathe,
+  .animate-runic-ring,
+  .animate-ascendant-pulse,
+  .animate-divine-halo,
+  .animate-celestial-drift,
+  .animate-eternal-shift {
+    animation: none !important;
+  }
+}
+
+

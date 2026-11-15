@@ -13,7 +13,6 @@ import {
   UserPlus,
   Shield,
 } from 'lucide-react';
-import { CloudSyncIndicator } from './CloudSyncIndicator';
 
 interface TopBarProps {
   onToggleSidebar: () => void;
@@ -27,10 +26,6 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
     setActiveTab,
     toggleSound,
     setShowAuthModal,
-    cloudStatus,
-    lastSavedAt,
-    setShowSupabaseConfigModal,
-    triggerManualCloudSave,
     notifications,
     unreadNotificationsCount,
     markNotificationRead,
@@ -94,14 +89,6 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
             Dashboard
           </button>
           <button
-            onClick={() => setActiveTab('quests')}
-            className={`whitespace-nowrap shrink-0 transition-colors hover:text-[#D9D2C5] ${
-              activeTab === 'quests' ? 'text-[#C5A15A] font-semibold border-b-2 border-[#C5A15A] pb-0.5' : ''
-            }`}
-          >
-            Quests
-          </button>
-          <button
             onClick={() => setActiveTab('aether-vision')}
             className={`whitespace-nowrap shrink-0 transition-colors hover:text-[#D9D2C5] ${
               activeTab === 'aether-vision' ? 'text-[#C5A15A] font-semibold border-b-2 border-[#C5A15A] pb-0.5' : ''
@@ -137,14 +124,6 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
 
         {/* Zone 3: RPG Currency & Player Stats HUD */}
         <div className="flex items-center gap-2.5 shrink-0">
-          {/* Cloud Sync Status Indicator */}
-          <CloudSyncIndicator
-            status={cloudStatus}
-            lastSavedAt={lastSavedAt}
-            onClickConfig={() => setShowSupabaseConfigModal(true)}
-            onRetrySave={triggerManualCloudSave}
-          />
-
           {/* Audio toggle */}
           <button
             onClick={toggleSound}

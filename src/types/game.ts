@@ -9,6 +9,56 @@ export type BiologicalSex = 'female' | 'male' | 'non_binary' | 'prefer_not_to_sa
 
 export type ProfileVisibility = 'public' | 'friends_only' | 'private';
 
+export type PresenceStatus = 'online' | 'offline' | 'away' | 'busy' | 'dnd';
+
+export type FieldVisibilityLevel = 'everyone' | 'friends' | 'nobody';
+
+export type PrivacyFieldKey =
+  | 'usernameAvatar'
+  | 'level'
+  | 'xpProgression'
+  | 'achievements'
+  | 'fitnessStats'
+  | 'workoutHistory'
+  | 'personalRecords'
+  | 'dailyActivity'
+  | 'onlineStatus'
+  | 'lastActive'
+  | 'bio';
+
+export interface GranularPrivacySettings {
+  privateByDefault: boolean;
+  usernameAvatar: FieldVisibilityLevel;
+  level: FieldVisibilityLevel;
+  xpProgression: FieldVisibilityLevel;
+  achievements: FieldVisibilityLevel;
+  fitnessStats: FieldVisibilityLevel;
+  workoutHistory: FieldVisibilityLevel;
+  personalRecords: FieldVisibilityLevel;
+  dailyActivity: FieldVisibilityLevel;
+  onlineStatus: FieldVisibilityLevel;
+  lastActive: FieldVisibilityLevel;
+  bio: FieldVisibilityLevel;
+  showEquipment?: boolean;
+  showGuild?: boolean;
+}
+
+export interface PresenceSettings {
+  manualStatus: PresenceStatus;
+  effectiveStatus: PresenceStatus;
+  autoAwayEnabled: boolean;
+  autoAwayMinutes: number;
+  isAutoAway: boolean;
+  lastActiveAt: string;
+}
+
+export interface PlayerPresenceInfo {
+  userId: string;
+  status: PresenceStatus;
+  lastActiveAt?: string | null;
+  hidden?: boolean;
+}
+
 export interface NotificationPreferences {
   dailyReminders: boolean;
   weeklySummary: boolean;
@@ -30,6 +80,10 @@ export interface UserAccount {
   showEquipment?: boolean;
   showStats?: boolean;
   showGuild?: boolean;
+  presenceStatus?: PresenceStatus;
+  autoAwayEnabled?: boolean;
+  autoAwayMinutes?: number;
+  privacySettings?: GranularPrivacySettings;
   ageYears?: number;
   ageGroup?: AgeGroup;
   biologicalSex?: BiologicalSex;
@@ -54,6 +108,10 @@ export interface UserAccount {
   leaderboardVisible?: boolean;
   createdAt: string;
   isOnboarded: boolean;
+  legendTitle?: string | null;
+  legendTitleStyle?: GlobalTitleStyle | null;
+  legendEmblem?: string | null;
+  legendAchievementId?: string | null;
 }
 
 export interface PlayerStats {
@@ -545,6 +603,11 @@ export interface GuildMemberRecord {
   role: GuildRole;
   weeklyContribution: number;
   joinedAt: string;
+  legendTitle?: string | null;
+  legendTitleStyle?: GlobalTitleStyle | null;
+  legendEmblem?: string | null;
+  presenceStatus?: PresenceStatus;
+  lastActiveAt?: string | null;
 }
 
 export interface GuildChallengeRecord {
@@ -606,6 +669,10 @@ export interface ChatMessage {
   timestamp: string;
   channel: 'guild' | 'general' | 'whisper';
   isCurrentUser?: boolean;
+  senderLegendTitle?: string | null;
+  senderLegendStyle?: GlobalTitleStyle | null;
+  senderLegendEmblem?: string | null;
+  senderPresenceStatus?: PresenceStatus;
 }
 
 export interface Achievement {
@@ -656,6 +723,13 @@ export interface LeaderboardEntry {
   streak: number;
   score: number;
   isCurrent?: boolean;
+  legendTitle?: string | null;
+  legendTitleStyle?: GlobalTitleStyle | null;
+  legendEmblem?: string | null;
+  presenceStatus?: PresenceStatus;
+  lastActiveAt?: string | null;
+  identityHidden?: boolean;
+  levelHidden?: boolean;
 }
 
 export type RelationshipStatus =
@@ -682,35 +756,77 @@ export interface ChampionSummary {
   guildName?: string | null;
   guildTag?: string | null;
   achievementCount?: number;
+  legendTitle?: string | null;
+  legendTitleStyle?: GlobalTitleStyle | null;
+  legendEmblem?: string | null;
+  presenceStatus?: PresenceStatus;
+  lastActiveAt?: string | null;
+  identityHidden?: boolean;
+  levelHidden?: boolean;
+}
+
+export interface ProfileWorkoutHistoryItem {
+  id: string;
+  exerciseName: string;
+  exerciseType: string;
+  durationMinutes: number;
+  repetitions?: number;
+  distanceKm?: number;
+  verifiedWithAetherVision: boolean;
+  timestamp: string;
+}
+
+export interface ProfilePersonalRecord {
+  exerciseName: string;
+  bestReps?: number;
+  bestDurationMinutes?: number;
+  bestDistanceKm?: number;
+  achievedAt: string;
+}
+
+export interface ProfileDailyActivitySummary {
+  habitsCompletedToday: number;
+  habitsTotal: number;
+  workoutsToday: number;
+  activeMinutesToday: number;
+  mealsLoggedToday: number;
+  waterGlassesToday: number;
+  currentStreak: number;
 }
 
 export interface PublicPlayerProfile {
   accessible: boolean;
-  restrictedReason?: 'private' | 'friends_only';
+  restrictedReason?: 'private' | 'friends_only' | 'restricted';
   blocked?: boolean;
   blockedByMe?: boolean;
+  previewMode?: 'public' | 'friend' | 'restricted';
   error?: string;
+  permittedFields?: PrivacyFieldKey[];
   player?: {
     id: string;
-    username: string;
+    username?: string;
     characterName?: string;
-    characterClass: CharacterClass;
+    characterClass?: CharacterClass;
+    avatarUrl?: string;
+    heroName?: string;
     level?: number;
-    totalXp?: number | null;
+    playerXP?: number;
+    playerXPNextLevel?: number;
+    totalXp?: number;
     aetherRank?: AetherRankStage;
-    aetherPoints?: number | null;
-    currentStreak?: number | null;
-    totalWorkoutsCompleted?: number | null;
-    totalVerifiedReps?: number | null;
-    totalBossesDefeated?: number | null;
+    aetherPoints?: number;
+    aetherPointsNextRank?: number;
+    currentStreak?: number;
+    totalWorkoutsCompleted?: number;
+    totalVerifiedReps?: number;
+    totalBossesDefeated?: number;
+    totalActiveMinutes?: number;
     bio?: string;
     profileVisibility?: ProfileVisibility;
-    showAchievements?: boolean;
-    showEquipment?: boolean;
-    showStats?: boolean;
-    showGuild?: boolean;
     relationshipStatus: RelationshipStatus;
     friendshipId?: string | null;
+    presenceStatus?: PresenceStatus;
+    lastActiveAt?: string | null;
     equippedWeapon?: {
       weaponId: string;
       name: string;
@@ -720,15 +836,15 @@ export interface PublicPlayerProfile {
       evolutionStage: AetherRankStage;
       masteryLevel: number;
       element: ElementType;
-    } | null;
-    unlockedWeaponsCount?: number | null;
+    };
+    unlockedWeaponsCount?: number;
     guild?: {
       id: string;
       name: string;
       tag: string;
       level: number;
       role: GuildRole;
-    } | null;
+    };
     achievements?: Array<{
       id: string;
       name: string;
@@ -737,7 +853,22 @@ export interface PublicPlayerProfile {
       icon: string;
       unlocked: boolean;
     }>;
-    lastActiveAt?: string;
+    workoutHistory?: ProfileWorkoutHistoryItem[];
+    personalRecords?: ProfilePersonalRecord[];
+    dailyActivity?: ProfileDailyActivitySummary;
+    legendTitle?: string | null;
+    legendTitleStyle?: GlobalTitleStyle | null;
+    legendEmblem?: string | null;
+    legendAchievementId?: string | null;
+    legendTitles?: Array<{
+      achievementId: string;
+      name: string;
+      titleTag: string;
+      titleStyle: GlobalTitleStyle;
+      emblemIcon: string;
+      rarity: GlobalAchievementRarity;
+      claimedAt: string;
+    }>;
   };
 }
 
@@ -787,6 +918,11 @@ export type RpgAttributeKey =
 
 export type RpgAttributes = Record<RpgAttributeKey, number>;
 
+export interface HeroAbilitySummary {
+  name: string;
+  description: string;
+}
+
 export interface PlayableHeroDefinition {
   id: PlayableHeroId;
   name: string;
@@ -797,6 +933,8 @@ export interface PlayableHeroDefinition {
   roleSummary: string;
   startingEquipment: string[];
   attributeFocus: RpgAttributeKey[];
+  abilities: HeroAbilitySummary[];
+  strengths: string[];
   accentHex: string;
   secondaryHex: string;
   introFlourishLabel: string;
@@ -861,3 +999,236 @@ export interface TutorialState {
   completed: boolean;
   skipped: boolean;
 }
+
+// --- 10. AI-POWERED DYNAMIC QUEST GENERATOR ---
+
+export type DynamicQuestCategory =
+  | 'physical'
+  | 'intellectual'
+  | 'discipline'
+  | 'personal_growth'
+  | 'social';
+
+export type DynamicQuestDifficulty = 'easy' | 'medium' | 'challenging' | 'special';
+
+export type AdaptiveDifficultyTier =
+  | 'gentle_comeback'
+  | 'supportive'
+  | 'balanced'
+  | 'escalating';
+
+export type DynamicQuestEvidenceType =
+  | 'workout_minutes'
+  | 'workout_sessions'
+  | 'vision_reps'
+  | 'habit_completions'
+  | 'meal_logs'
+  | 'water_glasses'
+  | 'friend_interaction'
+  | 'study_or_skill_reflection'
+  | 'personal_reflection';
+
+export interface DynamicDailyQuest {
+  id: string;
+  periodKey: string; // YYYY-MM-DD in player timezone
+  title: string;
+  description: string;
+  category: DynamicQuestCategory;
+  difficulty: DynamicQuestDifficulty;
+  objectiveLabel: string;
+  evidenceType: DynamicQuestEvidenceType;
+  progress: number;
+  maxProgress: number;
+  unitLabel: string;
+  estimatedMinutes: number;
+  playerXpReward: number;
+  forgeXpReward: number;
+  goldReward: number;
+  isSpecialChallenge: boolean;
+  personalizationReason: string;
+  adaptiveTier: AdaptiveDifficultyTier;
+  completed: boolean;
+  claimed: boolean;
+  evidenceNote?: string;
+  completedAt?: string;
+  claimedAt?: string;
+  createdAt: string;
+}
+
+export interface DynamicQuestHistoryEntry {
+  id: string;
+  periodKey: string;
+  title: string;
+  category: DynamicQuestCategory;
+  difficulty: DynamicQuestDifficulty;
+  completed: boolean;
+  claimed: boolean;
+  playerXpReward: number;
+  forgeXpReward: number;
+  goldReward: number;
+  evidenceNote?: string;
+  recordedAt: string;
+}
+
+export interface AiQuestMentorMemory {
+  recentQuestTitles: string[];
+  preferredCategories: DynamicQuestCategory[];
+  struggleCategories: DynamicQuestCategory[];
+  lastAdaptiveTier: AdaptiveDifficultyTier;
+  mentorNotes: string;
+  reportsGeneratedCount: number;
+  lastGeneratedDate?: string;
+}
+
+// --- 11. DAILY QUEST REPORT (PERSONAL RPG PROGRESSION ANALYSIS) ---
+
+export interface DailyQuestReportData {
+  reportDate: string; // YYYY-MM-DD
+  yesterdayDate: string;
+  headline: string;
+  adaptiveTone: string;
+  yesterdayPerformance: {
+    questsCompleted: number;
+    questsTotal: number;
+    habitsCompleted: number;
+    workoutsLogged: number;
+    mealsLogged: number;
+    playerXpEarned: number;
+    forgeXpEarned: number;
+    goldEarned: number;
+    achievementsUnlocked: number;
+    consistencyScore: number; // 0-100
+    summary: string;
+  };
+  personalStrengths: Array<{
+    title: string;
+    detail: string;
+    category: string;
+  }>;
+  areasForImprovement: Array<{
+    area: string;
+    observation: string;
+    gentleAction: string;
+  }>;
+  todayRecommendations: {
+    primaryFocus: string;
+    realisticGoals: string[];
+    specialChallengeAdvice: string;
+    suggestedMinutes: number;
+  };
+  dailyRpgEvaluation: {
+    mentorTitle: string;
+    narrative: string;
+    longTermConnection: string;
+  };
+  generatedAt: string;
+}
+
+// --- 12. GLOBAL EXCLUSIVE ACHIEVEMENTS & HALL OF LEGENDS ---
+
+export type GlobalAchievementCategory =
+  | 'legendary_discipline'
+  | 'master_of_knowledge'
+  | 'physical_excellence'
+  | 'unbreakable_consistency'
+  | 'exploration_and_discovery'
+  | 'social_legends'
+  | 'ultimate_challenges'
+  | 'special_hidden_achievements';
+
+export type GlobalAchievementRarity =
+  | 'Legendary'
+  | 'Mythic'
+  | 'Ascendant'
+  | 'Celestial'
+  | 'Eternal';
+
+export type GlobalTitleStyle =
+  | 'gold'
+  | 'celestial'
+  | 'crimson'
+  | 'emerald'
+  | 'arcane'
+  | 'prismatic';
+
+export type GlobalRequirementType =
+  | 'level'
+  | 'total_xp'
+  | 'current_streak'
+  | 'total_workouts'
+  | 'total_verified_reps'
+  | 'total_bosses_defeated'
+  | 'aether_points'
+  | 'habits_claimed_total'
+  | 'meals_logged_total'
+  | 'water_glasses_current'
+  | 'quests_claimed_total'
+  | 'dynamic_quests_claimed_total'
+  | 'dynamic_physical_claimed'
+  | 'dynamic_intellectual_claimed'
+  | 'dynamic_discipline_claimed'
+  | 'dynamic_personal_growth_claimed'
+  | 'dynamic_social_claimed'
+  | 'normal_achievements_unlocked'
+  | 'unlocked_weapons_count'
+  | 'max_weapon_level'
+  | 'friends_count'
+  | 'guild_joined'
+  | 'guild_leader'
+  | 'chat_messages_sent'
+  | 'story_chapters_claimed'
+  | 'all_kingdoms_cleared'
+  | 'honor_reclaimed'
+  | 'daily_reports_generated'
+  | 'gold_balance'
+  | 'forge_xp_balance';
+
+export interface GlobalExclusiveAchievement {
+  id: string;
+  name: string;
+  story: string;
+  category: GlobalAchievementCategory;
+  rarity: GlobalAchievementRarity;
+  difficulty: 'Hard' | 'Extreme' | 'Pinnacle' | 'Secret';
+  titleTag: string;
+  titleStyle: GlobalTitleStyle;
+  emblemIcon: string;
+  requirementSummary: string;
+  requirementType: GlobalRequirementType;
+  threshold: number;
+  rewardPlayerXp: number;
+  rewardForgeXp: number;
+  rewardGold: number;
+  isHidden?: boolean;
+}
+
+export interface GlobalAchievementOwnership {
+  achievementId: string;
+  ownerId: string;
+  ownerUsername: string;
+  claimedAt: string;
+}
+
+export interface GlobalLegendAnnouncement {
+  id: string;
+  achievementId: string;
+  achievementName: string;
+  titleTag: string;
+  titleStyle: GlobalTitleStyle;
+  emblemIcon: string;
+  rarity: GlobalAchievementRarity;
+  ownerId: string;
+  ownerUsername: string;
+  announcedAt: string;
+}
+
+export type HallOfLegendsStatus = 'unclaimed' | 'locked_for_you' | 'claimed';
+
+export interface HallOfLegendsEntry extends GlobalExclusiveAchievement {
+  ownership: GlobalAchievementOwnership | null;
+  status: HallOfLegendsStatus;
+  userProgress: number;
+  eligibleToClaim: boolean;
+  ownedByCurrentUser: boolean;
+}
+

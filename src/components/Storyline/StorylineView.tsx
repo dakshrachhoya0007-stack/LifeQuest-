@@ -4,11 +4,14 @@ import { resolveAssetUrl } from '../../assets/images';
 import {
   CAMPAIGN_CHAPTERS,
   FALLEN_KNIGHT_OPENING_MONOLOGUE,
+  RECLAIM_HONOR_OBJECTIVES,
 } from '../../data/campaignData';
 import { getHeroById } from '../../data/heroesData';
 import {
+  Award,
   BookOpen,
   CheckCircle2,
+  Circle,
   Compass,
   Crown,
   Lock,
@@ -22,17 +25,39 @@ export const StorylineView: React.FC = () => {
   const {
     kingdoms,
     selectedHeroId,
+    heroLocked,
     setShowHeroSelectModal,
     campaignProgress,
     evaluateChapterRequirements,
     claimCampaignChapterReward,
+    reclaimHonorQuest,
+    claimReclaimHonorReward,
     setActiveTab,
   } = useGame();
 
   const [claimingId, setClaimingId] = useState<string | null>(null);
+  const [claimingHonor, setClaimingHonor] = useState(false);
   const [chapterFeedback, setChapterFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const heroDef = getHeroById(selectedHeroId);
+  const honorDoneCount = Object.values(reclaimHonorQuest.objectives).filter(Boolean).length;
+  const honorTotalCount = RECLAIM_HONOR_OBJECTIVES.length;
+
+  const handleClaimHonor = async () => {
+    if (claimingHonor) return;
+    setClaimingHonor(true);
+    setChapterFeedback(null);
+    const res = await claimReclaimHonorReward();
+    setClaimingHonor(false);
+    if (res.success) {
+      setChapterFeedback({
+        type: 'success',
+        text: 'Honor Reclaimed! +120 Player XP, +75 Forge XP & +100 Gold granted.',
+      });
+    } else if (res.error) {
+      setChapterFeedback({ type: 'error', text: res.error });
+    }
+  };
 
   const handleClaimChapter = async (chapterId: string) => {
     if (claimingId) return;
@@ -64,17 +89,24 @@ export const StorylineView: React.FC = () => {
             </h1>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setShowHeroSelectModal(true)}
-            className="px-4 py-2 rounded-xl bg-[#251638] hover:bg-[#7046A5]/45 border border-[#C5A15A]/40 text-xs font-bold font-['Cinzel'] text-[#C5A15A] shrink-0 transition-colors"
-          >
-            Hero Path: {heroDef.name}
-          </button>
+          {heroLocked ? (
+            <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#251638] border border-[#C5A15A]/40 text-xs font-bold font-['Cinzel'] text-[#C5A15A] shrink-0">
+              <Lock className="w-3.5 h-3.5" />
+              Hero Oath: {heroDef.name}
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowHeroSelectModal(true)}
+              className="px-4 py-2 rounded-xl bg-[#251638] hover:bg-[#7046A5]/45 border border-[#C5A15A]/40 text-xs font-bold font-['Cinzel'] text-[#C5A15A] shrink-0 transition-colors"
+            >
+              Hero Path: {heroDef.name}
+            </button>
+          )}
         </div>
 
         {/* Canonical Great Fall Opening Quote */}
-        <blockquote className="p-4 sm:p-5 rounded-xl bg-[#0b0813] border-l-4 border-[#C5A15A] text-xs sm:text-sm text-[#D9D2C5]/90 leading-relaxed whitespace-pre-line font-serif italic">
+        <blockquote className="p-4 sm:p-5 rounded-xl bg-[#0b0813] border border-[#C5A15A]/25 text-xs sm:text-sm text-[#D9D2C5]/90 leading-relaxed whitespace-pre-line font-serif italic">
           {FALLEN_KNIGHT_OPENING_MONOLOGUE}
         </blockquote>
 
@@ -104,6 +136,86 @@ export const StorylineView: React.FC = () => {
         >
           {chapterFeedback.text}
         </div>
+      )}
+
+      {!reclaimHonorQuest.claimed && (
+        <section
+          aria-label="Reclaim Your Honor Introductory Quest"
+          className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/40 p-5 sm:p-6 shadow-xl space-y-4"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#C5A15A]/15 pb-3.5">
+            <div>
+              <span className="text-[10px] font-['Cinzel'] font-bold uppercase tracking-widest text-[#C5A15A] block">
+                Starter Story Trial · Awakening Chapter
+              </span>
+              <h2 className="font-['Cinzel'] font-black text-lg text-[#D9D2C5] flex items-center gap-2 mt-0.5">
+                <Shield className="w-4 h-4 text-[#C5A15A]" />
+                RECLAIM YOUR HONOR
+              </h2>
+              <p className="text-xs text-[#D9D2C5]/70 mt-0.5">
+                Complete each genuine realm action below to awaken your citadel oath and unlock your starter reward.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3 shrink-0">
+              <span className="font-mono text-xs font-bold text-[#C5A15A] tabular-nums">
+                {honorDoneCount} / {honorTotalCount} Complete
+              </span>
+              {reclaimHonorQuest.completed && (
+                <button
+                  type="button"
+                  disabled={claimingHonor}
+                  onClick={handleClaimHonor}
+                  className="px-4 py-2 rounded-xl bg-[#C5A15A] hover:bg-[#d8b46d] text-[#100D19] font-['Cinzel'] font-black text-xs tracking-wider shadow-lg transition-colors"
+                >
+                  {claimingHonor ? 'CLAIMING...' : 'CLAIM STARTER REWARD'}
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+            {RECLAIM_HONOR_OBJECTIVES.map(obj => {
+              const done = reclaimHonorQuest.objectives[obj.id];
+              return (
+                <button
+                  key={obj.id}
+                  type="button"
+                  onClick={() => setActiveTab(obj.targetTab)}
+                  className={`p-3 rounded-xl border text-left transition-colors flex items-start gap-2.5 ${
+                    done
+                      ? 'bg-[#171b24] border-emerald-600/50 text-[#D9D2C5]'
+                      : 'bg-[#161124] border-[#C5A15A]/18 hover:border-[#C5A15A]/55 text-[#D9D2C5]'
+                  }`}
+                >
+                  {done ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  ) : (
+                    <Circle className="w-4 h-4 text-[#C5A15A]/60 shrink-0 mt-0.5" />
+                  )}
+                  <div className="min-w-0">
+                    <span className={`text-xs font-bold block ${done ? 'line-through text-[#D9D2C5]/60' : 'text-[#D9D2C5]'}`}>
+                      {obj.label}
+                    </span>
+                    <span className="text-[10px] text-[#D9D2C5]/60 block mt-0.5 leading-snug">
+                      {obj.hint}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+
+            <div className="p-3 rounded-xl bg-[#181229] border border-[#7046A5]/45 flex flex-col justify-between">
+              <span className="text-[10px] uppercase tracking-wider text-[#C5A15A] font-bold flex items-center gap-1">
+                <Award className="w-3 h-3" /> Completion Reward
+              </span>
+              <div className="text-xs font-mono text-[#D9D2C5] mt-1 space-y-0.5">
+                <div>+120 Player XP · +75 Forge XP</div>
+                <div className="text-[#C5A15A]">+100 Gold · +2 DIS · +1 RES</div>
+              </div>
+            </div>
+          </div>
+        </section>
       )}
 
       {/* 2. Five Story Chapters */}

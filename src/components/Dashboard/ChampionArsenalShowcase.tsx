@@ -21,6 +21,7 @@ interface ChampionArsenalShowcaseProps {
   user: UserAccount | null;
   stats: PlayerStats;
   selectedHeroId: PlayableHeroId;
+  heroLocked?: boolean;
   rpgAttributes: RpgAttributes;
   weapons: Weapon[];
   equippedWeapon: Weapon;
@@ -34,6 +35,7 @@ export const ChampionArsenalShowcase: React.FC<ChampionArsenalShowcaseProps> = (
   user,
   stats,
   selectedHeroId,
+  heroLocked = true,
   rpgAttributes,
   weapons,
   equippedWeapon,
@@ -92,14 +94,16 @@ export const ChampionArsenalShowcase: React.FC<ChampionArsenalShowcaseProps> = (
             </div>
 
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={onOpenHeroSelect}
-                className="px-3 py-1.5 rounded-lg bg-[#251638] hover:bg-[#7046A5]/45 border border-[#C5A15A]/35 text-[11px] font-semibold text-[#C5A15A] flex items-center gap-1.5 transition-colors"
-              >
-                <Users className="w-3.5 h-3.5" />
-                Switch Hero
-              </button>
+              {!heroLocked && (
+                <button
+                  type="button"
+                  onClick={onOpenHeroSelect}
+                  className="px-3 py-1.5 rounded-lg bg-[#251638] hover:bg-[#7046A5]/45 border border-[#C5A15A]/35 text-[11px] font-semibold text-[#C5A15A] flex items-center gap-1.5 transition-colors"
+                >
+                  <Users className="w-3.5 h-3.5" />
+                  Choose Hero
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => onNavigate('character')}

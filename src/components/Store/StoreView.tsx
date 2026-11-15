@@ -119,7 +119,7 @@ export const StoreView: React.FC = () => {
     if (!res.success) {
       setFeedback({
         type: 'error',
-        text: res.error || 'Purchase could not be completed on the server.',
+        text: res.error || 'Purchase could not be completed right now.',
       });
     } else {
       setFeedback({

@@ -6,22 +6,21 @@ import {
   EyeOff,
   Flame,
   Hammer,
+  Lock,
   ShoppingBag,
   Sparkles,
   Users,
 } from 'lucide-react';
 import { Buff, Kingdom, PlayableHeroId, PlayerStats, UserAccount } from '../../types/game';
 import { getHeroById } from '../../data/heroesData';
-import { probeWebGLCapabilities } from './world3d/AetheriaRelicCanvas';
-import {
-  AetheriaCourtyardCanvas,
-  CourtyardCameraPreset,
-} from '../world3d/AetheriaCourtyardCanvas';
+import { aetheriaCitadelKingdomImg, getHeroArtwork } from '../../assets/images';
+import { AtmosphereParticlesCanvas } from './world3d/AtmosphereParticlesCanvas';
 
 interface AetheriaKingdomHeroProps {
   user: UserAccount | null;
   stats: PlayerStats;
   selectedHeroId: PlayableHeroId;
+  heroLocked?: boolean;
   restorationRatio: number;
   currentKingdom: Kingdom;
   unlockedKingdomsCount: number;
@@ -30,16 +29,13 @@ interface AetheriaKingdomHeroProps {
   onOpenHeroSelect: () => void;
 }
 
-const PRESET_LABELS: Record<CourtyardCameraPreset, string> = {
-  courtyard: 'Courtyard',
-  hero: 'Hero Close-Up',
-  citadel: 'Citadel Keep',
-};
+type SanctuaryFocusMode = 'courtyard' | 'hero';
 
 export const AetheriaKingdomHero: React.FC<AetheriaKingdomHeroProps> = ({
   user,
   stats,
   selectedHeroId,
+  heroLocked = true,
   restorationRatio,
   currentKingdom,
   unlockedKingdomsCount,
@@ -47,12 +43,15 @@ export const AetheriaKingdomHero: React.FC<AetheriaKingdomHeroProps> = ({
   onNavigate,
   onOpenHeroSelect,
 }) => {
-  const gpuProbe = useMemo(() => probeWebGLCapabilities(), []);
-  const [webglFailed, setWebglFailed] = useState(!gpuProbe.webglAvailable);
-  const [cameraPreset, setCameraPreset] = useState<CourtyardCameraPreset>('courtyard');
+  const [focusMode, setFocusMode] = useState<SanctuaryFocusMode>('courtyard');
   const [hudHidden, setHudHidden] = useState(false);
 
   const heroDef = useMemo(() => getHeroById(selectedHeroId), [selectedHeroId]);
+  const heroArtSrc = useMemo(
+    () => getHeroArtwork(selectedHeroId, user?.characterClass),
+    [selectedHeroId, user?.characterClass]
+  );
+
   const xpPercent = Math.min(
     100,
     Math.round((stats.playerXP / Math.max(1, stats.playerXPNextLevel)) * 100)
@@ -62,44 +61,73 @@ export const AetheriaKingdomHero: React.FC<AetheriaKingdomHeroProps> = ({
   return (
     <section
       data-tutorial-id="castle-courtyard"
-      aria-label="World of Aetheria 3D Castle Courtyard and Selected Hero"
-      className="relative w-full h-[480px] sm:h-[540px] lg:h-[590px] rounded-2xl overflow-hidden border border-[#C5A15A]/28 bg-[#100D19] shadow-2xl select-none"
+      aria-label="World of Aetheria Sanctuary and Champion"
+      className="relative w-full h-[500px] sm:h-[550px] lg:h-[600px] rounded-2xl overflow-hidden border border-[#C5A15A]/28 bg-[#100D19] shadow-2xl select-none"
     >
-      {/* Unified Interactive 3D Castle Courtyard & Selected Hero Scene */}
-      <div className="absolute inset-0">
-        {!webglFailed ? (
-          <AetheriaCourtyardCanvas
-            heroId={selectedHeroId}
-            restorationRatio={restorationRatio}
-            cameraPreset={cameraPreset}
-            isSoftwareGl={gpuProbe.isSoftwareGl}
-            onWebglError={() => setWebglFailed(true)}
-          />
-        ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#100D19]">
-            <p className="font-['Cinzel'] text-lg font-bold text-[#C5A15A]">
-              {heroDef.name} · Citadel Courtyard
-            </p>
-            <p className="text-xs text-[#D9D2C5]/75 max-w-md mt-1">
-              WebGL hardware acceleration is unavailable in this browser context. All RPG quests, attributes, and campaign progression remain active.
-            </p>
-          </div>
-        )}
+      {/* Citadel Backdrop & Atmospheric Particles (replaces geometric primitive 3D placeholder) */}
+      <div className="absolute inset-0 bg-[#0d0a16]">
+        <img
+          src={aetheriaCitadelKingdomImg}
+          alt="Aetheria Citadel Sanctuary"
+          referrerPolicy="no-referrer"
+          className={`w-full h-full object-cover object-center transition-all duration-700 ${
+            focusMode === 'hero' ? 'opacity-35 scale-105 filter blur-[2px]' : 'opacity-60 scale-100'
+          }`}
+        />
+        <div
+          className="absolute inset-0 transition-opacity duration-500"
+          style={{
+            background:
+              focusMode === 'hero'
+                ? `radial-gradient(circle at 50% 42%, ${heroDef.accentHex}24 0%, rgba(16, 13, 25, 0.86) 62%, #100D19 100%)`
+                : 'radial-gradient(circle at 50% 46%, rgba(16, 13, 25, 0.25) 0%, rgba(16, 13, 25, 0.78) 68%, #100D19 100%)',
+          }}
+        />
+        <AtmosphereParticlesCanvas qualityMode="rich" reducedMotion={false} />
       </div>
 
-      {/* Subtle Radial Edge Vignette (Pointer-Transparent) */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            'radial-gradient(circle at 50% 46%, transparent 56%, rgba(16, 13, 25, 0.72) 100%)',
-        }}
-      />
+      {/* Featured Champion Artwork Focal Point */}
+      <div className="relative z-10 h-full flex items-center justify-center px-4 pt-16 pb-32 sm:pb-28 pointer-events-none">
+        <div
+          className={`relative transition-all duration-500 ${
+            focusMode === 'hero'
+              ? 'w-56 sm:w-64 lg:w-72 aspect-[3/4]'
+              : 'w-44 sm:w-52 lg:w-60 aspect-[3/4]'
+          } rounded-2xl overflow-hidden border border-[#C5A15A]/55 bg-[#120d20] shadow-2xl`}
+          style={{
+            boxShadow: `0 24px 60px -12px rgba(0, 0, 0, 0.92), 0 0 36px -10px ${heroDef.accentHex}55`,
+          }}
+        >
+          <img
+            src={heroArtSrc}
+            alt={`${heroDef.name} — ${heroDef.archetype}`}
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-cover object-top"
+          />
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#100D19] via-[#100D19]/60 to-transparent" />
+          <div className="absolute bottom-2.5 left-3 right-3 flex items-end justify-between gap-2">
+            <div className="min-w-0">
+              <span
+                className="text-[9px] font-mono uppercase tracking-widest font-bold block truncate"
+                style={{ color: heroDef.accentHex }}
+              >
+                {heroDef.archetype}
+              </span>
+              <span className="font-['Cinzel'] font-black text-xs sm:text-sm text-[#F5EFE6] block truncate">
+                {heroDef.name}
+              </span>
+            </div>
+            <span className="text-[9px] font-mono text-[#C5A15A] shrink-0">
+              {stats.aetherRank}
+            </span>
+          </div>
+        </div>
+      </div>
 
-      {/* TOP HUD: Active 3D Hero Identity & Camera / Switch Hero Controls */}
-      <div className="pointer-events-none absolute top-3.5 left-3.5 right-3.5 sm:top-4 sm:left-5 sm:right-5 z-10 flex flex-wrap items-start justify-between gap-3">
+      {/* TOP HUD: Champion Identity & Sanctuary View Controls */}
+      <div className="pointer-events-none absolute top-3.5 left-3.5 right-3.5 sm:top-4 sm:left-5 sm:right-5 z-20 flex flex-wrap items-start justify-between gap-3">
         {!hudHidden ? (
-          <div className="pointer-events-auto flex items-center gap-3.5 px-4 py-2.5 rounded-xl bg-[#100D19]/90 border border-[#C5A15A]/30 shadow-xl max-w-full sm:max-w-lg">
+          <div className="pointer-events-auto flex items-center gap-3.5 px-4 py-2.5 rounded-xl bg-[#100D19]/92 border border-[#C5A15A]/30 shadow-xl max-w-full sm:max-w-lg">
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-sm sm:text-lg font-bold font-['Cinzel'] text-[#D9D2C5] tracking-wide truncate">
@@ -110,7 +138,7 @@ export const AetheriaKingdomHero: React.FC<AetheriaKingdomHeroProps> = ({
                 </span>
               </div>
               <p className="text-[11px] sm:text-xs text-[#C5A15A] font-medium truncate mt-0.5">
-                {heroDef.name} · {heroDef.archetype} · {stats.aetherRank}
+                {heroDef.name} · {heroDef.mappedClass} Class · {stats.aetherRank}
               </p>
               <p className="text-[10px] sm:text-[11px] text-[#D9D2C5]/70 truncate mt-0.5">
                 Kingdom:{' '}
@@ -134,42 +162,53 @@ export const AetheriaKingdomHero: React.FC<AetheriaKingdomHeroProps> = ({
           </div>
         )}
 
-        {/* Camera Preset Switcher, Hero Selector CTA & Zen Toggle */}
-        <div className="pointer-events-auto flex flex-wrap items-center gap-1 p-1 rounded-xl bg-[#100D19]/90 border border-[#C5A15A]/25 shadow-xl">
+        {/* Sanctuary Framing Switcher & Zen Toggle */}
+        <div className="pointer-events-auto flex flex-wrap items-center gap-1 p-1 rounded-xl bg-[#100D19]/92 border border-[#C5A15A]/25 shadow-xl">
           {!hudHidden && (
             <>
-              {(Object.keys(PRESET_LABELS) as CourtyardCameraPreset[]).map(presetKey => (
-                <button
-                  key={presetKey}
-                  type="button"
-                  onClick={() => setCameraPreset(presetKey)}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors whitespace-nowrap shrink-0 ${
-                    cameraPreset === presetKey
-                      ? 'bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/45'
-                      : 'text-[#D9D2C5]/70 hover:text-[#D9D2C5] hover:bg-[#251638]/50 border border-transparent'
-                  }`}
-                >
-                  {PRESET_LABELS[presetKey]}
-                </button>
-              ))}
-
-              <span className="w-px h-4 bg-[#C5A15A]/20 mx-0.5" />
-
               <button
                 type="button"
-                onClick={onOpenHeroSelect}
-                className="px-2.5 py-1 rounded-lg text-[11px] font-bold font-['Cinzel'] bg-[#C5A15A]/15 hover:bg-[#C5A15A]/30 text-[#C5A15A] border border-[#C5A15A]/45 flex items-center gap-1 whitespace-nowrap shrink-0 transition-colors"
+                onClick={() => setFocusMode('courtyard')}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors whitespace-nowrap shrink-0 ${
+                  focusMode === 'courtyard'
+                    ? 'bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/45'
+                    : 'text-[#D9D2C5]/70 hover:text-[#D9D2C5] hover:bg-[#251638]/50 border border-transparent'
+                }`}
               >
-                <Users className="w-3 h-3" />
-                Switch 3D Hero
+                Citadel Vista
               </button>
+              <button
+                type="button"
+                onClick={() => setFocusMode('hero')}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors whitespace-nowrap shrink-0 ${
+                  focusMode === 'hero'
+                    ? 'bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/45'
+                    : 'text-[#D9D2C5]/70 hover:text-[#D9D2C5] hover:bg-[#251638]/50 border border-transparent'
+                }`}
+              >
+                Hero Spotlight
+              </button>
+
+              {!heroLocked && (
+                <>
+                  <span className="w-px h-4 bg-[#C5A15A]/20 mx-0.5" />
+                  <button
+                    type="button"
+                    onClick={onOpenHeroSelect}
+                    className="px-2.5 py-1 rounded-lg text-[11px] font-bold font-['Cinzel'] bg-[#C5A15A]/15 hover:bg-[#C5A15A]/30 text-[#C5A15A] border border-[#C5A15A]/45 flex items-center gap-1 whitespace-nowrap shrink-0 transition-colors"
+                  >
+                    <Users className="w-3 h-3" />
+                    Choose Hero
+                  </button>
+                </>
+              )}
             </>
           )}
 
           <button
             type="button"
             onClick={() => setHudHidden(h => !h)}
-            title={hudHidden ? 'Show HUD controls' : 'Hide HUD to view 3D courtyard'}
+            title={hudHidden ? 'Show HUD controls' : 'Hide HUD to admire citadel artwork'}
             className="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-[#D9D2C5]/80 hover:text-[#C5A15A] hover:bg-[#251638]/50 flex items-center gap-1 whitespace-nowrap shrink-0 transition-colors"
           >
             {hudHidden ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
@@ -180,7 +219,7 @@ export const AetheriaKingdomHero: React.FC<AetheriaKingdomHeroProps> = ({
 
       {/* BOTTOM COMMAND BAR: XP, Currencies & Navigation */}
       {!hudHidden && (
-        <div className="pointer-events-none absolute bottom-3.5 left-3.5 right-3.5 sm:bottom-4 sm:left-5 sm:right-5 z-10">
+        <div className="pointer-events-none absolute bottom-3.5 left-3.5 right-3.5 sm:bottom-4 sm:left-5 sm:right-5 z-20">
           <div className="pointer-events-auto rounded-xl bg-[#100D19]/92 border border-[#C5A15A]/25 px-4 py-3 sm:px-5 sm:py-3.5 shadow-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             {/* Hero XP & Active Buffs */}
             <div className="flex-1 min-w-0 space-y-2">
@@ -227,8 +266,9 @@ export const AetheriaKingdomHero: React.FC<AetheriaKingdomHeroProps> = ({
                     </button>
                   ))
                 ) : (
-                  <span className="text-[11px] text-[#D9D2C5]/65">
-                    Drag inside the 3D courtyard to inspect your champion · Complete habits &amp; chapters to restore the Keep.
+                  <span className="text-[11px] text-[#D9D2C5]/65 flex items-center gap-1.5">
+                    {heroLocked && <Lock className="w-3 h-3 text-[#C5A15A]" />}
+                    {heroDef.name} bound · Complete habits &amp; story chapters to restore the Keep.
                   </span>
                 )}
               </div>

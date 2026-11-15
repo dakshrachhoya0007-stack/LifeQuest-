@@ -1,6 +1,6 @@
 import React from 'react';
 import { useGame } from '../../context/GameContext';
-import { getRpgAvatarForClass } from '../../assets/images';
+import { getHeroArtwork } from '../../assets/images';
 import { getHeroById, RPG_ATTRIBUTE_META } from '../../data/heroesData';
 import { EquipmentIllustration } from '../../assets/equipmentArtwork';
 import { getRarityStyle } from '../../utils/rarityStyles';
@@ -13,13 +13,17 @@ import {
   ShoppingBag,
   Users,
   Sparkles,
+  Lock,
+  Crown,
 } from 'lucide-react';
+import { LegendTitleBadge } from '../Social/LegendTitleBadge';
 
 export const CharacterView: React.FC = () => {
   const {
     user,
     stats,
     selectedHeroId,
+    heroLocked,
     setShowHeroSelectModal,
     rpgAttributes,
     weapons,
@@ -27,7 +31,24 @@ export const CharacterView: React.FC = () => {
     equippedGear,
     activeBuffs,
     setActiveTab,
+    setProgressionSubTab,
+    hallOfLegends,
+    equippedLegendMap,
+    equipGlobalLegendTitle,
   } = useGame();
+
+  const equippedLegend = user
+    ? user.legendTitle
+      ? {
+          achievementId:
+            hallOfLegends.find(h => h.ownedByCurrentUser && h.titleTag === user.legendTitle)?.id || '',
+          titleTag: user.legendTitle,
+          titleStyle: user.legendTitleStyle || ('gold' as const),
+          emblemIcon: user.legendEmblem || 'Crown',
+        }
+      : equippedLegendMap[user.id]
+    : undefined;
+  const ownedLegends = hallOfLegends.filter(h => h.ownedByCurrentUser);
 
   const heroDef = getHeroById(selectedHeroId);
   const xpPercent = Math.min(100, Math.round((stats.playerXP / stats.playerXPNextLevel) * 100));
@@ -62,8 +83,9 @@ export const CharacterView: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
           <div className="relative shrink-0">
             <img
-              src={getRpgAvatarForClass(user?.characterClass)}
+              src={getHeroArtwork(selectedHeroId, user?.characterClass)}
               alt={`${heroDef.name} Emblem`}
+              referrerPolicy="no-referrer"
               className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl object-cover object-top border-2 border-[#C5A15A]/70 shadow-2xl"
             />
             <span className="absolute -bottom-2 -right-2 bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/60 px-3 py-1 rounded-lg text-xs font-['Cinzel'] font-bold">
@@ -76,6 +98,14 @@ export const CharacterView: React.FC = () => {
               <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#D9D2C5]">
                 {user?.characterName || user?.username || 'Hero'}
               </h1>
+              {equippedLegend && (
+                <LegendTitleBadge
+                  title={equippedLegend.titleTag}
+                  style={equippedLegend.titleStyle}
+                  emblemIcon={equippedLegend.emblemIcon}
+                  size="md"
+                />
+              )}
               <span className="text-xs font-bold px-2.5 py-0.5 rounded bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/45">
                 {heroDef.name} · {user?.characterClass || 'Warrior'}
               </span>
@@ -103,17 +133,72 @@ export const CharacterView: React.FC = () => {
                 />
               </div>
             </div>
+
+            {ownedLegends.length > 0 && (
+              <div className="pt-2 flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                <span className="text-[11px] font-['Cinzel'] uppercase tracking-wider text-[#C5A15A] flex items-center gap-1">
+                  <Crown className="w-3.5 h-3.5" />
+                  Worldwide Titles:
+                </span>
+                {ownedLegends.map(entry => {
+                  const isEquipped = equippedLegend?.titleTag === entry.titleTag;
+                  return (
+                    <button
+                      key={entry.id}
+                      type="button"
+                      onClick={() =>
+                        void equipGlobalLegendTitle(isEquipped ? null : entry.id)
+                      }
+                      title={
+                        isEquipped
+                          ? 'Click to unequip title'
+                          : `Equip [${entry.titleTag}] across the realm`
+                      }
+                      className={`inline-flex items-center gap-1 rounded-lg p-0.5 transition-all ${
+                        isEquipped
+                          ? 'ring-1 ring-[#C5A15A] bg-[#251638]'
+                          : 'opacity-80 hover:opacity-100'
+                      }`}
+                    >
+                      <LegendTitleBadge
+                        title={entry.titleTag}
+                        style={entry.titleStyle}
+                        emblemIcon={entry.emblemIcon}
+                        size="xs"
+                      />
+                    </button>
+                  );
+                })}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProgressionSubTab('hall-of-legends');
+                    setActiveTab('progression');
+                  }}
+                  className="text-[11px] text-[#C5A15A]/80 hover:text-[#C5A15A] underline ml-1"
+                >
+                  Hall of Legends
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={() => setShowHeroSelectModal(true)}
-              className="px-4 py-2 text-xs font-bold font-['Cinzel'] rounded-xl bg-[#C5A15A] hover:bg-[#d8b46d] text-[#100D19] flex items-center justify-center gap-1.5 transition-colors"
-            >
-              <Users className="w-3.5 h-3.5" />
-              Switch 3D Hero
-            </button>
+            {heroLocked ? (
+              <div className="px-4 py-2 text-xs font-bold font-['Cinzel'] rounded-xl border border-[#C5A15A]/35 bg-[#191229] text-[#C5A15A] flex items-center justify-center gap-1.5">
+                <Lock className="w-3.5 h-3.5" />
+                Permanent Champion
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowHeroSelectModal(true)}
+                className="px-4 py-2 text-xs font-bold font-['Cinzel'] rounded-xl bg-[#C5A15A] hover:bg-[#d8b46d] text-[#100D19] flex items-center justify-center gap-1.5 transition-colors"
+              >
+                <Users className="w-3.5 h-3.5" />
+                Choose Champion
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setActiveTab('settings')}

@@ -11,10 +11,8 @@ import {
   RefreshCw,
   AlertCircle,
   CheckCircle2,
-  Database,
   ArrowLeft,
 } from 'lucide-react';
-import { isSupabaseConfigured } from '../../lib/supabase';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -31,7 +29,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   canClose = true,
   onClose,
   onSuccessRegister,
-  onOpenSupabaseConfig,
 }) => {
   const {
     loginWithSupabase,
@@ -76,7 +73,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       const res = await loginWithGoogleWithSupabase();
       if (!res.success) {
         setIsGoogleLoading(false);
-        setError(res.error || 'Could not start Google sign-in. Verify Supabase Google OAuth provider settings.');
+        setError(res.error || 'Could not start Google sign-in. Please try again in a moment.');
       }
       // On success, browser redirects to Google OAuth consent screen
     } catch (err: any) {
@@ -106,7 +103,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             'Password reset link has been dispatched to your email! Please check your inbox and follow the instructions to restore your account.'
           );
         } else {
-          setError(res.error || 'Failed to dispatch password reset email. Verify your email or Supabase Auth settings.');
+          setError(res.error || 'Could not send password reset email. Please verify your email address and try again.');
         }
       } catch (err: any) {
         setIsSubmitting(false);
@@ -218,7 +215,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             {mode === 'login'
               ? 'Authenticate to access your forged weapons, habits, and quest progress.'
               : mode === 'register'
-              ? 'Create a cloud-backed account to build real habits and RPG power.'
+              ? 'Create your adventurer account to save habits, gear, and realm progress.'
               : 'Enter your account email to receive a password recovery dispatch.'}
           </p>
         </div>
@@ -316,7 +313,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
             {isInIframe && (
               <p className="text-[11px] text-amber-300/80 text-center leading-snug">
-                Embedded preview detected: Google OAuth works best in a full browser tab on the published domain.
+                Tip: If Google sign-in is blocked in this frame, open the app in a full browser tab.
               </p>
             )}
 
@@ -482,24 +479,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </button>
           )}
         </form>
-
-        {/* Database Cloud Configuration Link */}
-        {onOpenSupabaseConfig && (
-          <div className="mt-4 pt-3 border-t border-purple-950/70 text-center">
-            <button
-              type="button"
-              onClick={onOpenSupabaseConfig}
-              className="text-[11px] text-slate-400 hover:text-purple-300 inline-flex items-center gap-1.5 transition-colors"
-            >
-              <Database className="w-3.5 h-3.5 text-purple-400" />
-              <span>
-                {isSupabaseConfigured()
-                  ? 'Supabase Cloud Connected'
-                  : 'Configure Supabase Database'}
-              </span>
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

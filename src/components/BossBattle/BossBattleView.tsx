@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
-import { getRpgAvatarForClass, resolveAssetUrl } from '../../assets/images';
+import { getHeroArtwork, resolveAssetUrl } from '../../assets/images';
 import { EquipmentIllustration } from '../../assets/equipmentArtwork';
 import {
   Swords,
@@ -36,6 +36,7 @@ export const BossBattleView: React.FC = () => {
   const {
     user,
     stats,
+    selectedHeroId,
     kingdoms,
     equippedWeapon,
     buffs,
@@ -137,7 +138,7 @@ export const BossBattleView: React.FC = () => {
     try {
       const startRes = await startBossBattle(activeKingdom.id);
       if (!startRes.success) {
-        setBattleError(startRes.error || 'Could not start boss encounter on server.');
+        setBattleError(startRes.error || 'Could not start boss encounter right now.');
         return;
       }
       setPlayerCurrentHp(startRes.playerHp || playerMaxHp);
@@ -677,8 +678,9 @@ export const BossBattleView: React.FC = () => {
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <img
-                    src={getRpgAvatarForClass(user?.characterClass)}
+                    src={getHeroArtwork(selectedHeroId, user?.characterClass)}
                     alt={`${user?.characterClass || 'Warrior'} Champion`}
+                    referrerPolicy="no-referrer"
                     className="w-14 h-14 rounded-xl object-cover object-top border border-purple-500"
                   />
                   <div>

@@ -378,7 +378,7 @@ export const AetherVisionView: React.FC = () => {
     setIsSavingWorkout(false);
 
     if (!result.success) {
-      setWorkoutSaveError(result.error || 'Could not save workout to Supabase.');
+      setWorkoutSaveError(result.error || 'Could not save workout right now. Please try again.');
       return;
     }
 
@@ -856,7 +856,7 @@ export const AetherVisionView: React.FC = () => {
                 AI Vision Sanctuary
               </span>
               <span className="text-xs text-purple-300 font-semibold">
-                Honest Recognition · Server-Validated Rewards
+                Honest Recognition · Verified Rewards
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-white">
@@ -870,7 +870,7 @@ export const AetherVisionView: React.FC = () => {
           <div className="flex items-center gap-2 bg-[#090714] p-3 rounded-xl border border-purple-950 text-xs max-w-sm">
             <Shield className="w-4 h-4 text-emerald-400 shrink-0" />
             <span className="text-slate-400">
-              All XP, Forge XP, and Gold are verified authoritatively by the Supabase backend with duplicate protection.
+              All earned XP, Forge XP, and Gold are verified and safely credited to your hero.
             </span>
           </div>
         </div>
@@ -1367,7 +1367,7 @@ export const AetherVisionView: React.FC = () => {
               <div className="bg-[#0e0a1b] border border-purple-950 rounded-2xl p-5 space-y-3 text-xs">
                 <h3 className="font-['Cinzel'] font-bold text-sm text-slate-100 flex items-center gap-2">
                   <Zap className="w-4 h-4 text-amber-400" />
-                  REWARD RULES (SERVER-VALIDATED)
+                  REWARD RULES
                 </h3>
                 <div className="p-3 rounded-xl bg-[#130f24] border border-purple-950 flex justify-between">
                   <span className="text-slate-300">Vision-Verified Base + Rep XP</span>
@@ -1388,7 +1388,7 @@ export const AetherVisionView: React.FC = () => {
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Daily cap: up to 6 rewarded workout sessions per local day. All balances update directly from the Supabase server response.
+                  Daily cap: up to 6 rewarded workout sessions per day.
                 </p>
               </div>
 

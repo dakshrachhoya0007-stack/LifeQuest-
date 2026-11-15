@@ -4,7 +4,7 @@ import { Weapon, WeaponCategory, WeaponRarity, AetherRankStage } from '../../typ
 import { sound } from '../../utils/audio';
 import { AETHER_RANK_STAGES, getEvolutionVisual } from '../../data/initialData';
 import { PROGRESSION_UNLOCK_BLUEPRINTS, findBlueprintByWeaponId } from '../../data/weaponArsenal';
-import { blacksmithForgeImg, getRpgAvatarForClass } from '../../assets/images';
+import { blacksmithForgeImg, getHeroArtwork } from '../../assets/images';
 import { EquipmentIllustration } from '../../assets/equipmentArtwork';
 import {
   getRarityStyle,
@@ -47,6 +47,7 @@ export const ArmoryView: React.FC = () => {
     weapons,
     stats,
     user,
+    selectedHeroId,
     kingdoms,
     shopItems,
     equippedGear,
@@ -221,7 +222,7 @@ export const ArmoryView: React.FC = () => {
           previousDefense: res.previousDefense ?? activeWeapon.baseDefense,
         });
       } else {
-        setForgeError(res.error || 'Weapon upgrade could not be completed on the server.');
+        setForgeError(res.error || 'Weapon upgrade could not be completed right now.');
       }
     } finally {
       setIsForging(false);
@@ -238,7 +239,7 @@ export const ArmoryView: React.FC = () => {
       if (!result.success) {
         setMasteryFeedback({
           type: 'error',
-          text: result.error || 'Mastery drill rejected by server.',
+          text: result.error || 'Mastery drill could not be completed right now.',
         });
         return;
       }
@@ -312,7 +313,7 @@ export const ArmoryView: React.FC = () => {
           previousDefense: res.previousDefense ?? prevDefense,
         });
       } else {
-        setEvolutionError(res.error || 'Rarity ascension rejected by server.');
+        setEvolutionError(res.error || 'Rarity ascension could not be completed right now.');
       }
     } finally {
       setIsAscending(false);
@@ -390,7 +391,7 @@ export const ArmoryView: React.FC = () => {
           previousStage: oldStage,
         });
       } else {
-        setEvolutionError(evolveResult.error || 'Weapon evolution rejected by server.');
+        setEvolutionError(evolveResult.error || 'Weapon evolution could not be completed right now.');
       }
     } finally {
       setIsEvolving(false);
@@ -445,8 +446,9 @@ export const ArmoryView: React.FC = () => {
             <div className="relative">
               <div className="w-13 h-13 sm:w-15 sm:h-15 rounded-xl bg-gradient-to-b from-amber-500 via-purple-700 to-indigo-900 p-0.5 shadow-xl shadow-purple-950">
                 <img
-                  src={getRpgAvatarForClass(user?.characterClass)}
+                  src={getHeroArtwork(selectedHeroId, user?.characterClass)}
                   alt={`${user?.characterClass || 'Warrior'} Champion`}
+                  referrerPolicy="no-referrer"
                   className="w-full h-full object-cover object-top rounded-xl"
                 />
               </div>
@@ -782,6 +784,7 @@ export const ArmoryView: React.FC = () => {
         {/* COLUMN 2: RPG CHARACTER EQUIPMENT STAGE (4 Cols) */}
         <div className="lg:col-span-4">
           <RpgCharacterStage
+            heroId={selectedHeroId}
             characterClass={user?.characterClass || 'Warrior'}
             characterName={user?.characterName || user?.username || 'Hero of Aetheria'}
             level={stats.level}
@@ -1178,7 +1181,7 @@ export const ArmoryView: React.FC = () => {
                   Pinnacle Progression Relics (Ascendant → Eternal)
                 </span>
                 <p className="text-[11px] text-slate-300 mt-0.5">
-                  Supreme relics cannot be bought directly in the Bazaar. Meet the progression milestones below to unseal them server-side.
+                  Supreme relics cannot be bought directly in the Bazaar. Meet the progression milestones below to unseal them.
                 </p>
               </div>
 

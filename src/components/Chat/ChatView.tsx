@@ -5,9 +5,11 @@ import {
   MessageSquare,
   Send,
   Flag,
+  Crown,
 } from 'lucide-react';
+import { LegendTitleBadge } from '../Social/LegendTitleBadge';
 
-export const ChatView: React.FC = () => {
+export const ChatView: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
   const {
     chatMessages,
     sendChatMessage,
@@ -16,6 +18,9 @@ export const ChatView: React.FC = () => {
     friends,
     openPublicProfile,
     setActiveTab,
+    setProgressionSubTab,
+    equippedLegendMap,
+    legendAnnouncements,
   } = useGame();
   const [selectedChannel, setSelectedChannel] = useState<'guild' | 'general' | 'whisper'>('general');
   const [inputText, setInputText] = useState('');
@@ -50,26 +55,18 @@ export const ChatView: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in pb-12">
-      {/* Banner */}
-      <div className="rounded-2xl bg-gradient-to-r from-[#170e2f] via-[#100a20] to-[#1a1236] border border-purple-900/60 p-6 shadow-xl">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      {/* Banner / Channel Toolbar */}
+      {embedded ? (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#0e0a1b] border border-purple-950/90 rounded-2xl p-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-purple-400">
-                Tavern of Fellowship
-              </span>
-              <span className="text-slate-600">·</span>
-              <span className="text-xs text-purple-300 font-semibold">Real-Time Web & Mobile Channels</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-white">
-              REALM CHAT & MESSAGES
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1">
-              Coordinate guild raids, celebrate workout milestones, and share healthy culinary tips across Aetheria.
+            <h2 className="font-['Cinzel'] font-bold text-base text-white">
+              Realm Chat &amp; Messages
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Coordinate guild raids, celebrate milestones, and whisper companions.
             </p>
           </div>
-
-          <div className="flex items-center gap-1.5 p-1 bg-[#090714] rounded-xl border border-purple-950">
+          <div className="flex flex-wrap items-center gap-1.5 p-1 bg-[#090714] rounded-xl border border-purple-950">
             <button
               onClick={() => setSelectedChannel('guild')}
               className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap shrink-0 ${
@@ -96,7 +93,54 @@ export const ChatView: React.FC = () => {
             </button>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="rounded-2xl bg-gradient-to-r from-[#170e2f] via-[#100a20] to-[#1a1236] border border-purple-900/60 p-6 shadow-xl">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-purple-400">
+                  Tavern of Fellowship
+                </span>
+                <span className="text-slate-600">·</span>
+                <span className="text-xs text-purple-300 font-semibold">Real-Time Web & Mobile Channels</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-white">
+                REALM CHAT & MESSAGES
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1">
+                Coordinate guild raids, celebrate workout milestones, and share healthy culinary tips across Aetheria.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-1.5 p-1 bg-[#090714] rounded-xl border border-purple-950">
+              <button
+                onClick={() => setSelectedChannel('guild')}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap shrink-0 ${
+                  selectedChannel === 'guild' ? 'bg-purple-800 text-white shadow' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Guild Chat
+              </button>
+              <button
+                onClick={() => setSelectedChannel('general')}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap shrink-0 ${
+                  selectedChannel === 'general' ? 'bg-purple-800 text-white shadow' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                General Tavern
+              </button>
+              <button
+                onClick={() => setSelectedChannel('whisper')}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap shrink-0 ${
+                  selectedChannel === 'whisper' ? 'bg-purple-800 text-white shadow' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Whispers
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {notice && (
         <div
@@ -146,6 +190,28 @@ export const ChatView: React.FC = () => {
           </span>
         </div>
 
+        {legendAnnouncements.length > 0 && (
+          <div className="px-6 py-2 bg-[#161028]/90 border-b border-[#C5A15A]/20 flex items-center justify-between gap-3 text-[11px]">
+            <div className="flex items-center gap-2 min-w-0">
+              <Crown className="w-3.5 h-3.5 text-[#C5A15A] shrink-0" />
+              <span className="text-[#D9D2C5]/85 truncate">
+                <span className="font-semibold text-[#C5A15A]">Realm Herald:</span>{' '}
+                {legendAnnouncements[0].ownerUsername} became the sole worldwide bearer of [{legendAnnouncements[0].titleTag}] ({legendAnnouncements[0].achievementName})
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setProgressionSubTab('hall-of-legends');
+                setActiveTab('progression');
+              }}
+              className="text-[10px] font-['Cinzel'] font-bold uppercase tracking-wider text-[#C5A15A] hover:text-[#f0cf85] whitespace-nowrap shrink-0"
+            >
+              Hall of Legends →
+            </button>
+          </div>
+        )}
+
         {/* Message Log */}
         <div className="flex-1 p-6 overflow-y-auto space-y-4">
           {filteredMessages.length === 0 ? (
@@ -192,7 +258,7 @@ export const ChatView: React.FC = () => {
 
                   <div className={`max-w-md ${msg.isCurrentUser ? 'text-right' : 'text-left'}`}>
                     <div
-                      className={`flex items-center gap-2 mb-1 ${
+                      className={`flex flex-wrap items-center gap-1.5 mb-1 ${
                         msg.isCurrentUser ? 'justify-end' : 'justify-start'
                       }`}
                     >
@@ -206,6 +272,21 @@ export const ChatView: React.FC = () => {
                       >
                         {msg.senderName}
                       </button>
+                      <LegendTitleBadge
+                        title={
+                          msg.senderLegendTitle ||
+                          (msg.senderId ? equippedLegendMap[msg.senderId]?.titleTag : undefined)
+                        }
+                        style={
+                          msg.senderLegendStyle ||
+                          (msg.senderId ? equippedLegendMap[msg.senderId]?.titleStyle : undefined)
+                        }
+                        emblemIcon={
+                          msg.senderLegendEmblem ||
+                          (msg.senderId ? equippedLegendMap[msg.senderId]?.emblemIcon : undefined)
+                        }
+                        size="xs"
+                      />
                       <span className="text-[10px] text-purple-400 uppercase font-mono font-medium">
                         {msg.senderClass}
                       </span>

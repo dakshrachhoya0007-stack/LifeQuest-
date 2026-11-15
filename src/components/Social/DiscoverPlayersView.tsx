@@ -16,10 +16,11 @@ import {
   Clock,
   Inbox,
 } from 'lucide-react';
+import { LegendTitleBadge } from './LegendTitleBadge';
 
 type SocialSection = 'discover' | 'friends' | 'received' | 'sent' | 'blocked';
 
-export const DiscoverPlayersView: React.FC = () => {
+export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
   const {
     friends,
     blockedUsers,
@@ -32,6 +33,7 @@ export const DiscoverPlayersView: React.FC = () => {
     blockUser,
     unblockUser,
     openPublicProfile,
+    equippedLegendMap,
   } = useGame();
 
   const [section, setSection] = useState<SocialSection>('discover');
@@ -184,38 +186,40 @@ export const DiscoverPlayersView: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in pb-12">
       {/* Header Banner */}
-      <div className="rounded-2xl bg-gradient-to-r from-[#170e2f] via-[#100a20] to-[#1a1236] border border-purple-900/60 p-6 shadow-xl">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold text-purple-300 mb-1">
-              Social Directory · Verified Players
-            </p>
-            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-white">
-              DISCOVER & FRIENDS
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1">
-              Find active Aetheria champions, inspect public RPG profiles, manage friend requests, and keep your social circle safe.
-            </p>
-          </div>
+      {!embedded && (
+        <div className="rounded-2xl bg-gradient-to-r from-[#170e2f] via-[#100a20] to-[#1a1236] border border-purple-900/60 p-6 shadow-xl">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold text-purple-300 mb-1">
+                Social Directory · Verified Players
+              </p>
+              <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-white">
+                DISCOVER & FRIENDS
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1">
+                Find active Aetheria champions, inspect public RPG profiles, manage friend requests, and keep your social circle safe.
+              </p>
+            </div>
 
-          <div className="flex items-center gap-6 text-xs text-slate-300 shrink-0 tabular-nums">
-            <div>
-              <span className="text-[11px] text-slate-400 block">Friends</span>
-              <span className="text-lg font-bold text-white font-mono">{acceptedFriends.length}</span>
-            </div>
-            <div className="w-px h-8 bg-purple-900/70" />
-            <div>
-              <span className="text-[11px] text-slate-400 block">Incoming</span>
-              <span className="text-lg font-bold text-amber-300 font-mono">{pendingIncoming.length}</span>
-            </div>
-            <div className="w-px h-8 bg-purple-900/70" />
-            <div>
-              <span className="text-[11px] text-slate-400 block">Sent</span>
-              <span className="text-lg font-bold text-purple-300 font-mono">{pendingOutgoing.length}</span>
+            <div className="flex items-center gap-6 text-xs text-slate-300 shrink-0 tabular-nums">
+              <div>
+                <span className="text-[11px] text-slate-400 block">Friends</span>
+                <span className="text-lg font-bold text-white font-mono">{acceptedFriends.length}</span>
+              </div>
+              <div className="w-px h-8 bg-purple-900/70" />
+              <div>
+                <span className="text-[11px] text-slate-400 block">Incoming</span>
+                <span className="text-lg font-bold text-amber-300 font-mono">{pendingIncoming.length}</span>
+              </div>
+              <div className="w-px h-8 bg-purple-900/70" />
+              <div>
+                <span className="text-[11px] text-slate-400 block">Sent</span>
+                <span className="text-lg font-bold text-purple-300 font-mono">{pendingOutgoing.length}</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Section Tabs */}
       <div className="flex flex-wrap items-center gap-1.5 p-1 bg-[#0e0a1b] border border-purple-950 rounded-xl w-fit">
@@ -256,7 +260,7 @@ export const DiscoverPlayersView: React.FC = () => {
 
       {!unifiedBackendReady && (
         <div className="p-4 rounded-xl bg-amber-950/40 border border-amber-800/60 text-xs text-amber-200">
-          Connect to your Supabase backend and apply the database migrations to discover live players and manage friend requests.
+          Player discovery and friend requests are currently offline. Please check your connection or try again shortly.
         </div>
       )}
 
@@ -359,13 +363,21 @@ export const DiscoverPlayersView: React.FC = () => {
                       </button>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-2">
-                          <button
-                            type="button"
-                            onClick={() => openPublicProfile(champ.id)}
-                            className="text-sm font-bold text-white hover:text-purple-300 truncate text-left transition-colors"
-                          >
-                            {champ.username}
-                          </button>
+                          <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
+                            <button
+                              type="button"
+                              onClick={() => openPublicProfile(champ.id)}
+                              className="text-sm font-bold text-white hover:text-purple-300 truncate text-left transition-colors"
+                            >
+                              {champ.username}
+                            </button>
+                            <LegendTitleBadge
+                              title={champ.legendTitle || equippedLegendMap[champ.id]?.titleTag}
+                              style={champ.legendTitleStyle || equippedLegendMap[champ.id]?.titleStyle}
+                              emblemIcon={champ.legendEmblem || equippedLegendMap[champ.id]?.emblemIcon}
+                              size="xs"
+                            />
+                          </div>
                           <span
                             className={`text-[11px] font-medium shrink-0 ${
                               rel === 'friends'
@@ -506,13 +518,21 @@ export const DiscoverPlayersView: React.FC = () => {
                     />
                   </button>
                   <div className="min-w-0">
-                    <button
-                      type="button"
-                      onClick={() => openPublicProfile(f.champion.id)}
-                      className="text-sm font-bold text-white hover:text-purple-300 truncate block"
-                    >
-                      {f.champion.username}
-                    </button>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => openPublicProfile(f.champion.id)}
+                        className="text-sm font-bold text-white hover:text-purple-300 truncate block"
+                      >
+                        {f.champion.username}
+                      </button>
+                      <LegendTitleBadge
+                        title={f.champion.legendTitle || equippedLegendMap[f.champion.id]?.titleTag}
+                        style={f.champion.legendTitleStyle || equippedLegendMap[f.champion.id]?.titleStyle}
+                        emblemIcon={f.champion.legendEmblem || equippedLegendMap[f.champion.id]?.emblemIcon}
+                        size="xs"
+                      />
+                    </div>
                     <p className="text-xs text-slate-400 tabular-nums">
                       Lv.{f.champion.level} · {f.champion.characterClass} · {f.champion.currentStreak}d streak
                     </p>
@@ -590,13 +610,21 @@ export const DiscoverPlayersView: React.FC = () => {
                     />
                   </button>
                   <div className="min-w-0">
-                    <button
-                      type="button"
-                      onClick={() => openPublicProfile(req.champion.id)}
-                      className="text-sm font-bold text-white hover:text-purple-300 truncate block"
-                    >
-                      {req.champion.username}
-                    </button>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => openPublicProfile(req.champion.id)}
+                        className="text-sm font-bold text-white hover:text-purple-300 truncate block"
+                      >
+                        {req.champion.username}
+                      </button>
+                      <LegendTitleBadge
+                        title={req.champion.legendTitle || equippedLegendMap[req.champion.id]?.titleTag}
+                        style={req.champion.legendTitleStyle || equippedLegendMap[req.champion.id]?.titleStyle}
+                        emblemIcon={req.champion.legendEmblem || equippedLegendMap[req.champion.id]?.emblemIcon}
+                        size="xs"
+                      />
+                    </div>
                     <p className="text-xs text-purple-300 tabular-nums">
                       Lv.{req.champion.level} · {req.champion.characterClass} · Wants to connect
                     </p>
@@ -656,13 +684,21 @@ export const DiscoverPlayersView: React.FC = () => {
                     />
                   </button>
                   <div className="min-w-0">
-                    <button
-                      type="button"
-                      onClick={() => openPublicProfile(req.champion.id)}
-                      className="text-sm font-bold text-white hover:text-purple-300 truncate block"
-                    >
-                      {req.champion.username}
-                    </button>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => openPublicProfile(req.champion.id)}
+                        className="text-sm font-bold text-white hover:text-purple-300 truncate block"
+                      >
+                        {req.champion.username}
+                      </button>
+                      <LegendTitleBadge
+                        title={req.champion.legendTitle || equippedLegendMap[req.champion.id]?.titleTag}
+                        style={req.champion.legendTitleStyle || equippedLegendMap[req.champion.id]?.titleStyle}
+                        emblemIcon={req.champion.legendEmblem || equippedLegendMap[req.champion.id]?.emblemIcon}
+                        size="xs"
+                      />
+                    </div>
                     <p className="text-xs text-slate-400 tabular-nums">
                       Lv.{req.champion.level} · {req.champion.characterClass} · Awaiting response
                     </p>

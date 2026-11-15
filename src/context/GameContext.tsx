@@ -35,9 +35,26 @@ import {
   ReclaimHonorQuestState,
   CampaignProgressState,
   TutorialState,
+  DynamicDailyQuest,
+  DynamicQuestCategory,
+  DynamicQuestEvidenceType,
+  DynamicQuestHistoryEntry,
+  AiQuestMentorMemory,
+  DailyQuestReportData,
+  HallOfLegendsEntry,
+  GlobalLegendAnnouncement,
+  GlobalAchievementOwnership,
+  GlobalTitleStyle,
+  AdaptiveDifficultyTier,
+  HallOfLegendsStatus,
 } from '../types/game';
 import { getHeroById, mapClassToDefaultHeroId } from '../data/heroesData';
 import { CAMPAIGN_CHAPTERS, TUTORIAL_STEPS } from '../data/campaignData';
+import {
+  GLOBAL_EXCLUSIVE_ACHIEVEMENTS,
+  GlobalMetricSnapshot,
+  getMetricValueForRequirement,
+} from '../data/globalLegendsData';
 import {
   INITIAL_PLAYER_STATS,
   INITIAL_WEAPONS,
@@ -58,7 +75,7 @@ import {
 } from '../data/weaponArsenal';
 import { getRarityStyle } from '../utils/rarityStyles';
 import { sound } from '../utils/audio';
-import { characterWarriorAvatarImg, getRpgAvatarForClass } from '../assets/images';
+import { characterWarriorAvatarImg, getHeroArtwork, getRpgAvatarForClass } from '../assets/images';
 import { getSupabase, isSupabaseConfigured } from '../lib/supabase';
 import { getOAuthRedirectUrl, sanitizeAuthErrorMessage } from '../lib/authRedirect';
 import {
@@ -74,6 +91,7 @@ import {
 import {
   bootstrapUnifiedPlayerState,
   saveClientPreferencesServer,
+  lockHeroSelectionServer,
   claimHabitRewardServer,
   createHabitServer,
   archiveHabitServer,
@@ -131,6 +149,17 @@ import {
   subscribeUnifiedRealtime,
   getPeriodKeyForFrequency,
   getUserTimezone,
+  generateDailyQuestsAiServer,
+  generateDailyQuestReportAiServer,
+  fetchPlayerDynamicQuestsServer,
+  saveGeneratedDailyQuestsServer,
+  updateDynamicQuestProgressServer,
+  claimDynamicQuestServer,
+  saveDailyReportServer,
+  fetchDailyReportServer,
+  fetchHallOfLegendsServer,
+  claimGlobalAchievementServer,
+  setEquippedLegendTitleServer,
 } from '../services/unifiedBackendService';
 import { CloudSyncStatus } from '../components/Navigation/CloudSyncIndicator';
 import { User as SupabaseUser } from '@supabase/supabase-js';
@@ -161,15 +190,55 @@ interface GameContextType {
   unreadNotificationsCount: number;
   unifiedBackendReady: boolean;
   activeTab: string;
+  socialSubTab: 'leaderboard' | 'friends' | 'chat';
+  setSocialSubTab: (subTab: 'leaderboard' | 'friends' | 'chat') => void;
+  progressionSubTab: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends';
+  setProgressionSubTab: (subTab: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends') => void;
+  // Feature 10: AI-Powered Dynamic Quest Generator
+  dynamicDailyQuests: DynamicDailyQuest[];
+  dynamicQuestHistory: DynamicQuestHistoryEntry[];
+  aiMentorMemory: AiQuestMentorMemory;
+  isGeneratingDailyQuests: boolean;
+  questGenerationError: string | null;
+  mentorGreeting: string | null;
+  generateTodaysAiQuests: (checkIn?: {
+    availableMinutes?: number;
+    energyLevel?: 'low' | 'medium' | 'high';
+    focusNote?: string;
+  }) => Promise<{ success: boolean; error?: string }>;
+  submitDynamicQuestEvidence: (questId: string, evidenceNote: string) => Promise<{ success: boolean; error?: string }>;
+  claimDynamicQuest: (questId: string) => Promise<{ success: boolean; error?: string }>;
+  // Feature 11: Daily Quest Report
+  dailyReport: DailyQuestReportData | null;
+  isGeneratingDailyReport: boolean;
+  dailyReportError: string | null;
+  generateTodaysDailyReport: (forceRefresh?: boolean) => Promise<{ success: boolean; error?: string }>;
+  // Feature 12: Global Exclusive Achievements & Hall of Legends
+  hallOfLegends: HallOfLegendsEntry[];
+  legendAnnouncements: GlobalLegendAnnouncement[];
+  recentGlobalUnlockCelebration: HallOfLegendsEntry | null;
+  hallLoading: boolean;
+  equippedLegendMap: Record<
+    string,
+    { achievementId: string; titleTag: string; titleStyle: GlobalTitleStyle; emblemIcon: string }
+  >;
+  refreshHallOfLegends: () => Promise<void>;
+  claimGlobalExclusiveAchievement: (
+    achievementId: string
+  ) => Promise<{ success: boolean; error?: string; ownerUsername?: string }>;
+  equipGlobalLegendTitle: (achievementId: string | null) => Promise<{ success: boolean; error?: string }>;
+  dismissGlobalUnlockCelebration: () => void;
   showAuthModal: boolean;
   authMode: 'login' | 'register';
   equippedWeapon: Weapon;
   equippedGear: EquippedGear;
   activeBuffs: Buff[];
   selectedHeroId: PlayableHeroId;
+  heroLocked: boolean;
+  heroSelectedAt: string | null;
   showHeroSelectModal: boolean;
   setShowHeroSelectModal: (show: boolean) => void;
-  selectPlayableHero: (heroId: PlayableHeroId) => Promise<void>;
+  selectPlayableHero: (heroId: PlayableHeroId) => Promise<{ success: boolean; error?: string }>;
   rpgAttributes: RpgAttributes;
   reclaimHonorQuest: ReclaimHonorQuestState;
   recordEquipmentInspected: () => void;
@@ -393,14 +462,20 @@ const ROUTE_TO_TAB: Record<string, string> = {
   '/buffs': 'buffs',
   '/boss-battles': 'boss-battles',
   '/storyline': 'storyline',
+  '/social': 'social',
   '/leaderboard': 'leaderboard',
   '/leaderboards': 'leaderboard',
   '/friends': 'friends',
   '/discover': 'friends',
   '/guilds': 'guilds',
   '/chat': 'chat',
+  '/progression': 'progression',
+  '/daily-report': 'daily-report',
+  '/report': 'daily-report',
   '/rewards': 'achievements',
   '/achievements': 'achievements',
+  '/hall-of-legends': 'hall-of-legends',
+  '/legends': 'hall-of-legends',
   '/settings': 'settings',
 };
 
@@ -655,7 +730,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [unifiedBackendReady, setUnifiedBackendReady] = useState<boolean>(false);
 
   const [activeTab, setActiveTabState] = useState<string>('dashboard');
-  const [showAuthModal, setShowAuthModalState] = useState<boolean>(true);
+  const [socialSubTab, setSocialSubTabState] = useState<'leaderboard' | 'friends' | 'chat'>('leaderboard');
+  const [progressionSubTab, setProgressionSubTabState] = useState<
+    'quests' | 'daily-report' | 'achievements' | 'hall-of-legends'
+  >('quests');
+  const [showAuthModal, setShowAuthModalState] = useState<boolean>(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [authError, setAuthError] = useState<string | null>(null);
   const clearAuthError = () => setAuthError(null);
@@ -700,7 +779,25 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     return 'fallen_knight';
   });
-  const [showHeroSelectModal, setShowHeroSelectModal] = useState<boolean>(false);
+  const [heroLocked, setHeroLocked] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(STORAGE_KEY_PREFIX + 'hero_locked') === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [heroSelectedAt, setHeroSelectedAt] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem(STORAGE_KEY_PREFIX + 'hero_selected_at');
+    } catch {
+      return null;
+    }
+  });
+  const [showHeroSelectModal, setShowHeroSelectModalState] = useState<boolean>(false);
+  const setShowHeroSelectModal = (show: boolean) => {
+    if (show && heroLocked) return;
+    setShowHeroSelectModalState(show);
+  };
 
   const [reclaimHonorQuest, setReclaimHonorQuest] = useState<ReclaimHonorQuestState>(() => {
     try {
@@ -750,6 +847,69 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { isOpen: false, stepIndex: 0, completed: false, skipped: false };
   });
 
+  // Feature 10, 11 & 12 States
+  const DEFAULT_MENTOR_MEMORY: AiQuestMentorMemory = {
+    recentQuestTitles: [],
+    preferredCategories: [],
+    struggleCategories: [],
+    lastAdaptiveTier: 'balanced',
+    mentorNotes: '',
+    reportsGeneratedCount: 0,
+  };
+
+  const [dynamicDailyQuests, setDynamicDailyQuests] = useState<DynamicDailyQuest[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_PREFIX + 'dynamic_quests');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [dynamicQuestHistory, setDynamicQuestHistory] = useState<DynamicQuestHistoryEntry[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_PREFIX + 'dynamic_history');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [aiMentorMemory, setAiMentorMemory] = useState<AiQuestMentorMemory>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_PREFIX + 'mentor_memory');
+      if (saved) return { ...DEFAULT_MENTOR_MEMORY, ...JSON.parse(saved) };
+    } catch {
+      // ignore
+    }
+    return DEFAULT_MENTOR_MEMORY;
+  });
+
+  const [isGeneratingDailyQuests, setIsGeneratingDailyQuests] = useState<boolean>(false);
+  const [questGenerationError, setQuestGenerationError] = useState<string | null>(null);
+  const [mentorGreeting, setMentorGreeting] = useState<string | null>(null);
+
+  const [dailyReport, setDailyReport] = useState<DailyQuestReportData | null>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_PREFIX + 'daily_report');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [isGeneratingDailyReport, setIsGeneratingDailyReport] = useState<boolean>(false);
+  const [dailyReportError, setDailyReportError] = useState<string | null>(null);
+
+  const [legendClaims, setLegendClaims] = useState<GlobalAchievementOwnership[]>([]);
+  const [legendAnnouncements, setLegendAnnouncements] = useState<GlobalLegendAnnouncement[]>([]);
+  const [serverLegendMetrics, setServerLegendMetrics] = useState<Record<string, number> | null>(null);
+  const [equippedLegendMap, setEquippedLegendMap] = useState<
+    Record<string, { achievementId: string; titleTag: string; titleStyle: GlobalTitleStyle; emblemIcon: string }>
+  >({});
+  const [recentGlobalUnlockCelebration, setRecentGlobalUnlockCelebration] =
+    useState<HallOfLegendsEntry | null>(null);
+  const [hallLoading, setHallLoading] = useState<boolean>(false);
+
   const updateReclaimHonorObjective = (key: keyof ReclaimHonorQuestState['objectives']) => {
     setReclaimHonorQuest(prev => {
       if (prev.objectives[key]) return prev;
@@ -763,10 +923,46 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
+  const setSocialSubTab = (subTab: 'leaderboard' | 'friends' | 'chat') => {
+    sound.playClick();
+    setSocialSubTabState(subTab);
+  };
+
+  const setProgressionSubTab = (
+    subTab: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends'
+  ) => {
+    sound.playClick();
+    setProgressionSubTabState(subTab);
+    if (subTab === 'quests') {
+      updateReclaimHonorObjective('open_quest_board');
+    }
+  };
+
   const setActiveTab = (tab: string) => {
     if (!isAuthenticated || !user) return;
     sound.playClick();
-    setActiveTabState(tab);
+
+    // Unified hub routing while preserving all deep-links and tutorial/quest tracking
+    if (tab === 'leaderboard' || tab === 'friends' || tab === 'chat') {
+      setSocialSubTabState(tab);
+      setActiveTabState('social');
+    } else if (tab === 'social') {
+      setActiveTabState('social');
+    } else if (
+      tab === 'quests' ||
+      tab === 'daily-report' ||
+      tab === 'achievements' ||
+      tab === 'hall-of-legends'
+    ) {
+      setProgressionSubTabState(tab);
+      setActiveTabState('progression');
+      if (tab === 'quests') updateReclaimHonorObjective('open_quest_board');
+    } else if (tab === 'progression') {
+      setActiveTabState('progression');
+      if (progressionSubTab === 'quests') updateReclaimHonorObjective('open_quest_board');
+    } else {
+      setActiveTabState(tab);
+    }
 
     // Genuine interactive navigation tracking for "Reclaim Your Honor"
     if (tab === 'armory') updateReclaimHonorObjective('visit_armory');
@@ -833,10 +1029,16 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       'tx',
       'equipped_gear',
       'selected_hero_id',
+      'hero_locked',
+      'hero_selected_at',
       'reclaim_honor',
       'campaign_progress',
       'attribute_bonuses',
       'tutorial_state',
+      'dynamic_quests',
+      'dynamic_history',
+      'mentor_memory',
+      'daily_report',
     ];
     keys.forEach(k => localStorage.removeItem(STORAGE_KEY_PREFIX + k));
   };
@@ -868,11 +1070,21 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSelectedPublicProfileId(null);
     setTransactions([]);
     setSelectedHeroId('fallen_knight');
-    setShowHeroSelectModal(false);
+    setHeroLocked(false);
+    setHeroSelectedAt(null);
+    setShowHeroSelectModalState(false);
     setReclaimHonorQuest(DEFAULT_RECLAIM_HONOR);
     setCampaignProgress(DEFAULT_CAMPAIGN_PROGRESS);
     setAttributeBonuses(DEFAULT_ATTRIBUTE_BONUSES);
     setTutorialState({ isOpen: false, stepIndex: 0, completed: false, skipped: false });
+    setDynamicDailyQuests([]);
+    setDynamicQuestHistory([]);
+    setAiMentorMemory(DEFAULT_MENTOR_MEMORY);
+    setDailyReport(null);
+    setQuestGenerationError(null);
+    setDailyReportError(null);
+    setMentorGreeting(null);
+    setRecentGlobalUnlockCelebration(null);
   };
 
   const applyServerProfileToStats = (prof: any) => {
@@ -1117,6 +1329,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             leaderboardVisible: p?.leaderboard_visible ?? true,
             createdAt: sbUser.created_at || new Date().toISOString(),
             isOnboarded: resolvedOnboarded,
+            legendTitle: p?.equipped_legend_title ?? existing?.legendTitle ?? null,
+            legendTitleStyle: (p?.equipped_legend_style as GlobalTitleStyle) ?? existing?.legendTitleStyle ?? null,
+            legendEmblem: p?.equipped_legend_emblem ?? existing?.legendEmblem ?? null,
+            legendAchievementId: p?.equipped_legend_achievement_id ?? existing?.legendAchievementId ?? null,
           };
         };
 
@@ -1186,16 +1402,40 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
               }));
             }
 
-            // Hydrate 3D Hero Identity, Tutorial, Reclaim Your Honor & Campaign Progress from server client_preferences
+            // Hydrate Hero Identity, One-Time Permanent Lock, Tutorial, Reclaim Your Honor & Campaign Progress
             const srvPrefs = {
               ...(cloudRes.clientPreferences || {}),
               ...(boot.data.profile.client_preferences || {}),
             };
-            if (srvPrefs.selectedHeroId) {
-              setSelectedHeroId(getHeroById(srvPrefs.selectedHeroId).id);
+            const serverLockedFlag =
+              typeof boot.data.profile.hero_locked === 'boolean'
+                ? boot.data.profile.hero_locked
+                : srvPrefs.heroLocked === true ||
+                  (Boolean(boot.data.profile.is_onboarded ?? localUser.isOnboarded) &&
+                    srvPrefs.heroSelectionPending !== true);
+
+            const resolvedHeroRaw =
+              boot.data.profile.selected_hero_id || srvPrefs.selectedHeroId;
+            if (resolvedHeroRaw) {
+              setSelectedHeroId(getHeroById(resolvedHeroRaw).id);
             } else if (boot.data.profile.character_class) {
               setSelectedHeroId(mapClassToDefaultHeroId(boot.data.profile.character_class));
             }
+            setHeroLocked(Boolean(serverLockedFlag));
+            setHeroSelectedAt(
+              boot.data.profile.hero_selected_at || srvPrefs.heroSelectedAt || null
+            );
+
+            // If user completed onboarding but hasn't locked their one-time hero yet, require Hero Selection immediately
+            const profileOnboarded = Boolean(
+              boot.data.profile.is_onboarded ?? localUser.isOnboarded
+            );
+            if (profileOnboarded && !serverLockedFlag) {
+              setShowHeroSelectModalState(true);
+            } else {
+              setShowHeroSelectModalState(false);
+            }
+
             if (srvPrefs.reclaimHonor && typeof srvPrefs.reclaimHonor === 'object') {
               setReclaimHonorQuest({ ...DEFAULT_RECLAIM_HONOR, ...srvPrefs.reclaimHonor });
             }
@@ -1212,6 +1452,55 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 completed: Boolean(srvPrefs.tutorialState.completed),
                 skipped: Boolean(srvPrefs.tutorialState.skipped),
               });
+            }
+
+            if (Array.isArray(srvPrefs.dynamicDailyQuests)) {
+              setDynamicDailyQuests(srvPrefs.dynamicDailyQuests);
+            }
+            if (Array.isArray(srvPrefs.dynamicQuestHistory)) {
+              setDynamicQuestHistory(srvPrefs.dynamicQuestHistory);
+            }
+            if (srvPrefs.aiMentorMemory && typeof srvPrefs.aiMentorMemory === 'object') {
+              setAiMentorMemory({ ...DEFAULT_MENTOR_MEMORY, ...srvPrefs.aiMentorMemory });
+            }
+            if (srvPrefs.dailyReport && typeof srvPrefs.dailyReport === 'object') {
+              setDailyReport(srvPrefs.dailyReport);
+            }
+          }
+
+          // Hydrate Dynamic Quests, Daily Report & Hall of Legends from SQL tables if migrated
+          const todayPeriod = getPeriodKeyForFrequency('daily', userTimezone);
+          const [dynRes, repRes, hallRes] = await Promise.all([
+            fetchPlayerDynamicQuestsServer(sbUser.id, todayPeriod),
+            fetchDailyReportServer(sbUser.id, todayPeriod),
+            fetchHallOfLegendsServer(),
+          ]);
+          if (dynRes.ok && Array.isArray(dynRes.data) && dynRes.data.length > 0) {
+            setDynamicDailyQuests(dynRes.data);
+          }
+          if (repRes.ok && repRes.data) {
+            setDailyReport(repRes.data);
+          }
+          if (hallRes.ok && hallRes.data) {
+            setLegendClaims(hallRes.data.claims);
+            setLegendAnnouncements(hallRes.data.announcements);
+            if (hallRes.data.metrics) setServerLegendMetrics(hallRes.data.metrics);
+            if (hallRes.data.equippedByUser) {
+              setEquippedLegendMap(hallRes.data.equippedByUser);
+              const mine = hallRes.data.equippedByUser[sbUser.id];
+              if (mine) {
+                setUser(prev =>
+                  prev && !prev.legendTitle
+                    ? {
+                        ...prev,
+                        legendTitle: mine.titleTag,
+                        legendTitleStyle: mine.titleStyle,
+                        legendEmblem: mine.emblemIcon,
+                        legendAchievementId: mine.achievementId,
+                      }
+                    : prev
+                );
+              }
             }
           }
           if (Array.isArray(boot.data.habits) && boot.data.habits.length > 0) {
@@ -1349,6 +1638,20 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await refreshSocialAndShopData(sbUser.id);
         } else {
           setUnifiedBackendReady(false);
+          const fallbackPrefs = cloudRes.clientPreferences || {};
+          const fallbackLocked =
+            fallbackPrefs.heroLocked === true ||
+            (localUser.isOnboarded && fallbackPrefs.heroSelectionPending !== true);
+          if (fallbackPrefs.selectedHeroId) {
+            setSelectedHeroId(getHeroById(fallbackPrefs.selectedHeroId).id);
+          } else if (localUser.characterClass) {
+            setSelectedHeroId(mapClassToDefaultHeroId(localUser.characterClass));
+          }
+          setHeroLocked(Boolean(fallbackLocked));
+          setHeroSelectedAt(fallbackPrefs.heroSelectedAt || null);
+          if (localUser.isOnboarded && !fallbackLocked) {
+            setShowHeroSelectModalState(true);
+          }
         }
       } catch (err) {
         console.error('Failed to load user cloud data:', err);
@@ -1394,7 +1697,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       activeSessionUserIdRef.current = null;
       setUser(null);
       setIsAuthenticated(false);
-      setShowAuthModalState(true);
+      setShowAuthModalState(false);
       setCloudStatus('unconfigured');
       isVerifyingSessionRef.current = false;
       setIsAuthLoading(false);
@@ -1430,7 +1733,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsAuthenticated(false);
         setAuthError(safeErr);
         setAuthCallbackError(safeErr);
-        setShowAuthModalState(true);
+        setShowAuthModalState(false);
         return;
       }
 
@@ -1474,7 +1777,20 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (session?.user) {
         await loadUserCloudData(session.user);
         const routeTab = isOAuthCallback ? null : resolveTabFromPathname(window.location.pathname);
-        setActiveTabState(routeTab || 'dashboard');
+        if (routeTab === 'leaderboard' || routeTab === 'friends' || routeTab === 'chat') {
+          setSocialSubTabState(routeTab);
+          setActiveTabState('social');
+        } else if (
+          routeTab === 'quests' ||
+          routeTab === 'daily-report' ||
+          routeTab === 'achievements' ||
+          routeTab === 'hall-of-legends'
+        ) {
+          setProgressionSubTabState(routeTab);
+          setActiveTabState('progression');
+        } else {
+          setActiveTabState(routeTab || 'dashboard');
+        }
         // Clear callback query/hash ONLY after session persistence and profile load succeed
         clearOAuthUrlArtifacts();
         setAuthError(null);
@@ -1485,7 +1801,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         activeSessionUserIdRef.current = null;
         setUser(null);
         setIsAuthenticated(false);
-        setShowAuthModalState(true);
+        setShowAuthModalState(false);
 
         if (isOAuthCallback || sessionError) {
           const safeErr = sanitizeAuthErrorMessage(
@@ -1506,7 +1822,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       activeSessionUserIdRef.current = null;
       setUser(null);
       setIsAuthenticated(false);
-      setShowAuthModalState(true);
+      setShowAuthModalState(false);
     } finally {
       isVerifyingSessionRef.current = false;
       setIsAuthLoading(false);
@@ -1546,7 +1862,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         resetPrivateGameState();
         setActiveTabState('dashboard');
         setAuthMode('login');
-        setShowAuthModalState(true);
+        setShowAuthModalState(false);
         setCloudStatus(isSupabaseConfigured() ? 'saved' : 'unconfigured');
         setIsAuthLoading(false);
         if (window.location.pathname !== '/') {
@@ -1650,6 +1966,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         activeTab,
         equippedGear,
         selectedHeroId,
+        heroLocked,
+        heroSelectedAt,
+        heroSelectionPending: user?.isOnboarded ? !heroLocked : false,
         reclaimHonor: reclaimHonorQuest,
         campaignProgress,
         attributeBonuses,
@@ -1660,6 +1979,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ageYears: user.ageYears ?? null,
         ageGroup: user.ageGroup ?? null,
         biologicalSex: user.biologicalSex ?? null,
+        dynamicDailyQuests,
+        dynamicQuestHistory: dynamicQuestHistory.slice(0, 60),
+        aiMentorMemory,
+        dailyReport,
         savedAt: new Date().toISOString(),
       });
       if (res.ok) {
@@ -1680,12 +2003,19 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     activeTab,
     equippedGear,
     selectedHeroId,
+    heroLocked,
+    heroSelectedAt,
     reclaimHonorQuest,
     campaignProgress,
     attributeBonuses,
     tutorialState.completed,
     tutorialState.skipped,
+    dynamicDailyQuests,
+    dynamicQuestHistory,
+    aiMentorMemory,
+    dailyReport,
     user?.id,
+    user?.isOnboarded,
     isAuthenticated,
     unifiedBackendReady,
   ]);
@@ -1695,6 +2025,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!isAuthenticated || !user) return;
     localStorage.setItem(STORAGE_KEY_PREFIX + 'selected_hero_id', selectedHeroId);
   }, [selectedHeroId, isAuthenticated, user]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+    localStorage.setItem(STORAGE_KEY_PREFIX + 'hero_locked', heroLocked ? 'true' : 'false');
+    if (heroSelectedAt) {
+      localStorage.setItem(STORAGE_KEY_PREFIX + 'hero_selected_at', heroSelectedAt);
+    }
+  }, [heroLocked, heroSelectedAt, isAuthenticated, user]);
 
   useEffect(() => {
     if (!isAuthenticated || !user) return;
@@ -1715,6 +2053,28 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!isAuthenticated || !user) return;
     localStorage.setItem(STORAGE_KEY_PREFIX + 'tutorial_state', JSON.stringify(tutorialState));
   }, [tutorialState, isAuthenticated, user]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+    localStorage.setItem(STORAGE_KEY_PREFIX + 'dynamic_quests', JSON.stringify(dynamicDailyQuests));
+  }, [dynamicDailyQuests, isAuthenticated, user]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+    localStorage.setItem(STORAGE_KEY_PREFIX + 'dynamic_history', JSON.stringify(dynamicQuestHistory));
+  }, [dynamicQuestHistory, isAuthenticated, user]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+    localStorage.setItem(STORAGE_KEY_PREFIX + 'mentor_memory', JSON.stringify(aiMentorMemory));
+  }, [aiMentorMemory, isAuthenticated, user]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+    if (dailyReport) {
+      localStorage.setItem(STORAGE_KEY_PREFIX + 'daily_report', JSON.stringify(dailyReport));
+    }
+  }, [dailyReport, isAuthenticated, user]);
 
   // Sync state changes with LocalStorage ONLY for authenticated users
   useEffect(() => {
@@ -1833,7 +2193,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const prevWeapon = weapons.find(w => w.id === weaponId);
     if (!prevWeapon) return { success: false, newLevel: 1, error: 'Weapon not found.' };
     if (!unifiedBackendReady) {
-      return { success: false, newLevel: prevWeapon.masteryLevel, error: 'Unified Supabase backend is required for mastery drills.' };
+      return { success: false, newLevel: prevWeapon.masteryLevel, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
 
     const res = await trainWeaponMasteryServer(weaponId, gainedXP);
@@ -1893,14 +2253,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const target = weapons.find(w => w.id === weaponId);
     if (!target) return { success: false, error: 'Weapon not found.' };
     if (!unifiedBackendReady) {
-      return { success: false, error: 'Unified Supabase backend is required to evolve weapons.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
 
     const res = await evolveWeaponServer(weaponId);
     if (!res.ok || res.data?.success === false) {
       return {
         success: false,
-        error: res.data?.error || res.error || 'Weapon evolution rejected by server.',
+        error: res.data?.error || res.error || 'Unable to complete weapon evolution right now.',
       };
     }
 
@@ -1946,14 +2306,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     weaponId: string
   ): Promise<{ success: boolean; weapon?: Weapon; error?: string }> => {
     if (!unifiedBackendReady || !user) {
-      return { success: false, error: 'Unified Supabase backend is required to claim progression relics.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
 
     const res = await unlockProgressionWeaponServer(weaponId);
     if (!res.ok || res.data?.success === false) {
       return {
         success: false,
-        error: res.data?.error || res.error || 'Progression requirements not yet met on the server.',
+        error: res.data?.error || res.error || 'Progression requirements have not been met yet.',
       };
     }
 
@@ -2013,7 +2373,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const target = weapons.find(w => w.id === weaponId);
     if (!target) return { success: false, error: 'Source weapon not found in armory.' };
     if (!unifiedBackendReady || !user) {
-      return { success: false, error: 'Unified Supabase backend is required for rarity ascension.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
 
     const previousAttack = target.baseAttack;
@@ -2024,7 +2384,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!res.ok || res.data?.success === false) {
       return {
         success: false,
-        error: res.data?.error || res.error || 'Rarity ascension rejected by server.',
+        error: res.data?.error || res.error || 'Unable to complete rarity ascension right now.',
       };
     }
 
@@ -2118,7 +2478,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     if (!unifiedBackendReady || !user) {
-      return { success: false, error: 'Unified Supabase backend is required to claim rewards.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
 
     const tz = user.timezone || getUserTimezone();
@@ -2205,6 +2565,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Track genuine introductory habit completion for "Reclaim Your Honor"
     updateReclaimHonorObjective('complete_habit');
+    advanceDynamicQuestsByEvidence(['habit_completions'], 1);
 
     return { success: true };
   };
@@ -2214,7 +2575,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   ): Promise<{ success: boolean; error?: string }> => {
     sound.playClick();
     if (!unifiedBackendReady) {
-      return { success: false, error: 'Unified Supabase backend is required to create habits.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
 
     const res = await createHabitServer({
@@ -2233,7 +2594,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const row = res.data?.habit || res.data;
     if (!row?.id) {
-      return { success: false, error: 'Invalid server response creating habit.' };
+      return { success: false, error: 'Unable to create habit right now. Please try again.' };
     }
 
     const created: Habit = {
@@ -2269,12 +2630,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: false, error: 'Quest is not eligible to claim.' };
     }
     if (!unifiedBackendReady) {
-      return { success: false, error: 'Unified Supabase backend is required to claim quests.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
 
     const res = await claimQuestServer(questId);
     if (!res.ok || res.data?.success === false) {
-      return { success: false, error: res.data?.error || res.error || 'Quest claim rejected by server.' };
+      return { success: false, error: res.data?.error || res.error || 'Unable to claim quest reward right now.' };
     }
 
     sound.playVictory();
@@ -2375,7 +2736,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const weapon = weapons.find(w => w.id === weaponId);
     if (!weapon) return { success: false, error: 'Weapon not found.' };
     if (!unifiedBackendReady) {
-      return { success: false, error: 'Unified Supabase backend is required to upgrade weapons.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
 
     const previousLevel = weapon.level;
@@ -2433,7 +2794,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const item = shopItems.find(i => i.id === itemId);
     if (!item) return { success: false, error: 'Shop item not found.' };
     if (!unifiedBackendReady) {
-      return { success: false, error: 'Unified Supabase backend is required for Treasury purchases.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
 
     const res = await purchaseShopItemServer(itemId);
@@ -2513,7 +2874,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   ) => {
     if (!unifiedBackendReady || !user) {
-      return { success: false, error: 'Unified Supabase backend is required to record workouts.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
 
     const { idempotencyKey, ...sessionPayload } = session;
@@ -2625,6 +2986,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return q;
         })
       );
+
+      advanceDynamicQuestsByEvidence(['workout_sessions'], 1);
+      if (sessionPayload.durationMinutes > 0) {
+        advanceDynamicQuestsByEvidence(['workout_minutes'], sessionPayload.durationMinutes);
+      }
+      if (isVerified && sessionPayload.repetitions && sessionPayload.repetitions > 0) {
+        advanceDynamicQuestsByEvidence(['vision_reps'], sessionPayload.repetitions);
+      }
     }
 
     return {
@@ -2646,7 +3015,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     meal: Omit<Meal, 'id' | 'timestamp'> & { idempotencyKey?: string }
   ) => {
     if (!unifiedBackendReady || !user) {
-      return { success: false, error: 'Unified Supabase backend is required to record meals.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
 
     const { idempotencyKey, ...mealPayload } = meal;
@@ -2732,6 +3101,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return q;
         })
       );
+
+      advanceDynamicQuestsByEvidence(['meal_logs'], 1);
     }
 
     return {
@@ -2763,6 +3134,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         if (res.data.profile) syncProfileWithCelebration(res.data.profile);
         void syncWeaponsFromServer(user.id);
+        advanceDynamicQuestsByEvidence(['water_glasses'], 1);
       }
     });
   };
@@ -2813,7 +3185,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         playerStamina: 100,
         turnCount: 1,
         telegraphActive: false,
-        error: 'Unified Supabase backend is required for boss encounters.',
+        error: 'Unable to connect to realm services right now. Please try again shortly.',
       };
     }
 
@@ -2869,8 +3241,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isDodged: false,
         bossDefeated: false,
         playerDefeated: false,
-        combatLog: 'Unified Supabase backend is required for boss combat.',
-        error: 'Unified Supabase backend is required for boss combat.',
+        combatLog: 'Unable to connect to realm services right now. Please try again shortly.',
+        error: 'Unable to connect to realm services right now. Please try again shortly.',
       };
     }
 
@@ -3001,12 +3373,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: false, error: 'Achievement is not eligible to claim.' };
     }
     if (!unifiedBackendReady) {
-      return { success: false, error: 'Unified Supabase backend is required to claim achievements.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
 
     const res = await claimAchievementServer(achievementId);
     if (!res.ok || res.data?.success === false) {
-      return { success: false, error: res.data?.error || res.error || 'Achievement claim rejected by server.' };
+      return { success: false, error: res.data?.error || res.error || 'Unable to claim achievement reward right now.' };
     }
 
     sound.playVictory();
@@ -3030,7 +3402,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     userId: string
   ): Promise<{ success: boolean; data?: PublicPlayerProfile; error?: string }> => {
     if (!unifiedBackendReady) {
-      return { success: false, error: 'Unified Supabase backend is required to inspect player profiles.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
     const res = await getPublicPlayerProfileServer(userId);
     if (!res.ok || !res.data) {
@@ -3078,7 +3450,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   ): Promise<{ success: boolean; error?: string }> => {
     if (!text.trim()) return { success: false, error: 'Message cannot be empty.' };
     if (!unifiedBackendReady || !user) {
-      return { success: false, error: 'Unified Supabase backend is required to send messages.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
     sound.playClick();
 
@@ -3096,6 +3468,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (refreshed.ok && refreshed.data) {
       setChatMessages(refreshed.data);
     }
+    advanceDynamicQuestsByEvidence(['friend_interaction'], 1);
     return { success: true };
   };
 
@@ -3108,7 +3481,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const toggleGuildMembership = async (guildId: string): Promise<{ success: boolean; error?: string }> => {
     sound.playClick();
     if (!unifiedBackendReady || !user) {
-      return { success: false, error: 'Unified Supabase backend is required for guild actions.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
     const targetGuild = guilds.find(g => g.id === guildId);
     if (!targetGuild) return { success: false, error: 'Guild not found.' };
@@ -3127,7 +3500,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const leaveGuild = async (): Promise<{ success: boolean; error?: string }> => {
     sound.playClick();
     if (!unifiedBackendReady || !user) {
-      return { success: false, error: 'Unified Supabase backend is required.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
     const res = await leaveGuildServer();
     if (!res.ok || res.data?.success === false) {
@@ -3153,7 +3526,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: false, error: 'Guild name (min 3 chars) and tag (2–4 alphanumeric chars) are required.' };
     }
     if (!unifiedBackendReady || !user) {
-      return { success: false, error: 'Unified Supabase backend is required to found a guild.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
     const res = await createGuildServer({
       name: cleanName,
@@ -3175,7 +3548,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     guildId: string
   ): Promise<{ success: boolean; data?: GuildDetailsData; error?: string }> => {
     if (!unifiedBackendReady) {
-      return { success: false, error: 'Unified Supabase backend is required to inspect guild details.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
     const res = await getGuildDetailsServer(guildId);
     if (!res.ok || res.data?.success === false) {
@@ -3186,7 +3559,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const requestJoinGuild = async (guildId: string, message = ''): Promise<{ success: boolean; error?: string }> => {
     if (!unifiedBackendReady || !user) {
-      return { success: false, error: 'Unified Supabase backend is required.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
     const res = await requestJoinGuildServer(guildId, message);
     if (!res.ok || res.data?.success === false) {
@@ -3199,7 +3572,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const respondGuildRequest = async (requestId: string, accept: boolean): Promise<{ success: boolean; error?: string }> => {
     if (!unifiedBackendReady || !user) {
-      return { success: false, error: 'Unified Supabase backend is required.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
     const res = await respondGuildRequestServer(requestId, accept);
     if (!res.ok || res.data?.success === false) {
@@ -3212,7 +3585,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const inviteToGuild = async (guildId: string, targetUserId: string): Promise<{ success: boolean; error?: string }> => {
     if (!unifiedBackendReady) {
-      return { success: false, error: 'Unified Supabase backend is required.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
     const res = await inviteToGuildServer(guildId, targetUserId);
     if (!res.ok || res.data?.success === false) {
@@ -3223,7 +3596,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const respondGuildInvite = async (inviteId: string, accept: boolean): Promise<{ success: boolean; error?: string }> => {
     if (!unifiedBackendReady || !user) {
-      return { success: false, error: 'Unified Supabase backend is required.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
     const res = await respondGuildInviteServer(inviteId, accept);
     if (!res.ok || res.data?.success === false) {
@@ -3242,7 +3615,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const disbandGuild = async (guildId: string): Promise<{ success: boolean; error?: string }> => {
     if (!unifiedBackendReady || !user) {
-      return { success: false, error: 'Unified Supabase backend is required.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
     const res = await disbandGuildServer(guildId);
     if (!res.ok || res.data?.success === false) {
@@ -3262,7 +3635,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     emblem?: string | null;
   }): Promise<{ success: boolean; error?: string }> => {
     if (!unifiedBackendReady || !user) {
-      return { success: false, error: 'Unified Supabase backend is required.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
     const res = await updateGuildDetailsServer(params);
     if (!res.ok || res.data?.success === false) {
@@ -3279,7 +3652,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     action: 'promote' | 'demote' | 'kick' | 'transfer_leader'
   ): Promise<{ success: boolean; error?: string }> => {
     if (!unifiedBackendReady || !user) {
-      return { success: false, error: 'Unified Supabase backend is required.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
     const res = await manageGuildMemberServer(guildId, targetUserId, action);
     if (!res.ok || res.data?.success === false) {
@@ -3298,7 +3671,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     rewardPlayerXp?: number;
   }): Promise<{ success: boolean; error?: string }> => {
     if (!unifiedBackendReady || !user) {
-      return { success: false, error: 'Unified Supabase backend is required.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
     const res = await createGuildChallengeServer(params);
     if (!res.ok || res.data?.success === false) {
@@ -3317,7 +3690,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const sendFriendRequest = async (targetUserId: string): Promise<{ success: boolean; error?: string }> => {
     if (!unifiedBackendReady || !user) {
-      return { success: false, error: 'Unified Supabase backend is required for friend requests.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
     const res = await sendFriendRequestServer(targetUserId);
     if (!res.ok || res.data?.success === false) {
@@ -3325,12 +3698,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     const refreshed = await fetchFriendshipsServer(user.id);
     if (refreshed.ok && refreshed.data) setFriends(refreshed.data);
+    advanceDynamicQuestsByEvidence(['friend_interaction'], 1);
     return { success: true };
   };
 
   const cancelFriendRequest = async (friendshipId: string): Promise<{ success: boolean; error?: string }> => {
     if (!unifiedBackendReady || !user) {
-      return { success: false, error: 'Unified Supabase backend is required.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
     const res = await cancelFriendRequestServer(friendshipId);
     if (!res.ok || res.data?.success === false) {
@@ -3361,7 +3735,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const blockUser = async (targetUserId: string): Promise<{ success: boolean; error?: string }> => {
     if (!unifiedBackendReady || !user) {
-      return { success: false, error: 'Unified Supabase backend is required.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
     const res = await blockUserServer(targetUserId);
     if (!res.ok || res.data?.success === false) {
@@ -3378,7 +3752,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const unblockUser = async (targetUserId: string): Promise<{ success: boolean; error?: string }> => {
     if (!unifiedBackendReady || !user) {
-      return { success: false, error: 'Unified Supabase backend is required.' };
+      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
     const res = await unblockUserServer(targetUserId);
     if (!res.ok || res.data?.success === false) {
@@ -3422,8 +3796,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!supabase) {
       return {
         success: false,
-        error:
-          'Supabase authentication is not configured. Please configure your Supabase URL and Anon Key first.',
+        error: 'Account services are temporarily unavailable. Please try again later.',
       };
     }
 
@@ -3460,8 +3833,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!supabase) {
       return {
         success: false,
-        error:
-          'Supabase authentication is not configured. Please configure your Supabase URL and Anon Key first.',
+        error: 'Account services are temporarily unavailable. Please try again later.',
       };
     }
 
@@ -3500,8 +3872,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!supabase) {
       return {
         success: false,
-        error:
-          'Supabase authentication is not configured. Please configure your Supabase URL and Anon Key first.',
+        error: 'Account services are temporarily unavailable. Please try again later.',
       };
     }
 
@@ -3549,7 +3920,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const resetPasswordWithSupabase = async (email: string): Promise<{ success: boolean; error?: string }> => {
     const supabase = getSupabase();
     if (!supabase) {
-      return { success: false, error: 'Supabase credentials are not configured.' };
+      return { success: false, error: 'Account services are temporarily unavailable. Please try again later.' };
     }
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -3581,7 +3952,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     resetPrivateGameState();
     setActiveTabState('dashboard');
     setAuthMode('login');
-    setShowAuthModalState(true);
+    setShowAuthModalState(false);
     setCloudStatus(isSupabaseConfigured() ? 'saved' : 'unconfigured');
     if (window.location.pathname !== '/') {
       window.history.replaceState(null, '', '/');
@@ -3673,7 +4044,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateUser = async (updates: Partial<UserAccount>): Promise<{ success: boolean; error?: string }> => {
     if (!isAuthenticated || !user) return { success: false, error: 'Not authenticated.' };
     sound.playClick();
-    const updated: UserAccount = { ...user, ...updates };
+    const safeUpdates: Partial<UserAccount> = heroLocked
+      ? { ...updates, characterClass: user.characterClass }
+      : updates;
+    const updated: UserAccount = { ...user, ...safeUpdates };
     setUser(updated);
 
     if (isSupabaseConfigured()) {
@@ -3806,7 +4180,23 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(updated);
     const derivedHero = mapClassToDefaultHeroId(updated.characterClass);
     setSelectedHeroId(derivedHero);
-    setShowHeroSelectModal(true);
+    setHeroLocked(false);
+    setHeroSelectedAt(null);
+    if (isSupabaseConfigured()) {
+      void saveClientPreferencesServer({
+        soundEnabled: soundChoice,
+        activeTab: 'dashboard',
+        equippedGear,
+        selectedHeroId: derivedHero,
+        heroLocked: false,
+        heroSelectionPending: true,
+        ageYears: updated.ageYears ?? null,
+        ageGroup: updated.ageGroup ?? null,
+        biologicalSex: updated.biologicalSex ?? null,
+        savedAt: new Date().toISOString(),
+      });
+    }
+    setShowHeroSelectModalState(true);
     setActiveTabState('dashboard');
     if (window.location.pathname !== '/') {
       window.history.replaceState(null, '', '/');
@@ -3871,38 +4261,107 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       attributeBonuses.resilience,
   };
 
-  const selectPlayableHero = async (heroId: PlayableHeroId) => {
-    const def = getHeroById(heroId);
-    sound.playVictory();
-    setSelectedHeroId(def.id);
-    setShowHeroSelectModal(false);
-
-    // Preserve ALL existing progression while updating hero class identity cleanly
-    if (user && user.characterClass !== def.mappedClass) {
-      await updateUser({ characterClass: def.mappedClass });
+  const selectPlayableHero = async (
+    heroId: PlayableHeroId
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (heroLocked) {
+      return {
+        success: false,
+        error: 'Your hero is permanently locked to your account and cannot be changed.',
+      };
     }
 
-    if (unifiedBackendReady) {
-      void saveClientPreferencesServer({
-        soundEnabled: stats.soundEnabled,
-        activeTab,
-        equippedGear,
-        selectedHeroId: def.id,
-        reclaimHonor: reclaimHonorQuest,
-        campaignProgress,
-        attributeBonuses,
-        tutorialState: {
-          completed: tutorialState.completed,
-          skipped: tutorialState.skipped,
-        },
-        savedAt: new Date().toISOString(),
+    const def = getHeroById(heroId);
+    const lockedTimestamp = new Date().toISOString();
+
+    if (isSupabaseConfigured() && unifiedBackendReady) {
+      const lockRes = await lockHeroSelectionServer(def.id);
+      if (!lockRes.ok || lockRes.data?.success === false) {
+        if (lockRes.data?.alreadyLocked) {
+          const serverHero = getHeroById(lockRes.data.selectedHeroId);
+          setSelectedHeroId(serverHero.id);
+          setHeroLocked(true);
+          setHeroSelectedAt(lockRes.data.heroSelectedAt || lockedTimestamp);
+          setShowHeroSelectModalState(false);
+          if (user && lockRes.data.characterClass && user.characterClass !== lockRes.data.characterClass) {
+            setUser(prev =>
+              prev ? { ...prev, characterClass: lockRes.data.characterClass } : prev
+            );
+          }
+          return {
+            success: false,
+            error: lockRes.data.error || 'Your hero has already been permanently chosen.',
+          };
+        }
+
+        if (!lockRes.schemaMissing) {
+          return {
+            success: false,
+            error:
+              lockRes.data?.error ||
+              lockRes.error ||
+              'Could not lock your hero selection right now. Please try again.',
+          };
+        }
+
+        // Unmigrated backend schema fallback: persist lock via client_preferences + profile update
+        if (user && user.characterClass !== def.mappedClass) {
+          await updateUser({
+            characterClass: def.mappedClass,
+            avatar: getHeroArtwork(def.id, def.mappedClass),
+          });
+        }
+        await saveClientPreferencesServer({
+          soundEnabled: stats.soundEnabled,
+          activeTab,
+          equippedGear,
+          selectedHeroId: def.id,
+          heroLocked: true,
+          heroSelectedAt: lockedTimestamp,
+          heroSelectionPending: false,
+          reclaimHonor: reclaimHonorQuest,
+          campaignProgress,
+          attributeBonuses,
+          tutorialState: {
+            completed: tutorialState.completed,
+            skipped: tutorialState.skipped,
+          },
+          savedAt: lockedTimestamp,
+        });
+      } else if (lockRes.data?.profile) {
+        applyServerProfileToStats(lockRes.data.profile);
+      }
+    } else if (user && user.characterClass !== def.mappedClass) {
+      await updateUser({
+        characterClass: def.mappedClass,
+        avatar: getHeroArtwork(def.id, def.mappedClass),
       });
     }
+
+    sound.playVictory();
+    setSelectedHeroId(def.id);
+    setHeroLocked(true);
+    setHeroSelectedAt(lockedTimestamp);
+    setUser(prev =>
+      prev
+        ? {
+            ...prev,
+            characterClass: def.mappedClass,
+            avatar:
+              prev.avatar && prev.avatar.startsWith('http')
+                ? prev.avatar
+                : getHeroArtwork(def.id, def.mappedClass),
+          }
+        : prev
+    );
+    setShowHeroSelectModalState(false);
 
     // Start interactive tour for new players who haven't completed/skipped it yet
     if (!tutorialState.completed && !tutorialState.skipped) {
       setTutorialState(prev => ({ ...prev, isOpen: true, stepIndex: 0 }));
     }
+
+    return { success: true };
   };
 
   const recordEquipmentInspected = () => {
@@ -4146,6 +4605,716 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setActiveTabState('dashboard');
   };
 
+  // ===========================================================================
+  // FEATURE 10: AI-POWERED DYNAMIC QUEST GENERATOR ACTIONS
+  // ===========================================================================
+  const getTodayDailyPeriod = (): string => {
+    const tz = user?.timezone || getUserTimezone();
+    return getPeriodKeyForFrequency('daily', tz);
+  };
+
+  const getYesterdayDailyPeriod = (): string => {
+    const tz = user?.timezone || getUserTimezone();
+    const yDate = new Date(Date.now() - 86400000);
+    return getPeriodKeyForFrequency('daily', tz, yDate);
+  };
+
+  const advanceDynamicQuestsByEvidence = (
+    evidenceTypes: DynamicQuestEvidenceType[],
+    amount: number,
+    evidenceNote?: string
+  ) => {
+    if (!amount || amount <= 0) return;
+    const todayKey = getTodayDailyPeriod();
+    const updatesToSync: Array<{ id: string; progress: number; evidenceNote?: string }> = [];
+
+    setDynamicDailyQuests(prev =>
+      prev.map(q => {
+        if (q.periodKey !== todayKey || q.claimed) return q;
+        if (!evidenceTypes.includes(q.evidenceType)) return q;
+        const nextProgress = Math.min(q.maxProgress, q.progress + amount);
+        const nowDone = nextProgress >= q.maxProgress;
+        if (nextProgress === q.progress && !evidenceNote) return q;
+        updatesToSync.push({ id: q.id, progress: nextProgress, evidenceNote });
+        return {
+          ...q,
+          progress: nextProgress,
+          completed: q.completed || nowDone,
+          evidenceNote: evidenceNote || q.evidenceNote,
+          completedAt: q.completedAt || (nowDone ? new Date().toISOString() : undefined),
+        };
+      })
+    );
+
+    if (unifiedBackendReady && updatesToSync.length > 0) {
+      void updateDynamicQuestProgressServer(todayKey, updatesToSync);
+    }
+  };
+
+  const generateTodaysAiQuests = async (checkIn?: {
+    availableMinutes?: number;
+    energyLevel?: 'low' | 'medium' | 'high';
+    focusNote?: string;
+  }): Promise<{ success: boolean; error?: string }> => {
+    if (!isAuthenticated || !user) {
+      return { success: false, error: 'Please sign in to generate your daily quests.' };
+    }
+    const todayKey = getTodayDailyPeriod();
+    const existingToday = dynamicDailyQuests.filter(q => q.periodKey === todayKey);
+    if (existingToday.length > 0) {
+      return {
+        success: false,
+        error: 'Today’s AI quests have already been forged. Complete them before the daily reset!',
+      };
+    }
+
+    setIsGeneratingDailyQuests(true);
+    setQuestGenerationError(null);
+    try {
+      const yesterdayKey = getYesterdayDailyPeriod();
+      const yDynamic = dynamicQuestHistory.filter(h => h.periodKey === yesterdayKey);
+      const yWorkouts = fitnessSessions.filter(s => s.timestamp?.startsWith(yesterdayKey)).length;
+      const yMeals = meals.filter(m => m.timestamp?.startsWith(yesterdayKey)).length;
+      const yHabits = habits.filter(
+        h => h.lastPeriodKey === yesterdayKey || (h.history || []).includes(yesterdayKey)
+      ).length;
+      const totalTodayItems = Math.max(1, habits.length + yDynamic.length);
+      const yesterdayCompletionRate = Math.min(
+        1,
+        (yHabits + yDynamic.filter(q => q.claimed).length + yWorkouts) / totalTodayItems
+      );
+
+      const res = await generateDailyQuestsAiServer({
+        periodKey: todayKey,
+        checkIn,
+        recentQuestTitles: aiMentorMemory.recentQuestTitles,
+        player: {
+          username: user.username,
+          characterClass: user.characterClass,
+          level: stats.level,
+          currentStreak: stats.currentStreak,
+          yesterdayCompletionRate,
+          missedDaysEstimate: stats.currentStreak === 0 && yHabits === 0 && yWorkouts === 0 ? 2 : 0,
+          personalGoals: user.personalGoals || [],
+          preferredActivities: user.preferredActivities || [],
+          habits: habits.map(h => ({ name: h.name, category: h.category, streak: h.streak })),
+          incompleteClassicQuests: quests.filter(q => !q.completed).map(q => q.title),
+          recentAchievements: achievements.filter(a => a.unlocked).slice(0, 6).map(a => a.name),
+          yesterdaySummary: {
+            workouts: yWorkouts,
+            meals: yMeals,
+            habitsCompleted: yHabits,
+            dynamicQuestsClaimed: yDynamic.filter(q => q.claimed).length,
+          },
+          struggleCategories: aiMentorMemory.struggleCategories,
+          preferredCategories: aiMentorMemory.preferredCategories,
+        },
+      });
+
+      if (!res.ok || !res.data || res.data.quests.length === 0) {
+        const msg = res.error || 'Could not generate today’s quests. Please retry.';
+        setQuestGenerationError(msg);
+        return { success: false, error: msg };
+      }
+
+      let finalQuests = res.data.quests;
+      if (unifiedBackendReady) {
+        const saveRes = await saveGeneratedDailyQuestsServer(todayKey, finalQuests);
+        if (saveRes.ok && saveRes.data?.quests?.length) {
+          finalQuests = saveRes.data.quests;
+        }
+      }
+
+      setDynamicDailyQuests(prev => [...finalQuests, ...prev.filter(q => q.periodKey !== todayKey)]);
+      setMentorGreeting(res.data.mentorGreeting || null);
+      setAiMentorMemory(prev => ({
+        ...prev,
+        lastAdaptiveTier: res.data!.adaptiveTier,
+        lastGeneratedDate: todayKey,
+        recentQuestTitles: Array.from(
+          new Set([...finalQuests.map(q => q.title), ...prev.recentQuestTitles])
+        ).slice(0, 30),
+      }));
+      sound.playQuestComplete();
+      return { success: true };
+    } catch (err: any) {
+      const msg = err?.message || 'Unexpected error generating quests.';
+      setQuestGenerationError(msg);
+      return { success: false, error: msg };
+    } finally {
+      setIsGeneratingDailyQuests(false);
+    }
+  };
+
+  const submitDynamicQuestEvidence = async (
+    questId: string,
+    evidenceNote: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    const note = evidenceNote.trim();
+    if (note.length < 12) {
+      return {
+        success: false,
+        error: 'Share a brief genuine reflection (at least 12 characters) describing what you completed.',
+      };
+    }
+
+    const q = dynamicDailyQuests.find(item => item.id === questId);
+    if (!q) return { success: false, error: 'Quest not found.' };
+    if (q.claimed) return { success: false, error: 'This quest has already been claimed.' };
+
+    const nowIso = new Date().toISOString();
+    setDynamicDailyQuests(prev =>
+      prev.map(item =>
+        item.id === questId
+          ? {
+              ...item,
+              progress: item.maxProgress,
+              completed: true,
+              evidenceNote: note,
+              completedAt: item.completedAt || nowIso,
+            }
+          : item
+      )
+    );
+
+    if (unifiedBackendReady) {
+      await updateDynamicQuestProgressServer(q.periodKey, [
+        { id: questId, progress: q.maxProgress, evidenceNote: note },
+      ]);
+    }
+    sound.playQuestComplete();
+    return { success: true };
+  };
+
+  const claimDynamicQuest = async (questId: string): Promise<{ success: boolean; error?: string }> => {
+    const q = dynamicDailyQuests.find(item => item.id === questId);
+    if (!q) return { success: false, error: 'Quest not found.' };
+    if (q.claimed) return { success: false, error: 'Reward already claimed for this quest.' };
+    if (!q.completed || q.progress < q.maxProgress) {
+      return { success: false, error: 'Complete the quest objective before claiming its reward.' };
+    }
+
+    let creditedViaRpc = false;
+    if (unifiedBackendReady) {
+      const rpcRes = await claimDynamicQuestServer(questId, q.periodKey);
+      if (rpcRes.ok && rpcRes.data?.profile) {
+        syncProfileWithCelebration(rpcRes.data.profile);
+        creditedViaRpc = true;
+      } else if (rpcRes.ok && rpcRes.data?.success === false) {
+        return { success: false, error: rpcRes.data.error || 'Could not claim quest.' };
+      } else if (!rpcRes.schemaMissing && !rpcRes.ok) {
+        return { success: false, error: rpcRes.error || 'Could not claim quest.' };
+      }
+    }
+
+    if (!creditedViaRpc) {
+      setStats(prev => {
+        let nextXp = prev.playerXP + q.playerXpReward;
+        let nextLevel = prev.level;
+        let nextReq = prev.playerXPNextLevel;
+        while (nextXp >= nextReq) {
+          nextXp -= nextReq;
+          nextLevel += 1;
+          nextReq = Math.floor(nextReq * 1.25);
+        }
+        return {
+          ...prev,
+          level: nextLevel,
+          playerXP: nextXp,
+          playerXPNextLevel: nextReq,
+          forgeXP: prev.forgeXP + q.forgeXpReward,
+          gold: prev.gold + q.goldReward,
+        };
+      });
+    }
+
+    const claimedAt = new Date().toISOString();
+    sound.playVictory();
+    confetti({
+      particleCount: q.isSpecialChallenge ? 95 : 55,
+      spread: 70,
+      origin: { y: 0.65 },
+      colors: ['#C5A15A', '#7046A5', '#34D399'],
+    });
+
+    setDynamicDailyQuests(prev =>
+      prev.map(item => (item.id === questId ? { ...item, claimed: true, claimedAt } : item))
+    );
+
+    setDynamicQuestHistory(prev => {
+      if (prev.some(h => h.id === questId)) return prev;
+      return [
+        {
+          id: q.id,
+          periodKey: q.periodKey,
+          title: q.title,
+          category: q.category,
+          difficulty: q.difficulty,
+          completed: true,
+          claimed: true,
+          playerXpReward: q.playerXpReward,
+          forgeXpReward: q.forgeXpReward,
+          goldReward: q.goldReward,
+          evidenceNote: q.evidenceNote,
+          recordedAt: claimedAt,
+        },
+        ...prev.slice(0, 99),
+      ];
+    });
+
+    setAiMentorMemory(prev => ({
+      ...prev,
+      preferredCategories: Array.from(new Set([q.category, ...prev.preferredCategories])).slice(0, 5),
+    }));
+
+    setTransactions(prev => [
+      {
+        id: 'tx-dq-' + Date.now(),
+        type: 'PLAYER_XP',
+        source: `AI Quest: ${q.title}`,
+        amount: q.playerXpReward,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      },
+      ...prev.slice(0, 49),
+    ]);
+
+    return { success: true };
+  };
+
+  // ===========================================================================
+  // FEATURE 11: DAILY QUEST REPORT
+  // ===========================================================================
+  const generateTodaysDailyReport = async (
+    forceRefresh = false
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (!isAuthenticated || !user) {
+      return { success: false, error: 'Please sign in to view your Daily Quest Report.' };
+    }
+
+    const todayKey = getTodayDailyPeriod();
+    if (!forceRefresh && dailyReport && dailyReport.reportDate === todayKey) {
+      return { success: true };
+    }
+
+    setIsGeneratingDailyReport(true);
+    setDailyReportError(null);
+    try {
+      const yesterdayKey = getYesterdayDailyPeriod();
+      const yDyn = dynamicDailyQuests.filter(q => q.periodKey === yesterdayKey);
+      const yHist = dynamicQuestHistory.filter(h => h.periodKey === yesterdayKey);
+      const questsTotal = Math.max(yDyn.length, yHist.length);
+      const questsCompleted = Math.max(
+        yDyn.filter(q => q.claimed).length,
+        yHist.filter(h => h.claimed).length
+      );
+      const habitsCompleted = habits.filter(
+        h => h.lastPeriodKey === yesterdayKey || (h.history || []).includes(yesterdayKey)
+      ).length;
+      const yesterdayWorkouts = fitnessSessions.filter(s => s.timestamp?.startsWith(yesterdayKey));
+      const yesterdayMeals = meals.filter(m => m.timestamp?.startsWith(yesterdayKey));
+
+      const yPlayerXp =
+        yesterdayWorkouts.reduce((acc, w) => acc + (w.playerXpEarned || 0), 0) +
+        yHist.reduce((acc, q) => acc + (q.claimed ? q.playerXpReward : 0), 0);
+      const yForgeXp =
+        yesterdayWorkouts.reduce((acc, w) => acc + (w.forgeXpEarned || 0), 0) +
+        yHist.reduce((acc, q) => acc + (q.claimed ? q.forgeXpReward : 0), 0);
+      const yGold =
+        yesterdayWorkouts.reduce((acc, w) => acc + (w.goldEarned || 0), 0) +
+        yHist.reduce((acc, q) => acc + (q.claimed ? q.goldReward : 0), 0);
+
+      const totalOpportunities = Math.max(1, habits.length + questsTotal);
+      const consistencyScore = Math.min(
+        100,
+        Math.round(
+          ((habitsCompleted + questsCompleted + (yesterdayWorkouts.length > 0 ? 1 : 0)) /
+            (totalOpportunities + 1)) *
+            100
+        )
+      );
+
+      const res = await generateDailyQuestReportAiServer({
+        reportDate: todayKey,
+        yesterdayDate: yesterdayKey,
+        metrics: {
+          username: user.username,
+          characterClass: user.characterClass,
+          level: stats.level,
+          currentStreak: stats.currentStreak,
+          aetherRank: stats.aetherRank,
+          yesterdayQuestsCompleted: questsCompleted,
+          yesterdayQuestsTotal: questsTotal,
+          yesterdayHabitsCompleted: habitsCompleted,
+          totalActiveHabits: habits.length,
+          yesterdayWorkouts: yesterdayWorkouts.length,
+          yesterdayMeals: yesterdayMeals.length,
+          yesterdayPlayerXp: yPlayerXp,
+          yesterdayForgeXp: yForgeXp,
+          yesterdayGold: yGold,
+          yesterdayAchievements: 0,
+          consistencyScore,
+          todayDynamicQuestsCount: dynamicDailyQuests.filter(q => q.periodKey === todayKey).length,
+          personalGoals: user.personalGoals || [],
+        },
+      });
+
+      if (!res.ok || !res.data) {
+        const msg = res.error || 'Unable to compile your Daily Quest Report.';
+        setDailyReportError(msg);
+        return { success: false, error: msg };
+      }
+
+      setDailyReport(res.data);
+      setAiMentorMemory(prev => ({
+        ...prev,
+        reportsGeneratedCount: (prev.reportsGeneratedCount || 0) + 1,
+      }));
+
+      if (unifiedBackendReady) {
+        void saveDailyReportServer(todayKey, res.data);
+      }
+      sound.playQuestComplete();
+      return { success: true };
+    } catch (err: any) {
+      const msg = err?.message || 'Unexpected error generating Daily Quest Report.';
+      setDailyReportError(msg);
+      return { success: false, error: msg };
+    } finally {
+      setIsGeneratingDailyReport(false);
+    }
+  };
+
+  // ===========================================================================
+  // FEATURE 12: GLOBAL EXCLUSIVE ACHIEVEMENTS & HALL OF LEGENDS
+  // ===========================================================================
+  const computeLocalMetricSnapshot = (): GlobalMetricSnapshot => {
+    const claimedClassicQuests = quests.filter(q => q.claimed).length;
+    const claimedDynAll = dynamicQuestHistory.filter(h => h.claimed);
+    const totalXpApprox =
+      stats.playerXP + Math.max(0, stats.level - 1) * 120;
+    const myChatCount = chatMessages.filter(
+      m => m.isCurrentUser || (user && m.senderId === user.id)
+    ).length;
+    const acceptedFriends = friends.filter(f => f.status === 'accepted').length;
+    const inGuild = guilds.some(g => g.isMember) ? 1 : 0;
+    const isGuildLeader = guilds.some(g => g.isMember && g.myRole === 'leader') ? 1 : 0;
+
+    return {
+      level: stats.level,
+      totalXp: Math.max(serverLegendMetrics?.total_xp ?? 0, totalXpApprox),
+      currentStreak: Math.max(serverLegendMetrics?.current_streak ?? 0, stats.currentStreak),
+      totalWorkouts: Math.max(serverLegendMetrics?.total_workouts ?? 0, stats.totalWorkoutsCompleted, fitnessSessions.length),
+      totalVerifiedReps: Math.max(serverLegendMetrics?.total_verified_reps ?? 0, stats.totalVerifiedReps),
+      totalBossesDefeated: Math.max(serverLegendMetrics?.total_bosses_defeated ?? 0, stats.totalBossesDefeated),
+      aetherPoints: Math.max(serverLegendMetrics?.aether_points ?? 0, stats.aetherPoints),
+      habitsClaimedTotal: Math.max(
+        serverLegendMetrics?.habits_claimed_total ?? 0,
+        habits.reduce((sum, h) => sum + Math.max(h.history?.length || 0, h.completedToday ? 1 : 0), 0)
+      ),
+      mealsLoggedTotal: Math.max(serverLegendMetrics?.meals_logged_total ?? 0, meals.length),
+      waterGlassesCurrent: Math.max(serverLegendMetrics?.water_glasses_current ?? 0, waterGlasses),
+      questsClaimedTotal: Math.max(
+        serverLegendMetrics?.quests_claimed_total ?? 0,
+        claimedClassicQuests + claimedDynAll.length
+      ),
+      dynamicQuestsClaimedTotal: Math.max(
+        serverLegendMetrics?.dynamic_quests_claimed_total ?? 0,
+        claimedDynAll.length
+      ),
+      dynamicPhysicalClaimed: Math.max(
+        serverLegendMetrics?.dynamic_physical_claimed ?? 0,
+        claimedDynAll.filter(q => q.category === 'physical').length
+      ),
+      dynamicIntellectualClaimed: Math.max(
+        serverLegendMetrics?.dynamic_intellectual_claimed ?? 0,
+        claimedDynAll.filter(q => q.category === 'intellectual').length
+      ),
+      dynamicDisciplineClaimed: Math.max(
+        serverLegendMetrics?.dynamic_discipline_claimed ?? 0,
+        claimedDynAll.filter(q => q.category === 'discipline').length
+      ),
+      dynamicPersonalGrowthClaimed: Math.max(
+        serverLegendMetrics?.dynamic_personal_growth_claimed ?? 0,
+        claimedDynAll.filter(q => q.category === 'personal_growth').length
+      ),
+      dynamicSocialClaimed: Math.max(
+        serverLegendMetrics?.dynamic_social_claimed ?? 0,
+        claimedDynAll.filter(q => q.category === 'social').length
+      ),
+      normalAchievementsUnlocked: Math.max(
+        serverLegendMetrics?.normal_achievements_unlocked ?? 0,
+        achievements.filter(a => a.unlocked).length
+      ),
+      unlockedWeaponsCount: Math.max(
+        serverLegendMetrics?.unlocked_weapons_count ?? 0,
+        weapons.filter(w => w.unlocked).length
+      ),
+      maxWeaponLevel: Math.max(
+        serverLegendMetrics?.max_weapon_level ?? 1,
+        weapons.reduce((mx, w) => Math.max(mx, w.level || 1), 1)
+      ),
+      friendsCount: Math.max(serverLegendMetrics?.friends_count ?? 0, acceptedFriends),
+      guildJoined: Math.max(serverLegendMetrics?.guild_joined ?? 0, inGuild),
+      guildLeader: Math.max(serverLegendMetrics?.guild_leader ?? 0, isGuildLeader),
+      chatMessagesSent: Math.max(serverLegendMetrics?.chat_messages_sent ?? 0, myChatCount),
+      storyChaptersClaimed: Math.max(
+        serverLegendMetrics?.story_chapters_claimed ?? 0,
+        campaignProgress.claimedChapterIds.length
+      ),
+      allKingdomsCleared: Math.max(
+        serverLegendMetrics?.all_kingdoms_cleared ?? 0,
+        kingdoms.every(k => k.cleared) ? 1 : 0
+      ),
+      honorReclaimed: Math.max(
+        serverLegendMetrics?.honor_reclaimed ?? 0,
+        reclaimHonorQuest.claimed ? 1 : 0
+      ),
+      dailyReportsGenerated: Math.max(
+        serverLegendMetrics?.daily_reports_generated ?? 0,
+        aiMentorMemory.reportsGeneratedCount || (dailyReport ? 1 : 0)
+      ),
+      goldBalance: Math.max(serverLegendMetrics?.gold_balance ?? 0, stats.gold),
+      forgeXpBalance: Math.max(serverLegendMetrics?.forge_xp_balance ?? 0, stats.forgeXP),
+    };
+  };
+
+  const metricSnapshot = computeLocalMetricSnapshot();
+  const ownershipByAchievement = new Map<string, GlobalAchievementOwnership>();
+  for (const c of legendClaims) {
+    ownershipByAchievement.set(c.achievementId, c);
+  }
+
+  const hallOfLegends: HallOfLegendsEntry[] = GLOBAL_EXCLUSIVE_ACHIEVEMENTS.map(def => {
+    const ownership = ownershipByAchievement.get(def.id) || null;
+    const userProgress = getMetricValueForRequirement(def.requirementType, metricSnapshot);
+    const eligible = !ownership && userProgress >= def.threshold;
+    const status: HallOfLegendsStatus = ownership
+      ? 'claimed'
+      : eligible
+      ? 'unclaimed'
+      : 'locked_for_you';
+    return {
+      ...def,
+      ownership,
+      status,
+      userProgress,
+      eligibleToClaim: eligible,
+      ownedByCurrentUser: Boolean(ownership && user && ownership.ownerId === user.id),
+    };
+  });
+
+  const refreshHallOfLegends = async () => {
+    setHallLoading(true);
+    try {
+      const res = await fetchHallOfLegendsServer();
+      if (res.ok && res.data) {
+        setLegendClaims(res.data.claims);
+        setLegendAnnouncements(res.data.announcements);
+        if (res.data.metrics) setServerLegendMetrics(res.data.metrics);
+        if (res.data.equippedByUser) setEquippedLegendMap(res.data.equippedByUser);
+      }
+    } finally {
+      setHallLoading(false);
+    }
+  };
+
+  const claimGlobalExclusiveAchievement = async (
+    achievementId: string
+  ): Promise<{ success: boolean; error?: string; ownerUsername?: string }> => {
+    if (!isAuthenticated || !user) {
+      return { success: false, error: 'Please sign in to claim a Global Exclusive Title.' };
+    }
+    const entry = hallOfLegends.find(h => h.id === achievementId);
+    if (!entry) return { success: false, error: 'Global achievement not found.' };
+    if (entry.ownership) {
+      return {
+        success: false,
+        ownerUsername: entry.ownership.ownerUsername,
+        error: `Already claimed permanently by ${entry.ownership.ownerUsername}.`,
+      };
+    }
+    if (entry.userProgress < entry.threshold) {
+      return {
+        success: false,
+        error: `Requirement not yet fulfilled (${entry.userProgress}/${entry.threshold}).`,
+      };
+    }
+
+    const res = await claimGlobalAchievementServer({
+      achievementId: entry.id,
+      achievementName: entry.name,
+      titleTag: entry.titleTag,
+      titleStyle: entry.titleStyle,
+      emblemIcon: entry.emblemIcon,
+      rarity: entry.rarity,
+      ownerId: user.id,
+      ownerUsername: user.username,
+      threshold: entry.threshold,
+      progressValue: entry.userProgress,
+    });
+
+    if (!res.ok || !res.data || res.data.success === false) {
+      await refreshHallOfLegends();
+      return {
+        success: false,
+        ownerUsername: res.data?.ownerUsername,
+        error: res.error || res.data?.error || 'Could not claim this Global Exclusive Title.',
+      };
+    }
+
+    if (res.data.profile) {
+      syncProfileWithCelebration(res.data.profile);
+    } else if (res.data.isFallbackLedger) {
+      setStats(prev => {
+        let nextXp = prev.playerXP + entry.rewardPlayerXp;
+        let nextLevel = prev.level;
+        let nextReq = prev.playerXPNextLevel;
+        while (nextXp >= nextReq) {
+          nextXp -= nextReq;
+          nextLevel += 1;
+          nextReq = Math.floor(nextReq * 1.25);
+        }
+        return {
+          ...prev,
+          level: nextLevel,
+          playerXP: nextXp,
+          playerXPNextLevel: nextReq,
+          forgeXP: prev.forgeXP + entry.rewardForgeXp,
+          gold: prev.gold + entry.rewardGold,
+        };
+      });
+    }
+
+    const ownership: GlobalAchievementOwnership = res.data.ownership || {
+      achievementId: entry.id,
+      ownerId: user.id,
+      ownerUsername: user.username,
+      claimedAt: new Date().toISOString(),
+    };
+
+    setLegendClaims(prev => [...prev.filter(c => c.achievementId !== entry.id), ownership]);
+    if (res.data.announcements) {
+      setLegendAnnouncements(res.data.announcements);
+    } else {
+      setLegendAnnouncements(prev => [
+        {
+          id: 'ann-local-' + Date.now(),
+          achievementId: entry.id,
+          achievementName: entry.name,
+          titleTag: entry.titleTag,
+          titleStyle: entry.titleStyle,
+          emblemIcon: entry.emblemIcon,
+          rarity: entry.rarity,
+          ownerId: user.id,
+          ownerUsername: user.username,
+          announcedAt: ownership.claimedAt,
+        },
+        ...prev,
+      ]);
+    }
+    if (res.data.equippedByUser) {
+      setEquippedLegendMap(res.data.equippedByUser);
+    } else {
+      setEquippedLegendMap(prev => ({
+        ...prev,
+        [user.id]: {
+          achievementId: entry.id,
+          titleTag: entry.titleTag,
+          titleStyle: entry.titleStyle,
+          emblemIcon: entry.emblemIcon,
+        },
+      }));
+    }
+
+    setUser(prev =>
+      prev
+        ? {
+            ...prev,
+            legendTitle: entry.titleTag,
+            legendTitleStyle: entry.titleStyle,
+            legendEmblem: entry.emblemIcon,
+            legendAchievementId: entry.id,
+          }
+        : prev
+    );
+
+    const wonEntry: HallOfLegendsEntry = {
+      ...entry,
+      ownership,
+      status: 'claimed',
+      eligibleToClaim: false,
+      ownedByCurrentUser: true,
+    };
+    setRecentGlobalUnlockCelebration(wonEntry);
+
+    sound.playRarityAscension('Eternal');
+    confetti({
+      particleCount: 160,
+      spread: 110,
+      origin: { y: 0.5 },
+      colors: ['#F59E0B', '#38BDF8', '#A855F7', '#F43F5E', '#34D399'],
+    });
+
+    return { success: true };
+  };
+
+  const equipGlobalLegendTitle = async (
+    achievementId: string | null
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (!user) return { success: false, error: 'Please sign in first.' };
+
+    const target = achievementId
+      ? hallOfLegends.find(h => h.id === achievementId && h.ownedByCurrentUser)
+      : null;
+    if (achievementId && !target) {
+      return { success: false, error: 'You can only equip Global Titles you own.' };
+    }
+
+    const res = await setEquippedLegendTitleServer({
+      ownerId: user.id,
+      achievementId: target ? target.id : null,
+      titleTag: target ? target.titleTag : null,
+      titleStyle: target ? target.titleStyle : null,
+      emblemIcon: target ? target.emblemIcon : null,
+    });
+
+    if (!res.ok) {
+      return { success: false, error: res.error || 'Could not update equipped legend title.' };
+    }
+
+    setUser(prev =>
+      prev
+        ? {
+            ...prev,
+            legendTitle: target ? target.titleTag : null,
+            legendTitleStyle: target ? target.titleStyle : null,
+            legendEmblem: target ? target.emblemIcon : null,
+            legendAchievementId: target ? target.id : null,
+          }
+        : prev
+    );
+    setEquippedLegendMap(prev => {
+      const next = { ...prev };
+      if (!target) {
+        delete next[user.id];
+      } else {
+        next[user.id] = {
+          achievementId: target.id,
+          titleTag: target.titleTag,
+          titleStyle: target.titleStyle,
+          emblemIcon: target.emblemIcon,
+        };
+      }
+      return next;
+    });
+    sound.playClick();
+    return { success: true };
+  };
+
+  const dismissGlobalUnlockCelebration = () => {
+    setRecentGlobalUnlockCelebration(null);
+  };
+
   // Reset & Export
   const resetAllData = () => {
     if (!isAuthenticated || !user) return;
@@ -4218,12 +5387,40 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         unreadNotificationsCount,
         unifiedBackendReady,
         activeTab,
+        socialSubTab,
+        setSocialSubTab,
+        progressionSubTab,
+        setProgressionSubTab,
+        dynamicDailyQuests,
+        dynamicQuestHistory,
+        aiMentorMemory,
+        isGeneratingDailyQuests,
+        questGenerationError,
+        mentorGreeting,
+        generateTodaysAiQuests,
+        submitDynamicQuestEvidence,
+        claimDynamicQuest,
+        dailyReport,
+        isGeneratingDailyReport,
+        dailyReportError,
+        generateTodaysDailyReport,
+        hallOfLegends,
+        legendAnnouncements,
+        recentGlobalUnlockCelebration,
+        hallLoading,
+        equippedLegendMap,
+        refreshHallOfLegends,
+        claimGlobalExclusiveAchievement,
+        equipGlobalLegendTitle,
+        dismissGlobalUnlockCelebration,
         showAuthModal,
         authMode,
         equippedWeapon,
         equippedGear,
         activeBuffs,
         selectedHeroId,
+        heroLocked,
+        heroSelectedAt,
         showHeroSelectModal,
         setShowHeroSelectModal,
         selectPlayableHero,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Cloud, CloudCheck, CloudOff, RefreshCw, AlertCircle, Database } from 'lucide-react';
+import { Cloud, CloudOff, RefreshCw, AlertCircle } from 'lucide-react';
 
 export type CloudSyncStatus = 'saved' | 'saving' | 'error' | 'offline' | 'unconfigured';
 
@@ -21,43 +21,36 @@ export const CloudSyncIndicator: React.FC<CloudSyncIndicatorProps> = ({
       case 'saved':
         return {
           icon: <Cloud className="w-3.5 h-3.5 text-emerald-400" />,
-          label: 'Cloud Saved',
+          label: 'Saved',
           textColor: 'text-emerald-300',
           bgColor: 'bg-emerald-950/40 border-emerald-700/50',
-          title: `All changes saved to Supabase Cloud (${lastSavedAt ? lastSavedAt.toLocaleTimeString() : 'Up to date'})`,
+          title: `Progress saved (${lastSavedAt ? lastSavedAt.toLocaleTimeString() : 'Up to date'})`,
         };
       case 'saving':
         return {
           icon: <RefreshCw className="w-3.5 h-3.5 text-amber-400 animate-spin" />,
-          label: 'Syncing...',
+          label: 'Saving...',
           textColor: 'text-amber-300',
           bgColor: 'bg-amber-950/40 border-amber-700/50',
-          title: 'Syncing hero progression to Supabase...',
+          title: 'Saving hero progression...',
         };
       case 'error':
         return {
           icon: <AlertCircle className="w-3.5 h-3.5 text-rose-400" />,
-          label: 'Sync Error',
+          label: 'Sync Issue',
           textColor: 'text-rose-300',
           bgColor: 'bg-rose-950/40 border-rose-700/50',
-          title: 'Failed to sync with Supabase Cloud. Click to view configuration and retry.',
+          title: 'Unable to sync right now. Click to retry.',
         };
       case 'unconfigured':
-        return {
-          icon: <Database className="w-3.5 h-3.5 text-purple-400" />,
-          label: 'Setup Cloud',
-          textColor: 'text-purple-300',
-          bgColor: 'bg-purple-950/40 border-purple-700/50',
-          title: 'Supabase credentials not configured. Click to connect your cloud database.',
-        };
       case 'offline':
       default:
         return {
           icon: <CloudOff className="w-3.5 h-3.5 text-slate-400" />,
-          label: 'Local Mode',
+          label: 'Offline',
           textColor: 'text-slate-400',
           bgColor: 'bg-slate-900/60 border-slate-700/40',
-          title: 'Running in local persistence mode.',
+          title: 'Saving progress locally on this device.',
         };
     }
   };

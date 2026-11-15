@@ -18,10 +18,13 @@ import {
   Swords,
   AlertTriangle,
   MailPlus,
+  Crown,
 } from 'lucide-react';
+import { LegendTitleBadge } from './LegendTitleBadge';
 
 export const PublicProfileModal: React.FC = () => {
   const {
+    user,
     selectedPublicProfileId,
     closePublicProfile,
     getPublicPlayerProfile,
@@ -34,6 +37,9 @@ export const PublicProfileModal: React.FC = () => {
     inviteToGuild,
     guilds,
     refreshSocialState,
+    hallOfLegends,
+    equippedLegendMap,
+    equipGlobalLegendTitle,
   } = useGame();
 
   const [loading, setLoading] = useState(false);
@@ -179,6 +185,30 @@ export const PublicProfileModal: React.FC = () => {
   const weaponRarityStyle = player?.equippedWeapon
     ? getRarityStyle(player.equippedWeapon.rarity)
     : null;
+  const isSelfProfile = Boolean(player && (player.relationshipStatus === 'self' || player.id === user?.id));
+  const playerEquippedLegend = player
+    ? player.legendTitle
+      ? {
+          titleTag: player.legendTitle,
+          titleStyle: player.legendTitleStyle || ('gold' as const),
+          emblemIcon: player.legendEmblem || 'Crown',
+        }
+      : equippedLegendMap[player.id]
+    : undefined;
+  const playerOwnedLegends = player
+    ? player.legendTitles && player.legendTitles.length > 0
+      ? player.legendTitles
+      : hallOfLegends
+          .filter(h => h.ownership?.ownerId === player.id)
+          .map(h => ({
+            achievementId: h.id,
+            titleTag: h.titleTag,
+            titleStyle: h.titleStyle,
+            emblemIcon: h.emblemIcon,
+            name: h.name,
+            claimedAt: h.ownership?.claimedAt || new Date().toISOString(),
+          }))
+    : [];
 
   return (
     <div
@@ -272,6 +302,14 @@ export const PublicProfileModal: React.FC = () => {
                       <h3 className="font-['Cinzel'] font-bold text-xl text-white truncate">
                         {player.username}
                       </h3>
+                      {playerEquippedLegend && (
+                        <LegendTitleBadge
+                          title={playerEquippedLegend.titleTag}
+                          style={playerEquippedLegend.titleStyle}
+                          emblemIcon={playerEquippedLegend.emblemIcon}
+                          size="sm"
+                        />
+                      )}
                       {player.characterName && player.characterName !== player.username && (
                         <span className="text-xs text-slate-400 truncate">
                           ({player.characterName})
@@ -519,6 +557,65 @@ export const PublicProfileModal: React.FC = () => {
                       </div>
                     )}
                   </div>
+
+                  {/* Worldwide Exclusive One-of-One Legend Titles */}
+                  {playerOwnedLegends.length > 0 && (
+                    <div className="p-4 rounded-xl bg-[#130f24] border border-[#C5A15A]/30 space-y-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-semibold text-[#E8CF96] flex items-center gap-1.5 font-['Cinzel']">
+                          <Crown className="w-3.5 h-3.5 text-[#C5A15A]" />
+                          Worldwide Exclusive Titles
+                        </span>
+                        <span className="text-[11px] text-[#C5A15A]/80 tabular-nums">
+                          {playerOwnedLegends.length} One-of-One
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        {playerOwnedLegends.map(lt => {
+                          const equipped = playerEquippedLegend?.titleTag === lt.titleTag;
+                          return (
+                            <div
+                              key={lt.achievementId}
+                              className="p-2.5 rounded-lg bg-[#0a0714] border border-[#C5A15A]/20 flex items-center justify-between gap-2"
+                            >
+                              <div className="min-w-0 space-y-1">
+                                <LegendTitleBadge
+                                  title={lt.titleTag}
+                                  style={lt.titleStyle}
+                                  emblemIcon={lt.emblemIcon}
+                                  size="xs"
+                                />
+                                <p className="text-[11px] text-slate-300 truncate">{lt.name}</p>
+                              </div>
+                              {isSelfProfile && (
+                                <button
+                                  type="button"
+                                  disabled={actionBusy}
+                                  onClick={async () => {
+                                    setActionBusy(true);
+                                    const res = await equipGlobalLegendTitle(
+                                      equipped ? null : lt.achievementId
+                                    );
+                                    if (res.success && player) {
+                                      await loadProfile(player.id);
+                                    }
+                                    setActionBusy(false);
+                                  }}
+                                  className={`px-2 py-1 rounded text-[10px] font-semibold shrink-0 transition-colors ${
+                                    equipped
+                                      ? 'bg-[#C5A15A] text-[#100D19]'
+                                      : 'bg-[#1a132c] text-[#C5A15A] border border-[#C5A15A]/35 hover:bg-[#251638]'
+                                  }`}
+                                >
+                                  {equipped ? 'Equipped' : 'Equip'}
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Unlocked Achievements */}
                   {player.showAchievements !== false && (
