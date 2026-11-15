@@ -20,6 +20,7 @@ import {
   ShoppingBag,
   Crown,
   Lock,
+  Compass,
 } from 'lucide-react';
 import { LegendTitleBadge } from '../Social/LegendTitleBadge';
 
@@ -83,6 +84,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   // Mobile-only quick access for routes shown in TopBar on md+ screens (avoids desktop duplication)
   const mobileTopBarItems: NavItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'world', label: 'Explore 3D World', icon: Compass, highlight: true },
     { id: 'aether-vision', label: 'Aether Vision AI', icon: Camera, highlight: true },
     { id: 'armory', label: 'The Armory', icon: Hammer },
     { id: 'store', label: 'Store', icon: ShoppingBag },
@@ -93,6 +95,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     {
       title: 'Adventure & Wellness',
       items: [
+        {
+          id: 'world',
+          label: 'THE HEARTLANDS',
+          subtitle: '3D Open World (Phase 1)',
+          icon: Compass,
+          highlight: true,
+        },
         {
           id: 'progression',
           label: 'PROGRESSION',

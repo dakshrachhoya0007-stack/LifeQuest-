@@ -47,7 +47,14 @@ import {
   GlobalTitleStyle,
   AdaptiveDifficultyTier,
   HallOfLegendsStatus,
+  GoldenTreeStage,
+  LandmarkId,
+  LandmarkRestorationStage,
+  WorldGraphicsQuality,
+  WorldPersistenceState,
+  WorldPlayerPosition,
 } from '../types/game';
+import { DEFAULT_WORLD_STATE } from '../data/heartlandsWorldData';
 import { getHeroById, mapClassToDefaultHeroId } from '../data/heroesData';
 import { CAMPAIGN_CHAPTERS, TUTORIAL_STEPS } from '../data/campaignData';
 import {
@@ -160,6 +167,8 @@ import {
   fetchHallOfLegendsServer,
   claimGlobalAchievementServer,
   setEquippedLegendTitleServer,
+  getWorldStateServer,
+  saveWorldStateServer,
 } from '../services/unifiedBackendService';
 import { CloudSyncStatus } from '../components/Navigation/CloudSyncIndicator';
 import { User as SupabaseUser } from '@supabase/supabase-js';
@@ -443,6 +452,17 @@ interface GameContextType {
   performMigration: () => Promise<boolean>;
   skipMigration: () => void;
   triggerManualCloudSave: () => Promise<boolean>;
+  // Phase 1: Explorable 3D World Foundation (The Heartlands)
+  worldState: WorldPersistenceState;
+  markWorldEntered: () => Promise<void>;
+  setWorldGoldenTreeStage: (stage: GoldenTreeStage) => Promise<void>;
+  setWorldLandmarkStage: (
+    landmarkId: LandmarkId,
+    stage: LandmarkRestorationStage,
+    restorationPercent: number
+  ) => Promise<void>;
+  setWorldGraphicsQuality: (quality: WorldGraphicsQuality) => Promise<void>;
+  saveWorldPlayerPosition: (pos: WorldPlayerPosition) => void;
 }
 
 const STORAGE_KEY_PREFIX = 'lifequest_v1_';
@@ -476,6 +496,8 @@ const ROUTE_TO_TAB: Record<string, string> = {
   '/achievements': 'achievements',
   '/hall-of-legends': 'hall-of-legends',
   '/legends': 'hall-of-legends',
+  '/world': 'world',
+  '/heartlands': 'world',
   '/settings': 'settings',
 };
 
@@ -910,6 +932,52 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useState<HallOfLegendsEntry | null>(null);
   const [hallLoading, setHallLoading] = useState<boolean>(false);
 
+  // Phase 1: Explorable 3D World State (The Heartlands)
+  const [worldState, setWorldState] = useState<WorldPersistenceState>(DEFAULT_WORLD_STATE);
+  const worldStateRef = useRef<WorldPersistenceState>(DEFAULT_WORLD_STATE);
+  const worldPosSaveTimerRef = useRef<any>(null);
+
+  const normalizeWorldState = (raw: any): WorldPersistenceState => {
+    const src = raw && typeof raw === 'object' ? raw : {};
+    return {
+      hasEnteredWorld: Boolean(src.hasEnteredWorld),
+      selectedRegionId: 'heartlands',
+      goldenTreeStage: (['fallen', 'awakening', 'growing', 'radiant', 'eternal'].includes(src.goldenTreeStage)
+        ? src.goldenTreeStage
+        : DEFAULT_WORLD_STATE.goldenTreeStage) as GoldenTreeStage,
+      landmarks: {
+        ancient_castle: {
+          ...DEFAULT_WORLD_STATE.landmarks.ancient_castle,
+          ...(src.landmarks?.ancient_castle || {}),
+          id: 'ancient_castle',
+        },
+        forgotten_village: {
+          ...DEFAULT_WORLD_STATE.landmarks.forgotten_village,
+          ...(src.landmarks?.forgotten_village || {}),
+          id: 'forgotten_village',
+        },
+        ancient_bridge: {
+          ...DEFAULT_WORLD_STATE.landmarks.ancient_bridge,
+          ...(src.landmarks?.ancient_bridge || {}),
+          id: 'ancient_bridge',
+        },
+        sacred_shrine: {
+          ...DEFAULT_WORLD_STATE.landmarks.sacred_shrine,
+          ...(src.landmarks?.sacred_shrine || {}),
+          id: 'sacred_shrine',
+        },
+      },
+      graphicsQuality: src.graphicsQuality === 'low' ? 'low' : 'high',
+      lastPlayerPosition:
+        src.lastPlayerPosition &&
+        typeof src.lastPlayerPosition.x === 'number' &&
+        typeof src.lastPlayerPosition.y === 'number' &&
+        typeof src.lastPlayerPosition.z === 'number'
+          ? src.lastPlayerPosition
+          : DEFAULT_WORLD_STATE.lastPlayerPosition,
+    };
+  };
+
   const updateReclaimHonorObjective = (key: keyof ReclaimHonorQuestState['objectives']) => {
     setReclaimHonorQuest(prev => {
       if (prev.objectives[key]) return prev;
@@ -1083,6 +1151,16 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setDailyReport(null);
     setQuestGenerationError(null);
     setDailyReportError(null);
+    if (worldPosSaveTimerRef.current) {
+      clearTimeout(worldPosSaveTimerRef.current);
+      worldPosSaveTimerRef.current = null;
+    }
+    if (activeSessionUserIdRef.current) {
+      localStorage.removeItem(STORAGE_KEY_PREFIX + 'world_state_' + activeSessionUserIdRef.current);
+    }
+    localStorage.removeItem(STORAGE_KEY_PREFIX + 'world_state_guest');
+    worldStateRef.current = DEFAULT_WORLD_STATE;
+    setWorldState(DEFAULT_WORLD_STATE);
     setMentorGreeting(null);
     setRecentGlobalUnlockCelebration(null);
   };
@@ -1466,15 +1544,45 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (srvPrefs.dailyReport && typeof srvPrefs.dailyReport === 'object') {
               setDailyReport(srvPrefs.dailyReport);
             }
+            if (srvPrefs.worldState && typeof srvPrefs.worldState === 'object') {
+              const normFromPrefs = normalizeWorldState(srvPrefs.worldState);
+              worldStateRef.current = normFromPrefs;
+              setWorldState(normFromPrefs);
+            }
           }
 
-          // Hydrate Dynamic Quests, Daily Report & Hall of Legends from SQL tables if migrated
+          // Hydrate Dynamic Quests, Daily Report, Hall of Legends & 3D World State from SQL tables if migrated
           const todayPeriod = getPeriodKeyForFrequency('daily', userTimezone);
-          const [dynRes, repRes, hallRes] = await Promise.all([
+          const [dynRes, repRes, hallRes, worldRes] = await Promise.all([
             fetchPlayerDynamicQuestsServer(sbUser.id, todayPeriod),
             fetchDailyReportServer(sbUser.id, todayPeriod),
             fetchHallOfLegendsServer(),
+            getWorldStateServer(),
           ]);
+          if (worldRes.ok && worldRes.data?.worldState) {
+            const normSrvWorld = normalizeWorldState(worldRes.data.worldState);
+            worldStateRef.current = normSrvWorld;
+            setWorldState(normSrvWorld);
+            try {
+              localStorage.setItem(
+                STORAGE_KEY_PREFIX + 'world_state_' + sbUser.id,
+                JSON.stringify(normSrvWorld)
+              );
+            } catch {
+              // ignore storage quota
+            }
+          } else {
+            try {
+              const cachedWorld = localStorage.getItem(STORAGE_KEY_PREFIX + 'world_state_' + sbUser.id);
+              if (cachedWorld) {
+                const parsedWorld = normalizeWorldState(JSON.parse(cachedWorld));
+                worldStateRef.current = parsedWorld;
+                setWorldState(parsedWorld);
+              }
+            } catch {
+              // ignore
+            }
+          }
           if (dynRes.ok && Array.isArray(dynRes.data) && dynRes.data.length > 0) {
             setDynamicDailyQuests(dynRes.data);
           }
@@ -5315,6 +5423,140 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setRecentGlobalUnlockCelebration(null);
   };
 
+  // Phase 1: Explorable 3D World Persistence & Preview Handlers
+  const persistWorldState = async (
+    nextState: WorldPersistenceState,
+    rpcPatch?: {
+      hasEnteredWorld?: boolean;
+      selectedRegionId?: 'heartlands';
+      goldenTreeStage?: GoldenTreeStage;
+      landmarks?: WorldPersistenceState['landmarks'];
+      graphicsQuality?: WorldGraphicsQuality;
+      lastPlayerPosition?: WorldPlayerPosition | null;
+    }
+  ) => {
+    const uid = activeSessionUserIdRef.current;
+    try {
+      const storageKey = uid
+        ? STORAGE_KEY_PREFIX + 'world_state_' + uid
+        : STORAGE_KEY_PREFIX + 'world_state_guest';
+      localStorage.setItem(storageKey, JSON.stringify(nextState));
+    } catch {
+      // ignore storage quota
+    }
+
+    if (!isSupabaseConfigured() || !uid) return;
+
+    const res = await saveWorldStateServer(rpcPatch || nextState);
+    if (!res.ok && res.schemaMissing && unifiedBackendReady) {
+      await saveClientPreferencesServer({
+        soundEnabled: stats.soundEnabled,
+        activeTab,
+        equippedGear,
+        selectedHeroId,
+        heroLocked,
+        heroSelectedAt,
+        reclaimHonor: reclaimHonorQuest,
+        campaignProgress,
+        attributeBonuses,
+        tutorialState: {
+          completed: tutorialState.completed,
+          skipped: tutorialState.skipped,
+        },
+        worldState: nextState,
+        savedAt: new Date().toISOString(),
+      });
+    }
+  };
+
+  const markWorldEntered = async () => {
+    if (worldStateRef.current.hasEnteredWorld) return;
+    const next: WorldPersistenceState = {
+      ...worldStateRef.current,
+      hasEnteredWorld: true,
+    };
+    worldStateRef.current = next;
+    setWorldState(next);
+    await persistWorldState(next, { hasEnteredWorld: true });
+  };
+
+  const setWorldGoldenTreeStage = async (stage: GoldenTreeStage) => {
+    sound.playClick();
+    const next: WorldPersistenceState = {
+      ...worldStateRef.current,
+      goldenTreeStage: stage,
+    };
+    worldStateRef.current = next;
+    setWorldState(next);
+    await persistWorldState(next, { goldenTreeStage: stage });
+  };
+
+  const setWorldLandmarkStage = async (
+    landmarkId: LandmarkId,
+    stage: LandmarkRestorationStage,
+    restorationPercent: number
+  ) => {
+    sound.playClick();
+    const clampedPct = Math.max(0, Math.min(100, Math.round(restorationPercent)));
+    const nextLandmarks = {
+      ...worldStateRef.current.landmarks,
+      [landmarkId]: {
+        id: landmarkId,
+        stage,
+        restorationPercent: clampedPct,
+      },
+    };
+    const next: WorldPersistenceState = {
+      ...worldStateRef.current,
+      landmarks: nextLandmarks,
+    };
+    worldStateRef.current = next;
+    setWorldState(next);
+    await persistWorldState(next, { landmarks: nextLandmarks });
+  };
+
+  const setWorldGraphicsQuality = async (quality: WorldGraphicsQuality) => {
+    sound.playClick();
+    const next: WorldPersistenceState = {
+      ...worldStateRef.current,
+      graphicsQuality: quality,
+    };
+    worldStateRef.current = next;
+    setWorldState(next);
+    await persistWorldState(next, { graphicsQuality: quality });
+  };
+
+  const saveWorldPlayerPosition = (pos: WorldPlayerPosition) => {
+    const sanitized: WorldPlayerPosition = {
+      x: Math.round(Math.max(-145, Math.min(145, pos.x)) * 100) / 100,
+      y: Math.round(Math.max(-20, Math.min(60, pos.y)) * 100) / 100,
+      z: Math.round(Math.max(-145, Math.min(145, pos.z)) * 100) / 100,
+    };
+    const next: WorldPersistenceState = {
+      ...worldStateRef.current,
+      lastPlayerPosition: sanitized,
+    };
+    worldStateRef.current = next;
+    setWorldState(next);
+
+    const uid = activeSessionUserIdRef.current;
+    try {
+      const storageKey = uid
+        ? STORAGE_KEY_PREFIX + 'world_state_' + uid
+        : STORAGE_KEY_PREFIX + 'world_state_guest';
+      localStorage.setItem(storageKey, JSON.stringify(next));
+    } catch {
+      // ignore
+    }
+
+    if (worldPosSaveTimerRef.current) {
+      clearTimeout(worldPosSaveTimerRef.current);
+    }
+    worldPosSaveTimerRef.current = setTimeout(() => {
+      void persistWorldState(worldStateRef.current, { lastPlayerPosition: sanitized });
+    }, 1800);
+  };
+
   // Reset & Export
   const resetAllData = () => {
     if (!isAuthenticated || !user) return;
@@ -5514,6 +5756,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toggleSound,
         resetAllData,
         exportData,
+        worldState,
+        markWorldEntered,
+        setWorldGoldenTreeStage,
+        setWorldLandmarkStage,
+        setWorldGraphicsQuality,
+        saveWorldPlayerPosition,
       }}
     >
       {children}

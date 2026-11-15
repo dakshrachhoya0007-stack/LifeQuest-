@@ -89,6 +89,14 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
             Dashboard
           </button>
           <button
+            onClick={() => setActiveTab('world')}
+            className={`whitespace-nowrap shrink-0 transition-colors hover:text-[#D9D2C5] ${
+              activeTab === 'world' ? 'text-[#C5A15A] font-semibold border-b-2 border-[#C5A15A] pb-0.5' : ''
+            }`}
+          >
+            Explore World
+          </button>
+          <button
             onClick={() => setActiveTab('aether-vision')}
             className={`whitespace-nowrap shrink-0 transition-colors hover:text-[#D9D2C5] ${
               activeTab === 'aether-vision' ? 'text-[#C5A15A] font-semibold border-b-2 border-[#C5A15A] pb-0.5' : ''

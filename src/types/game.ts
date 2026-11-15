@@ -823,6 +823,10 @@ export interface PublicPlayerProfile {
     totalActiveMinutes?: number;
     bio?: string;
     profileVisibility?: ProfileVisibility;
+    showStats?: boolean;
+    showEquipment?: boolean;
+    showAchievements?: boolean;
+    showGuild?: boolean;
     relationshipStatus: RelationshipStatus;
     friendshipId?: string | null;
     presenceStatus?: PresenceStatus;
@@ -1232,3 +1236,54 @@ export interface HallOfLegendsEntry extends GlobalExclusiveAchievement {
   ownedByCurrentUser: boolean;
 }
 
+// --- PHASE 1: AAA EXPLORABLE 3D RPG WORLD (THE HEARTLANDS) ---
+
+export type WorldRegionId =
+  | 'heartlands'
+  | 'emerald_wilds'
+  | 'frozen_crown'
+  | 'ashen_expanse'
+  | 'celestial_reach';
+
+export type GoldenTreeStage =
+  | 'fallen'
+  | 'awakening'
+  | 'growing'
+  | 'radiant'
+  | 'eternal';
+
+export type LandmarkId =
+  | 'ancient_castle'
+  | 'forgotten_village'
+  | 'ancient_bridge'
+  | 'sacred_shrine';
+
+export type LandmarkRestorationStage =
+  | 'ruined'
+  | 'repaired'
+  | 'restored'
+  | 'flourishing'
+  | 'legendary';
+
+export type WorldGraphicsQuality = 'high' | 'low';
+
+export interface WorldLandmarkState {
+  id: LandmarkId;
+  stage: LandmarkRestorationStage;
+  restorationPercent: number;
+}
+
+export interface WorldPlayerPosition {
+  x: number;
+  y: number;
+  z: number;
+}
+
+export interface WorldPersistenceState {
+  hasEnteredWorld: boolean;
+  selectedRegionId: WorldRegionId;
+  goldenTreeStage: GoldenTreeStage;
+  landmarks: Record<LandmarkId, WorldLandmarkState>;
+  graphicsQuality: WorldGraphicsQuality;
+  lastPlayerPosition?: WorldPlayerPosition;
+}

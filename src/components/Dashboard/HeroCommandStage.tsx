@@ -11,6 +11,7 @@ import {
   ChevronDown,
   ChevronUp,
   Lock,
+  Compass,
 } from 'lucide-react';
 import {
   Buff,
@@ -249,6 +250,14 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
                 Select Hero
               </button>
             )}
+            <button
+              type="button"
+              onClick={() => onNavigate('world')}
+              className="px-3.5 py-2 rounded-lg bg-[#251638]/95 hover:bg-[#331e4d] border border-[#C5A15A]/55 text-xs font-['Cinzel'] font-bold text-[#F5EFE6] flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 shadow-sm"
+            >
+              <Compass className="w-3.5 h-3.5 text-[#C5A15A]" />
+              Explore 3D World
+            </button>
             <button
               type="button"
               onClick={() => onNavigate('character')}

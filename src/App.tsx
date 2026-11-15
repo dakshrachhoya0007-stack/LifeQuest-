@@ -26,6 +26,7 @@ import { SettingsView } from './components/Settings/SettingsView';
 import { HeroSelectionModal } from './components/HeroSelect/HeroSelectionModal';
 import { InteractiveTutorialOverlay } from './components/Tutorial/InteractiveTutorialOverlay';
 import { GlobalLegendUnlockModal } from './components/Achievements/GlobalLegendUnlockModal';
+import { WorldExplorationView } from './components/world3d/heartlands/WorldExplorationView';
 
 const MainAppContent: React.FC = () => {
   const {
@@ -147,6 +148,7 @@ const MainAppContent: React.FC = () => {
       case 'chat':
         return <SocialHubView />;
       case 'guilds': return <GuildsView />;
+      case 'world': return <WorldExplorationView />;
       case 'settings': return <SettingsView />;
       default: return <DashboardView />;
     }
@@ -161,7 +163,11 @@ const MainAppContent: React.FC = () => {
       <div className="flex-1 max-w-7xl w-full mx-auto flex">
         <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-        <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+        <main
+          className={`flex-1 min-w-0 overflow-y-auto ${
+            activeTab === 'world' ? 'p-2 sm:p-3 lg:p-4' : 'p-4 sm:p-6 lg:p-8'
+          }`}
+        >
           {renderCurrentView()}
         </main>
       </div>

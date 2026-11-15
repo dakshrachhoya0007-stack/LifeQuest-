@@ -26,11 +26,25 @@ export interface Hero3DRig {
   heroLight?: THREE.PointLight;
 }
 
+export interface HeroLocomotionState {
+  /** Normalized horizontal movement speed 0 (idle) to 1 (walk/sprint) */
+  speedRatio: number;
+  isSprinting: boolean;
+  isGrounded: boolean;
+  verticalVelocity: number;
+}
+
 export interface Hero3DInstance {
   heroId: PlayableHeroId;
   root: THREE.Group;
   rig: Hero3DRig;
-  update: (dt: number, elapsed: number, introElapsed: number) => void;
+  isExternalGlb?: boolean;
+  update: (
+    dt: number,
+    elapsed: number,
+    introElapsed: number,
+    locomotion?: HeroLocomotionState
+  ) => void;
   dispose: () => void;
 }
 
@@ -855,6 +869,24 @@ export function buildHero3DModel(heroId: PlayableHeroId): Hero3DInstance {
     forearm.castShadow = true;
     forearmPivot.add(forearm);
 
+    if (heroId === 'fallen_knight' || heroId === 'paladin') {
+      const gauntletCuff = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.072, 0.058, 0.11, 8),
+        steelMat
+      );
+      gauntletCuff.position.y = -0.20;
+      gauntletCuff.castShadow = true;
+      forearmPivot.add(gauntletCuff);
+
+      const cuffTrim = new THREE.Mesh(
+        new THREE.TorusGeometry(0.068, 0.008, 6, 16),
+        goldMat
+      );
+      cuffTrim.rotation.x = Math.PI / 2;
+      cuffTrim.position.y = -0.15;
+      forearmPivot.add(cuffTrim);
+    }
+
     const hand = new THREE.Mesh(new THREE.SphereGeometry(0.056, 10, 10), heroId === 'arcane_mage' ? skinMat : darkIronMat);
     hand.position.y = -0.285;
     forearmPivot.add(hand);
@@ -877,16 +909,21 @@ export function buildHero3DModel(heroId: PlayableHeroId): Hero3DInstance {
     swordGroup.position.set(0, -0.29, 0.03);
     swordGroup.rotation.x = Math.PI * 0.48;
 
-    const hilt = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.24, 8), leatherMat);
-    const pommel = new THREE.Mesh(new THREE.OctahedronGeometry(0.042, 0), goldMat);
-    pommel.position.y = -0.13;
-    const crossguard = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.035, 0.055), goldMat);
-    crossguard.position.y = 0.12;
+    const hilt = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.02, 0.28, 8), leatherMat);
+    const pommel = new THREE.Mesh(new THREE.OctahedronGeometry(0.048, 0), goldMat);
+    pommel.position.y = -0.15;
+    const crossguard = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.038, 0.062), goldMat);
+    crossguard.position.y = 0.14;
+    const ricasso = new THREE.Mesh(new THREE.BoxGeometry(0.095, 0.11, 0.03), darkIronMat);
+    ricasso.position.y = 0.21;
     const blade = new THREE.Mesh(track(createSwordGeometry()), steelMat);
-    blade.position.y = 0.135;
+    blade.scale.set(1.16, 1.12, 1.12);
+    blade.position.y = 0.15;
     blade.castShadow = true;
+    const goldFuller = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.78, 0.028), goldMat);
+    goldFuller.position.y = 0.62;
 
-    swordGroup.add(hilt, pommel, crossguard, blade);
+    swordGroup.add(hilt, pommel, crossguard, ricasso, blade, goldFuller);
     forearmR.add(swordGroup);
   } else if (heroId === 'shadowblade') {
     const buildDagger = (reverseGrip: boolean) => {
@@ -1046,54 +1083,98 @@ export function buildHero3DModel(heroId: PlayableHeroId): Hero3DInstance {
     heroLight,
   };
 
-  // --- IDLE & PER-HERO INTRO ANIMATION ---
-  const update = (_dt: number, elapsed: number, introElapsed: number) => {
+  // --- IDLE, INTRO & WALK/SPRINT/JUMP LOCOMOTION ANIMATION ---
+  let stridePhase = 0;
+  let moveBlend = 0;
+  let airBlend = 0;
+
+  const update = (
+    dt: number,
+    elapsed: number,
+    introElapsed: number,
+    locomotion?: HeroLocomotionState
+  ) => {
     const breath = Math.sin(elapsed * 2.1);
     const slowSway = Math.sin(elapsed * 1.05);
     const introDur = 1.6;
     const rawT = Math.min(1, Math.max(0, introElapsed / introDur));
-    // Smooth peak envelope 0 -> 1 -> 0 over introDur
     const introPulse = Math.sin(rawT * Math.PI);
 
-    // Default neutral idle posture
-    hips.position.y = 0.96 + breath * 0.008;
-    hips.rotation.y = slowSway * 0.03;
-    torso.rotation.x = 0.03 + breath * 0.014;
-    chest.scale.set(1 + breath * 0.012, 1, 1 + breath * 0.016);
-    headGroup.rotation.y = Math.sin(elapsed * 0.7) * 0.05;
-    headGroup.rotation.x = -breath * 0.018;
+    const targetMove = locomotion ? Math.min(1, Math.max(0, locomotion.speedRatio)) : 0;
+    const isSprinting = Boolean(locomotion?.isSprinting);
+    const isAirborne = locomotion ? !locomotion.isGrounded : false;
 
-    legL.rotation.set(0, 0, 0.03);
-    legR.rotation.set(0, 0, -0.03);
+    const lerpRate = Math.min(1, dt * 10);
+    moveBlend += (targetMove - moveBlend) * lerpRate;
+    airBlend += ((isAirborne ? 1 : 0) - airBlend) * Math.min(1, dt * 12);
+
+    const strideFreq = isSprinting ? 11.2 : 7.6;
+    stridePhase += dt * strideFreq * (0.2 + moveBlend * 0.95);
+    const stride = Math.sin(stridePhase);
+    const stepBounce = Math.abs(Math.sin(stridePhase)) * 0.055 * moveBlend * (1 - airBlend);
+    const legAmplitude = (isSprinting ? 0.68 : 0.46) * moveBlend * (1 - airBlend * 0.65);
+
+    // Base idle + blended walk/sprint posture
+    hips.position.y =
+      0.96 +
+      breath * 0.008 * (1 - moveBlend) +
+      stepBounce +
+      airBlend * 0.04;
+    hips.rotation.y = slowSway * 0.03 * (1 - moveBlend) + stride * 0.06 * moveBlend;
+    torso.rotation.x =
+      0.03 +
+      breath * 0.014 * (1 - moveBlend) +
+      (isSprinting ? 0.16 : 0.07) * moveBlend +
+      airBlend * -0.06;
+    chest.scale.set(1 + breath * 0.012, 1, 1 + breath * 0.016);
+    headGroup.rotation.y = Math.sin(elapsed * 0.7) * 0.05 * (1 - moveBlend);
+    headGroup.rotation.x = -breath * 0.018 - (isSprinting ? 0.08 * moveBlend : 0);
+
+    // Legs: stride cycle + airborne tuck
+    legL.rotation.set(
+      stride * legAmplitude + airBlend * -0.34,
+      0,
+      0.03
+    );
+    legR.rotation.set(
+      -stride * legAmplitude + airBlend * 0.24,
+      0,
+      -0.03
+    );
 
     if (capePivot) {
-      capePivot.rotation.x = 0.08 + Math.sin(elapsed * 2.4) * 0.035 + introPulse * 0.14;
+      const sprintBillow = (isSprinting ? 0.34 : 0.16) * moveBlend + airBlend * 0.28;
+      const capeFlutter = Math.sin(elapsed * (2.4 + moveBlend * 6.5)) * (0.035 + moveBlend * 0.07);
+      capePivot.rotation.x = 0.08 + sprintBillow + capeFlutter + introPulse * 0.14;
     }
 
+    const armStride = stride * (isSprinting ? 0.56 : 0.36) * moveBlend;
+
     if (heroId === 'fallen_knight') {
-      // Base combat-ready heavy sword guard + intro Oath-Blade Salute
-      shoulderR.rotation.set(-0.35 - introPulse * 0.78, 0.12 - introPulse * 0.45, 0.14);
+      shoulderR.rotation.set(
+        -0.35 - introPulse * 0.78 - armStride * 0.7,
+        0.12 - introPulse * 0.45,
+        0.14
+      );
       forearmR.rotation.set(-0.52 - introPulse * 0.55, 0, 0.12);
-      shoulderL.rotation.set(0.12 + breath * 0.03, 0, -0.14);
-      forearmL.rotation.set(-0.38, 0, 0);
+      shoulderL.rotation.set(0.12 + breath * 0.03 + armStride, 0, -0.14);
+      forearmL.rotation.set(-0.38 - moveBlend * 0.22, 0, 0);
     } else if (heroId === 'shadowblade') {
-      // Agile crouched stance + X-blade intro flourish
-      const crouch = 0.06 + introPulse * 0.12;
-      hips.position.y = 0.96 - crouch * 0.55 + breath * 0.01;
-      torso.rotation.x = 0.16 - introPulse * 0.14;
-      legL.rotation.x = -crouch * 0.8;
-      legR.rotation.x = crouch * 0.4;
-      shoulderR.rotation.set(-0.48 - introPulse * 0.65, -0.25 + introPulse * 0.75, 0.22);
+      const crouch = (0.06 + introPulse * 0.12) * (1 - moveBlend * 0.5);
+      hips.position.y = 0.96 - crouch * 0.55 + breath * 0.01 * (1 - moveBlend) + stepBounce;
+      torso.rotation.x = 0.16 - introPulse * 0.14 + (isSprinting ? 0.14 : 0.05) * moveBlend;
+      legL.rotation.x = -crouch * 0.8 + stride * legAmplitude;
+      legR.rotation.x = crouch * 0.4 - stride * legAmplitude;
+      shoulderR.rotation.set(-0.48 - introPulse * 0.65 - armStride * 0.85, -0.25 + introPulse * 0.75, 0.22);
       forearmR.rotation.set(-0.78, 0, 0.22);
-      shoulderL.rotation.set(-0.42 - introPulse * 0.6, 0.25 - introPulse * 0.75, -0.22);
+      shoulderL.rotation.set(-0.42 - introPulse * 0.6 + armStride * 0.85, 0.25 - introPulse * 0.75, -0.22);
       forearmL.rotation.set(-0.72, 0, -0.22);
     } else if (heroId === 'arcane_mage') {
-      // Subtle floating hover + crystal orb spin + intro staff lift
-      const hover = introPulse * 0.16 + Math.sin(elapsed * 1.8) * 0.022;
-      hips.position.y = 0.96 + hover;
-      shoulderR.rotation.set(-0.28 - introPulse * 0.65, 0.1, 0.12);
+      const hover = (introPulse * 0.16 + Math.sin(elapsed * 1.8) * 0.022) * (1 - moveBlend * 0.75);
+      hips.position.y = 0.96 + hover + stepBounce;
+      shoulderR.rotation.set(-0.28 - introPulse * 0.65 - armStride * 0.45, 0.1, 0.12);
       forearmR.rotation.set(-0.68, 0, 0);
-      shoulderL.rotation.set(-0.22 - introPulse * 0.35, -0.18, -0.16);
+      shoulderL.rotation.set(-0.22 - introPulse * 0.35 + armStride * 0.7, -0.18, -0.16);
       forearmL.rotation.set(-0.55, 0.3, 0);
       if (orbMesh) {
         orbMesh.rotation.y = elapsed * 1.6;
@@ -1107,17 +1188,15 @@ export function buildHero3DModel(heroId: PlayableHeroId): Hero3DInstance {
         heroLight.intensity = 1.35 + Math.sin(elapsed * 3.1) * 0.25 + introPulse * 1.1;
       }
     } else if (heroId === 'ranger') {
-      // Lookout stance + intro bow draw
-      shoulderL.rotation.set(-0.45 - introPulse * 0.45, 0.38 + introPulse * 0.25, -0.12);
+      shoulderL.rotation.set(-0.45 - introPulse * 0.45 + armStride * 0.55, 0.38 + introPulse * 0.25, -0.12);
       forearmL.rotation.set(-0.35, 0, 0);
-      shoulderR.rotation.set(-0.18 - introPulse * 0.55, -0.22, 0.18);
+      shoulderR.rotation.set(-0.18 - introPulse * 0.55 - armStride * 0.85, -0.22, 0.18);
       forearmR.rotation.set(-0.55 - introPulse * 0.45, 0, 0);
-      headGroup.rotation.y = Math.sin(elapsed * 0.8) * 0.09 + introPulse * 0.18;
+      headGroup.rotation.y = (Math.sin(elapsed * 0.8) * 0.09 + introPulse * 0.18) * (1 - moveBlend);
     } else if (heroId === 'paladin') {
-      // Steadfast shield sentinel + intro shield raise
-      shoulderL.rotation.set(-0.42 - introPulse * 0.35, 0.32, -0.14);
+      shoulderL.rotation.set(-0.42 - introPulse * 0.35 + armStride * 0.5, 0.32, -0.14);
       forearmL.rotation.set(-0.72, 0, 0);
-      shoulderR.rotation.set(-0.22 - introPulse * 0.85, 0.08, 0.14);
+      shoulderR.rotation.set(-0.22 - introPulse * 0.85 - armStride * 0.75, 0.08, 0.14);
       forearmR.rotation.set(-0.48, 0, 0);
       if (auraGroup) {
         auraGroup.rotation.z = elapsed * 0.45;

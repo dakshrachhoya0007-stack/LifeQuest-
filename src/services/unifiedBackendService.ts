@@ -27,6 +27,13 @@ import {
   PublicPlayerProfile,
   RelationshipStatus,
   ShopItem,
+  GoldenTreeStage,
+  LandmarkId,
+  WorldGraphicsQuality,
+  WorldLandmarkState,
+  WorldPersistenceState,
+  WorldPlayerPosition,
+  WorldRegionId,
 } from '../types/game';
 import { characterWarriorAvatarImg, getRpgAvatarForClass } from '../assets/images';
 
@@ -1385,3 +1392,52 @@ export const setEquippedLegendTitleServer = async (params: {
 
   return res;
 };
+
+// -----------------------------------------------------------------------------
+// PHASE 1: EXPLORABLE 3D WORLD FOUNDATION (THE HEARTLANDS)
+// -----------------------------------------------------------------------------
+
+export const getWorldStateServer = async (): Promise<
+  RpcResult<{ worldState: WorldPersistenceState }>
+> => {
+  const res = await callRpc<any>('rpc_get_world_state');
+  if (!res.ok) return res as any;
+  if (res.data?.success === false) {
+    return { ok: false, error: res.data?.error || 'Could not load world state.' };
+  }
+  return {
+    ok: true,
+    data: {
+      worldState: res.data?.worldState as WorldPersistenceState,
+    },
+  };
+};
+
+export const saveWorldStateServer = async (params: {
+  hasEnteredWorld?: boolean;
+  selectedRegionId?: WorldRegionId;
+  goldenTreeStage?: GoldenTreeStage;
+  landmarks?: Partial<Record<LandmarkId, WorldLandmarkState>>;
+  graphicsQuality?: WorldGraphicsQuality;
+  lastPlayerPosition?: WorldPlayerPosition | null;
+}): Promise<RpcResult<{ worldState: WorldPersistenceState }>> => {
+  const res = await callRpc<any>('rpc_save_world_state', {
+    p_has_entered_world: params.hasEnteredWorld ?? null,
+    p_selected_region_id: params.selectedRegionId ?? null,
+    p_golden_tree_stage: params.goldenTreeStage ?? null,
+    p_landmark_states: params.landmarks ?? null,
+    p_graphics_quality: params.graphicsQuality ?? null,
+    p_last_player_position: params.lastPlayerPosition ?? null,
+  });
+  if (!res.ok) return res as any;
+  if (res.data?.success === false) {
+    return { ok: false, error: res.data?.error || 'Could not save world state.' };
+  }
+  return {
+    ok: true,
+    data: {
+      worldState: res.data?.worldState as WorldPersistenceState,
+    },
+  };
+};
+
