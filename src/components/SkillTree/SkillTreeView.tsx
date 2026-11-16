@@ -1,0 +1,975 @@
+import React, { useMemo, useState } from 'react';
+import { useGame } from '../../context/GameContext';
+import {
+  DAILY_ATTRIBUTE_XP_CAPS,
+  MAX_SKILL_ATTRIBUTE_LEVEL,
+  SKILL_LEVEL_XP_THRESHOLDS,
+  SKILL_TREE_ATTRIBUTES,
+  evaluateSkillNodeStatus,
+  getSkillAttributeById,
+} from '../../data/skillTreeData';
+import { SkillAttributeId, SkillNodeDefinition } from '../../types/game';
+import { GoldenWorldTreeEmblem } from '../Welcome/WelcomeLanding';
+import {
+  Activity,
+  Award,
+  BookOpen,
+  Check,
+  CheckCircle2,
+  Compass,
+  Dumbbell,
+  Flame,
+  HeartPulse,
+  Lock,
+  Shield,
+  Sparkles,
+  Target,
+  X,
+} from 'lucide-react';
+
+const ATTRIBUTE_ICONS: Record<SkillAttributeId, React.ComponentType<{ className?: string }>> = {
+  strength: Dumbbell,
+  endurance: WindIcon,
+  discipline: Target,
+  focus: BookOpen,
+  resilience: Flame,
+  vitality: HeartPulse,
+};
+
+function WindIcon({ className }: { className?: string }) {
+  return <Activity className={className} />;
+}
+
+export const SkillTreeView: React.FC = () => {
+  const {
+    skillTreeState,
+    skillTreeLoading,
+    lastSkillAwardBanner,
+    dismissSkillAwardBanner,
+    unlockSkillNode,
+    claimSkillMilestone,
+    logVerifiedStudySession,
+    setActiveTab,
+  } = useGame();
+
+  const [selectedAttributeId, setSelectedAttributeId] = useState<SkillAttributeId>('strength');
+  const [selectedNodeId, setSelectedNodeId] = useState<string>('str-1a');
+  const [unlockFeedback, setUnlockFeedback] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
+  const [isMutating, setIsMutating] = useState<boolean>(false);
+  const [justUnlockedNodeId, setJustUnlockedNodeId] = useState<string | null>(null);
+
+  // Verified Study Session Form State
+  const [showStudyModal, setShowStudyModal] = useState<boolean>(false);
+  const [studyTopic, setStudyTopic] = useState<string>('');
+  const [studyMinutes, setStudyMinutes] = useState<number>(30);
+  const [studyReflection, setStudyReflection] = useState<string>('');
+  const [studyStatusMsg, setStudyStatusMsg] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
+  const [isSubmittingStudy, setIsSubmittingStudy] = useState<boolean>(false);
+
+  const activeAttrDef = useMemo(
+    () => getSkillAttributeById(selectedAttributeId),
+    [selectedAttributeId]
+  );
+  const activeAttrProgress = skillTreeState.attributes[selectedAttributeId];
+
+  const handleSelectAttribute = (attrId: SkillAttributeId) => {
+    const def = getSkillAttributeById(attrId);
+    setSelectedAttributeId(attrId);
+    setSelectedNodeId(def.nodes[0]?.id || 'str-1a');
+    setUnlockFeedback(null);
+  };
+
+  const selectedNode: SkillNodeDefinition = useMemo(() => {
+    return (
+      activeAttrDef.nodes.find(n => n.id === selectedNodeId) ||
+      activeAttrDef.nodes[0]
+    );
+  }, [activeAttrDef, selectedNodeId]);
+
+  const selectedNodeEval = useMemo(
+    () =>
+      evaluateSkillNodeStatus(
+        selectedNode,
+        activeAttrProgress,
+        skillTreeState.unlockedNodeIds
+      ),
+    [selectedNode, activeAttrProgress, skillTreeState.unlockedNodeIds]
+  );
+
+  // Totals across all 6 attributes
+  const totalUnlockedNodes = skillTreeState.unlockedNodeIds.length;
+  const totalAvailableNodes = useMemo(() => {
+    let count = 0;
+    for (const attr of SKILL_TREE_ATTRIBUTES) {
+      const prog = skillTreeState.attributes[attr.id];
+      for (const n of attr.nodes) {
+        if (evaluateSkillNodeStatus(n, prog, skillTreeState.unlockedNodeIds).status === 'available') {
+          count += 1;
+        }
+      }
+    }
+    return count;
+  }, [skillTreeState]);
+
+  const handleUnlockNode = async (node: SkillNodeDefinition) => {
+    if (isMutating) return;
+    setIsMutating(true);
+    setUnlockFeedback(null);
+    try {
+      const res = await unlockSkillNode(node.id);
+      if (res.success) {
+        setJustUnlockedNodeId(node.id);
+        setUnlockFeedback({
+          type: 'success',
+          message: `Unlocked "${node.name}" — Mastery Title earned: ${node.masteryTitle}.`,
+        });
+        window.setTimeout(() => setJustUnlockedNodeId(null), 1600);
+      } else {
+        setUnlockFeedback({
+          type: 'error',
+          message: res.error || 'Requirements not yet met to unlock this skill.',
+        });
+      }
+    } finally {
+      setIsMutating(false);
+    }
+  };
+
+  const handleClaimMilestone = async (milestoneId: string, title: string) => {
+    if (isMutating) return;
+    setIsMutating(true);
+    setUnlockFeedback(null);
+    try {
+      const res = await claimSkillMilestone(milestoneId);
+      if (res.success) {
+        setUnlockFeedback({
+          type: 'success',
+          message: `Claimed Milestone Seal: "${title}".`,
+        });
+      } else {
+        setUnlockFeedback({
+          type: 'error',
+          message: res.error || 'Milestone requirements not yet met.',
+        });
+      }
+    } finally {
+      setIsMutating(false);
+    }
+  };
+
+  const handleSubmitStudySession = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSubmittingStudy) return;
+    setIsSubmittingStudy(true);
+    setStudyStatusMsg(null);
+    try {
+      const res = await logVerifiedStudySession({
+        topic: studyTopic,
+        durationMinutes: studyMinutes,
+        reflection: studyReflection,
+      });
+      if (res.success) {
+        setStudyStatusMsg({
+          type: 'success',
+          message: res.safetyCapped
+            ? `Study session recorded (+${res.xpAwarded} Focus XP — daily healthy cap reached).`
+            : `Study session verified (+${res.xpAwarded} Focus XP awarded).`,
+        });
+        setStudyTopic('');
+        setStudyReflection('');
+        setSelectedAttributeId('focus');
+        setSelectedNodeId('foc-1a');
+      } else {
+        setStudyStatusMsg({
+          type: 'error',
+          message: res.error || 'Could not verify study session.',
+        });
+      }
+    } finally {
+      setIsSubmittingStudy(false);
+    }
+  };
+
+  const attrUnlockedCount = activeAttrDef.nodes.filter(n =>
+    skillTreeState.unlockedNodeIds.includes(n.id)
+  ).length;
+  const dailyCap = DAILY_ATTRIBUTE_XP_CAPS[selectedAttributeId];
+  const nextLevelThreshold =
+    activeAttrProgress.level >= MAX_SKILL_ATTRIBUTE_LEVEL
+      ? SKILL_LEVEL_XP_THRESHOLDS[MAX_SKILL_ATTRIBUTE_LEVEL - 1]
+      : SKILL_LEVEL_XP_THRESHOLDS[activeAttrProgress.level];
+
+  return (
+    <div className="space-y-6 animate-in fade-in pb-10">
+      {/* Banner Header with Golden World Tree Emblem */}
+      <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/25 p-5 sm:p-6 shadow-xl">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+          <div className="flex items-start gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-[#1a132c] border border-[#C5A15A]/40 flex items-center justify-center shrink-0">
+              <GoldenWorldTreeEmblem className="w-11 h-11" />
+            </div>
+            <div>
+              <div className="flex flex-wrap items-center gap-2 text-[11px] font-medium text-[#D9D2C5]/75">
+                <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#C5A15A]">
+                  Phase 1 · Real-Life Skill Tree
+                </span>
+                <span className="text-[#D9D2C5]/35" aria-hidden="true">·</span>
+                <span className="tabular-nums">
+                  {totalUnlockedNodes} / 54 Skills Unlocked
+                </span>
+                <span className="text-[#D9D2C5]/35" aria-hidden="true">·</span>
+                <span className="tabular-nums text-[#C5A15A]">
+                  {totalAvailableNodes} Ready to Unlock
+                </span>
+              </div>
+              <h1 className="text-xl sm:text-2xl font-black font-['Cinzel'] tracking-wide text-[#F5EFE6] mt-1">
+                ATTRIBUTES OF AETHERIA
+              </h1>
+              <p className="text-xs sm:text-sm text-[#D9D2C5]/75 max-w-2xl mt-1 leading-relaxed">
+                Grow six real-life virtues through server-verified workouts, daily habits, deep study, comeback streaks, and recovery. Attribute XP advances independently from Player XP.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                setStudyStatusMsg(null);
+                setShowStudyModal(true);
+              }}
+              className="px-3.5 py-2 rounded-xl bg-[#251638] hover:bg-[#311d4a] border border-[#7046A5]/60 text-xs font-semibold text-[#E6DFD3] flex items-center gap-2 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-[#A78BFA]" />
+              Log Verified Study
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('fitness')}
+              className="px-3.5 py-2 rounded-xl bg-[#161124] hover:bg-[#251638] border border-[#C5A15A]/30 text-xs font-semibold text-[#C5A15A] flex items-center gap-2 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            >
+              <Compass className="w-3.5 h-3.5" />
+              Log Training
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Live Verified XP Award Toast / Banner */}
+      {lastSkillAwardBanner && !lastSkillAwardBanner.duplicate && (
+        <div className="rounded-xl bg-[#181228] border border-[#C5A15A]/45 px-4 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <Sparkles className="w-4 h-4 text-[#C5A15A] shrink-0" />
+            <p className="text-xs sm:text-sm text-[#F5EFE6]">
+              <strong className="font-['Cinzel'] text-[#C5A15A] uppercase tracking-wider">
+                +{lastSkillAwardBanner.xpAwarded} {lastSkillAwardBanner.attributeId} XP
+              </strong>
+              {lastSkillAwardBanner.leveledUp && (
+                <span className="ml-2 text-emerald-300 font-semibold">
+                  · Level Up! Now Level {lastSkillAwardBanner.newLevel}
+                </span>
+              )}
+              {lastSkillAwardBanner.safetyCapped && (
+                <span className="ml-2 text-[#D9D2C5]/65 text-xs">
+                  · Healthy daily safety cap applied
+                </span>
+              )}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={dismissSkillAwardBanner}
+            aria-label="Dismiss notification"
+            className="p-1 rounded-lg text-[#D9D2C5]/60 hover:text-white cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* 6 Core Attributes Selector Grid */}
+      <div
+        role="tablist"
+        aria-label="Six Core Attributes"
+        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3"
+      >
+        {SKILL_TREE_ATTRIBUTES.map(attr => {
+          const Icon = ATTRIBUTE_ICONS[attr.id];
+          const prog = skillTreeState.attributes[attr.id];
+          const isSelected = attr.id === selectedAttributeId;
+          const unlockedInAttr = attr.nodes.filter(n =>
+            skillTreeState.unlockedNodeIds.includes(n.id)
+          ).length;
+          const availableInAttr = attr.nodes.filter(
+            n =>
+              evaluateSkillNodeStatus(n, prog, skillTreeState.unlockedNodeIds).status ===
+              'available'
+          ).length;
+
+          return (
+            <button
+              key={attr.id}
+              type="button"
+              role="tab"
+              aria-selected={isSelected}
+              onClick={() => handleSelectAttribute(attr.id)}
+              className={`text-left p-3.5 rounded-xl border transition-all cursor-pointer ${
+                isSelected
+                  ? 'bg-[#251638] border-[#C5A15A]/70 shadow-lg'
+                  : 'bg-[#100D19] border-[#C5A15A]/18 hover:border-[#C5A15A]/45 hover:bg-[#161124]'
+              }`}
+            >
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <span
+                  className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#090714] border border-white/10"
+                  style={{ color: attr.accentHex }}
+                >
+                  <Icon className="w-4 h-4" />
+                </span>
+                <span className="font-mono text-xs font-bold text-[#F5EFE6] tabular-nums">
+                  Lv.{prog.level}/10
+                </span>
+              </div>
+
+              <div className="font-['Cinzel'] font-bold text-xs sm:text-sm text-[#F5EFE6] truncate">
+                {attr.name}
+              </div>
+
+              <div className="w-full h-1.5 rounded-full bg-[#090714] overflow-hidden mt-2 mb-1.5">
+                <div
+                  className="h-full transition-all duration-500"
+                  style={{
+                    width: `${prog.progressPercent}%`,
+                    backgroundColor: attr.accentHex,
+                  }}
+                />
+              </div>
+
+              <div className="flex items-center justify-between text-[10px] text-[#D9D2C5]/65 tabular-nums">
+                <span>{unlockedInAttr}/9 Nodes</span>
+                {availableInAttr > 0 ? (
+                  <span className="text-[#C5A15A] font-bold">
+                    {availableInAttr} Ready
+                  </span>
+                ) : (
+                  <span>{prog.xp} XP</span>
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Active Attribute Progress & Main Tree + Inspector Split */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+        {/* Left/Main Column: Attribute Overview + 3 Interactive Skill Branches */}
+        <div className="xl:col-span-8 space-y-5">
+          {/* Active Attribute Progress Header */}
+          <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/22 p-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 text-xs text-[#D9D2C5]/70">
+                  <span
+                    className="font-['Cinzel'] font-bold uppercase tracking-wider"
+                    style={{ color: activeAttrDef.accentHex }}
+                  >
+                    {activeAttrDef.name} Mastery
+                  </span>
+                  <span aria-hidden="true">·</span>
+                  <span className="tabular-nums">
+                    {activeAttrProgress.totalActivities} Verified Activities
+                  </span>
+                  <span aria-hidden="true">·</span>
+                  <span className="tabular-nums">
+                    {attrUnlockedCount}/9 Skills
+                  </span>
+                </div>
+                <h2 className="text-lg sm:text-xl font-['Cinzel'] font-bold text-[#F5EFE6] mt-0.5">
+                  {activeAttrDef.subtitle}
+                </h2>
+                <p className="text-xs text-[#D9D2C5]/70 mt-1 max-w-2xl">
+                  {activeAttrDef.description}
+                </p>
+              </div>
+
+              <div className="sm:text-right shrink-0">
+                <div className="font-mono text-2xl font-black text-[#F5EFE6] tabular-nums">
+                  Level {activeAttrProgress.level}{' '}
+                  <span className="text-sm font-normal text-[#D9D2C5]/50">/ 10</span>
+                </div>
+                <div className="text-[11px] font-mono text-[#C5A15A] tabular-nums">
+                  {activeAttrProgress.level >= MAX_SKILL_ATTRIBUTE_LEVEL
+                    ? `${activeAttrProgress.xp} XP · Max Level Reached`
+                    : `${activeAttrProgress.xpIntoCurrentLevel} / ${activeAttrProgress.xpForNextLevel} XP to Lv.${
+                        activeAttrProgress.level + 1
+                      } (${nextLevelThreshold} total)`}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <div className="w-full h-2.5 rounded-full bg-[#090714] border border-white/10 overflow-hidden">
+                <div
+                  className="h-full transition-all duration-500"
+                  style={{
+                    width: `${activeAttrProgress.progressPercent}%`,
+                    backgroundColor: activeAttrDef.accentHex,
+                  }}
+                />
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-2 mt-2 text-[11px] text-[#D9D2C5]/60 tabular-nums">
+                <span>
+                  Verified Sources: {activeAttrDef.verifiedSources.join(' · ')}
+                </span>
+                <span>
+                  Daily Healthy Cap: {activeAttrProgress.dailyXpEarned} / {dailyCap} XP
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Interactive 3-Branch Skill Tree Canvas with SVG Connectors */}
+          <div className="rounded-2xl bg-[#090714] border border-[#C5A15A]/22 p-4 sm:p-6">
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <h3 className="font-['Cinzel'] font-bold text-sm uppercase tracking-widest text-[#C5A15A]">
+                Three Skill Branches
+              </h3>
+              <span className="text-[11px] text-[#D9D2C5]/60">
+                Select any node to inspect requirements or unlock
+              </span>
+            </div>
+
+            {/* Root Canopy Connector SVG on Desktop */}
+            <div className="hidden md:block w-full h-8 -mb-1" aria-hidden="true">
+              <svg viewBox="0 0 600 40" className="w-full h-full" preserveAspectRatio="none">
+                <circle cx="300" cy="6" r="4" fill="#C5A15A" />
+                <path
+                  d="M300 6 C300 22, 100 18, 100 38"
+                  stroke={activeAttrDef.accentHex}
+                  strokeOpacity="0.45"
+                  strokeWidth="2"
+                  fill="none"
+                />
+                <path
+                  d="M300 6 L300 38"
+                  stroke={activeAttrDef.accentHex}
+                  strokeOpacity="0.45"
+                  strokeWidth="2"
+                  fill="none"
+                />
+                <path
+                  d="M300 6 C300 22, 500 18, 500 38"
+                  stroke={activeAttrDef.accentHex}
+                  strokeOpacity="0.45"
+                  strokeWidth="2"
+                  fill="none"
+                />
+              </svg>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {activeAttrDef.branches.map(branch => {
+                const branchNodes = activeAttrDef.nodes
+                  .filter(n => n.branchId === branch.id)
+                  .sort((a, b) => a.tier - b.tier);
+
+                return (
+                  <div
+                    key={branch.id}
+                    className="rounded-xl bg-[#100D19] border border-[#C5A15A]/18 p-4 flex flex-col"
+                  >
+                    <div className="text-center pb-3 mb-3 border-b border-white/10">
+                      <h4 className="font-['Cinzel'] font-bold text-sm text-[#F5EFE6]">
+                        {branch.name}
+                      </h4>
+                      <p className="text-[11px] text-[#D9D2C5]/60 mt-0.5">
+                        {branch.subtitle}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col items-center">
+                      {branchNodes.map((node, idx) => {
+                        const evalResult = evaluateSkillNodeStatus(
+                          node,
+                          activeAttrProgress,
+                          skillTreeState.unlockedNodeIds
+                        );
+                        const isSelected = selectedNode.id === node.id;
+                        const isUnlocked = evalResult.status === 'unlocked';
+                        const isAvailable = evalResult.status === 'available';
+                        const isJustUnlocked = justUnlockedNodeId === node.id;
+
+                        // Determine SVG edge state from previous node in branch
+                        const prevNode = idx > 0 ? branchNodes[idx - 1] : null;
+                        const prevUnlocked = prevNode
+                          ? skillTreeState.unlockedNodeIds.includes(prevNode.id)
+                          : false;
+
+                        return (
+                          <React.Fragment key={node.id}>
+                            {idx > 0 && (
+                              <div className="w-8 h-8 flex items-center justify-center" aria-hidden="true">
+                                <svg viewBox="0 0 24 32" className="w-6 h-8">
+                                  <line
+                                    x1="12"
+                                    y1="0"
+                                    x2="12"
+                                    y2="32"
+                                    stroke={
+                                      isUnlocked || prevUnlocked
+                                        ? '#C5A15A'
+                                        : 'rgba(217, 210, 197, 0.2)'
+                                    }
+                                    strokeWidth={isUnlocked ? '2.5' : '1.75'}
+                                    strokeDasharray={prevUnlocked ? undefined : '4 3'}
+                                  />
+                                  <circle
+                                    cx="12"
+                                    cy="16"
+                                    r="2.5"
+                                    fill={
+                                      isUnlocked
+                                        ? '#C5A15A'
+                                        : isAvailable
+                                        ? '#A78BFA'
+                                        : '#251638'
+                                    }
+                                  />
+                                </svg>
+                              </div>
+                            )}
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedNodeId(node.id);
+                                setUnlockFeedback(null);
+                              }}
+                              className={`w-full text-left p-3.5 rounded-xl border transition-all cursor-pointer ${
+                                isJustUnlocked
+                                  ? 'ring-2 ring-[#C5A15A] scale-[1.02] motion-reduce:scale-100'
+                                  : ''
+                              } ${
+                                isUnlocked
+                                  ? 'bg-[#1c152d] border-[#C5A15A]/75 text-[#F5EFE6]'
+                                  : isAvailable
+                                  ? 'bg-[#1a1330] border-[#7046A5] text-[#F5EFE6]'
+                                  : 'bg-[#0c0914] border-white/10 text-[#D9D2C5]/60 hover:border-white/25'
+                              } ${isSelected ? 'ring-2 ring-[#C5A15A]/80' : ''}`}
+                            >
+                              <div className="flex items-center justify-between gap-2 mb-1">
+                                <span className="text-[10px] font-mono uppercase tracking-wider text-[#D9D2C5]/60 tabular-nums">
+                                  Tier {node.tier} · Lv.{node.requirements.minAttributeLevel}
+                                </span>
+                                <span
+                                  className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider ${
+                                    isUnlocked
+                                      ? 'text-[#C5A15A]'
+                                      : isAvailable
+                                      ? 'text-[#A78BFA]'
+                                      : 'text-[#D9D2C5]/45'
+                                  }`}
+                                >
+                                  {isUnlocked ? (
+                                    <>
+                                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                                      Unlocked
+                                    </>
+                                  ) : isAvailable ? (
+                                    <>
+                                      <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                                      Available
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Lock className="w-3 h-3 shrink-0" />
+                                      Locked
+                                    </>
+                                  )}
+                                </span>
+                              </div>
+                              <div className="font-['Cinzel'] font-bold text-sm text-[#F5EFE6]">
+                                {node.name}
+                              </div>
+                              <div className="text-[11px] text-[#D9D2C5]/65 mt-0.5 line-clamp-2">
+                                {node.tagline}
+                              </div>
+                            </button>
+                          </React.Fragment>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Attribute Milestones Track */}
+          <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/22 p-5 space-y-4">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="font-['Cinzel'] font-bold text-sm uppercase tracking-wider text-[#F5EFE6] flex items-center gap-2">
+                <Award className="w-4 h-4 text-[#C5A15A]" />
+                {activeAttrDef.name} Milestones
+              </h3>
+              <span className="text-[11px] text-[#D9D2C5]/60">
+                Recognition seals earned strictly through attribute mastery
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {activeAttrDef.milestones.map(ms => {
+                const isClaimed = skillTreeState.claimedMilestoneIds.includes(ms.id);
+                const levelMet = activeAttrProgress.level >= ms.requiredLevel;
+                const nodesMet =
+                  !ms.requiredNodesUnlocked ||
+                  attrUnlockedCount >= ms.requiredNodesUnlocked;
+                const canClaim = !isClaimed && levelMet && nodesMet;
+
+                return (
+                  <div
+                    key={ms.id}
+                    className={`p-3.5 rounded-xl border flex flex-col justify-between gap-3 ${
+                      isClaimed
+                        ? 'bg-[#1a1428] border-[#C5A15A]/55'
+                        : canClaim
+                        ? 'bg-[#18122b] border-[#7046A5]/70'
+                        : 'bg-[#090714] border-white/10'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-2 text-[11px] font-mono">
+                        <span className="text-[#C5A15A] font-bold">
+                          Lv.{ms.requiredLevel}
+                          {ms.requiredNodesUnlocked
+                            ? ` · ${ms.requiredNodesUnlocked} Nodes`
+                            : ''}
+                        </span>
+                        <span className="text-[#D9D2C5]/60">{ms.honorSeal}</span>
+                      </div>
+                      <h4 className="font-['Cinzel'] font-bold text-sm text-[#F5EFE6] mt-1">
+                        {ms.title}
+                      </h4>
+                      <p className="text-xs text-[#D9D2C5]/70 mt-0.5">
+                        {ms.description}
+                      </p>
+                    </div>
+
+                    <div>
+                      {isClaimed ? (
+                        <div className="text-[11px] font-semibold text-[#C5A15A] flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          Seal Claimed
+                        </div>
+                      ) : canClaim ? (
+                        <button
+                          type="button"
+                          disabled={isMutating}
+                          onClick={() => void handleClaimMilestone(ms.id, ms.title)}
+                          className="w-full py-1.5 px-3 rounded-lg bg-[#C5A15A] hover:bg-[#d8b46d] text-[#100D19] font-['Cinzel'] font-bold text-xs tracking-wider uppercase transition-colors cursor-pointer disabled:opacity-50"
+                        >
+                          Claim Seal
+                        </button>
+                      ) : (
+                        <div className="text-[11px] text-[#D9D2C5]/45 flex items-center gap-1.5">
+                          <Lock className="w-3 h-3" />
+                          Locked · Reach Lv.{ms.requiredLevel}
+                          {ms.requiredNodesUnlocked
+                            ? ` & ${ms.requiredNodesUnlocked} skills`
+                            : ''}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Selected Skill Inspector + Recent Verified Ledger */}
+        <div className="xl:col-span-4 space-y-5 xl:sticky xl:top-24">
+          {/* Selected Node Detail Card */}
+          <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/30 p-5 space-y-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-[11px] font-mono uppercase tracking-wider text-[#C5A15A]">
+                  {selectedNode.branchName} · Tier {selectedNode.tier}
+                </div>
+                <h3 className="font-['Cinzel'] font-bold text-xl text-[#F5EFE6] mt-0.5">
+                  {selectedNode.name}
+                </h3>
+                <p className="text-xs italic text-[#D9D2C5]/70 mt-0.5">
+                  "{selectedNode.tagline}"
+                </p>
+              </div>
+              <span
+                className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shrink-0 border ${
+                  selectedNodeEval.status === 'unlocked'
+                    ? 'bg-[#251638] text-[#C5A15A] border-[#C5A15A]/50'
+                    : selectedNodeEval.status === 'available'
+                    ? 'bg-[#251638] text-[#A78BFA] border-[#7046A5]'
+                    : 'bg-[#090714] text-[#D9D2C5]/55 border-white/10'
+                }`}
+              >
+                {selectedNodeEval.status}
+              </span>
+            </div>
+
+            <p className="text-xs sm:text-sm text-[#D9D2C5]/85 leading-relaxed">
+              {selectedNode.description}
+            </p>
+
+            <div className="p-3.5 rounded-xl bg-[#090714] border border-white/10 space-y-1">
+              <div className="text-[10px] font-['Cinzel'] font-bold uppercase tracking-wider text-[#C5A15A]">
+                Real-Life Practice
+              </div>
+              <p className="text-xs text-[#D9D2C5]/80">
+                {selectedNode.realLifePractice}
+              </p>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-[#090714] border border-white/10 space-y-2">
+              <div className="text-[10px] font-['Cinzel'] font-bold uppercase tracking-wider text-[#C5A15A]">
+                Unlock Requirements
+              </div>
+              <ul className="space-y-1.5 text-xs">
+                <li className="flex items-center gap-2">
+                  {activeAttrProgress.level >= selectedNode.requirements.minAttributeLevel ? (
+                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  ) : (
+                    <Lock className="w-3.5 h-3.5 text-[#D9D2C5]/40 shrink-0" />
+                  )}
+                  <span className="tabular-nums">
+                    {activeAttrDef.name} Level {selectedNode.requirements.minAttributeLevel} (You: Lv.{activeAttrProgress.level})
+                  </span>
+                </li>
+                {selectedNode.requirements.minVerifiedActivities ? (
+                  <li className="flex items-center gap-2">
+                    {activeAttrProgress.totalActivities >=
+                    selectedNode.requirements.minVerifiedActivities ? (
+                      <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    ) : (
+                      <Lock className="w-3.5 h-3.5 text-[#D9D2C5]/40 shrink-0" />
+                    )}
+                    <span className="tabular-nums">
+                      {selectedNode.requirements.minVerifiedActivities} Verified Activities (You:{' '}
+                      {activeAttrProgress.totalActivities})
+                    </span>
+                  </li>
+                ) : null}
+                {selectedNode.requirements.prerequisiteNodeIds.map(pid => {
+                  const met = skillTreeState.unlockedNodeIds.includes(pid);
+                  const prereq = activeAttrDef.nodes.find(n => n.id === pid);
+                  return (
+                    <li key={pid} className="flex items-center gap-2">
+                      {met ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      ) : (
+                        <Lock className="w-3.5 h-3.5 text-[#D9D2C5]/40 shrink-0" />
+                      )}
+                      <span>Prerequisite: {prereq?.name || pid}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+
+            {unlockFeedback && (
+              <div
+                role="status"
+                className={`p-3 rounded-xl border text-xs ${
+                  unlockFeedback.type === 'success'
+                    ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200'
+                    : 'bg-rose-950/40 border-rose-500/40 text-rose-200'
+                }`}
+              >
+                {unlockFeedback.message}
+              </div>
+            )}
+
+            {selectedNodeEval.status === 'unlocked' ? (
+              <div className="p-3 rounded-xl bg-[#1a1428] border border-[#C5A15A]/45 text-xs text-[#C5A15A] flex items-center gap-2 font-semibold">
+                <Shield className="w-4 h-4 shrink-0" />
+                Mastery Title Active: {selectedNode.masteryTitle}
+              </div>
+            ) : selectedNodeEval.status === 'available' ? (
+              <button
+                type="button"
+                disabled={isMutating || skillTreeLoading}
+                onClick={() => void handleUnlockNode(selectedNode)}
+                className="w-full py-2.5 px-4 rounded-xl bg-[#C5A15A] hover:bg-[#d8b46d] text-[#100D19] font-['Cinzel'] font-black text-xs tracking-wider uppercase shadow-lg transition-colors cursor-pointer disabled:opacity-50"
+              >
+                {isMutating ? 'Verifying Mastery...' : `Unlock "${selectedNode.name}"`}
+              </button>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="w-full py-2.5 px-4 rounded-xl bg-[#090714] border border-white/10 text-[#D9D2C5]/45 font-['Cinzel'] font-bold text-xs tracking-wider uppercase cursor-not-allowed"
+              >
+                Locked · Meet Requirements Above
+              </button>
+            )}
+          </div>
+
+          {/* Recent Verified Skill XP Ledger */}
+          <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/22 p-5 space-y-3">
+            <h4 className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-[#C5A15A]">
+              Recent Verified Attribute XP
+            </h4>
+            {skillTreeState.recentEvents.length === 0 ? (
+              <div className="text-xs text-[#D9D2C5]/60 py-4 text-center space-y-2">
+                <p>No skill XP events recorded yet.</p>
+                <p className="text-[11px] text-[#D9D2C5]/45">
+                  Complete a workout, daily habit, meal log, hydration goal, or verified study session to advance your Skill Tree.
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-white/10 max-h-72 overflow-y-auto pr-1">
+                {skillTreeState.recentEvents.slice(0, 12).map(evt => (
+                  <div
+                    key={evt.id}
+                    className="py-2.5 flex items-center justify-between gap-2 text-xs"
+                  >
+                    <div className="min-w-0">
+                      <div className="font-semibold text-[#F5EFE6] capitalize truncate">
+                        {evt.attributeId} · {evt.activityType.replace(/_/g, ' ')}
+                      </div>
+                      <div className="text-[10px] text-[#D9D2C5]/50 truncate">
+                        {new Date(evt.createdAt).toLocaleString([], {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                        {evt.safetyCapped ? ' · Daily Cap Reached' : ''}
+                      </div>
+                    </div>
+                    <span className="font-mono font-bold text-[#C5A15A] shrink-0 tabular-nums">
+                      +{evt.xpAwarded} XP
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Verified Study / Focus Session Modal */}
+      {showStudyModal && (
+        <div
+          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="verified-study-title"
+        >
+          <div className="w-full max-w-md rounded-2xl bg-[#100D19] border border-[#C5A15A]/35 p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <span className="text-[10px] font-['Cinzel'] font-bold uppercase tracking-widest text-[#A78BFA]">
+                  Focus Attribute Training
+                </span>
+                <h3
+                  id="verified-study-title"
+                  className="font-['Cinzel'] font-bold text-lg text-[#F5EFE6]"
+                >
+                  Log Verified Study Session
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowStudyModal(false)}
+                aria-label="Close modal"
+                className="p-1.5 rounded-lg text-[#D9D2C5]/60 hover:text-white cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitStudySession} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-medium text-[#D9D2C5]/80 mb-1">
+                  Subject or Skill Studied
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={studyTopic}
+                  onChange={e => setStudyTopic(e.target.value)}
+                  placeholder="e.g. Algorithms, Spanish Reading, Anatomy"
+                  className="w-full px-3.5 py-2 rounded-xl bg-[#090714] border border-white/15 text-sm text-[#F5EFE6] focus:outline-none focus:border-[#C5A15A]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[#D9D2C5]/80 mb-1">
+                  Focused Duration (Minutes · 10–240)
+                </label>
+                <input
+                  type="number"
+                  min={10}
+                  max={240}
+                  required
+                  value={studyMinutes}
+                  onChange={e => setStudyMinutes(Number(e.target.value))}
+                  className="w-full px-3.5 py-2 rounded-xl bg-[#090714] border border-white/15 text-sm text-[#F5EFE6] font-mono tabular-nums focus:outline-none focus:border-[#C5A15A]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[#D9D2C5]/80 mb-1">
+                  Key Takeaway / Verification Reflection (min 12 chars)
+                </label>
+                <textarea
+                  rows={3}
+                  required
+                  value={studyReflection}
+                  onChange={e => setStudyReflection(e.target.value)}
+                  placeholder="Summarize one concept you practiced or solved..."
+                  className="w-full px-3.5 py-2 rounded-xl bg-[#090714] border border-white/15 text-sm text-[#F5EFE6] focus:outline-none focus:border-[#C5A15A]"
+                />
+              </div>
+
+              {studyStatusMsg && (
+                <div
+                  className={`p-3 rounded-xl border text-xs ${
+                    studyStatusMsg.type === 'success'
+                      ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200'
+                      : 'bg-rose-950/40 border-rose-500/40 text-rose-200'
+                  }`}
+                >
+                  {studyStatusMsg.message}
+                </div>
+              )}
+
+              <div className="flex items-center justify-end gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowStudyModal(false)}
+                  className="px-4 py-2 rounded-xl border border-white/15 text-xs font-semibold text-[#D9D2C5]/80 hover:text-white cursor-pointer"
+                >
+                  Close
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingStudy}
+                  className="px-4 py-2 rounded-xl bg-[#C5A15A] hover:bg-[#d8b46d] text-[#100D19] font-['Cinzel'] font-bold text-xs tracking-wider uppercase cursor-pointer disabled:opacity-50"
+                >
+                  {isSubmittingStudy ? 'Verifying...' : 'Verify & Award Focus XP'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

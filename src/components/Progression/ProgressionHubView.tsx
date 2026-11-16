@@ -4,7 +4,9 @@ import { QuestsView } from '../Quests/QuestsView';
 import { DailyQuestReportView } from '../Quests/DailyQuestReportView';
 import { AchievementsView } from '../Achievements/AchievementsView';
 import { HallOfLegendsView } from '../Achievements/HallOfLegendsView';
-import { Scroll, ScrollText, Award, Crown } from 'lucide-react';
+import { SkillTreeView } from '../SkillTree/SkillTreeView';
+import { SKILL_TREE_ATTRIBUTES, evaluateSkillNodeStatus } from '../../data/skillTreeData';
+import { Scroll, ScrollText, Award, Crown, GitBranch } from 'lucide-react';
 import { getPeriodKeyForFrequency, getUserTimezone } from '../../services/unifiedBackendService';
 
 export const ProgressionHubView: React.FC = () => {
@@ -16,6 +18,7 @@ export const ProgressionHubView: React.FC = () => {
     dynamicDailyQuests,
     achievements,
     hallOfLegends,
+    skillTreeState,
   } = useGame();
 
   const todayKey = getPeriodKeyForFrequency('daily', user?.timezone || getUserTimezone());
@@ -30,13 +33,24 @@ export const ProgressionHubView: React.FC = () => {
   const unlockedAchievementsCount = achievements.filter(a => a.unlocked).length;
   const readyLegendsCount = hallOfLegends.filter(h => h.eligibleToClaim).length;
 
+  let readySkillNodesCount = 0;
+  for (const attr of SKILL_TREE_ATTRIBUTES) {
+    const prog = skillTreeState.attributes[attr.id];
+    for (const node of attr.nodes) {
+      if (evaluateSkillNodeStatus(node, prog, skillTreeState.unlockedNodeIds).status === 'available') {
+        readySkillNodesCount += 1;
+      }
+    }
+  }
+
   const tabs: Array<{
-    id: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends';
+    id: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree';
     label: string;
     icon: React.ComponentType<{ className?: string }>;
     badge?: number;
   }> = [
     { id: 'quests', label: 'Quest Board', icon: Scroll, badge: claimableQuestsCount },
+    { id: 'skill-tree', label: 'Skill Tree', icon: GitBranch, badge: readySkillNodesCount },
     { id: 'daily-report', label: 'Daily Report', icon: ScrollText },
     { id: 'achievements', label: 'Achievements', icon: Award, badge: claimableAchievementsCount },
     { id: 'hall-of-legends', label: 'Hall of Legends', icon: Crown, badge: readyLegendsCount },
@@ -108,6 +122,7 @@ export const ProgressionHubView: React.FC = () => {
       {/* Active Progression Tab Content */}
       <div role="tabpanel">
         {progressionSubTab === 'quests' && <QuestsView embedded />}
+        {progressionSubTab === 'skill-tree' && <SkillTreeView />}
         {progressionSubTab === 'daily-report' && <DailyQuestReportView />}
         {progressionSubTab === 'achievements' && <AchievementsView embedded />}
         {progressionSubTab === 'hall-of-legends' && <HallOfLegendsView />}

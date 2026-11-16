@@ -226,9 +226,18 @@ export const CharacterView: React.FC = () => {
               Each virtue scales directly from your genuine real-world habits, workouts, meals, hydration, and campaign chapters.
             </p>
           </div>
-          <span className="text-[11px] font-mono text-[#C5A15A]">
-            Affinity: {heroDef.attributeFocus.map(k => k.toUpperCase()).join(' · ')}
-          </span>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-[11px] font-mono text-[#C5A15A]">
+              Affinity: {heroDef.attributeFocus.map(k => k.toUpperCase()).join(' · ')}
+            </span>
+            <button
+              type="button"
+              onClick={() => setActiveTab('skill-tree')}
+              className="px-3 py-1.5 rounded-lg bg-[#251638] hover:bg-[#321f4b] border border-[#C5A15A]/45 text-[11px] font-['Cinzel'] font-bold tracking-wider uppercase text-[#C5A15A] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            >
+              Open Skill Tree
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

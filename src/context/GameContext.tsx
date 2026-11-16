@@ -53,7 +53,11 @@ import {
   WorldGraphicsQuality,
   WorldPersistenceState,
   WorldPlayerPosition,
+  PlayerSkillTreeState,
+  SkillActivityAwardResult,
+  SkillActivityType,
 } from '../types/game';
+import { createEmptySkillTreeState, type VerifiedActivityMetadata } from '../data/skillTreeData';
 import { DEFAULT_WORLD_STATE } from '../data/heartlandsWorldData';
 import { getHeroById, mapClassToDefaultHeroId } from '../data/heroesData';
 import { CAMPAIGN_CHAPTERS, TUTORIAL_STEPS } from '../data/campaignData';
@@ -169,6 +173,11 @@ import {
   setEquippedLegendTitleServer,
   getWorldStateServer,
   saveWorldStateServer,
+  createIdempotencyKey,
+  fetchSkillTreeStateServer,
+  recordVerifiedSkillActivityServer,
+  unlockSkillNodeServer,
+  claimSkillMilestoneServer,
 } from '../services/unifiedBackendService';
 import { CloudSyncStatus } from '../components/Navigation/CloudSyncIndicator';
 import { User as SupabaseUser } from '@supabase/supabase-js';
@@ -201,8 +210,23 @@ interface GameContextType {
   activeTab: string;
   socialSubTab: 'leaderboard' | 'friends' | 'chat';
   setSocialSubTab: (subTab: 'leaderboard' | 'friends' | 'chat') => void;
-  progressionSubTab: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends';
-  setProgressionSubTab: (subTab: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends') => void;
+  progressionSubTab: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree';
+  setProgressionSubTab: (
+    subTab: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree'
+  ) => void;
+  // Phase 1: Real-Life Skill Tree (Strictly Independent from Player XP)
+  skillTreeState: PlayerSkillTreeState;
+  skillTreeLoading: boolean;
+  lastSkillAwardBanner: SkillActivityAwardResult | null;
+  dismissSkillAwardBanner: () => void;
+  refreshSkillTreeState: () => Promise<void>;
+  unlockSkillNode: (nodeId: string) => Promise<{ success: boolean; error?: string }>;
+  claimSkillMilestone: (milestoneId: string) => Promise<{ success: boolean; error?: string }>;
+  logVerifiedStudySession: (params: {
+    topic: string;
+    durationMinutes: number;
+    reflection: string;
+  }) => Promise<SkillActivityAwardResult>;
   // Feature 10: AI-Powered Dynamic Quest Generator
   dynamicDailyQuests: DynamicDailyQuest[];
   dynamicQuestHistory: DynamicQuestHistoryEntry[];
@@ -496,6 +520,8 @@ const ROUTE_TO_TAB: Record<string, string> = {
   '/achievements': 'achievements',
   '/hall-of-legends': 'hall-of-legends',
   '/legends': 'hall-of-legends',
+  '/skill-tree': 'skill-tree',
+  '/skills': 'skill-tree',
   '/world': 'world',
   '/heartlands': 'world',
   '/settings': 'settings',
@@ -754,8 +780,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [activeTab, setActiveTabState] = useState<string>('dashboard');
   const [socialSubTab, setSocialSubTabState] = useState<'leaderboard' | 'friends' | 'chat'>('leaderboard');
   const [progressionSubTab, setProgressionSubTabState] = useState<
-    'quests' | 'daily-report' | 'achievements' | 'hall-of-legends'
+    'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree'
   >('quests');
+  const [skillTreeState, setSkillTreeState] = useState<PlayerSkillTreeState>(() =>
+    createEmptySkillTreeState()
+  );
+  const [skillTreeLoading, setSkillTreeLoading] = useState<boolean>(false);
+  const [lastSkillAwardBanner, setLastSkillAwardBanner] =
+    useState<SkillActivityAwardResult | null>(null);
   const [showAuthModal, setShowAuthModalState] = useState<boolean>(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [authError, setAuthError] = useState<string | null>(null);
@@ -997,7 +1029,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const setProgressionSubTab = (
-    subTab: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends'
+    subTab: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree'
   ) => {
     sound.playClick();
     setProgressionSubTabState(subTab);
@@ -1020,7 +1052,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       tab === 'quests' ||
       tab === 'daily-report' ||
       tab === 'achievements' ||
-      tab === 'hall-of-legends'
+      tab === 'hall-of-legends' ||
+      tab === 'skill-tree'
     ) {
       setProgressionSubTabState(tab);
       setActiveTabState('progression');
@@ -1151,6 +1184,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setDailyReport(null);
     setQuestGenerationError(null);
     setDailyReportError(null);
+    setSkillTreeState(createEmptySkillTreeState());
+    setLastSkillAwardBanner(null);
     if (worldPosSaveTimerRef.current) {
       clearTimeout(worldPosSaveTimerRef.current);
       worldPosSaveTimerRef.current = null;
@@ -1761,6 +1796,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setShowHeroSelectModalState(true);
           }
         }
+        // Hydrate Real-Life Skill Tree for the authenticated user
+        const skillRes = await fetchSkillTreeStateServer(sbUser.id, userTimezone);
+        if (skillRes.ok && skillRes.data?.state) {
+          setSkillTreeState(skillRes.data.state);
+        }
       } catch (err) {
         console.error('Failed to load user cloud data:', err);
         setCloudStatus('error');
@@ -1892,7 +1932,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           routeTab === 'quests' ||
           routeTab === 'daily-report' ||
           routeTab === 'achievements' ||
-          routeTab === 'hall-of-legends'
+          routeTab === 'hall-of-legends' ||
+          routeTab === 'skill-tree'
         ) {
           setProgressionSubTabState(routeTab);
           setActiveTabState('progression');
@@ -2675,6 +2716,41 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     updateReclaimHonorObjective('complete_habit');
     advanceDynamicQuestsByEvidence(['habit_completions'], 1);
 
+    // Server-authoritative Real-Life Skill Tree XP integration
+    const habitSkillActivity: SkillActivityType =
+      targetHabit.category === 'mindfulness'
+        ? 'study_session'
+        : targetHabit.category === 'sleep' || targetHabit.category === 'nutrition'
+        ? 'recovery_habit'
+        : targetHabit.category === 'fitness'
+        ? 'strength_workout'
+        : 'habit_completion';
+
+    void awardVerifiedSkillActivityInternal({
+      activityType: habitSkillActivity,
+      idempotencyKey: `habit:${habitId}:${periodKey}`,
+      sourceType: 'habit_completion',
+      sourceId: habitId,
+      metadata: {
+        streak: newStreak,
+        subAction: targetHabit.category === 'sleep' ? 'sleep' : 'habit',
+      },
+    });
+
+    // Comeback Resilience XP when returning after broken streak or gentle comeback tier
+    if (
+      (targetHabit.streak === 0 && targetHabit.history.length > 0) ||
+      aiMentorMemory.lastAdaptiveTier === 'gentle_comeback'
+    ) {
+      void awardVerifiedSkillActivityInternal({
+        activityType: 'comeback_activity',
+        idempotencyKey: `comeback:habit:${habitId}:${periodKey}`,
+        sourceType: 'comeback_habit',
+        sourceId: habitId,
+        metadata: { subAction: 'habit' },
+      });
+    }
+
     return { success: true };
   };
 
@@ -3102,6 +3178,31 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (isVerified && sessionPayload.repetitions && sessionPayload.repetitions > 0) {
         advanceDynamicQuestsByEvidence(['vision_reps'], sessionPayload.repetitions);
       }
+
+      // Server-authoritative Real-Life Skill Tree XP integration (Strength / Endurance / Vitality)
+      const isCardio = ['running', 'walking', 'cycling', 'jumping_jack'].includes(
+        sessionPayload.exerciseType
+      );
+      const isYogaRecovery = sessionPayload.exerciseType === 'yoga';
+      const skillActivityType: SkillActivityType = isYogaRecovery
+        ? 'recovery_habit'
+        : isCardio
+        ? 'cardio_workout'
+        : 'strength_workout';
+
+      void awardVerifiedSkillActivityInternal({
+        activityType: skillActivityType,
+        idempotencyKey: `workout:${savedSession.id}`,
+        sourceType: 'workout_session',
+        sourceId: savedSession.id,
+        metadata: {
+          durationMinutes: sessionPayload.durationMinutes,
+          repetitions: sessionPayload.repetitions,
+          distanceKm: sessionPayload.distanceKm,
+          verifiedWithAetherVision: isVerified,
+          subAction: isYogaRecovery ? 'yoga' : undefined,
+        },
+      });
     }
 
     return {
@@ -3211,6 +3312,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       );
 
       advanceDynamicQuestsByEvidence(['meal_logs'], 1);
+
+      void awardVerifiedSkillActivityInternal({
+        activityType: 'recovery_habit',
+        idempotencyKey: `meal:${savedMeal.id}`,
+        sourceType: 'nutrition_log',
+        sourceId: savedMeal.id,
+        metadata: { subAction: 'meal' },
+      });
     }
 
     return {
@@ -3239,6 +3348,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setBuffs(buffList =>
             buffList.map(b => (b.id === 'buff-4' ? { ...b, active: true, usesRemaining: 2 } : b))
           );
+          const todayKey = getPeriodKeyForFrequency('daily', user.timezone || getUserTimezone());
+          void awardVerifiedSkillActivityInternal({
+            activityType: 'recovery_habit',
+            idempotencyKey: `water_goal:${todayKey}`,
+            sourceType: 'hydration_goal',
+            sourceId: todayKey,
+            metadata: { subAction: 'hydration_goal' },
+          });
         }
         if (res.data.profile) syncProfileWithCelebration(res.data.profile);
         void syncWeaponsFromServer(user.id);
@@ -4890,6 +5007,26 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         { id: questId, progress: q.maxProgress, evidenceNote: note },
       ]);
     }
+    if (q.evidenceType === 'study_or_skill_reflection' || q.category === 'intellectual') {
+      void awardVerifiedSkillActivityInternal({
+        activityType: 'study_session',
+        idempotencyKey: `quest:${q.periodKey}:${q.id}`,
+        sourceType: 'intellectual_quest',
+        sourceId: q.id,
+        metadata: {
+          durationMinutes: q.estimatedMinutes,
+          subAction: 'reflection',
+        },
+      });
+    } else if (q.adaptiveTier === 'gentle_comeback') {
+      void awardVerifiedSkillActivityInternal({
+        activityType: 'comeback_activity',
+        idempotencyKey: `comeback:quest:${q.periodKey}:${q.id}`,
+        sourceType: 'comeback_quest',
+        sourceId: q.id,
+        metadata: { subAction: 'quest' },
+      });
+    }
     sound.playQuestComplete();
     return { success: true };
   };
@@ -5601,6 +5738,134 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
   };
 
+  // --- PHASE 1: REAL-LIFE SKILL TREE HANDLERS ---
+  const refreshSkillTreeState = async () => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    setSkillTreeLoading(true);
+    try {
+      const tz = user?.timezone || getUserTimezone();
+      const res = await fetchSkillTreeStateServer(uid, tz);
+      if (res.ok && res.data?.state) {
+        setSkillTreeState(res.data.state);
+      }
+    } finally {
+      setSkillTreeLoading(false);
+    }
+  };
+
+  const awardVerifiedSkillActivityInternal = async (params: {
+    activityType: SkillActivityType;
+    idempotencyKey: string;
+    sourceType: string;
+    sourceId: string;
+    metadata?: VerifiedActivityMetadata;
+  }): Promise<SkillActivityAwardResult> => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) {
+      return { success: false, error: 'Authentication required.' };
+    }
+    const tz = user?.timezone || getUserTimezone();
+    const res = await recordVerifiedSkillActivityServer({
+      userId: uid,
+      activityType: params.activityType,
+      idempotencyKey: params.idempotencyKey,
+      sourceType: params.sourceType,
+      sourceId: params.sourceId,
+      metadata: params.metadata,
+      timezone: tz,
+    });
+    if (res.success && res.state) {
+      setSkillTreeState(res.state);
+      if (!res.duplicate && (res.xpAwarded || 0) > 0) {
+        setLastSkillAwardBanner(res);
+        if (res.leveledUp) {
+          sound.playVictory();
+        }
+      }
+    }
+    return res;
+  };
+
+  const unlockSkillNode = async (
+    nodeId: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const tz = user?.timezone || getUserTimezone();
+    const res = await unlockSkillNodeServer({ userId: uid, nodeId, timezone: tz });
+    if (res.success && res.state) {
+      setSkillTreeState(res.state);
+      sound.playQuestComplete();
+      confetti({
+        particleCount: 45,
+        spread: 60,
+        origin: { y: 0.65 },
+        colors: ['#C5A15A', '#7046A5', '#34D399'],
+      });
+      return { success: true };
+    }
+    return { success: false, error: res.error || 'Could not unlock skill node.' };
+  };
+
+  const claimSkillMilestone = async (
+    milestoneId: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const tz = user?.timezone || getUserTimezone();
+    const res = await claimSkillMilestoneServer({ userId: uid, milestoneId, timezone: tz });
+    if (res.success && res.state) {
+      setSkillTreeState(res.state);
+      sound.playVictory();
+      return { success: true };
+    }
+    return { success: false, error: res.error || 'Could not claim milestone.' };
+  };
+
+  const logVerifiedStudySession = async (params: {
+    topic: string;
+    durationMinutes: number;
+    reflection: string;
+  }): Promise<SkillActivityAwardResult> => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) {
+      return { success: false, error: 'Please sign in to log a verified study session.' };
+    }
+    const cleanTopic = params.topic.trim();
+    const cleanReflection = params.reflection.trim();
+    const mins = Math.round(Number(params.durationMinutes) || 0);
+    if (cleanTopic.length < 2) {
+      return { success: false, error: 'Enter the subject or skill you practiced.' };
+    }
+    if (mins < 10 || mins > 240) {
+      return { success: false, error: 'Study duration must be between 10 and 240 minutes.' };
+    }
+    if (cleanReflection.length < 12) {
+      return {
+        success: false,
+        error: 'Share a brief study takeaway (at least 12 characters) to verify your session.',
+      };
+    }
+    const sessionKey = `study:${createIdempotencyKey()}`;
+    const result = await awardVerifiedSkillActivityInternal({
+      activityType: 'study_session',
+      idempotencyKey: sessionKey,
+      sourceType: 'verified_study_session',
+      sourceId: cleanTopic.slice(0, 64),
+      metadata: {
+        durationMinutes: mins,
+        subAction: 'reflection',
+      },
+    });
+    if (result.success) {
+      sound.playQuestComplete();
+    }
+    return result;
+  };
+
+  const dismissSkillAwardBanner = () => setLastSkillAwardBanner(null);
+
   return (
     <GameContext.Provider
       value={{
@@ -5633,6 +5898,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSocialSubTab,
         progressionSubTab,
         setProgressionSubTab,
+        skillTreeState,
+        skillTreeLoading,
+        lastSkillAwardBanner,
+        dismissSkillAwardBanner,
+        refreshSkillTreeState,
+        unlockSkillNode,
+        claimSkillMilestone,
+        logVerifiedStudySession,
         dynamicDailyQuests,
         dynamicQuestHistory,
         aiMentorMemory,

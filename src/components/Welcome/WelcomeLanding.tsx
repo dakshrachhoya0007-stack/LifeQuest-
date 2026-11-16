@@ -32,7 +32,7 @@ interface WelcomeLandingProps {
   onReturningPlayer: () => void;
 }
 
-const GoldenWorldTreeEmblem: React.FC<{ className?: string }> = ({ className = 'w-9 h-9' }) => (
+export const GoldenWorldTreeEmblem: React.FC<{ className?: string }> = ({ className = 'w-9 h-9' }) => (
   <svg
     viewBox="0 0 64 64"
     fill="none"

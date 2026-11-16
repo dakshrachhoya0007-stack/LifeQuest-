@@ -132,6 +132,7 @@ const MainAppContent: React.FC = () => {
       case 'daily-report':
       case 'achievements':
       case 'hall-of-legends':
+      case 'skill-tree':
         return <ProgressionHubView />;
       case 'character': return <CharacterView />;
       case 'fitness': return <FitnessView />;

@@ -1287,3 +1287,121 @@ export interface WorldPersistenceState {
   graphicsQuality: WorldGraphicsQuality;
   lastPlayerPosition?: WorldPlayerPosition;
 }
+
+// --- PHASE 1: REAL-LIFE SKILL TREE ---
+
+export type SkillAttributeId =
+  | 'strength'
+  | 'endurance'
+  | 'discipline'
+  | 'focus'
+  | 'resilience'
+  | 'vitality';
+
+export type SkillNodeStatus = 'locked' | 'available' | 'unlocked';
+
+export type SkillActivityType =
+  | 'strength_workout'
+  | 'cardio_workout'
+  | 'habit_completion'
+  | 'study_session'
+  | 'comeback_activity'
+  | 'recovery_habit';
+
+export interface SkillNodeRequirements {
+  minAttributeLevel: number;
+  prerequisiteNodeIds: string[];
+  minVerifiedActivities?: number;
+}
+
+export interface SkillNodeDefinition {
+  id: string;
+  attributeId: SkillAttributeId;
+  branchId: string;
+  branchName: string;
+  tier: 1 | 2 | 3;
+  name: string;
+  tagline: string;
+  description: string;
+  realLifePractice: string;
+  masteryTitle: string;
+  requirements: SkillNodeRequirements;
+}
+
+export interface SkillBranchDefinition {
+  id: string;
+  attributeId: SkillAttributeId;
+  name: string;
+  subtitle: string;
+  description: string;
+}
+
+export interface SkillMilestoneDefinition {
+  id: string;
+  attributeId: SkillAttributeId;
+  requiredLevel: number;
+  requiredNodesUnlocked?: number;
+  title: string;
+  description: string;
+  honorSeal: string;
+}
+
+export interface SkillTreeAttributeDefinition {
+  id: SkillAttributeId;
+  name: string;
+  subtitle: string;
+  description: string;
+  verifiedSources: string[];
+  accentHex: string;
+  dailySafetyCapXp: number;
+  branches: SkillBranchDefinition[];
+  nodes: SkillNodeDefinition[];
+  milestones: SkillMilestoneDefinition[];
+}
+
+export interface PlayerAttributeProgress {
+  attributeId: SkillAttributeId;
+  xp: number;
+  level: number; // 1..10
+  xpIntoCurrentLevel: number;
+  xpForNextLevel: number;
+  progressPercent: number;
+  totalActivities: number;
+  dailyXpEarned: number;
+  dailyCapRemaining: number;
+  lastActivityAt: string | null;
+}
+
+export interface SkillActivityLedgerEntry {
+  id: string;
+  idempotencyKey: string;
+  activityType: SkillActivityType;
+  attributeId: SkillAttributeId;
+  sourceType: string;
+  sourceId: string;
+  xpAwarded: number;
+  safetyCapped: boolean;
+  dailyBucket: string;
+  createdAt: string;
+}
+
+export interface PlayerSkillTreeState {
+  attributes: Record<SkillAttributeId, PlayerAttributeProgress>;
+  unlockedNodeIds: string[];
+  claimedMilestoneIds: string[];
+  recentEvents: SkillActivityLedgerEntry[];
+}
+
+export interface SkillActivityAwardResult {
+  success: boolean;
+  duplicate?: boolean;
+  safetyCapped?: boolean;
+  attributeId?: SkillAttributeId;
+  xpAwarded?: number;
+  previousLevel?: number;
+  newLevel?: number;
+  leveledUp?: boolean;
+  state?: PlayerSkillTreeState;
+  error?: string;
+}
+

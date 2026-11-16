@@ -34,7 +34,19 @@ import {
   WorldPersistenceState,
   WorldPlayerPosition,
   WorldRegionId,
+  PlayerSkillTreeState,
+  SkillActivityAwardResult,
+  SkillActivityType,
+  SkillAttributeId,
 } from '../types/game';
+import {
+  SKILL_ATTRIBUTE_IDS,
+  computeAttributeProgress,
+  createEmptySkillTreeState,
+  getSkillMilestoneById,
+  getSkillNodeById,
+  type VerifiedActivityMetadata,
+} from '../data/skillTreeData';
 import { characterWarriorAvatarImg, getRpgAvatarForClass } from '../assets/images';
 
 export const resolveSocialRpgAvatar = (
@@ -1440,4 +1452,271 @@ export const saveWorldStateServer = async (params: {
     },
   };
 };
+
+// --- PHASE 1: REAL-LIFE SKILL TREE SERVICE (SUPABASE RPC + EXPRESS AUTHORITATIVE FALLBACK) ---
+
+export const normalizeSkillTreeState = (raw: any): PlayerSkillTreeState => {
+  const base = createEmptySkillTreeState();
+  if (!raw || typeof raw !== 'object') return base;
+
+  const rawAttrs = raw.attributes || {};
+  for (const attrId of SKILL_ATTRIBUTE_IDS) {
+    const item = rawAttrs[attrId];
+    if (item && typeof item === 'object') {
+      base.attributes[attrId] = computeAttributeProgress(
+        attrId as SkillAttributeId,
+        Number(item.xp || 0),
+        Number(item.totalActivities || 0),
+        Number(item.dailyXpEarned || 0),
+        item.lastActivityAt || null
+      );
+    }
+  }
+
+  base.unlockedNodeIds = Array.isArray(raw.unlockedNodeIds) ? raw.unlockedNodeIds.map(String) : [];
+  base.claimedMilestoneIds = Array.isArray(raw.claimedMilestoneIds)
+    ? raw.claimedMilestoneIds.map(String)
+    : [];
+  base.recentEvents = Array.isArray(raw.recentEvents) ? raw.recentEvents : [];
+  return base;
+};
+
+const shouldUseSkillTreeExpressFallback = (res: RpcResult<any>): boolean => {
+  return Boolean(res.schemaMissing || res.error === 'Supabase not configured');
+};
+
+export const fetchSkillTreeStateServer = async (
+  userId: string,
+  timezone: string = getUserTimezone()
+): Promise<RpcResult<{ state: PlayerSkillTreeState }>> => {
+  if (!userId) return { ok: false, error: 'Missing player identity.' };
+
+  const rpcRes = await callRpc<any>('rpc_get_skill_tree_state');
+  if (rpcRes.ok && rpcRes.data?.success !== false) {
+    return {
+      ok: true,
+      data: { state: normalizeSkillTreeState(rpcRes.data?.state) },
+    };
+  }
+
+  if (!shouldUseSkillTreeExpressFallback(rpcRes)) {
+    return { ok: false, error: rpcRes.data?.error || rpcRes.error || 'Could not load Skill Tree.' };
+  }
+
+  try {
+    const resp = await fetch(
+      `/api/skill-tree/state?timezone=${encodeURIComponent(timezone)}`,
+      {
+        headers: {
+          'x-lifequest-user-id': userId,
+        },
+      }
+    );
+    const json = await resp.json();
+    if (!resp.ok || json?.success === false) {
+      return { ok: false, error: json?.error || 'Could not load Skill Tree.' };
+    }
+    return { ok: true, data: { state: normalizeSkillTreeState(json.state) } };
+  } catch (err: any) {
+    return { ok: false, error: err?.message || 'Could not reach Skill Tree service.' };
+  }
+};
+
+export const recordVerifiedSkillActivityServer = async (params: {
+  userId: string;
+  activityType: SkillActivityType;
+  idempotencyKey: string;
+  sourceType: string;
+  sourceId: string;
+  metadata?: VerifiedActivityMetadata;
+  timezone?: string;
+}): Promise<SkillActivityAwardResult> => {
+  if (!params.userId) {
+    return { success: false, error: 'Authentication required to earn skill XP.' };
+  }
+
+  const rpcRes = await callRpc<any>('rpc_record_verified_skill_activity', {
+    p_activity_type: params.activityType,
+    p_idempotency_key: params.idempotencyKey,
+    p_source_type: params.sourceType,
+    p_source_id: params.sourceId,
+    p_metadata: params.metadata || {},
+  });
+
+  if (rpcRes.ok && rpcRes.data?.success) {
+    return {
+      success: true,
+      duplicate: Boolean(rpcRes.data.duplicate),
+      safetyCapped: Boolean(rpcRes.data.safetyCapped),
+      attributeId: rpcRes.data.attributeId,
+      xpAwarded: Number(rpcRes.data.xpAwarded || 0),
+      previousLevel: Number(rpcRes.data.previousLevel || 1),
+      newLevel: Number(rpcRes.data.newLevel || 1),
+      leveledUp: Boolean(rpcRes.data.leveledUp),
+      state: normalizeSkillTreeState(rpcRes.data.state),
+    };
+  }
+
+  if (rpcRes.ok && rpcRes.data?.success === false) {
+    return { success: false, error: rpcRes.data.error || 'Skill activity could not be verified.' };
+  }
+
+  if (!shouldUseSkillTreeExpressFallback(rpcRes)) {
+    return { success: false, error: rpcRes.error || 'Could not record skill activity.' };
+  }
+
+  try {
+    const resp = await fetch('/api/skill-tree/award-activity', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-lifequest-user-id': params.userId,
+      },
+      body: JSON.stringify({
+        activityType: params.activityType,
+        idempotencyKey: params.idempotencyKey,
+        sourceType: params.sourceType,
+        sourceId: params.sourceId,
+        metadata: params.metadata || {},
+        timezone: params.timezone || getUserTimezone(),
+      }),
+    });
+    const json = await resp.json();
+    if (!resp.ok || json?.success === false) {
+      return { success: false, error: json?.error || 'Could not record verified activity.' };
+    }
+    return {
+      success: true,
+      duplicate: Boolean(json.duplicate),
+      safetyCapped: Boolean(json.safetyCapped),
+      attributeId: json.attributeId,
+      xpAwarded: Number(json.xpAwarded || 0),
+      previousLevel: Number(json.previousLevel || 1),
+      newLevel: Number(json.newLevel || 1),
+      leveledUp: Boolean(json.leveledUp),
+      state: normalizeSkillTreeState(json.state),
+    };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Skill Tree service unavailable.' };
+  }
+};
+
+export const unlockSkillNodeServer = async (params: {
+  userId: string;
+  nodeId: string;
+  timezone?: string;
+}): Promise<{ success: boolean; alreadyUnlocked?: boolean; state?: PlayerSkillTreeState; error?: string }> => {
+  if (!params.userId) return { success: false, error: 'Authentication required.' };
+  const node = getSkillNodeById(params.nodeId);
+  if (!node) return { success: false, error: 'Skill node not found.' };
+
+  const rpcRes = await callRpc<any>('rpc_unlock_skill_node', {
+    p_node_id: node.id,
+    p_attribute_id: node.attributeId,
+    p_branch_id: node.branchId,
+    p_min_level: node.requirements.minAttributeLevel,
+    p_min_activities: node.requirements.minVerifiedActivities ?? 0,
+    p_prerequisite_ids: node.requirements.prerequisiteNodeIds,
+  });
+
+  if (rpcRes.ok && rpcRes.data?.success) {
+    return {
+      success: true,
+      alreadyUnlocked: Boolean(rpcRes.data.alreadyUnlocked),
+      state: normalizeSkillTreeState(rpcRes.data.state),
+    };
+  }
+
+  if (rpcRes.ok && rpcRes.data?.success === false) {
+    return { success: false, error: rpcRes.data.error || 'Skill node requirements not met.' };
+  }
+
+  if (!shouldUseSkillTreeExpressFallback(rpcRes)) {
+    return { success: false, error: rpcRes.error || 'Could not unlock skill node.' };
+  }
+
+  try {
+    const resp = await fetch('/api/skill-tree/unlock-node', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-lifequest-user-id': params.userId,
+      },
+      body: JSON.stringify({
+        nodeId: node.id,
+        timezone: params.timezone || getUserTimezone(),
+      }),
+    });
+    const json = await resp.json();
+    if (!resp.ok || json?.success === false) {
+      return { success: false, error: json?.error || 'Skill node requirements not met.' };
+    }
+    return {
+      success: true,
+      alreadyUnlocked: Boolean(json.alreadyUnlocked),
+      state: normalizeSkillTreeState(json.state),
+    };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Skill Tree service unavailable.' };
+  }
+};
+
+export const claimSkillMilestoneServer = async (params: {
+  userId: string;
+  milestoneId: string;
+  timezone?: string;
+}): Promise<{ success: boolean; alreadyClaimed?: boolean; state?: PlayerSkillTreeState; error?: string }> => {
+  if (!params.userId) return { success: false, error: 'Authentication required.' };
+  const milestone = getSkillMilestoneById(params.milestoneId);
+  if (!milestone) return { success: false, error: 'Milestone not found.' };
+
+  const rpcRes = await callRpc<any>('rpc_claim_skill_milestone', {
+    p_milestone_id: milestone.id,
+    p_attribute_id: milestone.attributeId,
+    p_required_level: milestone.requiredLevel,
+    p_required_nodes: milestone.requiredNodesUnlocked ?? 0,
+  });
+
+  if (rpcRes.ok && rpcRes.data?.success) {
+    return {
+      success: true,
+      alreadyClaimed: Boolean(rpcRes.data.alreadyClaimed),
+      state: normalizeSkillTreeState(rpcRes.data.state),
+    };
+  }
+
+  if (rpcRes.ok && rpcRes.data?.success === false) {
+    return { success: false, error: rpcRes.data.error || 'Milestone requirements not met.' };
+  }
+
+  if (!shouldUseSkillTreeExpressFallback(rpcRes)) {
+    return { success: false, error: rpcRes.error || 'Could not claim milestone.' };
+  }
+
+  try {
+    const resp = await fetch('/api/skill-tree/claim-milestone', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-lifequest-user-id': params.userId,
+      },
+      body: JSON.stringify({
+        milestoneId: milestone.id,
+        timezone: params.timezone || getUserTimezone(),
+      }),
+    });
+    const json = await resp.json();
+    if (!resp.ok || json?.success === false) {
+      return { success: false, error: json?.error || 'Milestone requirements not met.' };
+    }
+    return {
+      success: true,
+      alreadyClaimed: Boolean(json.alreadyClaimed),
+      state: normalizeSkillTreeState(json.state),
+    };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Skill Tree service unavailable.' };
+  }
+};
+
 

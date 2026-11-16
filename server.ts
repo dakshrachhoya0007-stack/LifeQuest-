@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { GoogleGenAI, Type } from '@google/genai';
+import { registerSkillTreeRoutes } from './server/skillTreeService.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -1238,6 +1239,9 @@ async function startServer() {
 
     res.status(result.status).json(result.payload);
   });
+
+  // 6. Real-Life Skill Tree Server-Authoritative Ledger Routes
+  registerSkillTreeRoutes(app, __dirname);
 
   // Dev Vite middleware vs Production static build
   const distDir = path.join(__dirname, 'dist');

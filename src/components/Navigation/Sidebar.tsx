@@ -105,7 +105,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         {
           id: 'progression',
           label: 'PROGRESSION',
-          subtitle: 'Quests, Report & Legends',
+          subtitle: 'Skill Tree, Quests & Legends',
           icon: Crown,
           badge: claimableProgressionCount,
         },
