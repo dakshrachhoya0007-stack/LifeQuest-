@@ -21,6 +21,9 @@ import {
   Crown,
   Lock,
   Compass,
+  Landmark,
+  Brain,
+  Calendar,
 } from 'lucide-react';
 import { LegendTitleBadge } from '../Social/LegendTitleBadge';
 
@@ -55,12 +58,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     dynamicDailyQuests,
     hallOfLegends,
     equippedLegendMap,
+    rivalsState,
   } = useGame();
   const heroDef = getHeroById(selectedHeroId);
 
-  const incomingFriendCount = friends.filter(
-    f => f.status === 'pending' && f.direction === 'incoming'
-  ).length;
+  const incomingFriendCount =
+    friends.filter(f => f.status === 'pending' && f.direction === 'incoming').length +
+    (rivalsState?.stats?.pendingIncomingCount || 0);
 
   const claimableQuestsCount = quests.filter(q => q.completed && !q.claimed).length;
   const claimableAiQuestsCount = dynamicDailyQuests.filter(q => q.completed && !q.claimed).length;
@@ -112,6 +116,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         { id: 'character', label: 'Character Profile', icon: User },
         { id: 'fitness', label: 'Fitness Log', icon: Activity },
         { id: 'nutrition', label: 'Nutrition & Meals', icon: Apple },
+        { id: 'mentor', label: 'AI Fitness Mentor', icon: Brain },
+        { id: 'museum', label: 'Records Museum', icon: Landmark },
         { id: 'buffs', label: 'Active Buffs', icon: Sparkles, badge: activeBuffs.length },
         { id: 'storyline', label: 'World of Aetheria', icon: Map },
       ],
@@ -122,10 +128,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         {
           id: 'social',
           label: 'SOCIAL',
-          subtitle: 'Leaderboard, Friends & Chat',
+          subtitle: 'Leaderboard, Friends, Rivals & Chat',
           icon: Users,
           badge: incomingFriendCount,
         },
+        { id: 'events', label: 'Community Events', icon: Calendar },
         { id: 'guilds', label: 'Guilds & Raids', icon: Shield, badge: guildInvites.length },
       ],
     },

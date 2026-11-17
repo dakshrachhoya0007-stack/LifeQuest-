@@ -31,6 +31,7 @@ import {
 import { ElementType, WeaponAbility } from '../../types/game';
 import { sound } from '../../utils/audio';
 import confetti from 'canvas-confetti';
+import { WeeklyBossRaidPanel } from './WeeklyBossRaidPanel';
 
 export const BossBattleView: React.FC = () => {
   const {
@@ -48,6 +49,7 @@ export const BossBattleView: React.FC = () => {
     setActiveTab,
   } = useGame();
 
+  const [bossMode, setBossMode] = useState<'weekly' | 'kingdom'>('weekly');
   const [selectedKingdomId, setSelectedKingdomId] = useState<string>(stats.currentKingdomId);
   const [battleState, setBattleState] = useState<'PREP' | 'FIGHTING' | 'VICTORY' | 'DEFEAT'>('PREP');
   const [combatLogs, setCombatLogs] = useState<string[]>([]);
@@ -296,6 +298,52 @@ export const BossBattleView: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in pb-12">
+      {/* Mode Switcher: Weekly Community Raid vs Kingdom Story Bosses */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[#100D19] border border-[#C5A15A]/25 p-3">
+        <div className="flex items-center gap-2 px-2">
+          <Swords className="w-4 h-4 text-[#C5A15A]" />
+          <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-[#C5A15A]">
+            Boss Encounters
+          </span>
+        </div>
+        <div
+          role="tablist"
+          aria-label="Boss battle modes"
+          className="flex items-center gap-1.5 p-1 rounded-xl bg-[#090714] border border-[#C5A15A]/20"
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={bossMode === 'weekly'}
+            onClick={() => setBossMode('weekly')}
+            className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap shrink-0 ${
+              bossMode === 'weekly'
+                ? 'bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/45'
+                : 'text-[#D9D2C5]/65 hover:text-white border border-transparent'
+            }`}
+          >
+            Weekly Community Raid
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={bossMode === 'kingdom'}
+            onClick={() => setBossMode('kingdom')}
+            className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap shrink-0 ${
+              bossMode === 'kingdom'
+                ? 'bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/45'
+                : 'text-[#D9D2C5]/65 hover:text-white border border-transparent'
+            }`}
+          >
+            Kingdom Story Bosses
+          </button>
+        </div>
+      </div>
+
+      {bossMode === 'weekly' ? (
+        <WeeklyBossRaidPanel />
+      ) : (
+        <>
       {/* Top Banner & Kingdom Navigation */}
       <div className="rounded-2xl bg-gradient-to-r from-[#200e1e] via-[#150a1b] to-[#26102a] border border-rose-950/80 p-5 sm:p-6 shadow-xl">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -1199,6 +1247,8 @@ export const BossBattleView: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

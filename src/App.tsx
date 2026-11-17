@@ -27,6 +27,9 @@ import { HeroSelectionModal } from './components/HeroSelect/HeroSelectionModal';
 import { InteractiveTutorialOverlay } from './components/Tutorial/InteractiveTutorialOverlay';
 import { GlobalLegendUnlockModal } from './components/Achievements/GlobalLegendUnlockModal';
 import { WorldExplorationView } from './components/world3d/heartlands/WorldExplorationView';
+import { AiMentorView } from './components/Mentor/AiMentorView';
+import { CommunityEventsView } from './components/Events/CommunityEventsView';
+import { RecordsMuseumView } from './components/Museum/RecordsMuseumView';
 
 const MainAppContent: React.FC = () => {
   const {
@@ -146,8 +149,12 @@ const MainAppContent: React.FC = () => {
       case 'social':
       case 'leaderboard':
       case 'friends':
+      case 'rivals':
       case 'chat':
         return <SocialHubView />;
+      case 'mentor': return <AiMentorView />;
+      case 'events': return <CommunityEventsView />;
+      case 'museum': return <RecordsMuseumView />;
       case 'guilds': return <GuildsView />;
       case 'world': return <WorldExplorationView />;
       case 'settings': return <SettingsView />;

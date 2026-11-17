@@ -58,6 +58,38 @@ import {
   SkillActivityType,
 } from '../types/game';
 import { createEmptySkillTreeState, type VerifiedActivityMetadata } from '../data/skillTreeData';
+import type {
+  CommunityEventPlayerState,
+  MentorChatMessage,
+  MentorRecommendedQuest,
+  MentorWeeklyAnalysis,
+  MuseumCategory,
+  MuseumRecord,
+  RivalChallengeType,
+  WeeklyBossStatePayload,
+} from '../types/game';
+import {
+  acceptMentorQuestServer,
+  archiveSkillNodeMuseumServer,
+  blockRivalUserServer,
+  cancelRivalInviteServer,
+  claimCommunityMilestoneServer,
+  claimWeeklyBossRewardServer,
+  dispatchVerifiedEcosystemActivityServer,
+  endActiveRivalryServer,
+  fetchAiMentorStateServer,
+  fetchCommunityEventsStateServer,
+  fetchMuseumRecordsServer,
+  fetchRivalsStateServer,
+  fetchWeeklyBossStateServer,
+  inviteRivalServer,
+  requestMentorWeeklyAnalysisServer,
+  respondRivalInviteServer,
+  sendAiMentorMessageServer,
+  syncMuseumPrivacyServer,
+  type MuseumQueryResponse,
+  type RivalsStateResponse,
+} from '../services/ecosystemService';
 import { DEFAULT_WORLD_STATE } from '../data/heartlandsWorldData';
 import { getHeroById, mapClassToDefaultHeroId } from '../data/heroesData';
 import { CAMPAIGN_CHAPTERS, TUTORIAL_STEPS } from '../data/campaignData';
@@ -208,8 +240,8 @@ interface GameContextType {
   unreadNotificationsCount: number;
   unifiedBackendReady: boolean;
   activeTab: string;
-  socialSubTab: 'leaderboard' | 'friends' | 'chat';
-  setSocialSubTab: (subTab: 'leaderboard' | 'friends' | 'chat') => void;
+  socialSubTab: 'leaderboard' | 'friends' | 'chat' | 'rivals';
+  setSocialSubTab: (subTab: 'leaderboard' | 'friends' | 'chat' | 'rivals') => void;
   progressionSubTab: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree';
   setProgressionSubTab: (
     subTab: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree'
@@ -227,6 +259,58 @@ interface GameContextType {
     durationMinutes: number;
     reflection: string;
   }) => Promise<SkillActivityAwardResult>;
+  // Phase 2: Weekly Boss Battles
+  weeklyBossState: WeeklyBossStatePayload | null;
+  weeklyBossLoading: boolean;
+  refreshWeeklyBossState: (page?: number) => Promise<void>;
+  claimWeeklyBossReward: (
+    claimType: 'mission' | 'milestone' | 'participation' | 'defeat' | 'top_contributor',
+    claimId: string
+  ) => Promise<{ success: boolean; error?: string; rewards?: { xp: number; forgeXp: number; gold: number } }>;
+  // Phase 3: Friend Rival System
+  rivalsState: RivalsStateResponse | null;
+  rivalsLoading: boolean;
+  refreshRivalsState: () => Promise<void>;
+  sendRivalInvite: (
+    opponentId: string,
+    opponentName: string,
+    challengeType: RivalChallengeType
+  ) => Promise<{ success: boolean; error?: string }>;
+  respondRivalInvite: (
+    rivalryId: string,
+    decision: 'accept' | 'decline'
+  ) => Promise<{ success: boolean; error?: string }>;
+  cancelRivalInvite: (rivalryId: string) => Promise<{ success: boolean; error?: string }>;
+  endActiveRivalry: (rivalryId: string) => Promise<{ success: boolean; error?: string }>;
+  blockRivalUser: (targetUserId: string, unblock?: boolean) => Promise<{ success: boolean; error?: string }>;
+  // Phase 4: AI Fitness Mentor
+  mentorMessages: MentorChatMessage[];
+  mentorQuests: MentorRecommendedQuest[];
+  mentorWeeklyAnalysis: MentorWeeklyAnalysis | null;
+  mentorLoading: boolean;
+  mentorError: string | null;
+  refreshAiMentorState: () => Promise<void>;
+  sendAiMentorMessage: (message: string) => Promise<{ success: boolean; error?: string }>;
+  requestMentorWeeklyAnalysis: () => Promise<{ success: boolean; error?: string }>;
+  acceptMentorQuest: (questId: string) => Promise<{ success: boolean; error?: string }>;
+  // Phase 5: Community Events
+  communityEventState: CommunityEventPlayerState | null;
+  communityEventLoading: boolean;
+  refreshCommunityEventState: () => Promise<void>;
+  claimCommunityMilestone: (milestoneId: string) => Promise<{ success: boolean; error?: string }>;
+  // Phase 6: Personal Records Museum
+  museumData: MuseumQueryResponse | null;
+  museumLoading: boolean;
+  refreshMuseumRecords: (params?: {
+    category?: MuseumCategory | 'all';
+    search?: string;
+    sort?: 'newest' | 'oldest' | 'rarity' | 'value';
+    page?: number;
+  }) => Promise<void>;
+  inspectPlayerMuseumRecords: (
+    targetUserId: string,
+    page?: number
+  ) => Promise<{ ok: boolean; data?: MuseumQueryResponse; error?: string }>;
   // Feature 10: AI-Powered Dynamic Quest Generator
   dynamicDailyQuests: DynamicDailyQuest[];
   dynamicQuestHistory: DynamicQuestHistoryEntry[];
@@ -505,8 +589,14 @@ const ROUTE_TO_TAB: Record<string, string> = {
   '/armory': 'armory',
   '/buffs': 'buffs',
   '/boss-battles': 'boss-battles',
+  '/weekly-boss': 'boss-battles',
   '/storyline': 'storyline',
   '/social': 'social',
+  '/rivals': 'rivals',
+  '/mentor': 'mentor',
+  '/events': 'events',
+  '/museum': 'museum',
+  '/records': 'museum',
   '/leaderboard': 'leaderboard',
   '/leaderboards': 'leaderboard',
   '/friends': 'friends',
@@ -778,7 +868,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [unifiedBackendReady, setUnifiedBackendReady] = useState<boolean>(false);
 
   const [activeTab, setActiveTabState] = useState<string>('dashboard');
-  const [socialSubTab, setSocialSubTabState] = useState<'leaderboard' | 'friends' | 'chat'>('leaderboard');
+  const [socialSubTab, setSocialSubTabState] = useState<'leaderboard' | 'friends' | 'chat' | 'rivals'>('leaderboard');
   const [progressionSubTab, setProgressionSubTabState] = useState<
     'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree'
   >('quests');
@@ -788,6 +878,20 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [skillTreeLoading, setSkillTreeLoading] = useState<boolean>(false);
   const [lastSkillAwardBanner, setLastSkillAwardBanner] =
     useState<SkillActivityAwardResult | null>(null);
+  // Phases 2-6 Ecosystem State
+  const [weeklyBossState, setWeeklyBossState] = useState<WeeklyBossStatePayload | null>(null);
+  const [weeklyBossLoading, setWeeklyBossLoading] = useState<boolean>(false);
+  const [rivalsState, setRivalsState] = useState<RivalsStateResponse | null>(null);
+  const [rivalsLoading, setRivalsLoading] = useState<boolean>(false);
+  const [mentorMessages, setMentorMessages] = useState<MentorChatMessage[]>([]);
+  const [mentorQuests, setMentorQuests] = useState<MentorRecommendedQuest[]>([]);
+  const [mentorWeeklyAnalysis, setMentorWeeklyAnalysis] = useState<MentorWeeklyAnalysis | null>(null);
+  const [mentorLoading, setMentorLoading] = useState<boolean>(false);
+  const [mentorError, setMentorError] = useState<string | null>(null);
+  const [communityEventState, setCommunityEventState] = useState<CommunityEventPlayerState | null>(null);
+  const [communityEventLoading, setCommunityEventLoading] = useState<boolean>(false);
+  const [museumData, setMuseumData] = useState<MuseumQueryResponse | null>(null);
+  const [museumLoading, setMuseumLoading] = useState<boolean>(false);
   const [showAuthModal, setShowAuthModalState] = useState<boolean>(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [authError, setAuthError] = useState<string | null>(null);
@@ -1023,7 +1127,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  const setSocialSubTab = (subTab: 'leaderboard' | 'friends' | 'chat') => {
+  const setSocialSubTab = (subTab: 'leaderboard' | 'friends' | 'chat' | 'rivals') => {
     sound.playClick();
     setSocialSubTabState(subTab);
   };
@@ -1043,7 +1147,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     sound.playClick();
 
     // Unified hub routing while preserving all deep-links and tutorial/quest tracking
-    if (tab === 'leaderboard' || tab === 'friends' || tab === 'chat') {
+    if (tab === 'leaderboard' || tab === 'friends' || tab === 'chat' || tab === 'rivals') {
       setSocialSubTabState(tab);
       setActiveTabState('social');
     } else if (tab === 'social') {
@@ -1186,6 +1290,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setDailyReportError(null);
     setSkillTreeState(createEmptySkillTreeState());
     setLastSkillAwardBanner(null);
+    setWeeklyBossState(null);
+    setRivalsState(null);
+    setMentorMessages([]);
+    setMentorQuests([]);
+    setMentorWeeklyAnalysis(null);
+    setMentorError(null);
+    setCommunityEventState(null);
+    setMuseumData(null);
     if (worldPosSaveTimerRef.current) {
       clearTimeout(worldPosSaveTimerRef.current);
       worldPosSaveTimerRef.current = null;
@@ -1796,11 +1908,39 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setShowHeroSelectModalState(true);
           }
         }
-        // Hydrate Real-Life Skill Tree for the authenticated user
-        const skillRes = await fetchSkillTreeStateServer(sbUser.id, userTimezone);
+        // Hydrate Real-Life Skill Tree + Phases 2-6 Ecosystem Services for authenticated user
+        const [skillRes, bossRes, rivalRes, mentorRes, eventRes, museumRes] = await Promise.all([
+          fetchSkillTreeStateServer(sbUser.id, userTimezone),
+          fetchWeeklyBossStateServer(sbUser.id, 1, 10, userTimezone),
+          fetchRivalsStateServer(sbUser.id),
+          fetchAiMentorStateServer(sbUser.id),
+          fetchCommunityEventsStateServer(sbUser.id),
+          fetchMuseumRecordsServer({ callerUserId: sbUser.id, page: 1, limit: 12 }),
+        ]);
         if (skillRes.ok && skillRes.data?.state) {
           setSkillTreeState(skillRes.data.state);
         }
+        if (bossRes.ok && bossRes.data) {
+          setWeeklyBossState(bossRes.data);
+        }
+        if (rivalRes.ok && rivalRes.data) {
+          setRivalsState(rivalRes.data);
+        }
+        if (mentorRes.ok && mentorRes.data) {
+          setMentorMessages(mentorRes.data.messages || []);
+          setMentorQuests(mentorRes.data.recommendedQuests || []);
+          setMentorWeeklyAnalysis(mentorRes.data.latestWeeklyAnalysis || null);
+        }
+        if (eventRes.ok && eventRes.data) {
+          setCommunityEventState(eventRes.data);
+        }
+        if (museumRes.ok && museumRes.data) {
+          setMuseumData(museumRes.data);
+        }
+        void syncMuseumPrivacyServer(
+          sbUser.id,
+          localUser.profileVisibility === 'public' && localUser.privacySettings?.personalRecords === 'everyone'
+        );
       } catch (err) {
         console.error('Failed to load user cloud data:', err);
         setCloudStatus('error');
@@ -1925,7 +2065,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (session?.user) {
         await loadUserCloudData(session.user);
         const routeTab = isOAuthCallback ? null : resolveTabFromPathname(window.location.pathname);
-        if (routeTab === 'leaderboard' || routeTab === 'friends' || routeTab === 'chat') {
+        if (routeTab === 'leaderboard' || routeTab === 'friends' || routeTab === 'chat' || routeTab === 'rivals') {
           setSocialSubTabState(routeTab);
           setActiveTabState('social');
         } else if (
@@ -5777,6 +5917,59 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     if (res.success && res.state) {
       setSkillTreeState(res.state);
+      if (!res.duplicate) {
+        // Dispatch verified activity across Weekly Boss, Rivalries, Community Events, and Personal Records Museum
+        const ecoRes = await dispatchVerifiedEcosystemActivityServer({
+          userId: uid,
+          username: user?.username || 'Champion',
+          activityType: params.activityType,
+          idempotencyKey: params.idempotencyKey,
+          sourceType: params.sourceType,
+          sourceId: params.sourceId,
+          metadata: params.metadata,
+          timezone: tz,
+          skillLevelUp:
+            res.leveledUp && res.attributeId && res.newLevel
+              ? { attributeId: res.attributeId, newLevel: res.newLevel }
+              : undefined,
+        });
+        if (ecoRes.ok && ecoRes.data) {
+          if (ecoRes.data.weeklyBoss?.bossDefeatedJustNow) {
+            setNotifications(prev => [
+              {
+                id: `notif-wb-${Date.now()}`,
+                type: 'weekly_boss_defeated',
+                title: 'Weekly Raid Boss Vanquished!',
+                body: `The realm defeated ${ecoRes.data.weeklyBoss.bossName}! Claim your raid rewards.`,
+                readAt: null,
+                createdAt: new Date().toISOString(),
+              },
+              ...prev,
+            ]);
+          }
+          if (Array.isArray(ecoRes.data.museumRecordsCreated) && ecoRes.data.museumRecordsCreated.length > 0) {
+            const firstRec = ecoRes.data.museumRecordsCreated[0] as MuseumRecord;
+            if (firstRec.isPersonalBest) {
+              setNotifications(prev => [
+                {
+                  id: `notif-pb-${Date.now()}`,
+                  type: 'museum_personal_best',
+                  title: 'New Personal Best Enshrined!',
+                  body: `${firstRec.title}: ${firstRec.displayValue}`,
+                  readAt: null,
+                  createdAt: new Date().toISOString(),
+                },
+                ...prev,
+              ]);
+            }
+          }
+          // Refresh affected ecosystem caches quietly
+          void refreshWeeklyBossState();
+          void refreshRivalsState();
+          void refreshCommunityEventState();
+          void refreshMuseumRecords();
+        }
+      }
       if (!res.duplicate && (res.xpAwarded || 0) > 0) {
         setLastSkillAwardBanner(res);
         if (res.leveledUp) {
@@ -5803,6 +5996,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         origin: { y: 0.65 },
         colors: ['#C5A15A', '#7046A5', '#34D399'],
       });
+      void archiveSkillNodeMuseumServer(uid, nodeId).then(() => refreshMuseumRecords());
       return { success: true };
     }
     return { success: false, error: res.error || 'Could not unlock skill node.' };
@@ -5866,6 +6060,365 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const dismissSkillAwardBanner = () => setLastSkillAwardBanner(null);
 
+  // --- CENTRAL REWARD CREDITING HELPER (NO DUPLICATE XP SYSTEMS) ---
+  const applyCentralRewardGrant = (sourceLabel: string, xp: number, forgeXp: number, gold: number) => {
+    if (xp <= 0 && forgeXp <= 0 && gold <= 0) return;
+    setStats(prev => {
+      let nextLevel = prev.level;
+      let nextXp = prev.playerXP + xp;
+      let nextThreshold = prev.playerXPNextLevel;
+      while (nextXp >= nextThreshold) {
+        nextXp -= nextThreshold;
+        nextLevel += 1;
+        nextThreshold = Math.round(nextThreshold * 1.25);
+      }
+      if (nextLevel > prev.level) {
+        sound.playVictory();
+        confetti({
+          particleCount: 90,
+          spread: 75,
+          origin: { y: 0.55 },
+          colors: ['#C5A15A', '#7046A5', '#38bdf8'],
+        });
+      }
+      return {
+        ...prev,
+        level: nextLevel,
+        playerXP: nextXp,
+        playerXPNextLevel: nextThreshold,
+        forgeXP: prev.forgeXP + forgeXp,
+        gold: prev.gold + gold,
+      };
+    });
+    const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    setTransactions(prev => [
+      ...(xp > 0 ? [{ id: `tx-pxp-${Date.now()}`, type: 'PLAYER_XP' as const, source: sourceLabel, amount: xp, timestamp: nowTime }] : []),
+      ...(forgeXp > 0 ? [{ id: `tx-fxp-${Date.now() + 1}`, type: 'FORGE_XP' as const, source: sourceLabel, amount: forgeXp, timestamp: nowTime }] : []),
+      ...(gold > 0 ? [{ id: `tx-g-${Date.now() + 2}`, type: 'GOLD' as const, source: sourceLabel, amount: gold, timestamp: nowTime }] : []),
+      ...prev.slice(0, 46),
+    ]);
+  };
+
+  // --- PHASE 2: WEEKLY BOSS BATTLES ---
+  const refreshWeeklyBossState = async (page: number = 1) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    setWeeklyBossLoading(true);
+    try {
+      const tz = user?.timezone || getUserTimezone();
+      const res = await fetchWeeklyBossStateServer(uid, page, 10, tz);
+      if (res.ok && res.data) {
+        setWeeklyBossState(res.data);
+      }
+    } finally {
+      setWeeklyBossLoading(false);
+    }
+  };
+
+  const claimWeeklyBossReward = async (
+    claimType: 'mission' | 'milestone' | 'participation' | 'defeat' | 'top_contributor',
+    claimId: string
+  ) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const tz = user?.timezone || getUserTimezone();
+    const res = await claimWeeklyBossRewardServer({ userId: uid, claimType, claimId, timezone: tz });
+    if (res.ok) {
+      if (res.state) setWeeklyBossState(res.state);
+      if (res.rewards) {
+        applyCentralRewardGrant(
+          `Weekly Raid (${claimType.replace('_', ' ')})`,
+          res.rewards.xp || 0,
+          res.rewards.forgeXp || 0,
+          res.rewards.gold || 0
+        );
+      }
+      sound.playQuestComplete();
+      return { success: true, rewards: res.rewards };
+    }
+    return { success: false, error: res.error || 'Could not claim reward.' };
+  };
+
+  // --- PHASE 3: FRIEND RIVAL SYSTEM ---
+  const refreshRivalsState = async () => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    setRivalsLoading(true);
+    try {
+      const res = await fetchRivalsStateServer(uid);
+      if (res.ok && res.data) {
+        setRivalsState(res.data);
+      }
+    } finally {
+      setRivalsLoading(false);
+    }
+  };
+
+  const sendRivalInvite = async (
+    opponentId: string,
+    opponentName: string,
+    challengeType: RivalChallengeType
+  ) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid || !user) return { success: false, error: 'Authentication required.' };
+    const isAcceptedFriend = friends.some(
+      f => f.status === 'accepted' && f.champion.id === opponentId
+    );
+    const res = await inviteRivalServer({
+      userId: uid,
+      challengerName: user.username,
+      opponentId,
+      opponentName,
+      challengeType,
+      isFriend: isAcceptedFriend,
+    });
+    if (res.ok && res.data) {
+      setRivalsState(res.data);
+      sound.playClick();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const respondRivalInvite = async (rivalryId: string, decision: 'accept' | 'decline') => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await respondRivalInviteServer({ userId: uid, rivalryId, decision });
+    if (res.ok && res.data) {
+      setRivalsState(res.data);
+      if (decision === 'accept') sound.playQuestComplete();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const cancelRivalInvite = async (rivalryId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await cancelRivalInviteServer({ userId: uid, rivalryId });
+    if (res.ok && res.data) {
+      setRivalsState(res.data);
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const endActiveRivalry = async (rivalryId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await endActiveRivalryServer({ userId: uid, rivalryId });
+    if (res.ok && res.data) {
+      setRivalsState(res.data);
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const blockRivalUser = async (targetUserId: string, unblock: boolean = false) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await blockRivalUserServer({ userId: uid, targetUserId, unblock });
+    if (res.ok && res.data) {
+      setRivalsState(res.data);
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  // --- PHASE 4: AI FITNESS MENTOR ---
+  const buildMinimizedMentorContext = () => ({
+    username: user?.username || 'Champion',
+    characterClass: user?.characterClass || 'Warrior',
+    level: stats.level,
+    currentStreak: stats.currentStreak,
+    fitnessGoals: user?.personalGoals || [],
+    recentWorkouts: fitnessSessions.slice(0, 8).map(w => ({
+      exercise: w.exerciseName,
+      durationMinutes: w.durationMinutes,
+      reps: w.repetitions,
+    })),
+    personalRecords: (museumData?.personalBests || []).slice(0, 6).map(p => ({
+      title: p.title,
+      displayValue: p.displayValue,
+    })),
+    skillTreeLevels: Object.fromEntries(
+      Object.entries(skillTreeState.attributes).map(([k, v]) => [k, v.level])
+    ),
+    completedQuestsCount: quests.filter(q => q.completed).length + dynamicDailyQuests.filter(q => q.completed).length,
+    recentAchievements: achievements.filter(a => a.unlocked).slice(0, 6).map(a => a.name),
+    waterGlassesToday: waterGlasses,
+    mealsLoggedCount: meals.length,
+  });
+
+  const refreshAiMentorState = async () => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    const res = await fetchAiMentorStateServer(uid);
+    if (res.ok && res.data) {
+      setMentorMessages(res.data.messages || []);
+      setMentorQuests(res.data.recommendedQuests || []);
+      setMentorWeeklyAnalysis(res.data.latestWeeklyAnalysis || null);
+    }
+  };
+
+  const sendAiMentorMessage = async (message: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    setMentorLoading(true);
+    setMentorError(null);
+    try {
+      const res = await sendAiMentorMessageServer({
+        userId: uid,
+        message,
+        playerContext: buildMinimizedMentorContext(),
+      });
+      if (!res.ok) {
+        const msg = res.error || 'AI Mentor is currently unavailable.';
+        setMentorError(msg);
+        return { success: false, error: msg };
+      }
+      if (res.messages) setMentorMessages(res.messages);
+      if (res.recommendedQuests) setMentorQuests(res.recommendedQuests);
+      return { success: true };
+    } finally {
+      setMentorLoading(false);
+    }
+  };
+
+  const requestMentorWeeklyAnalysis = async () => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    setMentorLoading(true);
+    setMentorError(null);
+    try {
+      const res = await requestMentorWeeklyAnalysisServer({
+        userId: uid,
+        playerContext: buildMinimizedMentorContext(),
+      });
+      if (!res.ok || !res.analysis) {
+        const msg = res.error || 'Could not generate weekly analysis.';
+        setMentorError(msg);
+        return { success: false, error: msg };
+      }
+      setMentorWeeklyAnalysis(res.analysis);
+      return { success: true };
+    } finally {
+      setMentorLoading(false);
+    }
+  };
+
+  const acceptMentorQuest = async (questId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await acceptMentorQuestServer({ userId: uid, questId });
+    if (!res.ok || !res.quest) {
+      return { success: false, error: res.error || 'Could not accept mentor quest.' };
+    }
+    if (res.recommendedQuests) setMentorQuests(res.recommendedQuests);
+    const tz = user?.timezone || getUserTimezone();
+    const todayKey = getPeriodKeyForFrequency('daily', tz);
+    const q = res.quest;
+    const mappedQuest: DynamicDailyQuest = {
+      id: `mentor-${q.id}`,
+      periodKey: todayKey,
+      title: q.title,
+      description: q.description,
+      category: q.category,
+      difficulty: q.difficulty,
+      objectiveLabel: q.objectiveLabel,
+      evidenceType: q.evidenceType,
+      progress: 0,
+      maxProgress: q.maxProgress,
+      unitLabel: q.unitLabel,
+      estimatedMinutes: q.estimatedMinutes,
+      playerXpReward: q.playerXpReward,
+      forgeXpReward: q.forgeXpReward,
+      goldReward: q.goldReward,
+      isSpecialChallenge: false,
+      personalizationReason: `AI Mentor Guidance: ${q.rationale}`,
+      adaptiveTier: 'balanced',
+      completed: false,
+      claimed: false,
+      createdAt: new Date().toISOString(),
+    };
+    setDynamicDailyQuests(prev => [mappedQuest, ...prev.filter(item => item.id !== mappedQuest.id)]);
+    sound.playQuestComplete();
+    return { success: true };
+  };
+
+  // --- PHASE 5: COMMUNITY EVENTS ---
+  const refreshCommunityEventState = async () => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    setCommunityEventLoading(true);
+    try {
+      const res = await fetchCommunityEventsStateServer(uid);
+      if (res.ok && res.data) {
+        setCommunityEventState(res.data);
+      }
+    } finally {
+      setCommunityEventLoading(false);
+    }
+  };
+
+  const claimCommunityMilestone = async (milestoneId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await claimCommunityMilestoneServer({ userId: uid, milestoneId });
+    if (res.ok) {
+      if (res.state) setCommunityEventState(res.state);
+      if (res.rewards) {
+        applyCentralRewardGrant(
+          'Community Event Milestone',
+          res.rewards.xp || 0,
+          0,
+          res.rewards.gold || 0
+        );
+      }
+      sound.playVictory();
+      return { success: true };
+    }
+    return { success: false, error: res.error || 'Could not claim community milestone.' };
+  };
+
+  // --- PHASE 6: PERSONAL RECORDS MUSEUM ---
+  const refreshMuseumRecords = async (params?: {
+    category?: MuseumCategory | 'all';
+    search?: string;
+    sort?: 'newest' | 'oldest' | 'rarity' | 'value';
+    page?: number;
+  }) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    setMuseumLoading(true);
+    try {
+      const res = await fetchMuseumRecordsServer({
+        callerUserId: uid,
+        category: params?.category || 'all',
+        search: params?.search || '',
+        sort: params?.sort || 'newest',
+        page: params?.page || 1,
+        limit: 12,
+      });
+      if (res.ok && res.data) {
+        setMuseumData(res.data);
+      }
+    } finally {
+      setMuseumLoading(false);
+    }
+  };
+
+  const inspectPlayerMuseumRecords = async (targetUserId: string, page: number = 1) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { ok: false, error: 'Authentication required.' };
+    return fetchMuseumRecordsServer({
+      callerUserId: uid,
+      targetUserId,
+      page,
+      limit: 10,
+    });
+  };
+
   return (
     <GameContext.Provider
       value={{
@@ -5906,6 +6459,35 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         unlockSkillNode,
         claimSkillMilestone,
         logVerifiedStudySession,
+        weeklyBossState,
+        weeklyBossLoading,
+        refreshWeeklyBossState,
+        claimWeeklyBossReward,
+        rivalsState,
+        rivalsLoading,
+        refreshRivalsState,
+        sendRivalInvite,
+        respondRivalInvite,
+        cancelRivalInvite,
+        endActiveRivalry,
+        blockRivalUser,
+        mentorMessages,
+        mentorQuests,
+        mentorWeeklyAnalysis,
+        mentorLoading,
+        mentorError,
+        refreshAiMentorState,
+        sendAiMentorMessage,
+        requestMentorWeeklyAnalysis,
+        acceptMentorQuest,
+        communityEventState,
+        communityEventLoading,
+        refreshCommunityEventState,
+        claimCommunityMilestone,
+        museumData,
+        museumLoading,
+        refreshMuseumRecords,
+        inspectPlayerMuseumRecords,
         dynamicDailyQuests,
         dynamicQuestHistory,
         aiMentorMemory,

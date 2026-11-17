@@ -6,6 +6,12 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { GoogleGenAI, Type } from '@google/genai';
 import { registerSkillTreeRoutes } from './server/skillTreeService.ts';
+import { createWeeklyBossService } from './server/weeklyBossService.ts';
+import { createRivalService } from './server/rivalService.ts';
+import { createCommunityEventsService } from './server/communityEventsService.ts';
+import { createRecordsMuseumService } from './server/recordsMuseumService.ts';
+import { createAiMentorService } from './server/aiMentorService.ts';
+import { registerEcosystemDispatcherRoutes } from './server/ecosystemDispatcher.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -81,35 +87,49 @@ const parseGeminiJson = <T>(text: string | undefined): T => {
 };
 
 const extractErrorStatus = (err: any): { status: number; message: string } => {
-  const rawMsg = String(err?.message || 'AI Vision request failed.');
+  const rawMsg = String(err?.message || 'AI request failed.');
   if (rawMsg.includes('GEMINI_API_KEY is not configured')) {
     return {
       status: 503,
-      message: 'Server Gemini API key is not configured. Check Settings > Secrets.',
+      message: 'AI Mentor configuration is unavailable on the server right now. Please try again later.',
     };
   }
   const statusCode = Number(err?.status || err?.statusCode || 0);
   if (statusCode === 403 || rawMsg.includes('PERMISSION_DENIED') || rawMsg.includes('API_KEY_INVALID')) {
     return {
       status: 403,
-      message: 'Gemini API authentication failed. Please verify the configured API key in Settings > Secrets.',
+      message: 'AI service authentication failed. Please verify the configured server key.',
     };
   }
   if (statusCode === 429 || rawMsg.includes('RESOURCE_EXHAUSTED')) {
     return {
       status: 429,
-      message: 'AI Vision rate limit reached temporarily. Please wait a moment and try again.',
+      message: 'AI service rate limit reached temporarily. Please wait a moment and try again.',
+    };
+  }
+  if (
+    statusCode === 503 ||
+    rawMsg.includes('"code":503') ||
+    rawMsg.includes('UNAVAILABLE') ||
+    rawMsg.toLowerCase().includes('high demand') ||
+    rawMsg.includes('fetch failed') ||
+    rawMsg.includes('ETIMEDOUT') ||
+    rawMsg.includes('ECONNRESET')
+  ) {
+    return {
+      status: 503,
+      message: 'The AI service is temporarily experiencing high demand. Please try again in a moment.',
     };
   }
   if (statusCode === 404 || rawMsg.includes('NOT_FOUND')) {
     return {
       status: 502,
-      message: `Gemini Vision model (${GEMINI_MODEL}) could not be reached.`,
+      message: `AI model (${GEMINI_MODEL}) could not be reached right now.`,
     };
   }
   return {
     status: 500,
-    message: rawMsg,
+    message: rawMsg.startsWith('{') ? 'AI request encountered an unexpected server error. Please retry.' : rawMsg,
   };
 };
 
@@ -1242,6 +1262,55 @@ async function startServer() {
 
   // 6. Real-Life Skill Tree Server-Authoritative Ledger Routes
   registerSkillTreeRoutes(app, __dirname);
+
+  // 7. Phases 2-7 Ecosystem Services (Weekly Boss, Rivals, AI Mentor, Community Events, Records Museum)
+  const recordsMuseumService = createRecordsMuseumService(__dirname);
+  const weeklyBossService = createWeeklyBossService(__dirname);
+  const rivalService = createRivalService(__dirname, {
+    onRivalryCompleted: async rivalry => {
+      if (!rivalry.winnerId || rivalry.isTie) return;
+      const winScore =
+        rivalry.winnerId === rivalry.challengerId
+          ? rivalry.challengerScore
+          : rivalry.opponentScore;
+      const opponentName =
+        rivalry.winnerId === rivalry.challengerId
+          ? rivalry.opponentName
+          : rivalry.challengerName;
+      await recordsMuseumService.archiveDirectMilestone({
+        userId: rivalry.winnerId,
+        idempotencyKey: `rivalry_win:${rivalry.id}`,
+        category: 'rivalry',
+        metricKey: `rivalry_win_${rivalry.id}`,
+        title: `Rivalry Victory: ${rivalry.challengeTitle}`,
+        description: `Prevailed against ${opponentName} in a 7-day Friend Rivalry challenge.`,
+        numericValue: winScore,
+        displayValue: `${winScore} pts`,
+        trackAsPersonalBest: false,
+        sourceActivityRef: `rivalry:${rivalry.id}`,
+        rarity: 'Epic',
+      });
+    },
+  });
+  const communityEventsService = createCommunityEventsService(__dirname);
+  const aiMentorService = createAiMentorService(__dirname, {
+    geminiModel: GEMINI_MODEL,
+    getGeminiClient,
+    parseGeminiJson,
+    extractErrorStatus,
+  });
+
+  weeklyBossService.registerRoutes(app);
+  rivalService.registerRoutes(app);
+  communityEventsService.registerRoutes(app);
+  recordsMuseumService.registerRoutes(app);
+  aiMentorService.registerRoutes(app);
+  registerEcosystemDispatcherRoutes(app, {
+    weeklyBoss: weeklyBossService,
+    rivals: rivalService,
+    communityEvents: communityEventsService,
+    museum: recordsMuseumService,
+  });
 
   // Dev Vite middleware vs Production static build
   const distDir = path.join(__dirname, 'dist');

@@ -1,0 +1,388 @@
+import React, { useEffect, useState } from 'react';
+import { useGame } from '../../context/GameContext';
+import { recordsMuseumHallImg } from '../../assets/images';
+import { MUSEUM_CATEGORY_META, MUSEUM_LOCKED_MILESTONES } from '../../data/ecosystemData';
+import type { MuseumCategory, MuseumRarity, MuseumRecord } from '../../types/game';
+import { GoldenWorldTreeEmblem } from '../Welcome/WelcomeLanding';
+import {
+  Award,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Crown,
+  Lock,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Trophy,
+  X,
+} from 'lucide-react';
+
+const RARITY_COLOR: Record<MuseumRarity, string> = {
+  Common: 'text-[#D9D2C5]/80',
+  Rare: 'text-sky-300',
+  Epic: 'text-purple-300',
+  Legendary: 'text-[#C5A15A]',
+  Mythic: 'text-rose-300',
+};
+
+export const RecordsMuseumView: React.FC = () => {
+  const { museumData, museumLoading, refreshMuseumRecords } = useGame();
+
+  const [category, setCategory] = useState<MuseumCategory | 'all'>('all');
+  const [search, setSearch] = useState<string>('');
+  const [sort, setSort] = useState<'newest' | 'oldest' | 'rarity' | 'value'>('newest');
+  const [page, setPage] = useState<number>(1);
+  const [selectedRecord, setSelectedRecord] = useState<MuseumRecord | null>(null);
+
+  useEffect(() => {
+    void refreshMuseumRecords({ category, search, sort, page });
+  }, [category, sort, page]);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPage(1);
+    void refreshMuseumRecords({ category, search, sort, page: 1 });
+  };
+
+  const records = museumData?.records || [];
+  const personalBests = museumData?.personalBests || [];
+  const counts = museumData?.categoryCounts || { all: 0 };
+  const totalPages = museumData?.totalPages || 1;
+  const totalRecords = museumData?.totalRecords || 0;
+
+  const archivedTitles = new Set(records.map(r => r.title.toLowerCase()));
+  const unlockedPbTitles = new Set(personalBests.map(r => r.title.toLowerCase()));
+
+  return (
+    <div className="space-y-6 animate-in fade-in pb-12">
+      {/* AAA Museum Exhibition Header */}
+      <div className="relative rounded-2xl overflow-hidden border border-[#C5A15A]/30 bg-[#100D19] shadow-2xl">
+        <div className="relative h-56 sm:h-64 overflow-hidden">
+          <img
+            src={recordsMuseumHallImg}
+            alt="Personal Records Museum Hall"
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-cover object-center brightness-85"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#100D19] via-[#100D19]/65 to-transparent" />
+          <div className="absolute bottom-5 left-5 right-5 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="flex items-start gap-3.5 max-w-2xl">
+              <div className="w-11 h-11 rounded-xl bg-[#161024]/90 border border-[#C5A15A]/45 flex items-center justify-center shrink-0">
+                <GoldenWorldTreeEmblem className="w-7 h-7" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 text-xs text-[#C5A15A] font-semibold uppercase tracking-widest">
+                  <span className="font-['Cinzel']">Permanent Archive</span>
+                  <span className="text-[#D9D2C5]/35" aria-hidden="true">·</span>
+                  <span className="tabular-nums">{counts.all || 0} Enshrined Records</span>
+                  <span className="text-[#D9D2C5]/35" aria-hidden="true">·</span>
+                  <span className="tabular-nums">{personalBests.length} Active Personal Bests</span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-white mt-0.5">
+                  PERSONAL RECORDS MUSEUM
+                </h1>
+                <p className="text-xs sm:text-sm text-[#D9D2C5]/80 mt-1">
+                  Every verified workout milestone, skill breakthrough, boss victory, rivalry triumph, and Personal Best—preserved permanently in chronological order without erasing history.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Personal Best Trophy Showcase */}
+      <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
+            <Crown className="w-4 h-4 text-[#C5A15A]" />
+            Active Personal Best Trophy Case
+          </h2>
+          <span className="text-[11px] text-[#D9D2C5]/55">
+            Previous PBs remain preserved in the archive below
+          </span>
+        </div>
+
+        {personalBests.length === 0 ? (
+          <p className="text-xs text-[#D9D2C5]/60 py-4">
+            Complete verified workouts, streak milestones, or raid strikes to enshrine your first Personal Best trophy.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {personalBests.slice(0, 8).map(pb => (
+              <button
+                key={pb.id}
+                type="button"
+                onClick={() => setSelectedRecord(pb)}
+                className="text-left rounded-xl bg-gradient-to-br from-[#1f1533] to-[#130e20] border border-[#C5A15A]/35 hover:border-[#C5A15A]/70 p-4 transition-colors space-y-1.5"
+              >
+                <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider">
+                  <span className="text-[#C5A15A]">Personal Best</span>
+                  <span className={RARITY_COLOR[pb.rarity]}>{pb.rarity}</span>
+                </div>
+                <p className="text-sm font-bold text-white truncate">{pb.title}</p>
+                <p className="text-xl font-black font-mono text-[#C5A15A] tabular-nums">
+                  {pb.displayValue}
+                </p>
+                <p className="text-[10px] text-[#D9D2C5]/55">
+                  {new Date(pb.achievedAt).toLocaleDateString()}
+                </p>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Filter Tabs + Search & Sort Controls */}
+      <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-5 space-y-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          <form onSubmit={handleSearchSubmit} className="flex items-center gap-2 flex-1 max-w-md">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-[#D9D2C5]/40 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search museum records..."
+                className="w-full rounded-xl bg-[#151022] border border-[#C5A15A]/25 pl-9 pr-3 py-2 text-xs text-white placeholder-[#D9D2C5]/40 focus:outline-none focus:border-[#C5A15A]"
+              />
+            </div>
+            <button
+              type="submit"
+              className="px-3.5 py-2 rounded-xl bg-[#251638] border border-[#C5A15A]/35 text-xs font-semibold text-[#C5A15A]"
+            >
+              Filter
+            </button>
+          </form>
+
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-[#D9D2C5]/60">Sort:</label>
+            <select
+              value={sort}
+              onChange={e => {
+                setSort(e.target.value as any);
+                setPage(1);
+              }}
+              className="rounded-xl bg-[#151022] border border-[#C5A15A]/25 px-3 py-2 text-xs text-white focus:outline-none"
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="rarity">Highest Rarity</option>
+              <option value="value">Highest Value</option>
+            </select>
+          </div>
+        </div>
+
+        {/* All 10 Category Filter Buttons */}
+        <div className="flex flex-wrap gap-1.5">
+          <button
+            type="button"
+            onClick={() => {
+              setCategory('all');
+              setPage(1);
+            }}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 transition-colors ${
+              category === 'all'
+                ? 'bg-[#C5A15A] text-[#0c0914] font-bold'
+                : 'bg-[#151022] text-[#D9D2C5]/70 hover:text-white border border-[#C5A15A]/15'
+            }`}
+          >
+            All ({counts.all || 0})
+          </button>
+          {(Object.keys(MUSEUM_CATEGORY_META) as MuseumCategory[]).map(catKey => (
+            <button
+              key={catKey}
+              type="button"
+              onClick={() => {
+                setCategory(catKey);
+                setPage(1);
+              }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 transition-colors ${
+                category === catKey
+                  ? 'bg-[#C5A15A] text-[#0c0914] font-bold'
+                  : 'bg-[#151022] text-[#D9D2C5]/70 hover:text-white border border-[#C5A15A]/15'
+              }`}
+            >
+              {MUSEUM_CATEGORY_META[catKey].label} ({counts[catKey] || 0})
+            </button>
+          ))}
+        </div>
+
+        {/* Exhibition Grid */}
+        {museumLoading ? (
+          <div className="py-10 text-center text-xs text-[#D9D2C5]/60">Loading museum exhibits...</div>
+        ) : records.length === 0 ? (
+          <div className="py-10 text-center text-xs text-[#D9D2C5]/60">
+            No archived records match this filter yet.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+            {records.map(rec => (
+              <button
+                key={rec.id}
+                type="button"
+                onClick={() => setSelectedRecord(rec)}
+                className={`text-left rounded-xl p-4 border transition-colors space-y-2 ${
+                  rec.isPersonalBest
+                    ? 'bg-[#1a132c] border-[#C5A15A]/45 hover:border-[#C5A15A]'
+                    : 'bg-[#151022] border-[#C5A15A]/15 hover:border-[#C5A15A]/40'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2 text-[11px]">
+                  <span className="font-semibold text-[#C5A15A]">
+                    {MUSEUM_CATEGORY_META[rec.category]?.label || rec.category}
+                  </span>
+                  <span className={`font-bold ${RARITY_COLOR[rec.rarity]}`}>
+                    {rec.rarity}
+                  </span>
+                </div>
+                <p className="text-sm font-bold text-white">{rec.title}</p>
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="text-lg font-black font-mono text-white tabular-nums">
+                    {rec.displayValue}
+                  </span>
+                  <span
+                    className={`text-[10px] font-semibold uppercase tracking-wider ${
+                      rec.isPersonalBest ? 'text-[#C5A15A]' : 'text-[#D9D2C5]/45'
+                    }`}
+                  >
+                    {rec.isPersonalBest ? 'Active Personal Best' : 'Historical Record'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#D9D2C5]/65 line-clamp-2">{rec.description}</p>
+                <div className="pt-1 border-t border-[#C5A15A]/10 flex items-center justify-between text-[10px] text-[#D9D2C5]/50">
+                  <span className="flex items-center gap-1 text-emerald-300/80">
+                    <ShieldCheck className="w-3 h-3" /> Verified
+                  </span>
+                  <span className="tabular-nums">
+                    {new Date(rec.achievedAt).toLocaleDateString()}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalRecords > 0 && (
+          <div className="flex items-center justify-between pt-2 border-t border-[#C5A15A]/15 text-xs text-[#D9D2C5]/65">
+            <span className="tabular-nums">Showing page {page} of {totalPages} ({totalRecords} total)</span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={page <= 1}
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                className="p-1.5 rounded-lg bg-[#151022] border border-[#C5A15A]/20 disabled:opacity-35"
+                aria-label="Previous page"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                disabled={page >= totalPages}
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                className="p-1.5 rounded-lg bg-[#151022] border border-[#C5A15A]/20 disabled:opacity-35"
+                aria-label="Next page"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Locked Milestone Previews */}
+      <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-5 space-y-4">
+        <h2 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
+          <Lock className="w-4 h-4 text-[#C5A15A]" />
+          Locked Milestone Exhibits Preview
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {MUSEUM_LOCKED_MILESTONES.map(m => {
+            const isUnlocked =
+              archivedTitles.has(m.title.toLowerCase()) ||
+              unlockedPbTitles.has(m.title.toLowerCase());
+            return (
+              <div
+                key={m.id}
+                className={`rounded-xl p-3.5 border space-y-1.5 ${
+                  isUnlocked
+                    ? 'bg-emerald-950/30 border-emerald-500/35'
+                    : 'bg-[#151022] border-[#C5A15A]/10 opacity-80'
+                }`}
+              >
+                <div className="flex items-center justify-between text-[10px] font-bold uppercase">
+                  <span className={RARITY_COLOR[m.rarity]}>{m.rarity}</span>
+                  <span className={isUnlocked ? 'text-emerald-300' : 'text-[#D9D2C5]/45'}>
+                    {isUnlocked ? 'Enshrined' : 'Locked'}
+                  </span>
+                </div>
+                <p className="text-xs font-bold text-white">{m.title}</p>
+                <p className="text-[11px] text-[#D9D2C5]/65">{m.requirementText}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Detail Inspection Modal */}
+      {selectedRecord && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="max-w-md w-full rounded-2xl bg-[#100D19] border border-[#C5A15A]/45 p-6 space-y-4 shadow-2xl">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-[#C5A15A]">
+                  {MUSEUM_CATEGORY_META[selectedRecord.category]?.label} · {selectedRecord.rarity}
+                </p>
+                <h3 className="text-lg font-['Cinzel'] font-bold text-white mt-0.5">
+                  {selectedRecord.title}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedRecord(null)}
+                className="p-1.5 rounded-lg bg-[#151022] text-[#D9D2C5]/70 hover:text-white"
+                aria-label="Close record details"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="rounded-xl bg-[#151022] border border-[#C5A15A]/20 p-4 space-y-2">
+              <div className="flex items-baseline justify-between">
+                <span className="text-xs text-[#D9D2C5]/60">Recorded Value</span>
+                <span className="text-2xl font-black font-mono text-[#C5A15A] tabular-nums">
+                  {selectedRecord.displayValue}
+                </span>
+              </div>
+              <p className="text-xs text-[#D9D2C5]/80">{selectedRecord.description}</p>
+            </div>
+
+            <div className="space-y-1.5 text-xs text-[#D9D2C5]/70">
+              <div className="flex justify-between">
+                <span>Archive Status</span>
+                <span className="font-semibold text-white">
+                  {selectedRecord.isPersonalBest ? 'Current Personal Best' : 'Preserved Historical Record'}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Verification</span>
+                <span className="text-emerald-300 font-semibold">Server-Verified Activity</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Source Reference</span>
+                <span className="font-mono text-[11px]">{selectedRecord.sourceActivityRef}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Achieved On</span>
+                <span className="tabular-nums">
+                  {new Date(selectedRecord.achievedAt).toLocaleString()}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

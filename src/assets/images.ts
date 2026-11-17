@@ -18,6 +18,8 @@ import heroShadowbladeImg from './images/hero_shadowblade_1794719348979.jpg';
 import heroArcaneMageImg from './images/hero_arcane_mage_1794719350182.jpg';
 import heroRangerImg from './images/hero_ranger_1794719350899.jpg';
 import heroPaladinImg from './images/hero_paladin_1794719351246.jpg';
+import weeklyBossTitanImg from './images/weekly_boss_titan_1794920809847.jpg';
+import recordsMuseumHallImg from './images/records_museum_hall_1794920809521.jpg';
 import type { PlayableHeroId } from '../types/game';
 
 export {
@@ -41,6 +43,8 @@ export {
   heroArcaneMageImg,
   heroRangerImg,
   heroPaladinImg,
+  weeklyBossTitanImg,
+  recordsMuseumHallImg,
 };
 
 export const HERO_ARTWORK_BY_ID: Record<PlayableHeroId, string> = {
@@ -72,6 +76,8 @@ const ASSET_MAP: Record<string, string> = {
   'hero_arcane_mage_1794719350182.jpg': heroArcaneMageImg,
   'hero_ranger_1794719350899.jpg': heroRangerImg,
   'hero_paladin_1794719351246.jpg': heroPaladinImg,
+  'weekly_boss_titan_1794920809847.jpg': weeklyBossTitanImg,
+  'records_museum_hall_1794920809521.jpg': recordsMuseumHallImg,
 };
 
 export const getHeroArtwork = (

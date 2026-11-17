@@ -1405,3 +1405,274 @@ export interface SkillActivityAwardResult {
   error?: string;
 }
 
+// --- PHASE 2: WEEKLY BOSS BATTLES ---
+
+export type WeeklyBossDifficulty = 'Heroic' | 'Mythic' | 'Cataclysmic';
+export type WeeklyBossStatus = 'scheduled' | 'active' | 'defeated' | 'expired' | 'resolved';
+
+export interface WeeklyBossMission {
+  id: string;
+  title: string;
+  description: string;
+  activityFilter: 'any_workout' | 'cardio' | 'strength' | 'habit' | 'study' | 'recovery';
+  targetCount: number;
+  damageReward: number;
+  playerXpReward: number;
+  goldReward: number;
+}
+
+export interface WeeklyBossMilestone {
+  id: string;
+  title: string;
+  damageRequired: number;
+  playerXpReward: number;
+  goldReward: number;
+}
+
+export interface WeeklyBossRewardConfig {
+  participationXp: number;
+  participationGold: number;
+  defeatXp: number;
+  defeatForgeXp: number;
+  defeatGold: number;
+  topContributorBonusXp: number;
+  topContributorBonusGold: number;
+}
+
+export interface WeeklyBossEvent {
+  id: string;
+  weekKey: string;
+  bossName: string;
+  bossTitle: string;
+  bossDescription: string;
+  artworkKey: string;
+  difficulty: WeeklyBossDifficulty;
+  totalHealth: number;
+  currentHealth: number;
+  startsAt: string;
+  endsAt: string;
+  status: WeeklyBossStatus;
+  missions: WeeklyBossMission[];
+  milestones: WeeklyBossMilestone[];
+  rewards: WeeklyBossRewardConfig;
+  totalParticipants: number;
+  totalHits: number;
+  defeatedAt: string | null;
+}
+
+export interface WeeklyBossContributionEntry {
+  id: string;
+  eventId: string;
+  userId: string;
+  username: string;
+  idempotencyKey: string;
+  activityType: SkillActivityType;
+  actionLabel: string;
+  damageDealt: number;
+  safetyCapped: boolean;
+  createdAt: string;
+}
+
+export interface WeeklyBossLeaderboardEntry {
+  rank: number;
+  userId: string;
+  username: string;
+  totalDamage: number;
+  contributionsCount: number;
+  missionsCompleted: number;
+}
+
+export interface WeeklyBossPlayerSummary {
+  totalDamage: number;
+  contributionsCount: number;
+  dailyDamageDealt: number;
+  dailyDamageCap: number;
+  missionProgress: Record<string, { current: number; target: number; completed: boolean; claimed: boolean }>;
+  claimedMilestones: string[];
+  participationClaimed: boolean;
+  defeatRewardClaimed: boolean;
+  topContributorClaimed: boolean;
+}
+
+export interface WeeklyBossStatePayload {
+  event: WeeklyBossEvent;
+  playerSummary: WeeklyBossPlayerSummary;
+  leaderboard: WeeklyBossLeaderboardEntry[];
+  leaderboardPage: number;
+  leaderboardTotalPages: number;
+  recentContributions: WeeklyBossContributionEntry[];
+}
+
+// --- PHASE 3: FRIEND RIVAL SYSTEM ---
+
+export type RivalChallengeType =
+  | 'weekly_activity_score'
+  | 'workout_consistency'
+  | 'strength_milestones'
+  | 'endurance_achievements'
+  | 'habit_completion';
+
+export type RivalryStatus = 'pending' | 'active' | 'completed' | 'declined' | 'cancelled' | 'expired';
+
+export interface RivalryScoreEntry {
+  id: string;
+  rivalryId: string;
+  userId: string;
+  idempotencyKey: string;
+  activityType: SkillActivityType;
+  label: string;
+  pointsAwarded: number;
+  safetyCapped: boolean;
+  createdAt: string;
+}
+
+export interface RivalryRecord {
+  id: string;
+  challengerId: string;
+  challengerName: string;
+  opponentId: string;
+  opponentName: string;
+  challengeType: RivalChallengeType;
+  challengeTitle: string;
+  status: RivalryStatus;
+  challengerScore: number;
+  opponentScore: number;
+  winnerId: string | null;
+  isTie: boolean;
+  startsAt: string;
+  endsAt: string;
+  createdAt: string;
+  resolvedAt: string | null;
+}
+
+export interface RivalryStatsSummary {
+  wins: number;
+  losses: number;
+  ties: number;
+  activeCount: number;
+  pendingIncomingCount: number;
+  titlesUnlocked: string[];
+  achievementsUnlocked: string[];
+}
+
+// --- PHASE 4: AI FITNESS MENTOR ---
+
+export type MentorMessageRole = 'user' | 'mentor';
+
+export interface MentorRecommendedQuest {
+  id: string;
+  title: string;
+  description: string;
+  category: DynamicQuestCategory;
+  difficulty: DynamicQuestDifficulty;
+  estimatedMinutes: number;
+  objectiveLabel: string;
+  evidenceType: DynamicQuestEvidenceType;
+  maxProgress: number;
+  unitLabel: string;
+  playerXpReward: number;
+  forgeXpReward: number;
+  goldReward: number;
+  rationale: string;
+  accepted: boolean;
+  createdAt: string;
+}
+
+export interface MentorChatMessage {
+  id: string;
+  role: MentorMessageRole;
+  content: string;
+  focusAreas?: string[];
+  recoveryAdvice?: string;
+  safetyNotice?: string;
+  recommendedQuest?: MentorRecommendedQuest | null;
+  createdAt: string;
+}
+
+export interface MentorWeeklyAnalysis {
+  summary: string;
+  strengths: string[];
+  improvementAreas: string[];
+  realisticPlan: string[];
+  recoveryRecommendation: string;
+  generatedAt: string;
+}
+
+// --- PHASE 5: COMMUNITY EVENTS ---
+
+export type CommunityEventStatus = 'upcoming' | 'active' | 'completed';
+
+export interface CommunityEventMilestone {
+  id: string;
+  title: string;
+  targetPoints: number;
+  rewardXp: number;
+  rewardGold: number;
+}
+
+export interface CommunityEvent {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  themeColor: string;
+  status: CommunityEventStatus;
+  startsAt: string;
+  endsAt: string;
+  targetGoalPoints: number;
+  currentGoalPoints: number;
+  participantsCount: number;
+  milestones: CommunityEventMilestone[];
+}
+
+export interface CommunityEventPlayerState {
+  event: CommunityEvent;
+  playerPoints: number;
+  playerContributionsCount: number;
+  claimedMilestoneIds: string[];
+  topContributors: Array<{ rank: number; userId: string; username: string; points: number }>;
+}
+
+// --- PHASE 6: PERSONAL RECORDS MUSEUM ---
+
+export type MuseumCategory =
+  | 'fitness'
+  | 'strength'
+  | 'endurance'
+  | 'consistency'
+  | 'personal_best'
+  | 'boss_battle'
+  | 'rivalry'
+  | 'community_event'
+  | 'seasonal'
+  | 'rare_legendary';
+
+export type MuseumRarity = 'Common' | 'Rare' | 'Epic' | 'Legendary' | 'Mythic';
+
+export interface MuseumRecord {
+  id: string;
+  userId: string;
+  idempotencyKey: string;
+  category: MuseumCategory;
+  metricKey: string;
+  title: string;
+  description: string;
+  numericValue: number;
+  displayValue: string;
+  isPersonalBest: boolean;
+  achievedAt: string;
+  sourceActivityRef: string;
+  verified: boolean;
+  rarity: MuseumRarity;
+}
+
+export interface MuseumLockedMilestone {
+  id: string;
+  category: MuseumCategory;
+  title: string;
+  description: string;
+  requirementText: string;
+  rarity: MuseumRarity;
+}
+
+
