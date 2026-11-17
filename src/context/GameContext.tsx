@@ -56,8 +56,14 @@ import {
   PlayerSkillTreeState,
   SkillActivityAwardResult,
   SkillActivityType,
+  AdvancedLeaderboardResponse,
+  NotificationCategory,
+  PlayerIdentityState,
+  PlayerSeasonStateResponse,
+  ServerNotificationPreferences,
 } from '../types/game';
 import { createEmptySkillTreeState, type VerifiedActivityMetadata } from '../data/skillTreeData';
+import { DEFAULT_SERVER_NOTIFICATION_PREFS } from '../data/polish2Data';
 import type {
   CommunityEventPlayerState,
   MentorChatMessage,
@@ -90,6 +96,22 @@ import {
   type MuseumQueryResponse,
   type RivalsStateResponse,
 } from '../services/ecosystemService';
+import {
+  claimGlobalRareBadgeServer,
+  claimSeasonChallengeServer,
+  claimSeasonMilestoneServer,
+  dismissNotificationApiServer,
+  featureIdentityBadgesServer,
+  fetchIdentityStateServer,
+  fetchNotificationsStateServer,
+  fetchSeasonStateServer,
+  markAllNotificationsReadApiServer,
+  markNotificationReadApiServer,
+  queryAdvancedLeaderboardServer,
+  saveNotificationPreferencesServer,
+  selectIdentityTitleServer,
+  syncVerifiedIdentitySnapshotServer,
+} from '../services/polish2Service';
 import { DEFAULT_WORLD_STATE } from '../data/heartlandsWorldData';
 import { getHeroById, mapClassToDefaultHeroId } from '../data/heroesData';
 import { CAMPAIGN_CHAPTERS, TUTORIAL_STEPS } from '../data/campaignData';
@@ -242,10 +264,50 @@ interface GameContextType {
   activeTab: string;
   socialSubTab: 'leaderboard' | 'friends' | 'chat' | 'rivals';
   setSocialSubTab: (subTab: 'leaderboard' | 'friends' | 'chat' | 'rivals') => void;
-  progressionSubTab: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree';
+  progressionSubTab: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree' | 'seasons';
   setProgressionSubTab: (
-    subTab: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree'
+    subTab: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree' | 'seasons'
   ) => void;
+  // Polish 2.0 Phase 1: Advanced Player Identity
+  identityState: PlayerIdentityState | null;
+  identityLoading: boolean;
+  refreshIdentityState: () => Promise<void>;
+  syncVerifiedIdentitySnapshot: () => Promise<void>;
+  selectIdentityTitle: (titleId: string | null) => Promise<{ success: boolean; error?: string }>;
+  featureIdentityBadges: (badgeIds: string[]) => Promise<{ success: boolean; error?: string }>;
+  claimGlobalRareBadge: (
+    badgeId: string
+  ) => Promise<{ success: boolean; alreadyClaimedGlobally?: boolean; error?: string }>;
+  // Polish 2.0 Phase 2: Intelligent Notifications & Preferences
+  notificationPreferences: ServerNotificationPreferences;
+  notificationCategoryCounts: Record<string, { total: number; unread: number }>;
+  refreshNotificationsState: (category?: NotificationCategory | 'all') => Promise<void>;
+  saveServerNotificationPreferences: (
+    prefs: Partial<ServerNotificationPreferences>
+  ) => Promise<{ success: boolean; error?: string }>;
+  dismissNotification: (notificationId: string) => Promise<void>;
+  navigateFromNotification: (notif: AppNotification) => void;
+  // Polish 2.0 Phase 3: Seasonal Progression
+  seasonState: PlayerSeasonStateResponse | null;
+  seasonLoading: boolean;
+  refreshSeasonState: (page?: number) => Promise<void>;
+  claimSeasonChallenge: (
+    challengeId: string
+  ) => Promise<{ success: boolean; seasonXpAwarded?: number; error?: string }>;
+  claimSeasonMilestone: (
+    milestoneId: string
+  ) => Promise<{ success: boolean; rewardLabel?: string; error?: string }>;
+  // Polish 2.0 Phase 4: Advanced Leaderboards
+  queryAdvancedLeaderboard: (
+    scope: LeaderboardScope,
+    page?: number,
+    limit?: number
+  ) => Promise<{
+    ok: boolean;
+    data?: AdvancedLeaderboardResponse;
+    isLiveBackend: boolean;
+    error?: string;
+  }>;
   // Phase 1: Real-Life Skill Tree (Strictly Independent from Player XP)
   skillTreeState: PlayerSkillTreeState;
   skillTreeLoading: boolean;
@@ -541,7 +603,7 @@ interface GameContextType {
   removeFriend: (friendshipId: string) => Promise<void>;
   blockUser: (targetUserId: string) => Promise<{ success: boolean; error?: string }>;
   unblockUser: (targetUserId: string) => Promise<{ success: boolean; error?: string }>;
-  markNotificationRead: (notificationId?: string) => Promise<void>;
+  markNotificationRead: (notificationId?: string, category?: NotificationCategory | 'all') => Promise<void>;
   // System Actions
   toggleSound: () => void;
   resetAllData: () => void;
@@ -614,6 +676,8 @@ const ROUTE_TO_TAB: Record<string, string> = {
   '/skills': 'skill-tree',
   '/world': 'world',
   '/heartlands': 'world',
+  '/seasons': 'seasons',
+  '/notifications': 'notifications',
   '/settings': 'settings',
 };
 
@@ -870,8 +934,18 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [activeTab, setActiveTabState] = useState<string>('dashboard');
   const [socialSubTab, setSocialSubTabState] = useState<'leaderboard' | 'friends' | 'chat' | 'rivals'>('leaderboard');
   const [progressionSubTab, setProgressionSubTabState] = useState<
-    'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree'
+    'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree' | 'seasons'
   >('quests');
+  const [identityState, setIdentityState] = useState<PlayerIdentityState | null>(null);
+  const [identityLoading, setIdentityLoading] = useState<boolean>(false);
+  const [notificationPreferences, setNotificationPreferences] = useState<ServerNotificationPreferences>(
+    DEFAULT_SERVER_NOTIFICATION_PREFS
+  );
+  const [notificationCategoryCounts, setNotificationCategoryCounts] = useState<
+    Record<string, { total: number; unread: number }>
+  >({});
+  const [seasonState, setSeasonState] = useState<PlayerSeasonStateResponse | null>(null);
+  const [seasonLoading, setSeasonLoading] = useState<boolean>(false);
   const [skillTreeState, setSkillTreeState] = useState<PlayerSkillTreeState>(() =>
     createEmptySkillTreeState()
   );
@@ -1133,7 +1207,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const setProgressionSubTab = (
-    subTab: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree'
+    subTab: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree' | 'seasons'
   ) => {
     sound.playClick();
     setProgressionSubTabState(subTab);
@@ -1157,7 +1231,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       tab === 'daily-report' ||
       tab === 'achievements' ||
       tab === 'hall-of-legends' ||
-      tab === 'skill-tree'
+      tab === 'skill-tree' ||
+      tab === 'seasons'
     ) {
       setProgressionSubTabState(tab);
       setActiveTabState('progression');
@@ -1908,14 +1983,57 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setShowHeroSelectModalState(true);
           }
         }
-        // Hydrate Real-Life Skill Tree + Phases 2-6 Ecosystem Services for authenticated user
-        const [skillRes, bossRes, rivalRes, mentorRes, eventRes, museumRes] = await Promise.all([
+        // Hydrate Real-Life Skill Tree + Phases 2-6 Ecosystem + Polish 2.0 Identity, Notifications, Seasons
+        const srvProf = boot?.ok && boot.data?.profile ? boot.data.profile : prof;
+        const gsStats = cloudRes.gameState?.stats;
+        const initWorkoutsCount = Array.isArray(cloudRes.workoutSessions)
+          ? cloudRes.workoutSessions.length
+          : 0;
+        const initActiveMins = Array.isArray(cloudRes.workoutSessions)
+          ? cloudRes.workoutSessions.reduce((acc, w) => acc + (Number(w.durationMinutes) || 0), 0)
+          : 0;
+        const initAchievementsUnlocked = Array.isArray(boot?.ok ? boot.data?.achievements : undefined)
+          ? boot!.data!.achievements.filter((a: any) => Boolean(a.unlocked)).length
+          : Array.isArray(cloudRes.gameState?.achievements)
+          ? cloudRes.gameState!.achievements.filter(a => a.unlocked).length
+          : 0;
+
+        const [
+          skillRes,
+          bossRes,
+          rivalRes,
+          mentorRes,
+          eventRes,
+          museumRes,
+          identityRes,
+          notifStateRes,
+          seasonRes,
+        ] = await Promise.all([
           fetchSkillTreeStateServer(sbUser.id, userTimezone),
           fetchWeeklyBossStateServer(sbUser.id, 1, 10, userTimezone),
           fetchRivalsStateServer(sbUser.id),
           fetchAiMentorStateServer(sbUser.id),
           fetchCommunityEventsStateServer(sbUser.id),
           fetchMuseumRecordsServer({ callerUserId: sbUser.id, page: 1, limit: 12 }),
+          syncVerifiedIdentitySnapshotServer({
+            userId: sbUser.id,
+            snapshot: {
+              level: Number(srvProf?.level ?? gsStats?.level ?? 1),
+              currentStreak: Number(srvProf?.current_streak ?? gsStats?.currentStreak ?? 0),
+              longestStreak: Number(srvProf?.current_streak ?? gsStats?.currentStreak ?? 0),
+              totalWorkoutsCompleted: Math.max(
+                Number(srvProf?.total_workouts_completed ?? gsStats?.totalWorkoutsCompleted ?? 0),
+                initWorkoutsCount
+              ),
+              totalVerifiedReps: Number(srvProf?.total_verified_reps ?? gsStats?.totalVerifiedReps ?? 0),
+              totalActiveMinutes: initActiveMins,
+              totalAchievementsUnlocked: initAchievementsUnlocked,
+              totalBossesDefeated: Number(srvProf?.total_bosses_defeated ?? gsStats?.totalBossesDefeated ?? 0),
+              joinedAt: sbUser.created_at || null,
+            },
+          }),
+          fetchNotificationsStateServer(sbUser.id, 'all'),
+          fetchSeasonStateServer(sbUser.id, 1, 10),
         ]);
         if (skillRes.ok && skillRes.data?.state) {
           setSkillTreeState(skillRes.data.state);
@@ -1936,6 +2054,37 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         if (museumRes.ok && museumRes.data) {
           setMuseumData(museumRes.data);
+        }
+        if (identityRes.ok && identityRes.state) {
+          setIdentityState(identityRes.state);
+        }
+        if (notifStateRes.ok && notifStateRes.data) {
+          const srvList = notifStateRes.data.notifications || [];
+          setNotifications(prev => {
+            const seenKeys = new Set<string>(
+              srvList.map(n => n.eventKey || n.id)
+            );
+            const merged = [...srvList];
+            for (const existing of prev) {
+              const k = existing.eventKey || existing.id;
+              if (!seenKeys.has(k) && !existing.dismissedAt) {
+                merged.push(existing);
+              }
+            }
+            return merged
+              .filter(n => !n.dismissedAt)
+              .sort(
+                (a, b) =>
+                  new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+              );
+          });
+          setNotificationCategoryCounts(notifStateRes.data.categoryCounts || {});
+          if (notifStateRes.data.preferences) {
+            setNotificationPreferences(notifStateRes.data.preferences);
+          }
+        }
+        if (seasonRes.ok && seasonRes.data) {
+          setSeasonState(seasonRes.data);
         }
         void syncMuseumPrivacyServer(
           sbUser.id,
@@ -2073,7 +2222,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           routeTab === 'daily-report' ||
           routeTab === 'achievements' ||
           routeTab === 'hall-of-legends' ||
-          routeTab === 'skill-tree'
+          routeTab === 'skill-tree' ||
+          routeTab === 'seasons'
         ) {
           setProgressionSubTabState(routeTab);
           setActiveTabState('progression');
@@ -3750,6 +3900,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (res.data?.profile) syncProfileWithCelebration(res.data.profile);
     confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
     setAchievements(prev => prev.map(item => (item.id === achievementId ? { ...item, claimed: true } : item)));
+    void syncVerifiedIdentitySnapshot();
     return { success: true };
   };
 
@@ -4128,19 +4279,99 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { success: true };
   };
 
-  const markNotificationRead = async (notificationId?: string) => {
+  const markNotificationRead = async (
+    notificationId?: string,
+    category: NotificationCategory | 'all' = 'all'
+  ) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
     const nowIso = new Date().toISOString();
     setNotifications(prev =>
-      prev.map(n =>
-        !notificationId || n.id === notificationId ? { ...n, readAt: n.readAt || nowIso } : n
-      )
+      prev.map(n => {
+        if (notificationId) {
+          return n.id === notificationId ? { ...n, readAt: n.readAt || nowIso } : n;
+        }
+        if (category === 'all' || n.category === category) {
+          return { ...n, readAt: n.readAt || nowIso };
+        }
+        return n;
+      })
     );
+    if (uid) {
+      if (notificationId) {
+        await markNotificationReadApiServer(uid, notificationId);
+      } else {
+        await markAllNotificationsReadApiServer(uid, category);
+      }
+    }
     if (unifiedBackendReady) {
       await markNotificationsReadServer(notificationId ?? null);
     }
+    if (uid) {
+      void refreshNotificationsState();
+    }
   };
 
-  const unreadNotificationsCount = notifications.filter(n => !n.readAt).length;
+  const dismissNotification = async (notificationId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    const nowIso = new Date().toISOString();
+    setNotifications(prev =>
+      prev.filter(n => n.id !== notificationId).map(n => (n.id === notificationId ? { ...n, dismissedAt: nowIso } : n))
+    );
+    if (uid) {
+      await dismissNotificationApiServer(uid, notificationId);
+      void refreshNotificationsState();
+    }
+  };
+
+  const navigateFromNotification = (notif: AppNotification) => {
+    if (!notif.readAt) {
+      void markNotificationRead(notif.id);
+    }
+    if (notif.actionSubTab) {
+      setActiveTab(notif.actionSubTab);
+      return;
+    }
+    if (notif.actionTab) {
+      setActiveTab(notif.actionTab);
+      return;
+    }
+    switch (notif.type) {
+      case 'friend_request':
+      case 'friend_accepted':
+      case 'rival_invite':
+      case 'rival_accepted':
+        setActiveTab(notif.type.startsWith('rival') ? 'rivals' : 'friends');
+        break;
+      case 'guild_invite':
+        setActiveTab('guilds');
+        break;
+      case 'weekly_boss_defeated':
+      case 'boss_update':
+        setActiveTab('boss-battles');
+        break;
+      case 'community_milestone':
+        setActiveTab('events');
+        break;
+      case 'season_milestone':
+        setActiveTab('seasons');
+        break;
+      case 'skill_level_up':
+        setActiveTab('skill-tree');
+        break;
+      case 'title_unlocked':
+      case 'badge_unlocked':
+        setActiveTab('character');
+        break;
+      case 'museum_personal_best':
+        setActiveTab('museum');
+        break;
+      default:
+        setActiveTab('notifications');
+        break;
+    }
+  };
+
+  const unreadNotificationsCount = notifications.filter(n => !n.readAt && !n.dismissedAt).length;
 
   // Sound Engine Toggle
   const toggleSound = () => {
@@ -5934,40 +6165,18 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
               : undefined,
         });
         if (ecoRes.ok && ecoRes.data) {
-          if (ecoRes.data.weeklyBoss?.bossDefeatedJustNow) {
-            setNotifications(prev => [
-              {
-                id: `notif-wb-${Date.now()}`,
-                type: 'weekly_boss_defeated',
-                title: 'Weekly Raid Boss Vanquished!',
-                body: `The realm defeated ${ecoRes.data.weeklyBoss.bossName}! Claim your raid rewards.`,
-                readAt: null,
-                createdAt: new Date().toISOString(),
-              },
-              ...prev,
-            ]);
+          if (ecoRes.data.identityState) {
+            setIdentityState(ecoRes.data.identityState as PlayerIdentityState);
+          } else {
+            void refreshIdentityState();
           }
-          if (Array.isArray(ecoRes.data.museumRecordsCreated) && ecoRes.data.museumRecordsCreated.length > 0) {
-            const firstRec = ecoRes.data.museumRecordsCreated[0] as MuseumRecord;
-            if (firstRec.isPersonalBest) {
-              setNotifications(prev => [
-                {
-                  id: `notif-pb-${Date.now()}`,
-                  type: 'museum_personal_best',
-                  title: 'New Personal Best Enshrined!',
-                  body: `${firstRec.title}: ${firstRec.displayValue}`,
-                  readAt: null,
-                  createdAt: new Date().toISOString(),
-                },
-                ...prev,
-              ]);
-            }
-          }
-          // Refresh affected ecosystem caches quietly
+          // Refresh affected ecosystem + Polish 2.0 caches quietly
           void refreshWeeklyBossState();
           void refreshRivalsState();
           void refreshCommunityEventState();
           void refreshMuseumRecords();
+          void refreshSeasonState();
+          void refreshNotificationsState();
         }
       }
       if (!res.duplicate && (res.xpAwarded || 0) > 0) {
@@ -6419,6 +6628,237 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
+  // --- POLISH 2.0 PHASE 1: ADVANCED PLAYER IDENTITY ---
+  const refreshIdentityState = async () => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    setIdentityLoading(true);
+    try {
+      const res = await fetchIdentityStateServer(uid);
+      if (res.ok && res.state) {
+        setIdentityState(res.state);
+      }
+    } finally {
+      setIdentityLoading(false);
+    }
+  };
+
+  const syncVerifiedIdentitySnapshot = async () => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    const totalActiveMins = fitnessSessions.reduce(
+      (sum, s) => sum + (Number(s.durationMinutes) || 0),
+      0
+    );
+    const totalHabitsDone = habits.reduce((sum, h) => sum + (h.history?.length || (h.completedToday ? 1 : 0)), 0);
+    const unlockedAch = achievements.filter(a => a.unlocked).length;
+    const res = await syncVerifiedIdentitySnapshotServer({
+      userId: uid,
+      snapshot: {
+        level: stats.level,
+        currentStreak: stats.currentStreak,
+        longestStreak: Math.max(stats.currentStreak, identityState?.lifetimeStats?.longestStreak || 0),
+        totalWorkoutsCompleted: Math.max(stats.totalWorkoutsCompleted, fitnessSessions.length),
+        totalVerifiedReps: stats.totalVerifiedReps,
+        totalActiveMinutes: totalActiveMins,
+        totalHabitsCompleted: totalHabitsDone,
+        totalAchievementsUnlocked: unlockedAch,
+        totalBossesDefeated: stats.totalBossesDefeated,
+        joinedAt: user?.createdAt || null,
+      },
+    });
+    if (res.ok && res.state) {
+      setIdentityState(res.state);
+    }
+  };
+
+  const selectIdentityTitle = async (
+    titleId: string | null
+  ): Promise<{ success: boolean; error?: string }> => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await selectIdentityTitleServer(uid, titleId);
+    if (res.ok && res.state) {
+      setIdentityState(res.state);
+      sound.playClick();
+      return { success: true };
+    }
+    return { success: false, error: res.error || 'Could not update title.' };
+  };
+
+  const featureIdentityBadges = async (
+    badgeIds: string[]
+  ): Promise<{ success: boolean; error?: string }> => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await featureIdentityBadgesServer(uid, badgeIds);
+    if (res.ok && res.state) {
+      setIdentityState(res.state);
+      sound.playClick();
+      return { success: true };
+    }
+    return { success: false, error: res.error || 'Could not update featured badges.' };
+  };
+
+  const claimGlobalRareBadge = async (
+    badgeId: string
+  ): Promise<{ success: boolean; alreadyClaimedGlobally?: boolean; error?: string }> => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid || !user) return { success: false, error: 'Authentication required.' };
+    const res = await claimGlobalRareBadgeServer(uid, badgeId, user.username);
+    if (res.ok && res.state) {
+      setIdentityState(res.state);
+      sound.playVictory();
+      confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 }, colors: ['#C5A15A', '#7046A5', '#FB7185'] });
+      void refreshNotificationsState();
+      return { success: true };
+    }
+    return {
+      success: false,
+      alreadyClaimedGlobally: res.alreadyClaimedGlobally,
+      error: res.error || 'Could not claim rare badge.',
+    };
+  };
+
+  // --- POLISH 2.0 PHASE 2: INTELLIGENT NOTIFICATIONS ---
+  const refreshNotificationsState = async (category: NotificationCategory | 'all' = 'all') => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    const res = await fetchNotificationsStateServer(uid, category);
+    if (res.ok && res.data) {
+      const srvList = res.data.notifications || [];
+      if (category === 'all') {
+        setNotifications(prev => {
+          const seenKeys = new Set<string>(srvList.map(n => n.eventKey || n.id));
+          const merged = [...srvList];
+          for (const existing of prev) {
+            const k = existing.eventKey || existing.id;
+            if (!seenKeys.has(k) && !existing.dismissedAt && existing.id.startsWith('notif-')) {
+              // Keep non-synthetic Supabase-originated social notifications if still active
+              if (!existing.id.startsWith('notif-wb-') && !existing.id.startsWith('notif-pb-')) {
+                merged.push(existing);
+              }
+            }
+          }
+          return merged
+            .filter(n => !n.dismissedAt)
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        });
+      }
+      setNotificationCategoryCounts(res.data.categoryCounts || {});
+      if (res.data.preferences) {
+        setNotificationPreferences(res.data.preferences);
+      }
+    }
+  };
+
+  const saveServerNotificationPreferences = async (
+    prefs: Partial<ServerNotificationPreferences>
+  ): Promise<{ success: boolean; error?: string }> => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await saveNotificationPreferencesServer(uid, prefs);
+    if (res.ok && res.preferences) {
+      setNotificationPreferences(res.preferences);
+      sound.playClick();
+      return { success: true };
+    }
+    return { success: false, error: res.error || 'Could not save notification preferences.' };
+  };
+
+  // --- POLISH 2.0 PHASE 3: SEASONAL PROGRESSION ---
+  const refreshSeasonState = async (page: number = 1) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    setSeasonLoading(true);
+    try {
+      const res = await fetchSeasonStateServer(uid, page, 10);
+      if (res.ok && res.data) {
+        setSeasonState(res.data);
+      }
+    } finally {
+      setSeasonLoading(false);
+    }
+  };
+
+  const claimSeasonChallenge = async (
+    challengeId: string
+  ): Promise<{ success: boolean; seasonXpAwarded?: number; error?: string }> => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await claimSeasonChallengeServer(uid, challengeId);
+    if (res.ok && res.data) {
+      setSeasonState(res.data);
+      sound.playQuestComplete();
+      void refreshNotificationsState();
+      return { success: true, seasonXpAwarded: res.seasonXpAwarded };
+    }
+    return { success: false, error: res.error || 'Could not claim seasonal challenge.' };
+  };
+
+  const claimSeasonMilestone = async (
+    milestoneId: string
+  ): Promise<{ success: boolean; rewardLabel?: string; error?: string }> => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await claimSeasonMilestoneServer(uid, milestoneId);
+    if (res.ok && res.data) {
+      setSeasonState(res.data);
+      sound.playVictory();
+      confetti({ particleCount: 75, spread: 70, origin: { y: 0.6 }, colors: ['#C5A15A', '#7046A5', '#34D399'] });
+      void refreshIdentityState();
+      void refreshNotificationsState();
+      return { success: true, rewardLabel: res.rewardLabel };
+    }
+    return { success: false, error: res.error || 'Could not claim seasonal milestone.' };
+  };
+
+  // --- POLISH 2.0 PHASE 4: ADVANCED LEADERBOARDS ---
+  const queryAdvancedLeaderboard = async (
+    scope: LeaderboardScope,
+    page: number = 1,
+    limit: number = 20
+  ): Promise<{
+    ok: boolean;
+    data?: AdvancedLeaderboardResponse;
+    isLiveBackend: boolean;
+    error?: string;
+  }> => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) {
+      return { ok: false, isLiveBackend: false, error: 'Authentication required.' };
+    }
+
+    let supabaseEntries: LeaderboardEntry[] = [];
+    let isLiveBackend = false;
+    if (
+      unifiedBackendReady &&
+      (scope === 'global' ||
+        scope === 'weekly' ||
+        scope === 'monthly' ||
+        scope === 'guild' ||
+        scope === 'friends')
+    ) {
+      const srv = await fetchLeaderboardServer(scope, 50, 0);
+      if (srv.ok && srv.data) {
+        supabaseEntries = srv.data;
+        isLiveBackend = true;
+      }
+    }
+
+    const res = await queryAdvancedLeaderboardServer({
+      userId: uid,
+      scope,
+      page,
+      limit,
+      supabaseEntries,
+    });
+    if (res.ok && res.data) {
+      return { ok: true, data: res.data, isLiveBackend: true };
+    }
+    return { ok: false, isLiveBackend, error: res.error || 'Could not load leaderboard.' };
+  };
+
   return (
     <GameContext.Provider
       value={{
@@ -6451,6 +6891,25 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSocialSubTab,
         progressionSubTab,
         setProgressionSubTab,
+        identityState,
+        identityLoading,
+        refreshIdentityState,
+        syncVerifiedIdentitySnapshot,
+        selectIdentityTitle,
+        featureIdentityBadges,
+        claimGlobalRareBadge,
+        notificationPreferences,
+        notificationCategoryCounts,
+        refreshNotificationsState,
+        saveServerNotificationPreferences,
+        dismissNotification,
+        navigateFromNotification,
+        seasonState,
+        seasonLoading,
+        refreshSeasonState,
+        claimSeasonChallenge,
+        claimSeasonMilestone,
+        queryAdvancedLeaderboard,
         skillTreeState,
         skillTreeLoading,
         lastSkillAwardBanner,

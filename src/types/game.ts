@@ -60,6 +60,13 @@ export interface PlayerPresenceInfo {
 }
 
 export interface NotificationPreferences {
+  masterEnabled?: boolean;
+  fitness?: boolean;
+  social?: boolean;
+  achievement?: boolean;
+  boss?: boolean;
+  community?: boolean;
+  seasonal?: boolean;
   dailyReminders: boolean;
   weeklySummary: boolean;
   guildUpdates: boolean;
@@ -710,10 +717,24 @@ export interface ShopItem {
   metadata?: Record<string, any>;
 }
 
-export type LeaderboardScope = 'global' | 'weekly' | 'monthly' | 'guild' | 'friends';
+export type LeaderboardScope =
+  | 'global'
+  | 'weekly'
+  | 'monthly'
+  | 'seasonal'
+  | 'guild'
+  | 'friends'
+  | 'strength'
+  | 'endurance'
+  | 'consistency'
+  | 'discipline'
+  | 'community'
+  | 'boss_battle';
 
 export interface LeaderboardEntry {
   rank: number;
+  previousRank?: number | null;
+  rankDelta?: number | null;
   userId: string;
   name: string;
   avatar: string;
@@ -722,7 +743,11 @@ export interface LeaderboardEntry {
   aetherRank: AetherRankStage;
   streak: number;
   score: number;
+  scoreLabel?: string;
   isCurrent?: boolean;
+  equippedTitleName?: string | null;
+  equippedTitleRarity?: IdentityRarity | null;
+  reputationScore?: number;
   legendTitle?: string | null;
   legendTitleStyle?: GlobalTitleStyle | null;
   legendEmblem?: string | null;
@@ -873,6 +898,21 @@ export interface PublicPlayerProfile {
       rarity: GlobalAchievementRarity;
       claimedAt: string;
     }>;
+    equippedIdentityTitle?: {
+      id: string;
+      name: string;
+      rarity: IdentityRarity;
+    } | null;
+    featuredBadges?: Array<{
+      id: string;
+      name: string;
+      rarity: IdentityRarity;
+      iconName: string;
+      description: string;
+    }>;
+    reputationScore?: number;
+    reputationTier?: string;
+    joinedAt?: string | null;
   };
 }
 
@@ -893,13 +933,25 @@ export interface FriendRecord {
   createdAt: string;
 }
 
+export type NotificationCategory =
+  | 'player_progression'
+  | 'social'
+  | 'game_world'
+  | 'fitness';
+
 export interface AppNotification {
   id: string;
+  category?: NotificationCategory;
+  preferenceKey?: 'fitness' | 'social' | 'achievement' | 'boss' | 'community' | 'seasonal';
+  eventKey?: string;
   type: string;
   title: string;
   body: string;
+  actionTab?: string | null;
+  actionSubTab?: string | null;
   payload?: Record<string, any>;
   readAt: string | null;
+  dismissedAt?: string | null;
   createdAt: string;
 }
 
@@ -1674,5 +1726,247 @@ export interface MuseumLockedMilestone {
   requirementText: string;
   rarity: MuseumRarity;
 }
+
+// --- AAA POLISH 2.0: PHASE 1 (ADVANCED PLAYER IDENTITY) ---
+
+export type IdentityRarity =
+  | 'Common'
+  | 'Uncommon'
+  | 'Rare'
+  | 'Epic'
+  | 'Legendary'
+  | 'Mythic';
+
+export interface PlayerTitleDefinition {
+  id: string;
+  name: string;
+  rarity: IdentityRarity;
+  description: string;
+  unlockRequirement: string;
+  category: 'discipline' | 'endurance' | 'strength' | 'consistency' | 'boss' | 'social' | 'seasonal';
+  conditionType:
+    | 'streak_days'
+    | 'workouts_total'
+    | 'verified_reps_total'
+    | 'boss_hits_total'
+    | 'bosses_defeated'
+    | 'skill_level_any'
+    | 'skill_nodes_unlocked'
+    | 'achievements_unlocked'
+    | 'rivalry_wins'
+    | 'community_points'
+    | 'player_level'
+    | 'season_tier';
+  threshold: number;
+}
+
+export interface PlayerUnlockedTitle {
+  titleId: string;
+  unlockedAt: string;
+  sourceRef: string;
+}
+
+export interface RareBadgeDefinition {
+  id: string;
+  name: string;
+  rarity: IdentityRarity;
+  iconName: string;
+  description: string;
+  unlockRequirement: string;
+  globalExclusive?: boolean;
+  conditionType:
+    | 'workouts_total'
+    | 'verified_reps_total'
+    | 'streak_days'
+    | 'boss_damage_total'
+    | 'bosses_defeated'
+    | 'skill_nodes_unlocked'
+    | 'rivalry_wins'
+    | 'community_points'
+    | 'museum_records'
+    | 'season_tier'
+    | 'reputation_score';
+  threshold: number;
+}
+
+export interface PlayerUnlockedBadge {
+  badgeId: string;
+  unlockedAt: string;
+  sourceRef: string;
+  globalClaimOrder?: number | null;
+}
+
+export interface ReputationBreakdown {
+  workoutsScore: number;
+  consistencyScore: number;
+  bossParticipationScore: number;
+  rivalryScore: number;
+  communityScore: number;
+  skillMasteryScore: number;
+  titlesAndBadgesScore: number;
+}
+
+export interface PlayerLifetimeStatistics {
+  totalActivities: number;
+  totalWorkouts: number;
+  totalVerifiedReps: number;
+  totalActiveMinutes: number;
+  totalHabitsCompleted: number;
+  longestStreak: number;
+  totalAchievementsUnlocked: number;
+  totalPersonalRecords: number;
+  totalBossDamage: number;
+  totalBossesDefeated: number;
+  rivalryWins: number;
+  communityPoints: number;
+  skillNodesUnlocked: number;
+  joinedAt: string | null;
+}
+
+export interface PlayerIdentityState {
+  userId: string;
+  equippedTitleId: string | null;
+  featuredBadgeIds: string[];
+  unlockedTitles: PlayerUnlockedTitle[];
+  unlockedBadges: PlayerUnlockedBadge[];
+  reputationScore: number;
+  reputationTier: string;
+  reputationBreakdown: ReputationBreakdown;
+  lifetimeStats: PlayerLifetimeStatistics;
+  globalBadgeOwners: Record<
+    string,
+    { badgeId: string; ownerId: string; ownerUsername: string; claimedAt: string }
+  >;
+}
+
+// --- AAA POLISH 2.0: PHASE 2 (INTELLIGENT NOTIFICATION PREFERENCES) ---
+
+export interface ServerNotificationPreferences {
+  masterEnabled: boolean;
+  fitness: boolean;
+  social: boolean;
+  achievement: boolean;
+  boss: boolean;
+  community: boolean;
+  seasonal: boolean;
+  updatedAt?: string;
+}
+
+// --- AAA POLISH 2.0: PHASE 3 (SEASONAL PROGRESSION SYSTEM) ---
+
+export type SeasonStatus = 'upcoming' | 'active' | 'archived';
+
+export interface SeasonChallengeDefinition {
+  id: string;
+  cadence: 'weekly' | 'season';
+  title: string;
+  description: string;
+  metric:
+    | 'verified_activities'
+    | 'workouts'
+    | 'habit_completions'
+    | 'boss_hits'
+    | 'community_points'
+    | 'rivalry_matches'
+    | 'study_sessions';
+  targetCount: number;
+  seasonalXpReward: number;
+}
+
+export interface SeasonMilestoneReward {
+  tier: number;
+  id: string;
+  title: string;
+  requiredSeasonXp: number;
+  rewardType: 'cosmetic_crest' | 'title' | 'badge' | 'achievement';
+  rewardLabel: string;
+  rewardRefId?: string;
+}
+
+export interface SeasonDefinition {
+  id: string;
+  seasonNumber: number;
+  name: string;
+  theme: string;
+  subtitle: string;
+  description: string;
+  accentHex: string;
+  startsAt: string;
+  endsAt: string;
+  status: SeasonStatus;
+  challenges: SeasonChallengeDefinition[];
+  milestones: SeasonMilestoneReward[];
+}
+
+export interface SeasonLeaderboardEntry {
+  rank: number;
+  userId: string;
+  username: string;
+  characterClass: CharacterClass;
+  seasonXp: number;
+  currentTier: number;
+  completionPercent: number;
+}
+
+export interface ArchivedSeasonSummary {
+  seasonId: string;
+  seasonNumber: number;
+  name: string;
+  theme: string;
+  startsAt: string;
+  endsAt: string;
+  archivedAt: string;
+  totalParticipants: number;
+  topPlayers: SeasonLeaderboardEntry[];
+  playerSummary?: {
+    rank: number | null;
+    seasonXp: number;
+    tierReached: number;
+    completionPercent: number;
+    claimedRewardTitles: string[];
+  } | null;
+}
+
+export interface PlayerSeasonStateResponse {
+  season: SeasonDefinition;
+  playerProgress: {
+    seasonXp: number;
+    currentTier: number;
+    completionPercent: number;
+    challengeProgress: Record<
+      string,
+      { current: number; target: number; completed: boolean; claimed: boolean }
+    >;
+    claimedMilestoneIds: string[];
+    unlockedCosmetics: string[];
+  };
+  leaderboard: SeasonLeaderboardEntry[];
+  leaderboardPage: number;
+  leaderboardTotalPages: number;
+  history: ArchivedSeasonSummary[];
+}
+
+// --- AAA POLISH 2.0: PHASE 4 (ADVANCED LEADERBOARDS) ---
+
+export interface AdvancedLeaderboardResponse {
+  scope: LeaderboardScope;
+  periodKey: string;
+  resetLabel: string;
+  resetAt: string | null;
+  scoreUnit: string;
+  page: number;
+  limit: number;
+  totalEntries: number;
+  totalPages: number;
+  entries: LeaderboardEntry[];
+  currentUserEntry: LeaderboardEntry | null;
+  historicalSnapshots: Array<{
+    periodKey: string;
+    scope: LeaderboardScope;
+    capturedAt: string;
+    topThree: Array<{ rank: number; userId: string; name: string; score: number }>;
+  }>;
+}
+
 
 

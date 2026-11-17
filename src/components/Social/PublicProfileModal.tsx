@@ -4,6 +4,9 @@ import { getRpgAvatarForClass } from '../../assets/images';
 import { EquipmentIllustration, ArtworkItemId } from '../../assets/equipmentArtwork';
 import { getRarityStyle } from '../../utils/rarityStyles';
 import { PublicPlayerProfile } from '../../types/game';
+import { fetchPublicIdentitySummaryServer } from '../../services/polish2Service';
+import { IDENTITY_RARITY_STYLE } from '../../data/polish2Data';
+import type { IdentityRarity } from '../../types/game';
 import {
   X,
   UserPlus,
@@ -19,6 +22,7 @@ import {
   AlertTriangle,
   MailPlus,
   Crown,
+  Star,
 } from 'lucide-react';
 import { LegendTitleBadge } from './LegendTitleBadge';
 
@@ -48,17 +52,41 @@ export const PublicProfileModal: React.FC = () => {
   const [actionBusy, setActionBusy] = useState(false);
   const [actionNotice, setActionNotice] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [confirmAction, setConfirmAction] = useState<'remove' | 'block' | null>(null);
+  const [identitySummary, setIdentitySummary] = useState<{
+    equippedIdentityTitle: { id: string; name: string; rarity: string } | null;
+    featuredBadges: Array<{
+      id: string;
+      name: string;
+      rarity: string;
+      iconName: string;
+      description: string;
+    }>;
+    reputationScore: number;
+    reputationTier: string;
+    joinedAt: string | null;
+  } | null>(null);
 
   const loadProfile = async (targetId: string) => {
     setLoading(true);
     setError(null);
     setConfirmAction(null);
+    setIdentitySummary(null);
     const res = await getPublicPlayerProfile(targetId);
     if (!res.success || !res.data) {
       setError(res.error || 'Unable to load player profile.');
       setProfile(null);
     } else {
       setProfile(res.data);
+      if (
+        res.data.accessible &&
+        !res.data.blocked &&
+        res.data.player?.showAchievements !== false
+      ) {
+        const idRes = await fetchPublicIdentitySummaryServer(targetId);
+        if (idRes.ok && idRes.identity) {
+          setIdentitySummary(idRes.identity);
+        }
+      }
     }
     setLoading(false);
   };
@@ -320,6 +348,13 @@ export const PublicProfileModal: React.FC = () => {
                       {player.characterClass}
                       {typeof player.level === 'number' && ` · Lv.${player.level}`}
                       {player.aetherRank && ` · ${player.aetherRank}`}
+                      {(player.equippedIdentityTitle || identitySummary?.equippedIdentityTitle) &&
+                        ` · ${(player.equippedIdentityTitle || identitySummary?.equippedIdentityTitle)?.name}`}
+                      {(() => {
+                        const rawJoin = player.joinedAt || identitySummary?.joinedAt;
+                        if (!rawJoin || Number.isNaN(new Date(rawJoin).getTime())) return '';
+                        return ` · Joined ${new Date(rawJoin).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}`;
+                      })()}
                     </p>
                     {player.bio && (
                       <p className="text-xs text-slate-300 mt-2 leading-relaxed max-w-md">
@@ -616,6 +651,70 @@ export const PublicProfileModal: React.FC = () => {
                       </div>
                     </div>
                   )}
+
+                  {/* Reputation & Featured Rare Badges Showcase (respects Achievements privacy) */}
+                  {player.showAchievements !== false &&
+                    (typeof player.reputationScore === 'number' ||
+                      identitySummary ||
+                      (player.featuredBadges && player.featuredBadges.length > 0)) && (
+                      <div className="p-4 rounded-xl bg-[#130f24] border border-[#C5A15A]/25 space-y-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-xs font-semibold text-[#E8CF96] flex items-center gap-1.5 font-['Cinzel']">
+                            <Star className="w-3.5 h-3.5 text-[#C5A15A]" />
+                            Reputation &amp; Featured Badges
+                          </span>
+                          <span className="text-xs font-mono font-bold text-white tabular-nums">
+                            {(
+                              player.reputationScore ??
+                              identitySummary?.reputationScore ??
+                              0
+                            ).toLocaleString()}{' '}
+                            Rep ·{' '}
+                            <span className="text-[#C5A15A]">
+                              {player.reputationTier ||
+                                identitySummary?.reputationTier ||
+                                'Aspiring Traveler'}
+                            </span>
+                          </span>
+                        </div>
+                        {((player.featuredBadges && player.featuredBadges.length > 0) ||
+                          (identitySummary?.featuredBadges &&
+                            identitySummary.featuredBadges.length > 0)) ? (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            {(player.featuredBadges && player.featuredBadges.length > 0
+                              ? player.featuredBadges
+                              : identitySummary?.featuredBadges || []
+                            )
+                              .slice(0, 4)
+                              .map(badge => {
+                                const rStyle =
+                                  IDENTITY_RARITY_STYLE[badge.rarity as IdentityRarity] ||
+                                  IDENTITY_RARITY_STYLE.Common;
+                                return (
+                                  <div
+                                    key={badge.id}
+                                    className="p-2.5 rounded-lg bg-[#0a0714] border border-purple-950/70"
+                                  >
+                                    <span className={`text-[10px] font-bold uppercase ${rStyle.text}`}>
+                                      {badge.rarity}
+                                    </span>
+                                    <p className="text-xs font-semibold text-white truncate mt-0.5">
+                                      {badge.name}
+                                    </p>
+                                    <p className="text-[11px] text-slate-400 truncate">
+                                      {badge.description}
+                                    </p>
+                                  </div>
+                                );
+                              })}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-slate-400">
+                            No rare badges featured yet.
+                          </p>
+                        )}
+                      </div>
+                    )}
 
                   {/* Unlocked Achievements */}
                   {player.showAchievements !== false && (

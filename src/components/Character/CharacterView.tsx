@@ -5,6 +5,11 @@ import { getHeroById, RPG_ATTRIBUTE_META } from '../../data/heroesData';
 import { EquipmentIllustration } from '../../assets/equipmentArtwork';
 import { getRarityStyle } from '../../utils/rarityStyles';
 import {
+  IDENTITY_RARITY_STYLE,
+  PLAYER_TITLES_CATALOG,
+  RARE_BADGES_CATALOG,
+} from '../../data/polish2Data';
+import {
   Shield,
   Swords,
   Flame,
@@ -15,6 +20,10 @@ import {
   Sparkles,
   Lock,
   Crown,
+  Star,
+  Check,
+  Calendar,
+  Landmark,
 } from 'lucide-react';
 import { LegendTitleBadge } from '../Social/LegendTitleBadge';
 
@@ -35,7 +44,93 @@ export const CharacterView: React.FC = () => {
     hallOfLegends,
     equippedLegendMap,
     equipGlobalLegendTitle,
+    identityState,
+    selectIdentityTitle,
+    featureIdentityBadges,
+    claimGlobalRareBadge,
+    syncVerifiedIdentitySnapshot,
   } = useGame();
+
+  const [identityBusy, setIdentityBusy] = React.useState(false);
+  const [identityNotice, setIdentityNotice] = React.useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  React.useEffect(() => {
+    void syncVerifiedIdentitySnapshot();
+  }, []);
+
+  const showIdentityNotice = (type: 'success' | 'error', text: string) => {
+    setIdentityNotice({ type, text });
+    setTimeout(() => setIdentityNotice(null), 3200);
+  };
+
+  const equippedIdentityTitle = identityState?.equippedTitleId
+    ? PLAYER_TITLES_CATALOG.find(t => t.id === identityState.equippedTitleId) || null
+    : null;
+  const unlockedTitleSet = new Set(identityState?.unlockedTitles.map(t => t.titleId) || []);
+  const unlockedBadgeSet = new Set(identityState?.unlockedBadges.map(b => b.badgeId) || []);
+  const featuredBadgeIds = identityState?.featuredBadgeIds || [];
+  const reputationScore = identityState?.reputationScore ?? 0;
+  const reputationTier = identityState?.reputationTier || 'Aspiring Traveler';
+  const repBreakdown = identityState?.reputationBreakdown || {
+    workoutsScore: 0,
+    consistencyScore: 0,
+    bossParticipationScore: 0,
+    rivalryScore: 0,
+    communityScore: 0,
+    skillMasteryScore: 0,
+    titlesAndBadgesScore: 0,
+  };
+  const lifetime = identityState?.lifetimeStats;
+  const validJoinedAt =
+    lifetime?.joinedAt && !Number.isNaN(new Date(lifetime.joinedAt).getTime())
+      ? new Date(lifetime.joinedAt).toLocaleDateString(undefined, {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        })
+      : null;
+
+  const handleEquipIdentityTitle = async (titleId: string | null) => {
+    setIdentityBusy(true);
+    const res = await selectIdentityTitle(titleId);
+    if (res.success) {
+      showIdentityNotice('success', titleId ? 'Player title equipped!' : 'Title unequipped.');
+    } else {
+      showIdentityNotice('error', res.error || 'Could not update title.');
+    }
+    setIdentityBusy(false);
+  };
+
+  const handleToggleFeaturedBadge = async (badgeId: string) => {
+    if (!unlockedBadgeSet.has(badgeId)) return;
+    const isFeatured = featuredBadgeIds.includes(badgeId);
+    if (!isFeatured && featuredBadgeIds.length >= 4) {
+      showIdentityNotice('error', 'You can feature up to 4 badges on your profile.');
+      return;
+    }
+    const nextList = isFeatured
+      ? featuredBadgeIds.filter(id => id !== badgeId)
+      : [...featuredBadgeIds, badgeId];
+    setIdentityBusy(true);
+    const res = await featureIdentityBadges(nextList);
+    if (res.success) {
+      showIdentityNotice('success', isFeatured ? 'Removed from featured showcase.' : 'Added to featured showcase!');
+    } else {
+      showIdentityNotice('error', res.error || 'Could not update featured badges.');
+    }
+    setIdentityBusy(false);
+  };
+
+  const handleClaimWorldFirstBadge = async (badgeId: string) => {
+    setIdentityBusy(true);
+    const res = await claimGlobalRareBadge(badgeId);
+    if (res.success) {
+      showIdentityNotice('success', 'World-First Rare Badge claimed and inscribed!');
+    } else {
+      showIdentityNotice('error', res.error || 'Could not claim rare badge.');
+    }
+    setIdentityBusy(false);
+  };
 
   const equippedLegend = user
     ? user.legendTitle
@@ -106,13 +201,21 @@ export const CharacterView: React.FC = () => {
                   size="md"
                 />
               )}
+              {equippedIdentityTitle && (
+                <span
+                  className={`text-xs font-bold px-2.5 py-0.5 rounded border ${IDENTITY_RARITY_STYLE[equippedIdentityTitle.rarity].bg} ${IDENTITY_RARITY_STYLE[equippedIdentityTitle.rarity].border} ${IDENTITY_RARITY_STYLE[equippedIdentityTitle.rarity].text}`}
+                >
+                  {equippedIdentityTitle.name}
+                </span>
+              )}
               <span className="text-xs font-bold px-2.5 py-0.5 rounded bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/45">
                 {heroDef.name} · {user?.characterClass || 'Warrior'}
               </span>
             </div>
 
             <p className="text-xs text-[#C5A15A]/90 font-medium">
-              {heroDef.title} · Aether Rank: {stats.aetherRank}
+              {heroDef.title} · Aether Rank: {stats.aetherRank} · Reputation: {reputationScore.toLocaleString()} ({reputationTier})
+              {validJoinedAt ? ` · Joined ${validJoinedAt}` : ''}
             </p>
             <p className="text-xs text-[#D9D2C5]/75 leading-relaxed max-w-2xl">
               {heroDef.greatFallOrigin}
@@ -408,43 +511,300 @@ export const CharacterView: React.FC = () => {
 
         {/* Lifetime Record */}
         <div className="bg-[#0e0a1b] border border-purple-950 rounded-2xl p-6 shadow-md space-y-4">
-          <h3 className="font-['Cinzel'] font-bold text-base text-slate-100 flex items-center gap-2">
-            <Award className="w-4 h-4 text-amber-400" />
-            LIFETIME HEROIC RECORD
-          </h3>
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="font-['Cinzel'] font-bold text-base text-slate-100 flex items-center gap-2">
+              <Award className="w-4 h-4 text-amber-400" />
+              LIFETIME HEROIC RECORD
+            </h3>
+            {validJoinedAt && (
+              <span className="text-[11px] text-slate-400 flex items-center gap-1 tabular-nums">
+                <Calendar className="w-3.5 h-3.5 text-[#C5A15A]" />
+                Joined {validJoinedAt}
+              </span>
+            )}
+          </div>
 
           <div className="grid grid-cols-2 gap-3 text-xs">
-            <div className="p-3.5 rounded-xl bg-[#130f24] border border-purple-950 flex items-center justify-between">
-              <span className="text-slate-400">Habit Consistency Streak</span>
-              <span className="font-mono font-bold text-amber-400 text-sm flex items-center gap-1">
-                <Flame className="w-3.5 h-3.5" /> {stats.currentStreak} Days
+            <div className="p-3.5 rounded-xl bg-[#130f24] border border-purple-950 flex items-center justify-between gap-2">
+              <span className="text-slate-400">Habit Streak</span>
+              <span className="font-mono font-bold text-amber-400 text-sm flex items-center gap-1 tabular-nums">
+                <Flame className="w-3.5 h-3.5" /> {stats.currentStreak}d (Best {Math.max(stats.currentStreak, lifetime?.longestStreak ?? 0)}d)
               </span>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-[#130f24] border border-purple-950 flex items-center justify-between">
-              <span className="text-slate-400">Total Workouts Completed</span>
-              <span className="font-mono font-bold text-purple-300 text-sm">
-                {stats.totalWorkoutsCompleted} Sessions
+            <div className="p-3.5 rounded-xl bg-[#130f24] border border-purple-950 flex items-center justify-between gap-2">
+              <span className="text-slate-400">Workouts</span>
+              <span className="font-mono font-bold text-purple-300 text-sm tabular-nums">
+                {Math.max(stats.totalWorkoutsCompleted, lifetime?.totalWorkouts ?? 0)} Sessions
               </span>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-[#130f24] border border-purple-950 flex items-center justify-between">
+            <div className="p-3.5 rounded-xl bg-[#130f24] border border-purple-950 flex items-center justify-between gap-2">
               <span className="text-slate-400">Aether Vision Reps</span>
-              <span className="font-mono font-bold text-emerald-400 text-sm">
-                {stats.totalVerifiedReps} Reps
+              <span className="font-mono font-bold text-emerald-400 text-sm tabular-nums">
+                {Math.max(stats.totalVerifiedReps, lifetime?.totalVerifiedReps ?? 0)} Reps
               </span>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-[#130f24] border border-purple-950 flex items-center justify-between">
-              <span className="text-slate-400">Void Bosses Defeated</span>
-              <span className="font-mono font-bold text-rose-400 text-sm">
-                {stats.totalBossesDefeated} Slain
+            <div className="p-3.5 rounded-xl bg-[#130f24] border border-purple-950 flex items-center justify-between gap-2">
+              <span className="text-slate-400">Bosses Defeated</span>
+              <span className="font-mono font-bold text-rose-400 text-sm tabular-nums">
+                {Math.max(stats.totalBossesDefeated, lifetime?.totalBossesDefeated ?? 0)} Slain
+              </span>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-[#130f24] border border-purple-950 flex items-center justify-between gap-2">
+              <span className="text-slate-400">Skill Nodes &amp; Boss DMG</span>
+              <span className="font-mono font-bold text-sky-300 text-sm tabular-nums">
+                {lifetime?.skillNodesUnlocked ?? 0} · {(lifetime?.totalBossDamage ?? 0).toLocaleString()}
+              </span>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-[#130f24] border border-purple-950 flex items-center justify-between gap-2">
+              <span className="text-slate-400">Rivalry Wins &amp; Records</span>
+              <span className="font-mono font-bold text-amber-300 text-sm tabular-nums">
+                {lifetime?.rivalryWins ?? 0}W · {lifetime?.totalPersonalRecords ?? 0} PRs
               </span>
             </div>
           </div>
 
           <div className="p-3 rounded-xl bg-purple-950/30 border border-purple-900/50 text-xs text-slate-400">
             Wellness Profile: <strong className="text-slate-200">{user?.activityLevel || 'Moderate'} activity</strong> · <strong className="text-slate-200">{user?.dietaryPreference || 'Vegetarian'} nutrition</strong> · Units: {user?.preferredUnits || 'Metric'}
+          </div>
+        </div>
+      </div>
+
+      {/* Advanced Player Identity: Titles, Rare Badges & Reputation */}
+      <div className="bg-[#100D19] border border-[#C5A15A]/25 rounded-2xl p-6 shadow-xl space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#C5A15A]/15">
+          <div>
+            <h2 className="font-['Cinzel'] font-bold text-base sm:text-lg text-[#D9D2C5] flex items-center gap-2">
+              <Crown className="w-4 h-4 text-[#C5A15A]" />
+              ADVANCED PLAYER IDENTITY &amp; REPUTATION
+            </h2>
+            <p className="text-xs text-[#D9D2C5]/65 mt-0.5">
+              Equip verified accomplishments as your active Title, feature up to 4 Rare Badges, and build non-purchasable Realm Reputation.
+            </p>
+          </div>
+          <div className="text-right shrink-0">
+            <span className="text-[11px] uppercase tracking-wider text-[#C5A15A] font-semibold block">
+              {reputationTier}
+            </span>
+            <span className="font-mono font-black text-xl text-white tabular-nums">
+              {reputationScore.toLocaleString()} Rep
+            </span>
+          </div>
+        </div>
+
+        {identityNotice && (
+          <div
+            className={`p-3 rounded-xl border text-xs text-center ${
+              identityNotice.type === 'error'
+                ? 'bg-rose-950/70 border-rose-700 text-rose-200'
+                : 'bg-emerald-950/70 border-emerald-700 text-emerald-200'
+            }`}
+          >
+            {identityNotice.text}
+          </div>
+        )}
+
+        {/* Reputation Breakdown + Active Title Selector */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Reputation Card */}
+          <div className="lg:col-span-5 p-4 rounded-xl bg-[#0b0816] border border-purple-950/80 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-wider text-[#C5A15A] flex items-center gap-1.5">
+                <Star className="w-3.5 h-3.5" />
+                Reputation Breakdown
+              </span>
+              <span className="text-[11px] text-[#D9D2C5]/60">Verified Effort Only</span>
+            </div>
+            <div className="space-y-2.5 text-xs">
+              {[
+                { label: 'Workouts & Activity', value: repBreakdown.workoutsScore, max: 350, color: '#38BDF8' },
+                { label: 'Consistency & Streaks', value: repBreakdown.consistencyScore, max: 300, color: '#F59E0B' },
+                { label: 'Weekly Raid Bosses', value: repBreakdown.bossParticipationScore, max: 350, color: '#FB7185' },
+                { label: 'Friend Rivalries', value: repBreakdown.rivalryScore, max: 200, color: '#A855F7' },
+                { label: 'Community Events', value: repBreakdown.communityScore, max: 250, color: '#34D399' },
+                { label: 'Skill Tree Mastery', value: repBreakdown.skillMasteryScore, max: 350, color: '#C5A15A' },
+                { label: 'Titles & Rare Badges', value: repBreakdown.titlesAndBadgesScore, max: 300, color: '#E8CF96' },
+              ].map(bar => {
+                const pct = Math.min(100, Math.round((bar.value / bar.max) * 100));
+                return (
+                  <div key={bar.label} className="space-y-1">
+                    <div className="flex justify-between text-[11px] tabular-nums">
+                      <span className="text-[#D9D2C5]/80">{bar.label}</span>
+                      <span className="font-mono font-bold text-white">{bar.value}</span>
+                    </div>
+                    <div className="w-full h-1.5 rounded-full bg-[#171128] overflow-hidden">
+                      <div
+                        className="h-full transition-all duration-300"
+                        style={{ width: `${pct}%`, backgroundColor: bar.color }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Player Titles Selector */}
+          <div className="lg:col-span-7 p-4 rounded-xl bg-[#0b0816] border border-purple-950/80 space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-wider text-[#C5A15A]">
+                Earned Player Titles ({unlockedTitleSet.size}/{PLAYER_TITLES_CATALOG.length})
+              </span>
+              {equippedIdentityTitle && (
+                <button
+                  type="button"
+                  disabled={identityBusy}
+                  onClick={() => void handleEquipIdentityTitle(null)}
+                  className="text-[11px] text-slate-400 hover:text-white underline whitespace-nowrap"
+                >
+                  Unequip Title
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-72 overflow-y-auto pr-1">
+              {PLAYER_TITLES_CATALOG.map(title => {
+                const unlocked = unlockedTitleSet.has(title.id);
+                const equipped = identityState?.equippedTitleId === title.id;
+                const rStyle = IDENTITY_RARITY_STYLE[title.rarity];
+                return (
+                  <div
+                    key={title.id}
+                    className={`p-3 rounded-xl border flex flex-col justify-between gap-2 ${
+                      equipped
+                        ? 'bg-[#21153b] border-[#C5A15A]'
+                        : unlocked
+                        ? 'bg-[#130e24] border-purple-900/70'
+                        : 'bg-[#090714] border-purple-950/50 opacity-65'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-1.5">
+                        <span className={`text-[10px] font-bold uppercase ${rStyle.text}`}>
+                          {title.rarity}
+                        </span>
+                        {!unlocked && <Lock className="w-3 h-3 text-slate-500" />}
+                      </div>
+                      <p className="font-['Cinzel'] font-bold text-xs text-white mt-0.5">
+                        {title.name}
+                      </p>
+                      <p className="text-[11px] text-[#D9D2C5]/65 mt-0.5 leading-snug">
+                        {title.unlockRequirement}
+                      </p>
+                    </div>
+                    {unlocked && (
+                      <button
+                        type="button"
+                        disabled={identityBusy}
+                        onClick={() => void handleEquipIdentityTitle(equipped ? null : title.id)}
+                        className={`w-full py-1.5 rounded-lg text-[11px] font-bold transition-colors ${
+                          equipped
+                            ? 'bg-[#C5A15A] text-[#100D19]'
+                            : 'bg-[#251638] hover:bg-[#331e4d] text-[#E8CF96] border border-[#C5A15A]/30'
+                        }`}
+                      >
+                        {equipped ? 'Equipped' : 'Equip Title'}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Rare Badges Showcase */}
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="font-['Cinzel'] font-bold text-sm text-[#D9D2C5] flex items-center gap-2">
+              <Landmark className="w-4 h-4 text-[#C5A15A]" />
+              RARE BADGES ({unlockedBadgeSet.size}/{RARE_BADGES_CATALOG.length})
+            </h3>
+            <span className="text-xs text-[#D9D2C5]/65 tabular-nums">
+              Featured on Profile: {featuredBadgeIds.length}/4
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {RARE_BADGES_CATALOG.map(badge => {
+              const unlocked = unlockedBadgeSet.has(badge.id);
+              const featured = featuredBadgeIds.includes(badge.id);
+              const rStyle = IDENTITY_RARITY_STYLE[badge.rarity];
+              const globalOwner = identityState?.globalBadgeOwners?.[badge.id];
+              const canClaimGlobal =
+                Boolean(badge.globalExclusive) &&
+                !globalOwner &&
+                (stats.totalBossesDefeated > 0 || (lifetime?.totalBossesDefeated ?? 0) > 0);
+
+              return (
+                <div
+                  key={badge.id}
+                  className={`p-4 rounded-xl border flex flex-col justify-between gap-2.5 ${
+                    featured
+                      ? 'bg-[#1c1333] border-[#C5A15A]'
+                      : unlocked
+                      ? 'bg-[#130e24] border-purple-900/70'
+                      : 'bg-[#090714] border-purple-950/50 opacity-70'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={`text-[10px] font-bold uppercase ${rStyle.text}`}>
+                        {badge.rarity}
+                        {badge.globalExclusive ? ' · World-First' : ''}
+                      </span>
+                      {featured ? (
+                        <span className="text-[10px] font-semibold text-[#C5A15A] flex items-center gap-1">
+                          <Check className="w-3 h-3" />
+                          Featured
+                        </span>
+                      ) : !unlocked ? (
+                        <Lock className="w-3 h-3 text-slate-500" />
+                      ) : null}
+                    </div>
+                    <h4 className="font-['Cinzel'] font-bold text-sm text-white mt-1">
+                      {badge.name}
+                    </h4>
+                    <p className="text-[11px] text-[#D9D2C5]/75 mt-0.5 leading-snug">
+                      {badge.description}
+                    </p>
+                    <p className="text-[10px] text-[#C5A15A]/80 mt-1">
+                      {globalOwner
+                        ? `Claimed globally by ${globalOwner.ownerUsername}`
+                        : badge.unlockRequirement}
+                    </p>
+                  </div>
+
+                  {unlocked ? (
+                    <button
+                      type="button"
+                      disabled={identityBusy}
+                      onClick={() => void handleToggleFeaturedBadge(badge.id)}
+                      className={`w-full py-1.5 rounded-lg text-[11px] font-bold transition-colors ${
+                        featured
+                          ? 'bg-[#C5A15A] text-[#100D19]'
+                          : 'bg-[#251638] hover:bg-[#331e4d] text-[#E8CF96] border border-[#C5A15A]/30'
+                      }`}
+                    >
+                      {featured ? 'Unfeature Badge' : 'Feature on Profile'}
+                    </button>
+                  ) : canClaimGlobal ? (
+                    <button
+                      type="button"
+                      disabled={identityBusy}
+                      onClick={() => void handleClaimWorldFirstBadge(badge.id)}
+                      className="w-full py-1.5 rounded-lg bg-rose-700 hover:bg-rose-600 text-white text-[11px] font-bold transition-colors"
+                    >
+                      Claim World-First Badge
+                    </button>
+                  ) : null}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

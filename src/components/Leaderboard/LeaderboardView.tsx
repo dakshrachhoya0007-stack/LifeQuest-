@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import { getRpgAvatarForClass } from '../../assets/images';
-import { ChampionSummary, LeaderboardEntry, LeaderboardScope } from '../../types/game';
+import { IDENTITY_RARITY_STYLE } from '../../data/polish2Data';
+import type {
+  AdvancedLeaderboardResponse,
+  ChampionSummary,
+  IdentityRarity,
+  LeaderboardEntry,
+  LeaderboardScope,
+} from '../../types/game';
 import {
   Users,
   Search,
@@ -12,11 +19,98 @@ import {
   Loader2,
   Info,
   Compass,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  History,
+  TrendingUp,
+  TrendingDown,
+  Minus,
 } from 'lucide-react';
 import { LegendTitleBadge } from '../Social/LegendTitleBadge';
 
+const SCOPE_LABELS: Record<LeaderboardScope, string> = {
+  global: 'Global Realm Standings',
+  weekly: 'Weekly Progression',
+  monthly: 'Monthly Progression',
+  seasonal: 'Seasonal Standings',
+  guild: 'Guild Fellowship',
+  friends: 'Friends & Rivals',
+  strength: 'Strength Mastery',
+  endurance: 'Endurance Mastery',
+  consistency: 'Consistency Mastery',
+  discipline: 'Discipline Mastery',
+  community: 'Community Impact',
+  boss_battle: 'Weekly Raid Boss',
+};
+
+const LEADERBOARD_SCOPE_GROUPS: Array<{
+  group: string;
+  items: Array<{ id: LeaderboardScope; label: string }>;
+}> = [
+  {
+    group: 'Overview',
+    items: [
+      { id: 'global', label: 'Global' },
+      { id: 'friends', label: 'Friends' },
+      { id: 'guild', label: 'Guild' },
+    ],
+  },
+  {
+    group: 'Periods',
+    items: [
+      { id: 'weekly', label: 'Weekly' },
+      { id: 'monthly', label: 'Monthly' },
+      { id: 'seasonal', label: 'Seasonal' },
+    ],
+  },
+  {
+    group: 'Pillars & Events',
+    items: [
+      { id: 'strength', label: 'Strength' },
+      { id: 'endurance', label: 'Endurance' },
+      { id: 'consistency', label: 'Consistency' },
+      { id: 'discipline', label: 'Discipline' },
+      { id: 'community', label: 'Community' },
+      { id: 'boss_battle', label: 'Boss Raid' },
+    ],
+  },
+];
+
+const renderRankDelta = (delta?: number | null) => {
+  if (typeof delta !== 'number') {
+    return (
+      <span className="inline-flex items-center gap-0.5 text-[10px] font-mono text-slate-500" title="No prior snapshot comparison">
+        <Minus className="w-3 h-3" />
+      </span>
+    );
+  }
+  if (delta > 0) {
+    return (
+      <span className="inline-flex items-center gap-0.5 text-[10px] font-mono font-bold text-emerald-400 tabular-nums" title={`Up ${delta} ranks`}>
+        <TrendingUp className="w-3 h-3" />
+        {delta}
+      </span>
+    );
+  }
+  if (delta < 0) {
+    return (
+      <span className="inline-flex items-center gap-0.5 text-[10px] font-mono font-bold text-rose-400 tabular-nums" title={`Down ${Math.abs(delta)} ranks`}>
+        <TrendingDown className="w-3 h-3" />
+        {Math.abs(delta)}
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center text-[10px] font-mono text-slate-500" title="Unchanged">
+      —
+    </span>
+  );
+};
+
 export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
   const {
+    queryAdvancedLeaderboard,
     fetchLeaderboard,
     friends,
     searchChampions,
@@ -29,8 +123,10 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
     equippedLegendMap,
   } = useGame();
 
-  const [activeTab, setActiveTab] = useState<LeaderboardScope>('global');
-  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [activeScope, setActiveScope] = useState<LeaderboardScope>('global');
+  const [page, setPage] = useState<number>(1);
+  const [boardData, setBoardData] = useState<AdvancedLeaderboardResponse | null>(null);
+  const [fallbackEntries, setFallbackEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isLiveBackend, setIsLiveBackend] = useState<boolean>(false);
 
@@ -42,16 +138,30 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
   useEffect(() => {
     let active = true;
     setLoading(true);
-    fetchLeaderboard(activeTab).then(res => {
+    queryAdvancedLeaderboard(activeScope, page, 20).then(async res => {
       if (!active) return;
-      setEntries(res.entries);
-      setIsLiveBackend(res.isLiveBackend);
+      if (res.ok && res.data) {
+        setBoardData(res.data);
+        setFallbackEntries(res.data.entries);
+        setIsLiveBackend(res.isLiveBackend);
+      } else {
+        const legacy = await fetchLeaderboard(activeScope);
+        if (!active) return;
+        setBoardData(null);
+        setFallbackEntries(legacy.entries);
+        setIsLiveBackend(legacy.isLiveBackend);
+      }
       setLoading(false);
     });
     return () => {
       active = false;
     };
-  }, [activeTab, unifiedBackendReady]);
+  }, [activeScope, page, unifiedBackendReady]);
+
+  const handleScopeChange = (nextScope: LeaderboardScope) => {
+    setActiveScope(nextScope);
+    setPage(1);
+  };
 
   const handleSearchChampions = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,83 +181,143 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
     setTimeout(() => setFriendNotice(null), 3500);
   };
 
+  const entries = boardData?.entries || fallbackEntries;
+  const currentUserEntry = boardData?.currentUserEntry || entries.find(e => e.isCurrent) || null;
+  const scoreUnit = boardData?.scoreUnit || 'pts';
+  const totalPages = boardData?.totalPages || 1;
+  const historicalSnapshots = boardData?.historicalSnapshots || [];
+  const scopeTitle = SCOPE_LABELS[activeScope] || 'Standings';
+
   const pendingIncoming = friends.filter(f => f.status === 'pending' && f.direction === 'incoming');
   const acceptedFriends = friends.filter(f => f.status === 'accepted');
 
   return (
     <div className="space-y-6 animate-in fade-in pb-12">
-      {/* Banner / Scope Toolbar */}
-      {embedded ? (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#0e0a1b] border border-purple-950/90 rounded-2xl p-4">
+      {/* Header & 12-Category Filter Selector */}
+      <div className="rounded-2xl bg-gradient-to-r from-[#170e2f] via-[#100a20] to-[#1a1236] border border-[#C5A15A]/22 p-5 sm:p-6 shadow-xl space-y-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           <div>
-            <h2 className="font-['Cinzel'] font-bold text-base text-white">
-              Aetheria Hall of Champions
-            </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Click any champion to inspect their public profile.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-1 p-1 bg-[#090714] rounded-xl border border-purple-950">
-            {(['global', 'weekly', 'monthly', 'guild', 'friends'] as LeaderboardScope[]).map(tab => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-lg capitalize transition-colors whitespace-nowrap shrink-0 ${
-                  activeTab === tab
-                    ? 'bg-purple-800 text-white shadow'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className="rounded-2xl bg-gradient-to-r from-[#170e2f] via-[#100a20] to-[#1a1236] border border-purple-900/60 p-6 shadow-xl">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-amber-400">
-                  Honor of the Realm
-                </span>
-                <span className="text-slate-600">·</span>
-                <span className="text-xs text-purple-300 font-semibold">Unified Web & Mobile Rankings</span>
-              </div>
+            <div className="flex flex-wrap items-center gap-2 text-xs mb-1">
+              <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#C5A15A]">
+                Honor of the Realm
+              </span>
+              <span className="text-[#D9D2C5]/35" aria-hidden="true">·</span>
+              <span className="text-purple-300 font-medium">{scopeTitle}</span>
+              {boardData?.resetLabel && (
+                <>
+                  <span className="text-[#D9D2C5]/35" aria-hidden="true">·</span>
+                  <span className="text-[#D9D2C5]/65 flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-[#C5A15A]" />
+                    {boardData.resetLabel}
+                  </span>
+                </>
+              )}
+            </div>
+            {embedded ? (
+              <h2 className="font-['Cinzel'] font-bold text-lg sm:text-xl text-white">
+                Aetheria Hall of Champions
+              </h2>
+            ) : (
               <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-white">
                 AETHERIA HALL OF CHAMPIONS
               </h1>
-              <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1">
-                Rankings reflect healthy habit streaks, quest completions, and verified fitness participation. Click any champion to inspect their public profile.
-              </p>
-            </div>
-
-            {/* Filter tabs */}
-            <div className="flex flex-wrap items-center gap-1 p-1 bg-[#090714] rounded-xl border border-purple-950">
-              {(['global', 'weekly', 'monthly', 'guild', 'friends'] as LeaderboardScope[]).map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg capitalize transition-colors whitespace-nowrap shrink-0 ${
-                    activeTab === tab
-                      ? 'bg-purple-800 text-white shadow'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
+            )}
+            <p className="text-xs text-[#D9D2C5]/75 mt-1 max-w-2xl">
+              Compare verified real-life workouts, Skill Tree mastery, consistency streaks, seasonal dedication, and Weekly Raid Boss strikes across 12 competitive categories.
+            </p>
           </div>
         </div>
-      )}
+
+        {/* 12 Category Tabs Grouped Cleanly */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1">
+          {LEADERBOARD_SCOPE_GROUPS.map(group => (
+            <div
+              key={group.group}
+              className="p-2 rounded-xl bg-[#090714]/90 border border-purple-950/80 space-y-1.5"
+            >
+              <span className="px-1.5 text-[10px] font-['Cinzel'] font-bold uppercase tracking-wider text-[#C5A15A]/80 block">
+                {group.group}
+              </span>
+              <div className="flex flex-wrap gap-1">
+                {group.items.map(tab => {
+                  const isActive = activeScope === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => handleScopeChange(tab.id)}
+                      className={`px-2.5 py-1.5 text-[11px] font-semibold rounded-lg transition-colors whitespace-nowrap shrink-0 ${
+                        isActive
+                          ? 'bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/50 shadow-sm'
+                          : 'text-[#D9D2C5]/65 hover:text-white hover:bg-[#161028] border border-transparent'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {!isLiveBackend && !loading && (
         <div className="p-3 rounded-xl bg-amber-950/40 border border-amber-700/50 text-xs text-amber-200 flex items-center gap-2">
           <Info className="w-4 h-4 shrink-0 text-amber-400" />
           <span>
-            Showing your personal realm standing. Live multi-player rankings will appear automatically once connected.
+            Showing verified standings from recorded player activity. Additional cross-realm entries sync automatically as players compete.
           </span>
+        </div>
+      )}
+
+      {/* Your Standing Highlight Banner */}
+      {currentUserEntry && (
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-[#21153b] via-[#140e27] to-[#1d1532] border border-[#C5A15A]/45 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="w-11 h-11 rounded-xl bg-[#0c0916] border border-[#C5A15A]/55 flex flex-col items-center justify-center shrink-0">
+              <span className="font-mono font-black text-sm text-[#C5A15A] tabular-nums">
+                #{currentUserEntry.rank}
+              </span>
+              {renderRankDelta(currentUserEntry.rankDelta)}
+            </div>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[10px] font-['Cinzel'] uppercase tracking-wider text-[#C5A15A] font-bold">
+                  Your Standing
+                </span>
+                {currentUserEntry.equippedTitleName && (
+                  <span className="text-[11px] text-purple-200 font-semibold">
+                    · {currentUserEntry.equippedTitleName}
+                  </span>
+                )}
+              </div>
+              <p className="text-sm font-bold text-white truncate">{currentUserEntry.name}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-5 text-xs shrink-0">
+            <div>
+              <span className="text-[10px] text-[#D9D2C5]/55 uppercase block">Level</span>
+              <span className="font-mono font-bold text-white tabular-nums">
+                Lv.{currentUserEntry.level}
+              </span>
+            </div>
+            <div>
+              <span className="text-[10px] text-[#D9D2C5]/55 uppercase block">Streak</span>
+              <span className="font-mono font-bold text-amber-300 tabular-nums">
+                {currentUserEntry.streak}d
+              </span>
+            </div>
+            <div className="text-right">
+              <span className="text-[10px] text-[#D9D2C5]/55 uppercase block">
+                {scopeTitle}
+              </span>
+              <span className="font-mono font-black text-base text-[#E8CF96] tabular-nums">
+                {currentUserEntry.score.toLocaleString()} {scoreUnit}
+              </span>
+            </div>
+          </div>
         </div>
       )}
 
@@ -157,18 +327,12 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-purple-950/80 bg-[#130f24] text-[11px] font-semibold uppercase tracking-wider text-purple-300">
-                <th className="py-3.5 px-4 w-16 text-center">Rank</th>
+                <th className="py-3.5 px-4 w-24 text-center">Rank</th>
                 <th className="py-3.5 px-4">Champion</th>
                 <th className="py-3.5 px-4">Class</th>
                 <th className="py-3.5 px-4 text-center">Level</th>
-                <th className="py-3.5 px-4 text-center">Habit Streak</th>
-                <th className="py-3.5 px-4 text-right">
-                  {activeTab === 'weekly'
-                    ? 'Weekly XP'
-                    : activeTab === 'monthly'
-                    ? 'Monthly XP'
-                    : 'Progress Score'}
-                </th>
+                <th className="py-3.5 px-4 text-center">Streak</th>
+                <th className="py-3.5 px-4 text-right">{scoreUnit.toUpperCase()}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-purple-950/50 text-xs">
@@ -177,86 +341,176 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                   <td colSpan={6} className="py-10 text-center text-slate-400">
                     <span className="inline-flex items-center gap-2">
                       <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
-                      Loading {activeTab} standings...
+                      Loading standings...
                     </span>
                   </td>
                 </tr>
               ) : entries.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-10 text-center text-slate-400">
-                    {activeTab === 'guild'
+                    {activeScope === 'guild'
                       ? 'Join a guild in the Guilds tab to see your fellowship leaderboard!'
-                      : activeTab === 'friends'
+                      : activeScope === 'friends'
                       ? 'Add companions in Discover & Friends to compare streaks and scores.'
-                      : 'No ranked champions found in this period yet.'}
+                      : 'No ranked champions recorded in this category yet.'}
                   </td>
                 </tr>
               ) : (
-                entries.map(player => (
-                  <tr
-                    key={`${player.userId}-${player.rank}`}
-                    onClick={() => openPublicProfile(player.userId)}
-                    className={`transition-colors cursor-pointer ${
-                      player.isCurrent
-                        ? 'bg-purple-950/40 font-semibold text-purple-200 hover:bg-purple-950/55'
-                        : 'hover:bg-purple-950/25 text-slate-300'
-                    }`}
-                  >
-                    <td className="py-3.5 px-4 text-center font-mono font-bold tabular-nums">
-                      {player.rank === 1 && <span className="text-amber-400 text-base">🥇</span>}
-                      {player.rank === 2 && <span className="text-slate-300 text-base">🥈</span>}
-                      {player.rank === 3 && <span className="text-amber-600 text-base">🥉</span>}
-                      {player.rank > 3 && <span className="text-slate-400">#{player.rank}</span>}
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <button
-                        type="button"
-                        onClick={e => {
-                          e.stopPropagation();
-                          openPublicProfile(player.userId);
-                        }}
-                        className="flex items-center gap-3 text-left group"
-                      >
-                        <img
-                          src={getRpgAvatarForClass(player.characterClass)}
-                          alt={player.name}
-                          className="w-8 h-8 rounded-full object-cover object-top border border-purple-600 shrink-0"
-                        />
-                        <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-                          <span className="font-bold text-slate-100 group-hover:text-amber-300 transition-colors">
-                            {player.name}
-                          </span>
-                          <LegendTitleBadge
-                            title={player.legendTitle || equippedLegendMap[player.userId]?.titleTag}
-                            style={player.legendTitleStyle || equippedLegendMap[player.userId]?.titleStyle}
-                            emblemIcon={player.legendEmblem || equippedLegendMap[player.userId]?.emblemIcon}
-                            size="xs"
-                          />
-                          {player.isCurrent && (
-                            <span className="text-[10px] bg-purple-700 text-white px-1.5 py-0.5 rounded font-mono">
-                              YOU
-                            </span>
-                          )}
+                entries.map(player => {
+                  const titleRarity = player.equippedTitleRarity as IdentityRarity | undefined;
+                  const titleColorClass =
+                    titleRarity && IDENTITY_RARITY_STYLE[titleRarity]
+                      ? IDENTITY_RARITY_STYLE[titleRarity].text
+                      : 'text-[#C5A15A]';
+                  return (
+                    <tr
+                      key={`${player.userId}-${player.rank}`}
+                      onClick={() => openPublicProfile(player.userId)}
+                      className={`transition-colors cursor-pointer ${
+                        player.isCurrent
+                          ? 'bg-purple-950/40 font-semibold text-purple-200 hover:bg-purple-950/55'
+                          : 'hover:bg-purple-950/25 text-slate-300'
+                      }`}
+                    >
+                      <td className="py-3.5 px-4 text-center font-mono font-bold tabular-nums">
+                        <div className="inline-flex items-center justify-center gap-1.5">
+                          {player.rank === 1 && <span className="text-amber-400 text-base">🥇</span>}
+                          {player.rank === 2 && <span className="text-slate-300 text-base">🥈</span>}
+                          {player.rank === 3 && <span className="text-amber-600 text-base">🥉</span>}
+                          {player.rank > 3 && <span className="text-slate-400">#{player.rank}</span>}
+                          {renderRankDelta(player.rankDelta)}
                         </div>
-                      </button>
-                    </td>
-                    <td className="py-3.5 px-4 text-purple-300">{player.characterClass}</td>
-                    <td className="py-3.5 px-4 text-center font-mono font-bold text-slate-200 tabular-nums">
-                      Lv.{player.level}
-                    </td>
-                    <td className="py-3.5 px-4 text-center font-mono text-amber-400 tabular-nums">
-                      🔥 {player.streak}d
-                    </td>
-                    <td className="py-3.5 px-4 text-right font-mono font-bold text-purple-300 tabular-nums">
-                      {player.score.toLocaleString()} pts
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <button
+                          type="button"
+                          onClick={e => {
+                            e.stopPropagation();
+                            openPublicProfile(player.userId);
+                          }}
+                          className="flex items-center gap-3 text-left group"
+                        >
+                          <img
+                            src={getRpgAvatarForClass(player.characterClass)}
+                            alt={player.name}
+                            className="w-8 h-8 rounded-full object-cover object-top border border-purple-600 shrink-0"
+                          />
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <span className="font-bold text-slate-100 group-hover:text-amber-300 transition-colors">
+                                {player.name}
+                              </span>
+                              <LegendTitleBadge
+                                title={player.legendTitle || equippedLegendMap[player.userId]?.titleTag}
+                                style={player.legendTitleStyle || equippedLegendMap[player.userId]?.titleStyle}
+                                emblemIcon={player.legendEmblem || equippedLegendMap[player.userId]?.emblemIcon}
+                                size="xs"
+                              />
+                              {player.isCurrent && (
+                                <span className="text-[10px] bg-purple-700 text-white px-1.5 py-0.5 rounded font-mono">
+                                  YOU
+                                </span>
+                              )}
+                            </div>
+                            {player.equippedTitleName && (
+                              <span className={`text-[10px] font-semibold block ${titleColorClass}`}>
+                                {player.equippedTitleName}
+                              </span>
+                            )}
+                          </div>
+                        </button>
+                      </td>
+                      <td className="py-3.5 px-4 text-purple-300">{player.characterClass}</td>
+                      <td className="py-3.5 px-4 text-center font-mono font-bold text-slate-200 tabular-nums">
+                        Lv.{player.level}
+                      </td>
+                      <td className="py-3.5 px-4 text-center font-mono text-amber-400 tabular-nums">
+                        {player.streak}d
+                      </td>
+                      <td className="py-3.5 px-4 text-right font-mono font-bold text-[#E8CF96] tabular-nums">
+                        {player.score.toLocaleString()} {scoreUnit}
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Footer */}
+        {totalPages > 1 && (
+          <div className="px-4 py-3 border-t border-purple-950/70 bg-[#120d22] flex items-center justify-between gap-2 text-xs">
+            <span className="text-[#D9D2C5]/65 tabular-nums">
+              Page {page} of {totalPages} · {boardData?.totalEntries || entries.length} ranked
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={page <= 1}
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                className="px-3 py-1.5 rounded-lg bg-[#19122e] border border-purple-900/60 text-[#D9D2C5] disabled:opacity-40 flex items-center gap-1 whitespace-nowrap"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                Prev
+              </button>
+              <button
+                type="button"
+                disabled={page >= totalPages}
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                className="px-3 py-1.5 rounded-lg bg-[#19122e] border border-purple-900/60 text-[#D9D2C5] disabled:opacity-40 flex items-center gap-1 whitespace-nowrap"
+              >
+                Next
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Historical Snapshots */}
+      {historicalSnapshots.length > 0 && (
+        <div className="bg-[#0e0a1b] border border-purple-950/80 rounded-2xl p-5 space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="font-['Cinzel'] font-bold text-sm text-white flex items-center gap-2">
+              <History className="w-4 h-4 text-[#C5A15A]" />
+              HISTORICAL LEADERBOARD SNAPSHOTS
+            </h3>
+            <span className="text-[11px] text-[#D9D2C5]/60 tabular-nums">
+              {historicalSnapshots.length} Archived Periods
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {historicalSnapshots.slice(0, 6).map(snap => (
+              <div
+                key={`${snap.scope}-${snap.periodKey}-${snap.capturedAt}`}
+                className="p-3.5 rounded-xl bg-[#130e24] border border-purple-950/70 space-y-1.5"
+              >
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-['Cinzel'] font-bold text-[#C5A15A]">
+                    {snap.periodKey}
+                  </span>
+                  <span className="text-[#D9D2C5]/50 tabular-nums">
+                    {new Date(snap.capturedAt).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="space-y-1 text-xs">
+                  {snap.topThree.map(row => (
+                    <div key={`${snap.periodKey}-${row.userId}`} className="flex items-center justify-between gap-2">
+                      <span className="text-[#D9D2C5]/85 truncate">
+                        #{row.rank} {row.name}
+                      </span>
+                      <span className="font-mono text-[#E8CF96] tabular-nums shrink-0">
+                        {row.score.toLocaleString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Companions & Friend Requests Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -374,7 +628,7 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
           <div className="flex items-center justify-between gap-2">
             <h3 className="font-['Cinzel'] font-bold text-sm text-white flex items-center gap-2">
               <Users className="w-4 h-4 text-amber-400" />
-              COMPANIONS & REQUESTS ({acceptedFriends.length})
+              COMPANIONS &amp; REQUESTS ({acceptedFriends.length})
             </h3>
             <button
               type="button"
@@ -475,7 +729,7 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                         />
                       </div>
                       <p className="text-[10px] text-slate-400">
-                        Lv.{f.champion.level} {f.champion.characterClass} · 🔥 {f.champion.currentStreak}d
+                        Lv.{f.champion.level} {f.champion.characterClass} · {f.champion.currentStreak}d streak
                       </p>
                     </div>
                   </button>

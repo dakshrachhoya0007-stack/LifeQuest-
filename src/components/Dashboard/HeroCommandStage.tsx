@@ -12,6 +12,7 @@ import {
   ChevronUp,
   Lock,
   Compass,
+  Bell,
 } from 'lucide-react';
 import {
   Buff,
@@ -42,6 +43,8 @@ interface HeroCommandStageProps {
   activeBuffs: Buff[];
   onNavigate: (tab: string) => void;
   onOpenHeroSelect: () => void;
+  equippedIdentityTitle?: { name: string; rarity: string } | null;
+  unreadNotificationsCount?: number;
 }
 
 const ATTR_ICON_MAP: Record<RpgAttributeKey, React.ComponentType<{ className?: string }>> = {
@@ -74,6 +77,8 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
   activeBuffs,
   onNavigate,
   onOpenHeroSelect,
+  equippedIdentityTitle,
+  unreadNotificationsCount = 0,
 }) => {
   const { equippedLegendMap } = useGame();
   const [showAttributeSources, setShowAttributeSources] = useState(false);
@@ -189,7 +194,7 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2.5">
               <h1 className="font-['Cinzel'] font-black text-lg sm:text-xl text-[#F2ECE1] tracking-wide truncate">
-                {user?.characterName || user?.username || heroDef.name}
+                Welcome, {user?.characterName || user?.username || heroDef.name}
               </h1>
               {equippedLegend && (
                 <LegendTitleBadge
@@ -198,6 +203,11 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
                   emblemIcon={equippedLegend.emblemIcon}
                   size="sm"
                 />
+              )}
+              {equippedIdentityTitle && (
+                <span className="text-xs font-semibold text-[#E8CF96]">
+                  · {equippedIdentityTitle.name}
+                </span>
               )}
             </div>
             <p className="text-xs text-[#C5A15A]/90 mt-0.5 truncate">
@@ -257,6 +267,17 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
             >
               <Compass className="w-3.5 h-3.5 text-[#C5A15A]" />
               Explore 3D World
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigate('notifications')}
+              className="px-3 py-2 rounded-lg bg-[#161124]/90 hover:bg-[#251638] border border-[#C5A15A]/30 text-xs font-medium text-[#D9D2C5] flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0"
+              title="Open Notification Center"
+            >
+              <Bell className="w-3.5 h-3.5 text-[#C5A15A]" />
+              <span className="tabular-nums">
+                {unreadNotificationsCount > 0 ? `Alerts (${unreadNotificationsCount})` : 'Alerts'}
+              </span>
             </button>
             <button
               type="button"

@@ -30,6 +30,7 @@ import {
   Cloud,
   RefreshCw,
   Lock,
+  Bell,
 } from 'lucide-react';
 
 export const SettingsView: React.FC = () => {
@@ -48,6 +49,8 @@ export const SettingsView: React.FC = () => {
     selectedHeroId,
     heroLocked,
     setShowHeroSelectModal,
+    notificationPreferences,
+    saveServerNotificationPreferences,
   } = useGame();
   const boundHero = getHeroById(selectedHeroId);
 
@@ -144,6 +147,7 @@ export const SettingsView: React.FC = () => {
       showStats,
       showGuild,
     });
+    await saveServerNotificationPreferences(notificationPreferences);
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 2500);
   };
@@ -446,27 +450,58 @@ export const SettingsView: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 p-3 rounded-xl bg-[#130f24] border border-purple-900/70">
-              {(
-                [
-                  { key: 'dailyReminders', label: 'Daily Reminders' },
-                  { key: 'weeklySummary', label: 'Weekly Digest' },
-                  { key: 'guildUpdates', label: 'Guild & Friends' },
-                  { key: 'questAlerts', label: 'Quest Alerts' },
-                ] as const
-              ).map(item => (
-                <label key={item.key} className="flex items-center justify-between gap-2 text-[11px] text-slate-300 cursor-pointer">
-                  <span>{item.label}</span>
+            <div className="p-3.5 rounded-xl bg-[#130f24] border border-purple-900/70 space-y-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-semibold text-white flex items-center gap-1.5">
+                  <Bell className="w-3.5 h-3.5 text-[#C5A15A]" />
+                  Alert &amp; Notification Controls
+                </span>
+                <label className="flex items-center gap-2 text-[11px] text-[#C5A15A] cursor-pointer">
+                  <span>All Enabled</span>
                   <input
                     type="checkbox"
-                    checked={notifPrefs[item.key]}
+                    checked={notificationPreferences.masterEnabled}
                     onChange={e =>
-                      setNotifPrefs(prev => ({ ...prev, [item.key]: e.target.checked }))
+                      void saveServerNotificationPreferences({
+                        ...notificationPreferences,
+                        masterEnabled: e.target.checked,
+                      })
                     }
-                    className="accent-purple-600 cursor-pointer"
+                    className="accent-[#C5A15A] cursor-pointer"
                   />
                 </label>
-              ))}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {(
+                  [
+                    { key: 'fitness', label: 'Fitness & PRs' },
+                    { key: 'achievement', label: 'Titles & Badges' },
+                    { key: 'social', label: 'Social & Rivals' },
+                    { key: 'boss', label: 'Weekly Bosses' },
+                    { key: 'community', label: 'Community Events' },
+                    { key: 'seasonal', label: 'Seasonal Track' },
+                  ] as const
+                ).map(item => (
+                  <label
+                    key={item.key}
+                    className="flex items-center justify-between gap-2 text-[11px] text-slate-300 cursor-pointer"
+                  >
+                    <span>{item.label}</span>
+                    <input
+                      type="checkbox"
+                      disabled={!notificationPreferences.masterEnabled}
+                      checked={notificationPreferences[item.key]}
+                      onChange={e =>
+                        void saveServerNotificationPreferences({
+                          ...notificationPreferences,
+                          [item.key]: e.target.checked,
+                        })
+                      }
+                      className="accent-purple-600 cursor-pointer"
+                    />
+                  </label>
+                ))}
+              </div>
             </div>
 
             {/* Bio & Public Profile Privacy */}

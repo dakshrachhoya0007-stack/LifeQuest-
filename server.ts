@@ -12,6 +12,10 @@ import { createCommunityEventsService } from './server/communityEventsService.ts
 import { createRecordsMuseumService } from './server/recordsMuseumService.ts';
 import { createAiMentorService } from './server/aiMentorService.ts';
 import { registerEcosystemDispatcherRoutes } from './server/ecosystemDispatcher.ts';
+import { createNotificationService } from './server/notificationService.ts';
+import { createIdentityService } from './server/identityService.ts';
+import { createSeasonService } from './server/seasonService.ts';
+import { createLeaderboardService } from './server/leaderboardService.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -1263,7 +1267,37 @@ async function startServer() {
   // 6. Real-Life Skill Tree Server-Authoritative Ledger Routes
   registerSkillTreeRoutes(app, __dirname);
 
-  // 7. Phases 2-7 Ecosystem Services (Weekly Boss, Rivals, AI Mentor, Community Events, Records Museum)
+  const notificationService = createNotificationService(__dirname);
+  const identityService = createIdentityService(__dirname, {
+    onIdentityUnlocked: async ({ userId, kind, itemId, itemName, rarity }) => {
+      await notificationService.emitNotification({
+        userId,
+        category: 'player_progression',
+        preferenceKey: 'achievement',
+        eventKey: `identity_${kind}:${itemId}`,
+        type: kind === 'title' ? 'title_unlocked' : 'badge_unlocked',
+        title: kind === 'title' ? `New Title Earned: ${itemName}` : `Rare Badge Earned: ${itemName}`,
+        body: `Unlocked a ${rarity} ${kind} from your verified real-life accomplishments.`,
+        actionTab: 'character',
+      });
+    },
+  });
+  const seasonService = createSeasonService(__dirname, {
+    onSeasonMilestoneReached: async ({ userId, seasonName, milestoneTitle, rewardLabel, milestoneId }) => {
+      await notificationService.emitNotification({
+        userId,
+        category: 'game_world',
+        preferenceKey: 'seasonal',
+        eventKey: `season_ms:${milestoneId}`,
+        type: 'season_milestone',
+        title: `${milestoneTitle} Claimed`,
+        body: `Earned ${rewardLabel} in ${seasonName}.`,
+        actionTab: 'seasons',
+      });
+    },
+  });
+  const leaderboardService = createLeaderboardService(__dirname);
+
   const recordsMuseumService = createRecordsMuseumService(__dirname);
   const weeklyBossService = createWeeklyBossService(__dirname);
   const rivalService = createRivalService(__dirname, {
@@ -1290,6 +1324,17 @@ async function startServer() {
         sourceActivityRef: `rivalry:${rivalry.id}`,
         rarity: 'Epic',
       });
+      await notificationService.emitNotification({
+        userId: rivalry.winnerId,
+        category: 'social',
+        preferenceKey: 'social',
+        eventKey: `rival_win:${rivalry.id}`,
+        type: 'rivalry_victory',
+        title: 'Friend Rivalry Victory!',
+        body: `You prevailed against ${opponentName} in ${rivalry.challengeTitle}.`,
+        actionTab: 'social',
+        actionSubTab: 'rivals',
+      });
     },
   });
   const communityEventsService = createCommunityEventsService(__dirname);
@@ -1305,11 +1350,18 @@ async function startServer() {
   communityEventsService.registerRoutes(app);
   recordsMuseumService.registerRoutes(app);
   aiMentorService.registerRoutes(app);
+  notificationService.registerRoutes(app);
+  identityService.registerRoutes(app);
+  seasonService.registerRoutes(app);
+  leaderboardService.registerRoutes(app);
   registerEcosystemDispatcherRoutes(app, {
     weeklyBoss: weeklyBossService,
     rivals: rivalService,
     communityEvents: communityEventsService,
     museum: recordsMuseumService,
+    seasons: seasonService,
+    identity: identityService,
+    notifications: notificationService,
   });
 
   // Dev Vite middleware vs Production static build

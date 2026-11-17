@@ -24,6 +24,7 @@ import {
   Landmark,
   Brain,
   Calendar,
+  Bell,
 } from 'lucide-react';
 import { LegendTitleBadge } from '../Social/LegendTitleBadge';
 
@@ -59,6 +60,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     hallOfLegends,
     equippedLegendMap,
     rivalsState,
+    unreadNotificationsCount,
   } = useGame();
   const heroDef = getHeroById(selectedHeroId);
 
@@ -109,7 +111,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         {
           id: 'progression',
           label: 'PROGRESSION',
-          subtitle: 'Skill Tree, Quests & Legends',
+          subtitle: 'Quests, Skill Tree, Seasons & Legends',
           icon: Crown,
           badge: claimableProgressionCount,
         },
@@ -138,7 +140,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     },
     {
       title: 'System',
-      items: [{ id: 'settings', label: 'Settings & Privacy', icon: Settings }],
+      items: [
+        {
+          id: 'notifications',
+          label: 'Notifications',
+          icon: Bell,
+          badge: unreadNotificationsCount,
+        },
+        { id: 'settings', label: 'Settings & Privacy', icon: Settings },
+      ],
     },
   ];
 

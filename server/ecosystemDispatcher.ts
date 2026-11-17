@@ -52,6 +52,37 @@ interface EcosystemDeps {
       skillLevelUp?: { attributeId: SkillAttributeId; newLevel: number };
     }) => Promise<{ createdRecords: any[] }>;
   };
+  seasons?: {
+    applyVerifiedSeasonProgress: (params: {
+      userId: string;
+      username: string;
+      activityType: SkillActivityType;
+      idempotencyKey: string;
+      metadata?: VerifiedActivityMetadata;
+      bossHit?: boolean;
+      communityPointsAwarded?: number;
+    }) => Promise<any>;
+  };
+  identity?: {
+    evaluateAndRecordActivity: (params: {
+      userId: string;
+      idempotencyKey?: string;
+    }) => Promise<any>;
+  };
+  notifications?: {
+    emitNotification: (input: {
+      userId: string;
+      category: 'player_progression' | 'social' | 'game_world' | 'fitness';
+      preferenceKey: 'fitness' | 'social' | 'achievement' | 'boss' | 'community' | 'seasonal';
+      eventKey: string;
+      type: string;
+      title: string;
+      body: string;
+      actionTab?: string | null;
+      actionSubTab?: string | null;
+      payload?: Record<string, any>;
+    }) => Promise<any>;
+  };
 }
 
 const VALID_ACTIVITY_TYPES = new Set<SkillActivityType>([
@@ -160,12 +191,76 @@ export function registerEcosystemDispatcherRoutes(app: Express, deps: EcosystemD
           : undefined,
     });
 
+    const seasonRes = deps.seasons
+      ? await deps.seasons.applyVerifiedSeasonProgress({
+          userId,
+          username,
+          activityType,
+          idempotencyKey: `season:${idempotencyKey}`,
+          metadata,
+          bossHit: Boolean(bossRes?.applied && !bossRes?.duplicate),
+          communityPointsAwarded: Number(communityRes?.pointsAwarded || 0),
+        })
+      : null;
+
+    const identityRes = deps.identity
+      ? await deps.identity.evaluateAndRecordActivity({
+          userId,
+          idempotencyKey: `rep:${idempotencyKey}`,
+        })
+      : null;
+
+    if (deps.notifications) {
+      if (bossRes?.bossDefeatedJustNow) {
+        await deps.notifications.emitNotification({
+          userId,
+          category: 'game_world',
+          preferenceKey: 'boss',
+          eventKey: `boss_defeated:${bossRes.eventId || 'current'}`,
+          type: 'weekly_boss_defeated',
+          title: 'Weekly Raid Boss Vanquished!',
+          body: `${bossRes.bossName || 'Weekly Titan'} has fallen! Claim your raid rewards.`,
+          actionTab: 'boss-battles',
+        });
+      }
+      if (body.skillLevelUp?.attributeId && body.skillLevelUp?.newLevel) {
+        await deps.notifications.emitNotification({
+          userId,
+          category: 'player_progression',
+          preferenceKey: 'achievement',
+          eventKey: `skill_lv:${body.skillLevelUp.attributeId}:${body.skillLevelUp.newLevel}`,
+          type: 'skill_level_up',
+          title: `Skill Mastery Level ${body.skillLevelUp.newLevel}`,
+          body: `Your ${String(body.skillLevelUp.attributeId).toUpperCase()} mastery ascended to Level ${body.skillLevelUp.newLevel}.`,
+          actionTab: 'progression',
+          actionSubTab: 'skill-tree',
+        });
+      }
+      const pbRec = Array.isArray(museumRes.createdRecords)
+        ? museumRes.createdRecords.find((r: any) => r.isPersonalBest)
+        : null;
+      if (pbRec) {
+        await deps.notifications.emitNotification({
+          userId,
+          category: 'fitness',
+          preferenceKey: 'fitness',
+          eventKey: `pb:${pbRec.id}`,
+          type: 'museum_personal_best',
+          title: 'New Personal Best Enshrined!',
+          body: `${pbRec.title}: ${pbRec.displayValue}`,
+          actionTab: 'museum',
+        });
+      }
+    }
+
     res.json({
       success: true,
       weeklyBoss: bossRes,
       rivals: rivalRes,
       communityEvent: communityRes,
       museumRecordsCreated: museumRes.createdRecords,
+      seasonProgress: seasonRes,
+      identityState: identityRes,
     });
   });
 

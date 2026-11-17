@@ -696,12 +696,25 @@ export function attachPresenceAndPrivacySystem(
       }
     }
 
-    // 4. Achievements & Trophies
+    // 4. Achievements, Trophies & Rare Identity Badges
     if (canViewField(privacy, 'achievements', effectiveRelation)) {
       permittedFields.push('achievements');
       playerPayload.achievements = Array.isArray(target.achievements) ? target.achievements : [];
       if (Array.isArray(target.legendTitles)) {
         playerPayload.legendTitles = target.legendTitles;
+      }
+      if ((target as any).equippedIdentityTitle) {
+        playerPayload.equippedIdentityTitle = (target as any).equippedIdentityTitle;
+      }
+      if (Array.isArray((target as any).featuredBadges)) {
+        playerPayload.featuredBadges = (target as any).featuredBadges;
+      }
+      if (typeof (target as any).reputationScore === 'number') {
+        playerPayload.reputationScore = (target as any).reputationScore;
+        playerPayload.reputationTier = (target as any).reputationTier;
+      }
+      if ((target as any).joinedAt) {
+        playerPayload.joinedAt = (target as any).joinedAt;
       }
     }
 

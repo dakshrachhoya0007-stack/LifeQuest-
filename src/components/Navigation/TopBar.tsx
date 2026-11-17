@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { characterWarriorAvatarImg, resolveAssetUrl } from '../../assets/images';
+import { NOTIFICATION_CATEGORY_META } from '../../data/polish2Data';
 import {
   Volume2,
   VolumeX,
@@ -12,6 +13,7 @@ import {
   X,
   UserPlus,
   Shield,
+  Trash2,
 } from 'lucide-react';
 
 interface TopBarProps {
@@ -29,6 +31,8 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
     notifications,
     unreadNotificationsCount,
     markNotificationRead,
+    dismissNotification,
+    navigateFromNotification,
     friends,
     respondFriendRequest,
     guildInvites,
@@ -260,30 +264,95 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
                     </div>
                   )}
 
-                  <div className="max-h-56 overflow-y-auto space-y-2">
-                    {notifications.length === 0 && pendingIncomingFriends.length === 0 && guildInvites.length === 0 ? (
+                  <div className="max-h-60 overflow-y-auto space-y-2">
+                    {notifications.filter(n => !n.dismissedAt).length === 0 &&
+                    pendingIncomingFriends.length === 0 &&
+                    guildInvites.length === 0 ? (
                       <p className="text-xs text-slate-400 text-center py-4">
                         No notifications right now.
                       </p>
                     ) : (
-                      notifications.slice(0, 8).map(n => (
-                        <div
-                          key={n.id}
-                          onClick={() => !n.readAt && markNotificationRead(n.id)}
-                          className={`p-2.5 rounded-xl border text-xs cursor-pointer transition-colors ${
-                            n.readAt
-                              ? 'bg-[#0b0816] border-purple-950/60 text-slate-400'
-                              : 'bg-purple-950/50 border-purple-700/70 text-slate-200'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="font-bold text-white">{n.title}</span>
-                            {!n.readAt && <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />}
-                          </div>
-                          <p className="text-[11px] text-slate-300 mt-0.5">{n.body}</p>
-                        </div>
-                      ))
+                      notifications
+                        .filter(n => !n.dismissedAt)
+                        .slice(0, 8)
+                        .map(n => {
+                          const catLabel =
+                            (n.category && NOTIFICATION_CATEGORY_META[n.category]?.label) ||
+                            'Alert';
+                          return (
+                            <div
+                              key={n.id}
+                              className={`p-2.5 rounded-xl border text-xs transition-colors flex items-start justify-between gap-2 ${
+                                n.readAt
+                                  ? 'bg-[#0b0816] border-purple-950/60 text-slate-400'
+                                  : 'bg-purple-950/50 border-purple-700/70 text-slate-200'
+                              }`}
+                            >
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigateFromNotification(n);
+                                  setShowNotifMenu(false);
+                                }}
+                                className="min-w-0 flex-1 text-left"
+                              >
+                                <div className="flex items-center gap-1.5 text-[10px]">
+                                  <span className="font-semibold uppercase tracking-wider text-[#C5A15A]">
+                                    {catLabel}
+                                  </span>
+                                  {!n.readAt && (
+                                    <>
+                                      <span className="text-slate-600" aria-hidden="true">·</span>
+                                      <span className="text-amber-300 font-semibold">New</span>
+                                    </>
+                                  )}
+                                </div>
+                                <span className="font-bold text-white block mt-0.5 truncate">
+                                  {n.title}
+                                </span>
+                                <p className="text-[11px] text-slate-300 mt-0.5 line-clamp-2">
+                                  {n.body}
+                                </p>
+                              </button>
+                              <div className="flex flex-col gap-1 shrink-0">
+                                {!n.readAt && (
+                                  <button
+                                    type="button"
+                                    onClick={() => void markNotificationRead(n.id)}
+                                    className="p-1 rounded text-purple-300 hover:text-white hover:bg-purple-900/50"
+                                    title="Mark read"
+                                    aria-label="Mark notification read"
+                                  >
+                                    <Check className="w-3 h-3" />
+                                  </button>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => void dismissNotification(n.id)}
+                                  className="p-1 rounded text-slate-500 hover:text-rose-300 hover:bg-rose-950/50"
+                                  title="Dismiss"
+                                  aria-label="Dismiss notification"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })
                     )}
+                  </div>
+
+                  <div className="pt-2 border-t border-purple-950">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveTab('notifications');
+                        setShowNotifMenu(false);
+                      }}
+                      className="w-full py-2 rounded-xl bg-[#1b1231] hover:bg-[#251638] border border-[#C5A15A]/30 text-xs font-semibold text-[#E8CF96] transition-colors whitespace-nowrap"
+                    >
+                      Open Notification Center
+                    </button>
                   </div>
                 </div>
               )}

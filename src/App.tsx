@@ -30,6 +30,7 @@ import { WorldExplorationView } from './components/world3d/heartlands/WorldExplo
 import { AiMentorView } from './components/Mentor/AiMentorView';
 import { CommunityEventsView } from './components/Events/CommunityEventsView';
 import { RecordsMuseumView } from './components/Museum/RecordsMuseumView';
+import { NotificationCenterView } from './components/Notifications/NotificationCenterView';
 
 const MainAppContent: React.FC = () => {
   const {
@@ -136,6 +137,7 @@ const MainAppContent: React.FC = () => {
       case 'achievements':
       case 'hall-of-legends':
       case 'skill-tree':
+      case 'seasons':
         return <ProgressionHubView />;
       case 'character': return <CharacterView />;
       case 'fitness': return <FitnessView />;
@@ -157,6 +159,7 @@ const MainAppContent: React.FC = () => {
       case 'museum': return <RecordsMuseumView />;
       case 'guilds': return <GuildsView />;
       case 'world': return <WorldExplorationView />;
+      case 'notifications': return <NotificationCenterView />;
       case 'settings': return <SettingsView />;
       default: return <DashboardView />;
     }
