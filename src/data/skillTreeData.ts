@@ -1,4 +1,4 @@
-import {
+import type {
   PlayerAttributeProgress,
   PlayerSkillTreeState,
   SkillActivityType,
@@ -7,7 +7,7 @@ import {
   SkillNodeDefinition,
   SkillNodeStatus,
   SkillTreeAttributeDefinition,
-} from '../types/game';
+} from '../types/game.ts';
 
 export const SKILL_ATTRIBUTE_IDS: SkillAttributeId[] = [
   'strength',

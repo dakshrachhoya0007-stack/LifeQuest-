@@ -7,8 +7,8 @@ import type {
   SkillActivityType,
   WeeklyBossEvent,
   WeeklyBossMission,
-} from '../types/game';
-import type { VerifiedActivityMetadata } from './skillTreeData';
+} from '../types/game.ts';
+import type { VerifiedActivityMetadata } from './skillTreeData.ts';
 
 // --- SAFETY CAPS & CENTRALIZED REWARD BOUNDARIES ---
 

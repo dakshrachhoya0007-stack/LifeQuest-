@@ -6,7 +6,7 @@ import type {
   ReputationBreakdown,
   SeasonDefinition,
   ServerNotificationPreferences,
-} from '../types/game';
+} from '../types/game.ts';
 
 export const IDENTITY_RARITY_STYLE: Record<
   IdentityRarity,
