@@ -1133,9 +1133,61 @@ export function attachPresenceAndPrivacySystem(
   const getRelationForUsers = (targetUserId: string, viewerId: string | null) =>
     getRelation(targetUserId, viewerId);
 
+  const getProfileSnapshot = (userId: string): SyncedProfileRecord | null =>
+    persisted.profiles[userId] || null;
+
+  const canViewFieldForUsers = (
+    targetUserId: string,
+    viewerId: string | null,
+    field: PrivacyFieldKey
+  ): boolean => {
+    const rel = getRelation(targetUserId, viewerId).relation;
+    if (rel === 'self') return true;
+    if (rel === 'blocked') return false;
+    const target = persisted.profiles[targetUserId];
+    const privacy = target?.privacySettings || DEFAULT_PRIVACY_SETTINGS;
+    if (privacy.privateByDefault) return false;
+    return canViewField(privacy, field, rel);
+  };
+
+  const broadcastDomainEvent = (
+    eventType: string,
+    payload: unknown,
+    targetUserIds?: string[]
+  ) => {
+    const msg = JSON.stringify({
+      type: eventType,
+      payload,
+      ts: Date.now(),
+    });
+    if (Array.isArray(targetUserIds) && targetUserIds.length > 0) {
+      const targetSet = new Set(targetUserIds);
+      for (const [uid, sockets] of userSockets.entries()) {
+        if (!targetSet.has(uid)) continue;
+        for (const meta of sockets) {
+          if (meta.ws.readyState === WebSocket.OPEN) {
+            meta.ws.send(msg);
+          }
+        }
+      }
+      return;
+    }
+    for (const sockets of userSockets.values()) {
+      for (const meta of sockets) {
+        if (meta.ws.readyState === WebSocket.OPEN) {
+          meta.ws.send(msg);
+        }
+      }
+    }
+  };
+
   return {
     canViewPersonalRecords,
+    canViewFieldForUsers,
     getRelationForUsers,
+    getProfileSnapshot,
+    getKnownUserIds: () => Object.keys(persisted.profiles),
     computeEffectivePresenceForTarget,
+    broadcastDomainEvent,
   };
 }

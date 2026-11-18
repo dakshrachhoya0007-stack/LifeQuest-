@@ -1,6 +1,12 @@
 import type { Express, Request, Response } from 'express';
+import { resolveVerifiedCaller } from './authGuard.ts';
 import type { VerifiedActivityMetadata } from '../src/data/skillTreeData.ts';
-import type { SkillActivityType, SkillAttributeId } from '../src/types/game.ts';
+import type {
+  CharacterClass,
+  FeedPostCategory,
+  SkillActivityType,
+  SkillAttributeId,
+} from '../src/types/game.ts';
 
 interface EcosystemDeps {
   weeklyBoss: {
@@ -61,12 +67,35 @@ interface EcosystemDeps {
       metadata?: VerifiedActivityMetadata;
       bossHit?: boolean;
       communityPointsAwarded?: number;
+      timezone?: string;
     }) => Promise<any>;
   };
   identity?: {
     evaluateAndRecordActivity: (params: {
       userId: string;
       idempotencyKey?: string;
+    }) => Promise<any>;
+  };
+  territoryWars?: {
+    applyVerifiedTerritoryContribution: (params: {
+      userId: string;
+      activityType: SkillActivityType;
+      idempotencyKey: string;
+      metadata?: VerifiedActivityMetadata;
+      timezone?: string;
+    }) => Promise<any>;
+  };
+  activityFeed?: {
+    publishVerifiedPost: (params: {
+      authorId: string;
+      authorUsername: string;
+      authorClass?: CharacterClass;
+      authorLevel?: number;
+      category: FeedPostCategory;
+      eventKey: string;
+      title: string;
+      summary: string;
+      highlightValue?: string | null;
     }) => Promise<any>;
   };
   notifications?: {
@@ -96,11 +125,12 @@ const VALID_ACTIVITY_TYPES = new Set<SkillActivityType>([
 
 export function registerEcosystemDispatcherRoutes(app: Express, deps: EcosystemDeps) {
   app.post('/api/ecosystem/dispatch-activity', async (req: Request, res: Response) => {
-    const userId = String(req.headers['x-lifequest-user-id'] || '').trim();
-    if (!userId) {
-      res.status(401).json({ success: false, error: 'Authentication required.' });
+    const auth = await resolveVerifiedCaller(req);
+    if (!auth.ok || !auth.userId) {
+      res.status(auth.status || 401).json({ success: false, error: auth.error || 'Authentication required.' });
       return;
     }
+    const userId = auth.userId;
 
     const body = req.body && typeof req.body === 'object' ? req.body : {};
     // Reject any untrusted damage, points, or XP overrides
@@ -200,6 +230,17 @@ export function registerEcosystemDispatcherRoutes(app: Express, deps: EcosystemD
           metadata,
           bossHit: Boolean(bossRes?.applied && !bossRes?.duplicate),
           communityPointsAwarded: Number(communityRes?.pointsAwarded || 0),
+          timezone,
+        })
+      : null;
+
+    const territoryRes = deps.territoryWars
+      ? await deps.territoryWars.applyVerifiedTerritoryContribution({
+          userId,
+          activityType,
+          idempotencyKey: `tw:${idempotencyKey}`,
+          metadata,
+          timezone,
         })
       : null;
 
@@ -209,6 +250,69 @@ export function registerEcosystemDispatcherRoutes(app: Express, deps: EcosystemD
           idempotencyKey: `rep:${idempotencyKey}`,
         })
       : null;
+
+    const pbRec = Array.isArray(museumRes.createdRecords)
+      ? museumRes.createdRecords.find((r: any) => r.isPersonalBest)
+      : null;
+
+    // Publish verified Activity Feed events (idempotent via unique eventKey)
+    if (deps.activityFeed) {
+      if (activityType === 'strength_workout' || activityType === 'cardio_workout') {
+        const exName = String(metadata.exerciseName || (activityType === 'cardio_workout' ? 'Endurance Session' : 'Strength Training'));
+        const dur = Number(metadata.durationMinutes || 0);
+        const reps = Number(metadata.repetitions || 0);
+        const parts = [
+          dur > 0 ? `${dur} min` : '',
+          reps > 0 ? `${reps} reps` : '',
+          metadata.verifiedWithAetherVision ? 'Aether Vision Verified' : '',
+        ].filter(Boolean);
+        await deps.activityFeed.publishVerifiedPost({
+          authorId: userId,
+          authorUsername: username,
+          category: 'workout',
+          eventKey: `workout:${idempotencyKey}`,
+          title: `Completed ${exName}`,
+          summary: `Logged a verified ${activityType === 'cardio_workout' ? 'cardio' : 'strength'} session${parts.length ? ` (${parts.join(' · ')})` : ''}.`,
+          highlightValue: parts[0] || 'Verified Session',
+        });
+      }
+
+      if (pbRec) {
+        await deps.activityFeed.publishVerifiedPost({
+          authorId: userId,
+          authorUsername: username,
+          category: 'record',
+          eventKey: `pb:${pbRec.id}`,
+          title: `New Personal Record: ${pbRec.title}`,
+          summary: `${pbRec.description}`,
+          highlightValue: pbRec.displayValue,
+        });
+      }
+
+      if (bossRes?.bossDefeatedJustNow) {
+        await deps.activityFeed.publishVerifiedPost({
+          authorId: userId,
+          authorUsername: username,
+          category: 'competition',
+          eventKey: `boss_defeated:${bossRes.eventId || 'current'}`,
+          title: `Realm Raid Victory: ${bossRes.bossName || 'Weekly Titan'}`,
+          summary: `Landed a decisive strike in the Weekly Boss Battle!`,
+          highlightValue: `${bossRes.damageDealt || 0} DMG`,
+        });
+      }
+
+      if (body.skillLevelUp?.attributeId && body.skillLevelUp?.newLevel) {
+        await deps.activityFeed.publishVerifiedPost({
+          authorId: userId,
+          authorUsername: username,
+          category: 'milestone',
+          eventKey: `skill_lv:${body.skillLevelUp.attributeId}:${body.skillLevelUp.newLevel}`,
+          title: `${String(body.skillLevelUp.attributeId).toUpperCase()} Ascended to Level ${body.skillLevelUp.newLevel}`,
+          summary: `Reached a new Real-Life Skill Tree mastery rank through steady verified practice.`,
+          highlightValue: `Skill Lv.${body.skillLevelUp.newLevel}`,
+        });
+      }
+    }
 
     if (deps.notifications) {
       if (bossRes?.bossDefeatedJustNow) {
@@ -236,9 +340,6 @@ export function registerEcosystemDispatcherRoutes(app: Express, deps: EcosystemD
           actionSubTab: 'skill-tree',
         });
       }
-      const pbRec = Array.isArray(museumRes.createdRecords)
-        ? museumRes.createdRecords.find((r: any) => r.isPersonalBest)
-        : null;
       if (pbRec) {
         await deps.notifications.emitNotification({
           userId,
@@ -260,15 +361,16 @@ export function registerEcosystemDispatcherRoutes(app: Express, deps: EcosystemD
       communityEvent: communityRes,
       museumRecordsCreated: museumRes.createdRecords,
       seasonProgress: seasonRes,
+      territoryWars: territoryRes,
       identityState: identityRes,
     });
   });
 
   // Archive a verified skill tree node unlock into Personal Records Museum
   app.post('/api/ecosystem/record-skill-node', async (req: Request, res: Response) => {
-    const userId = String(req.headers['x-lifequest-user-id'] || '').trim();
-    if (!userId) {
-      res.status(401).json({ success: false, error: 'Authentication required.' });
+    const auth = await resolveVerifiedCaller(req);
+    if (!auth.ok || !auth.userId) {
+      res.status(auth.status || 401).json({ success: false, error: auth.error || 'Authentication required.' });
       return;
     }
 
@@ -279,7 +381,7 @@ export function registerEcosystemDispatcherRoutes(app: Express, deps: EcosystemD
     }
 
     const museumRes = await deps.museum.evaluateAndArchiveVerifiedRecords({
-      userId,
+      userId: auth.userId,
       activityType: 'habit_completion',
       idempotencyKey: `skillnode:${nodeId}`,
       sourceType: 'skill_node_unlock',

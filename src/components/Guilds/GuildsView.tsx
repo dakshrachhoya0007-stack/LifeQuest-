@@ -27,9 +27,11 @@ import {
   ChevronUp,
   ChevronDown,
   Target,
+  MapPin,
 } from 'lucide-react';
 import { LegendTitleBadge } from '../Social/LegendTitleBadge';
 import { PresenceBadge } from '../Brand/PresenceBadge';
+import { TerritoryWarsView } from './TerritoryWarsView';
 
 const EMBLEM_OPTIONS = [
   { id: 'Shield', label: 'Shield', Icon: Shield },
@@ -72,6 +74,8 @@ export const GuildsView: React.FC = () => {
     equippedLegendMap,
     queryPresencesBatch,
     getPlayerPresence,
+    guildsSubTab,
+    setGuildsSubTab,
   } = useGame();
 
   const [selectedGuildId, setSelectedGuildId] = useState<string | null>(null);
@@ -396,7 +400,33 @@ export const GuildsView: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-            {myGuild && selectedGuildId !== myGuild.id && (
+            <div className="flex items-center gap-1 p-1 bg-[#090714] border border-[#C5A15A]/25 rounded-xl">
+              <button
+                type="button"
+                onClick={() => setGuildsSubTab('directory')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 ${
+                  guildsSubTab === 'directory'
+                    ? 'bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/45'
+                    : 'text-[#D9D2C5]/65 hover:text-white border border-transparent'
+                }`}
+              >
+                <Shield className="w-3.5 h-3.5" />
+                Guild Directory
+              </button>
+              <button
+                type="button"
+                onClick={() => setGuildsSubTab('territory-wars')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 ${
+                  guildsSubTab === 'territory-wars'
+                    ? 'bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/45'
+                    : 'text-[#D9D2C5]/65 hover:text-white border border-transparent'
+                }`}
+              >
+                <MapPin className="w-3.5 h-3.5" />
+                Territory Wars
+              </button>
+            </div>
+            {guildsSubTab === 'directory' && myGuild && selectedGuildId !== myGuild.id && (
               <button
                 onClick={() => setSelectedGuildId(myGuild.id)}
                 className="px-4 py-2.5 rounded-xl border border-purple-600/70 bg-purple-950/60 hover:bg-purple-900/60 text-purple-100 text-xs font-semibold whitespace-nowrap"
@@ -404,7 +434,7 @@ export const GuildsView: React.FC = () => {
                 Open My Guild ([{myGuild.tag}])
               </button>
             )}
-            {!myGuild && (
+            {guildsSubTab === 'directory' && !myGuild && (
               <button
                 onClick={() => setShowCreateModal(true)}
                 className="px-5 py-2.5 rounded-xl font-bold font-['Cinzel'] text-xs tracking-wider bg-purple-700 hover:bg-purple-600 text-white shadow-lg flex items-center gap-2 transition-all whitespace-nowrap"
@@ -417,6 +447,10 @@ export const GuildsView: React.FC = () => {
         </div>
       </div>
 
+      {guildsSubTab === 'territory-wars' ? (
+        <TerritoryWarsView />
+      ) : (
+        <>
       {feedback && (
         <div
           className={`p-3 rounded-xl border text-xs animate-in fade-in ${
@@ -1107,6 +1141,8 @@ export const GuildsView: React.FC = () => {
             </div>
           )}
         </div>
+      )}
+        </>
       )}
 
       {/* Create Guild Modal */}

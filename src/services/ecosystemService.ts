@@ -139,6 +139,7 @@ export const fetchRivalsLeaderboardServer = async (params: {
   userId: string;
   scope?: 'global' | 'friends' | 'seasonal' | 'weekly';
   mode?: CompetitiveRivalMode | 'all';
+  division?: string;
   friendIds?: string[];
 }): Promise<{
   ok: boolean;
@@ -149,6 +150,7 @@ export const fetchRivalsLeaderboardServer = async (params: {
     const qs = new URLSearchParams({
       scope: params.scope || 'global',
       mode: params.mode || 'all',
+      ...(params.division && params.division !== 'all' ? { division: params.division } : {}),
       ...(params.friendIds?.length ? { friendIds: params.friendIds.join(',') } : {}),
     });
     const headers = await getLifequestAuthHeaders(params.userId, false);

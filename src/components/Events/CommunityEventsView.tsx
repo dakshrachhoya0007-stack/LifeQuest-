@@ -1,15 +1,19 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { GoldenWorldTreeEmblem } from '../Brand/GoldenWorldTreeEmblem';
-import { Award, Clock, Sparkles, Trophy, Users } from 'lucide-react';
+import { CommunityDecisionsView } from './CommunityDecisionsView';
+import { Award, CalendarClock, CheckCircle2, History, Megaphone, Sparkles, Trophy, Vote } from 'lucide-react';
 
 export const CommunityEventsView: React.FC = () => {
   const {
     user,
+    eventsSubTab,
+    setEventsSubTab,
     communityEventState,
     communityEventLoading,
     refreshCommunityEventState,
     claimCommunityMilestone,
+    claimCommunityChallenge,
     setActiveTab,
   } = useGame();
 
@@ -41,32 +45,124 @@ export const CommunityEventsView: React.FC = () => {
     }
   };
 
+  const handleClaimChallenge = async (challengeId: string, title: string) => {
+    setClaimingId(challengeId);
+    setFeedback(null);
+    try {
+      const res = await claimCommunityChallenge(challengeId);
+      if (res.success) {
+        setFeedback({ type: 'success', text: `Claimed event challenge "${title}"!` });
+      } else {
+        setFeedback({ type: 'error', text: res.error || 'Could not claim event challenge.' });
+      }
+    } finally {
+      setClaimingId(null);
+    }
+  };
+
+  const tabSwitcher = (
+    <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-[#100D19] border border-[#C5A15A]/20 w-fit">
+      <button
+        type="button"
+        onClick={() => setEventsSubTab('events')}
+        className={`px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 ${
+          eventsSubTab === 'events'
+            ? 'bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/45'
+            : 'text-[#D9D2C5]/70 hover:text-white border border-transparent'
+        }`}
+      >
+        <Sparkles className="w-3.5 h-3.5" />
+        Community Events
+      </button>
+      <button
+        type="button"
+        onClick={() => setEventsSubTab('decisions')}
+        className={`px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 ${
+          eventsSubTab === 'decisions'
+            ? 'bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/45'
+            : 'text-[#D9D2C5]/70 hover:text-white border border-transparent'
+        }`}
+      >
+        <Vote className="w-3.5 h-3.5" />
+        Community Decisions
+      </button>
+    </div>
+  );
+
+  if (eventsSubTab === 'decisions') {
+    return (
+      <div className="space-y-6 animate-in fade-in pb-12">
+        {tabSwitcher}
+        <CommunityDecisionsView />
+      </div>
+    );
+  }
+
   if (communityEventLoading && !evt) {
     return (
-      <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-8 text-center text-sm text-[#D9D2C5]/70">
-        Loading Realm Community Event...
+      <div className="space-y-6 animate-in fade-in pb-12">
+        {tabSwitcher}
+        <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-8 text-center text-sm text-[#D9D2C5]/70">
+          Loading Realm Community Event...
+        </div>
       </div>
     );
   }
 
   if (!evt || !communityEventState) {
     return (
-      <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-8 text-center">
-        <button
-          type="button"
-          onClick={() => void refreshCommunityEventState()}
-          className="px-4 py-2 rounded-lg bg-[#251638] border border-[#C5A15A]/40 text-xs font-semibold text-[#C5A15A]"
-        >
-          Reload Community Events
-        </button>
+      <div className="space-y-6 animate-in fade-in pb-12">
+        {tabSwitcher}
+        <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-8 text-center">
+          <button
+            type="button"
+            onClick={() => void refreshCommunityEventState()}
+            className="px-4 py-2 rounded-lg bg-[#251638] border border-[#C5A15A]/40 text-xs font-semibold text-[#C5A15A]"
+          >
+            Reload Community Events
+          </button>
+        </div>
       </div>
     );
   }
 
   const timeLeftDays = Math.max(0, Math.ceil((Date.parse(evt.endsAt) - Date.now()) / 86400000));
+  const announcements = communityEventState.announcements || [];
+  const limitedChallenges = evt.limitedChallenges || [];
+  const upcomingEvents = communityEventState.upcomingEvents || [];
+  const eventHistory = communityEventState.eventHistory || [];
 
   return (
     <div className="space-y-6 animate-in fade-in pb-12">
+      {tabSwitcher}
+
+      {/* Announcements Banner Strip */}
+      {announcements.length > 0 && (
+        <div className="rounded-2xl bg-[#140E24] border border-[#C5A15A]/30 p-4 space-y-2">
+          <div className="flex items-center gap-2 text-xs font-['Cinzel'] font-bold uppercase tracking-wider text-[#C5A15A]">
+            <Megaphone className="w-4 h-4" />
+            Realm Herald Announcements
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+            {announcements.slice(0, 4).map(ann => (
+              <div
+                key={ann.id}
+                className={`rounded-xl p-3 border text-xs ${
+                  ann.severity === 'milestone'
+                    ? 'bg-emerald-950/35 border-emerald-700/40'
+                    : ann.severity === 'alert'
+                    ? 'bg-amber-950/35 border-amber-700/40'
+                    : 'bg-[#0b0816] border-purple-900/50'
+                }`}
+              >
+                <p className="font-bold text-white">{ann.title}</p>
+                <p className="text-[#D9D2C5]/75 mt-0.5 leading-snug">{ann.message}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Header Chronicle Card */}
       <div className="rounded-2xl bg-gradient-to-r from-[#170e2f] via-[#100a20] to-[#1a1236] border border-[#C5A15A]/25 p-5 sm:p-6 shadow-xl space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -150,6 +246,108 @@ export const CommunityEventsView: React.FC = () => {
         </div>
       )}
 
+      {/* Limited-Time Event Challenges */}
+      {limitedChallenges.length > 0 && (
+        <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-5 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#C5A15A]" />
+              Limited-Time Event Challenges
+            </h2>
+            <span className="text-xs text-[#D9D2C5]/60">
+              Verified Workouts, Habits, Study &amp; Healthy Recovery Count
+            </span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+            {limitedChallenges.map(ch => {
+              const prog = communityEventState.challengeProgress?.[ch.id] || {
+                current: 0,
+                target: ch.targetCount,
+                completed: false,
+                claimed: (communityEventState.claimedChallengeIds || []).includes(ch.id),
+              };
+              const chPct = Math.min(100, Math.round((prog.current / Math.max(1, prog.target)) * 100));
+              const extras = [
+                ch.rewardCardId ? 'Collectible Card' : null,
+                ch.rewardTitleId ? 'Exclusive Title' : null,
+                ch.rewardCosmeticId ? 'Cosmetic Trim' : null,
+              ].filter(Boolean);
+              return (
+                <div
+                  key={ch.id}
+                  className="rounded-xl bg-[#151022] border border-[#C5A15A]/20 p-4 flex flex-col justify-between gap-3"
+                >
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="uppercase tracking-wider font-bold text-[#C5A15A]">
+                        {ch.metric === 'recovery_habit'
+                          ? 'Rest & Recovery'
+                          : ch.metric.replace(/_/g, ' ')}
+                      </span>
+                      <span className="font-mono text-purple-300 tabular-nums">
+                        +{ch.rewardXp} XP · +{ch.rewardGold}g
+                      </span>
+                    </div>
+                    <p className="text-sm font-bold text-white">{ch.title}</p>
+                    <p className="text-xs text-[#D9D2C5]/70 leading-snug">{ch.description}</p>
+                    {extras.length > 0 && (
+                      <p className="text-[11px] font-semibold text-amber-300">
+                        Bonus Unlock: {extras.join(' + ')}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[11px] font-mono text-[#D9D2C5]/70 tabular-nums">
+                        <span>Progress</span>
+                        <span>
+                          {Math.min(prog.current, prog.target)} / {prog.target} ({chPct}%)
+                        </span>
+                      </div>
+                      <div className="w-full h-1.5 rounded-full bg-[#090714] overflow-hidden">
+                        <div
+                          className={`h-full transition-all duration-300 ${
+                            prog.completed ? 'bg-emerald-500' : 'bg-gradient-to-r from-[#7046A5] to-[#C5A15A]'
+                          }`}
+                          style={{ width: `${chPct}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={!prog.completed || prog.claimed || claimingId === ch.id}
+                      onClick={() => void handleClaimChallenge(ch.id, ch.title)}
+                      className={`w-full py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 whitespace-nowrap ${
+                        prog.claimed
+                          ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-700/40'
+                          : prog.completed
+                          ? 'bg-[#C5A15A] hover:bg-[#d8b46d] text-[#0c0914]'
+                          : 'bg-[#1f1833] text-[#D9D2C5]/40 cursor-not-allowed'
+                      }`}
+                    >
+                      {prog.claimed ? (
+                        <>
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          Claimed
+                        </>
+                      ) : claimingId === ch.id ? (
+                        'Claiming...'
+                      ) : prog.completed ? (
+                        'Claim Challenge'
+                      ) : (
+                        'In Progress'
+                      )}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Milestones */}
         <div className="lg:col-span-6 rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-5 space-y-4">
@@ -162,6 +360,11 @@ export const CommunityEventsView: React.FC = () => {
               const unlocked = evt.currentGoalPoints >= m.targetPoints;
               const claimed = communityEventState.claimedMilestoneIds.includes(m.id);
               const eligible = unlocked && communityEventState.playerContributionsCount >= 1;
+              const exclusives = [
+                m.rewardCardId ? 'Limited Card' : null,
+                m.rewardTitleId ? 'Exclusive Title' : null,
+                m.rewardCosmeticId ? 'Event Cosmetic' : null,
+              ].filter(Boolean);
               return (
                 <div
                   key={m.id}
@@ -172,6 +375,11 @@ export const CommunityEventsView: React.FC = () => {
                     <p className="text-xs text-[#D9D2C5]/65 font-mono tabular-nums mt-0.5">
                       Goal: {m.targetPoints.toLocaleString()} pts · +{m.rewardXp} XP · +{m.rewardGold}g
                     </p>
+                    {exclusives.length > 0 && (
+                      <p className="text-[11px] text-amber-300 font-semibold mt-0.5">
+                        Includes: {exclusives.join(' + ')}
+                      </p>
+                    )}
                   </div>
                   <button
                     type="button"
@@ -234,6 +442,72 @@ export const CommunityEventsView: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Upcoming Events & Past Event Archive */}
+      {(upcomingEvents.length > 0 || eventHistory.length > 0) && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-5 space-y-3">
+            <h2 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
+              <CalendarClock className="w-4 h-4 text-[#C5A15A]" />
+              Upcoming Realm Gatherings
+            </h2>
+            {upcomingEvents.length === 0 ? (
+              <p className="text-xs text-[#D9D2C5]/60">
+                Upcoming community schedules will be posted here ahead of the next equinox.
+              </p>
+            ) : (
+              <div className="space-y-2.5">
+                {upcomingEvents.map(up => (
+                  <div
+                    key={up.id}
+                    className="rounded-xl bg-[#151022] border border-purple-950/80 p-3.5 space-y-1"
+                  >
+                    <div className="flex items-center justify-between gap-2 text-[11px]">
+                      <span className="font-bold text-[#C5A15A] uppercase">{up.subtitle || 'Scheduled'}</span>
+                      <span className="font-mono text-[#D9D2C5]/60 tabular-nums">
+                        Starts {new Date(up.startsAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="text-sm font-bold text-white">{up.title}</p>
+                    <p className="text-xs text-[#D9D2C5]/70">{up.description}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-5 space-y-3">
+            <h2 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
+              <History className="w-4 h-4 text-purple-400" />
+              Past Event Archive
+            </h2>
+            {eventHistory.length === 0 ? (
+              <p className="text-xs text-[#D9D2C5]/60">
+                Completed realm festivals and collective tallies are archived here permanently.
+              </p>
+            ) : (
+              <div className="space-y-2.5">
+                {eventHistory.map(hist => (
+                  <div
+                    key={hist.id}
+                    className="rounded-xl bg-[#151022] border border-purple-950/80 p-3.5 space-y-1"
+                  >
+                    <div className="flex items-center justify-between gap-2 text-[11px]">
+                      <span className="font-bold text-white">{hist.title}</span>
+                      <span className="font-mono text-emerald-300 tabular-nums">
+                        {hist.finalPoints.toLocaleString()} / {hist.targetGoalPoints.toLocaleString()} pts
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[#D9D2C5]/65 tabular-nums">
+                      {hist.participantsCount} champions · {hist.completedMilestonesCount} milestones · Concluded {new Date(hist.endedAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

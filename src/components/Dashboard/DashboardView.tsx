@@ -2,7 +2,7 @@ import React from 'react';
 import { useGame } from '../../context/GameContext';
 import { HeroCommandStage } from './HeroCommandStage';
 import { FitnessCommandCenter } from './FitnessCommandCenter';
-import { getHeroArtwork } from '../../assets/images';
+import { Character2DAvatar } from '../Character/Character2DAvatar';
 import { getHeroById } from '../../data/heroesData';
 import {
   IDENTITY_RARITY_STYLE,
@@ -25,6 +25,8 @@ export const DashboardView: React.FC = () => {
     activeBuffs,
     setActiveTab,
     identityState,
+    prestigeState,
+    cosmeticsState,
     unreadNotificationsCount,
     achievements,
     museumData,
@@ -35,6 +37,10 @@ export const DashboardView: React.FC = () => {
   const equippedIdentityTitle = identityState?.equippedTitleId
     ? PLAYER_TITLES_CATALOG.find(t => t.id === identityState.equippedTitleId) || null
     : null;
+  const equippedSecondaryTitle = identityState?.equippedSecondaryTitleId
+    ? PLAYER_TITLES_CATALOG.find(t => t.id === identityState.equippedSecondaryTitleId) || null
+    : null;
+  const prestigeTier = prestigeState?.prestigeTier ?? identityState?.prestigeTier ?? 0;
   const featuredBadges = (identityState?.featuredBadgeIds || [])
     .map(id => RARE_BADGES_CATALOG.find(b => b.id === id))
     .filter((b): b is NonNullable<typeof b> => Boolean(b))
@@ -75,6 +81,8 @@ export const DashboardView: React.FC = () => {
         onNavigate={setActiveTab}
         onOpenHeroSelect={() => setShowHeroSelectModal(true)}
         equippedIdentityTitle={equippedIdentityTitle}
+        equippedSecondaryTitle={equippedSecondaryTitle}
+        prestigeTier={prestigeTier}
         unreadNotificationsCount={unreadNotificationsCount}
       />
 
@@ -100,11 +108,12 @@ export const DashboardView: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3.5 min-w-0">
-            <img
-              src={getHeroArtwork(selectedHeroId, user?.characterClass)}
-              alt={heroDef.name}
-              referrerPolicy="no-referrer"
-              className="w-16 h-16 rounded-xl object-cover object-top border border-[#C5A15A]/60 shrink-0"
+            <Character2DAvatar
+              heroId={selectedHeroId}
+              characterClass={user?.characterClass}
+              appearance={cosmeticsState?.appearance}
+              size="md"
+              prestigeTier={prestigeTier}
             />
             <div className="min-w-0 space-y-0.5">
               <h3 className="font-['Cinzel'] font-bold text-base text-white truncate">
@@ -112,9 +121,11 @@ export const DashboardView: React.FC = () => {
               </h3>
               <p className="text-xs text-[#C5A15A] font-semibold truncate">
                 {equippedIdentityTitle ? equippedIdentityTitle.name : heroDef.title}
+                {equippedSecondaryTitle ? ` · ${equippedSecondaryTitle.name}` : ''}
               </p>
               <p className="text-[11px] text-[#D9D2C5]/65 tabular-nums">
                 Level {stats.level} · {user?.characterClass || 'Warrior'}
+                {prestigeTier > 0 ? ` · Prestige ${prestigeTier}` : ''}
               </p>
             </div>
           </div>

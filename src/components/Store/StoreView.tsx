@@ -22,6 +22,7 @@ import {
   Check,
   Coins,
   Eye,
+  Gem,
   Hammer,
   Lock,
   Search,
@@ -32,9 +33,9 @@ import {
   X,
   Zap,
 } from 'lucide-react';
+import { CosmeticMarketplaceView } from './CosmeticMarketplaceView';
 
 type StoreFilterCategory = 'All' | WeaponCategory | 'Consumables';
-type StoreViewMode = 'bazaar' | 'relics';
 
 export const StoreView: React.FC = () => {
   const {
@@ -42,6 +43,9 @@ export const StoreView: React.FC = () => {
     weapons,
     kingdoms,
     stats,
+    storeSubTab,
+    setStoreSubTab,
+    walletState,
     purchaseShopItem,
     unlockProgressionWeapon,
     equipGearSlot,
@@ -49,7 +53,7 @@ export const StoreView: React.FC = () => {
     recordEquipmentInspected,
   } = useGame();
 
-  const [storeMode, setStoreMode] = useState<StoreViewMode>('bazaar');
+  const storeMode = storeSubTab;
   const [categoryFilter, setCategoryFilter] = useState<StoreFilterCategory>('All');
   const [rarityFilter, setRarityFilter] = useState<WeaponRarity | 'All'>('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -300,6 +304,18 @@ export const StoreView: React.FC = () => {
               </div>
             </div>
 
+            <div className="bg-[#090514]/90 border-2 border-purple-500/60 rounded-xl px-4 py-2.5 flex items-center gap-3">
+              <Gem className="w-5 h-5 text-purple-300" />
+              <div>
+                <span className="text-[10px] uppercase tracking-wider text-purple-300 font-bold block">
+                  Fragments
+                </span>
+                <span className="font-mono text-lg font-black text-purple-100 tabular-nums">
+                  {walletState?.cosmeticFragments ?? 0}
+                </span>
+              </div>
+            </div>
+
             <button
               type="button"
               onClick={() => setActiveTab('armory')}
@@ -311,12 +327,12 @@ export const StoreView: React.FC = () => {
           </div>
         </div>
 
-        {/* Store Mode Switcher: Treasury Store vs Beyond-Mythical Pinnacle Relics */}
+        {/* Store Mode Switcher: Treasury Store vs Beyond-Mythical Pinnacle Relics vs Cosmetic Marketplace */}
         <div className="mt-5 pt-4 border-t border-purple-950/80 flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => {
-              setStoreMode('bazaar');
+              setStoreSubTab('bazaar');
               setRarityFilter('All');
               sound.playClick();
             }}
@@ -333,7 +349,7 @@ export const StoreView: React.FC = () => {
           <button
             type="button"
             onClick={() => {
-              setStoreMode('relics');
+              setStoreSubTab('relics');
               setRarityFilter('All');
               if (categoryFilter === 'Consumables') setCategoryFilter('All');
               sound.playClick();
@@ -347,10 +363,30 @@ export const StoreView: React.FC = () => {
             <Award className="w-4 h-4" />
             Beyond-Mythical Relics (Ascendant – Eternal)
           </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setStoreSubTab('marketplace');
+              sound.playClick();
+            }}
+            className={`px-4 py-2 rounded-xl text-xs font-['Cinzel'] font-black flex items-center gap-2 transition-all whitespace-nowrap ${
+              storeMode === 'marketplace'
+                ? 'bg-gradient-to-r from-purple-500 via-fuchsia-500 to-amber-400 text-slate-950 shadow-lg'
+                : 'bg-[#090514] border border-purple-500/60 text-purple-200 hover:text-white'
+            }`}
+          >
+            <Sparkles className="w-4 h-4" />
+            Cosmetic Marketplace (2D Vanity)
+          </button>
         </div>
       </div>
 
-      {/* Filters Bar */}
+      {storeMode === 'marketplace' ? (
+        <CosmeticMarketplaceView />
+      ) : (
+        <>
+          {/* Filters Bar */}
       <div className="bg-[#0e0a1b] border border-purple-950 rounded-2xl p-4 space-y-3">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           {/* 16+ Category Tabs */}
@@ -749,6 +785,8 @@ export const StoreView: React.FC = () => {
             );
           })}
         </div>
+      )}
+        </>
       )}
 
       {/* WEAPON / RELIC INSPECTION MODAL */}

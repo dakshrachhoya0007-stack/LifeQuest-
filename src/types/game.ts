@@ -1258,6 +1258,7 @@ export interface GlobalExclusiveAchievement {
   rewardForgeXp: number;
   rewardGold: number;
   isHidden?: boolean;
+  hint?: string;
 }
 
 export interface GlobalAchievementOwnership {
@@ -1640,6 +1641,10 @@ export interface CompetitiveRivalProfile {
   seasonalRating: number;
   allowNonFriendChallenges: boolean;
   presenceStatus?: PresenceStatus;
+  placementMatchesPlayed?: number;
+  placementCompleted?: boolean;
+  demotionShieldRemaining?: number;
+  currentDivisionIndex?: number;
   updatedAt: string;
 }
 
@@ -1837,6 +1842,32 @@ export interface CommunityEventMilestone {
   targetPoints: number;
   rewardXp: number;
   rewardGold: number;
+  rewardCardId?: string;
+  rewardTitleId?: string;
+  rewardCosmeticId?: string;
+}
+
+export interface CommunityEventAnnouncement {
+  id: string;
+  eventId: string;
+  title: string;
+  message: string;
+  severity: 'info' | 'milestone' | 'alert';
+  createdAt: string;
+}
+
+export interface CommunityEventChallenge {
+  id: string;
+  title: string;
+  description: string;
+  metric: 'verified_activities' | 'workouts' | 'cardio' | 'habits' | 'study' | 'recovery_habit';
+  targetCount: number;
+  rewardXp: number;
+  rewardGold: number;
+  minLevel?: number;
+  rewardCardId?: string;
+  rewardTitleId?: string;
+  rewardCosmeticId?: string;
 }
 
 export interface CommunityEvent {
@@ -1852,13 +1883,33 @@ export interface CommunityEvent {
   currentGoalPoints: number;
   participantsCount: number;
   milestones: CommunityEventMilestone[];
+  limitedChallenges?: CommunityEventChallenge[];
+  minLevelRequired?: number;
+}
+
+export interface CommunityEventHistoryEntry {
+  id: string;
+  title: string;
+  subtitle: string;
+  startsAt: string;
+  endsAt: string;
+  finalPoints: number;
+  targetGoalPoints: number;
+  participantsCount: number;
+  completedMilestonesCount: number;
+  endedAt: string;
 }
 
 export interface CommunityEventPlayerState {
   event: CommunityEvent;
+  upcomingEvents?: CommunityEvent[];
+  eventHistory?: CommunityEventHistoryEntry[];
+  announcements?: CommunityEventAnnouncement[];
   playerPoints: number;
   playerContributionsCount: number;
   claimedMilestoneIds: string[];
+  claimedChallengeIds?: string[];
+  challengeProgress?: Record<string, { current: number; target: number; completed: boolean; claimed: boolean }>;
   topContributors: Array<{ rank: number; userId: string; username: string; points: number }>;
 }
 
@@ -1920,7 +1971,19 @@ export interface PlayerTitleDefinition {
   rarity: IdentityRarity;
   description: string;
   unlockRequirement: string;
-  category: 'discipline' | 'endurance' | 'strength' | 'consistency' | 'boss' | 'social' | 'seasonal';
+  limitedEdition?: boolean;
+  category:
+    | 'discipline'
+    | 'endurance'
+    | 'strength'
+    | 'consistency'
+    | 'boss'
+    | 'social'
+    | 'seasonal'
+    | 'rivals'
+    | 'collection'
+    | 'prestige'
+    | 'event';
   conditionType:
     | 'streak_days'
     | 'workouts_total'
@@ -1933,7 +1996,14 @@ export interface PlayerTitleDefinition {
     | 'rivalry_wins'
     | 'community_points'
     | 'player_level'
-    | 'season_tier';
+    | 'season_tier'
+    | 'cards_collected'
+    | 'collection_percent'
+    | 'prestige_tier'
+    | 'friendship_level'
+    | 'ranked_division'
+    | 'marketplace_unlock'
+    | 'event_milestone';
   threshold: number;
 }
 
@@ -2003,6 +2073,8 @@ export interface PlayerLifetimeStatistics {
 export interface PlayerIdentityState {
   userId: string;
   equippedTitleId: string | null;
+  equippedSecondaryTitleId?: string | null;
+  prestigeTier?: number;
   featuredBadgeIds: string[];
   unlockedTitles: PlayerUnlockedTitle[];
   unlockedBadges: PlayerUnlockedBadge[];
@@ -2055,9 +2127,23 @@ export interface SeasonMilestoneReward {
   id: string;
   title: string;
   requiredSeasonXp: number;
-  rewardType: 'cosmetic_crest' | 'title' | 'badge' | 'achievement';
+  rewardType: 'cosmetic_crest' | 'title' | 'badge' | 'achievement' | 'card' | 'fragments' | 'gold' | 'relic';
   rewardLabel: string;
   rewardRefId?: string;
+  rewardCardId?: string;
+  rewardTitleId?: string;
+  rewardRelicId?: string;
+  rewardGold?: number;
+  rewardFragments?: number;
+  track?: 'free' | 'elite' | 'premium';
+  eliteRewardType?: 'cosmetic_crest' | 'title' | 'badge' | 'card' | 'fragments' | 'gold' | 'relic';
+  eliteRewardLabel?: string;
+  eliteCosmeticId?: string;
+  eliteCardId?: string;
+  eliteTitleId?: string;
+  eliteRelicId?: string;
+  eliteGold?: number;
+  eliteFragments?: number;
 }
 
 export interface SeasonDefinition {
@@ -2073,6 +2159,7 @@ export interface SeasonDefinition {
   status: SeasonStatus;
   challenges: SeasonChallengeDefinition[];
   milestones: SeasonMilestoneReward[];
+  dailyXpCap?: number;
 }
 
 export interface SeasonLeaderboardEntry {
@@ -2104,6 +2191,15 @@ export interface ArchivedSeasonSummary {
   } | null;
 }
 
+export interface SeasonalCosmeticRecord {
+  seasonId: string;
+  seasonName: string;
+  rewardId: string;
+  rewardLabel: string;
+  track: 'free' | 'elite';
+  earnedAt: string;
+}
+
 export interface PlayerSeasonStateResponse {
   season: SeasonDefinition;
   playerProgress: {
@@ -2115,8 +2211,14 @@ export interface PlayerSeasonStateResponse {
       { current: number; target: number; completed: boolean; claimed: boolean }
     >;
     claimedMilestoneIds: string[];
+    claimedEliteMilestoneIds?: string[];
     unlockedCosmetics: string[];
+    eliteUnlocked?: boolean;
+    verifiedActivitiesCount?: number;
+    dailyXpEarnedToday?: number;
+    dailyXpCap?: number;
   };
+  cosmeticCollection?: SeasonalCosmeticRecord[];
   leaderboard: SeasonLeaderboardEntry[];
   leaderboardPage: number;
   leaderboardTotalPages: number;
@@ -2145,5 +2247,751 @@ export interface AdvancedLeaderboardResponse {
   }>;
 }
 
+// ==============================================================================
+// LIFEQUEST EXPANSION 3.0: SOCIAL, PARTIES, 2D COSMETICS, DECISIONS,
+// TROPHY SHOWCASE & TERRITORY WARS
+// ==============================================================================
 
+// --- 1. ADVENTURER'S ACTIVITY FEED ---
 
+export type FeedPostCategory =
+  | 'workout'
+  | 'record'
+  | 'achievement'
+  | 'competition'
+  | 'milestone'
+  | 'level_up';
+
+export type FeedFilter = 'all' | 'friends' | 'achievements' | 'workouts' | 'competitions';
+export type FeedCommentPermission = 'everyone' | 'friends' | 'nobody';
+export type FeedReactionKey = 'like' | '🔥' | '⚔️' | '🏆' | '💪';
+
+export interface FeedComment {
+  id: string;
+  postId: string;
+  authorId: string;
+  authorUsername: string;
+  body: string;
+  createdAt: string;
+}
+
+export interface FeedPost {
+  id: string;
+  authorId: string;
+  authorUsername: string;
+  authorClass: CharacterClass;
+  authorLevel: number;
+  category: FeedPostCategory;
+  eventKey: string;
+  title: string;
+  summary: string;
+  highlightValue?: string | null;
+  privacyScope: 'everyone' | 'friends' | 'nobody';
+  commentPermission: FeedCommentPermission;
+  canComment: boolean;
+  verified: boolean;
+  reactions: Record<FeedReactionKey, number>;
+  myReactions: FeedReactionKey[];
+  comments: FeedComment[];
+  createdAt: string;
+}
+
+export interface FeedListResponse {
+  posts: FeedPost[];
+  page: number;
+  limit: number;
+  totalPosts: number;
+  hasMore: boolean;
+}
+
+// --- 2. WORKOUT PARTIES ---
+
+export type WorkoutPartyStatus = 'lobby' | 'countdown' | 'active' | 'completed' | 'expired';
+
+export interface WorkoutPartyChallengeTemplate {
+  id: string;
+  title: string;
+  description: string;
+  activityType: SkillActivityType;
+  targetValue: number;
+  targetUnit: string;
+  minVerifiedMinutes: number;
+  minVerifiedReps?: number;
+}
+
+export interface WorkoutPartyMember {
+  userId: string;
+  username: string;
+  characterClass: CharacterClass;
+  level: number;
+  connectionStatus: 'connected' | 'reconnecting' | 'disconnected';
+  progressValue: number;
+  completed: boolean;
+  verifiedSubmissionRef?: string | null;
+  joinedAt: string;
+  lastHeartbeatAt: string;
+  appearance?: CharacterAppearance;
+}
+
+export interface WorkoutPartyMessage {
+  id: string;
+  senderId: string;
+  senderUsername: string;
+  kind: 'message' | 'reaction' | 'system';
+  content: string;
+  createdAt: string;
+}
+
+export interface WorkoutParty {
+  id: string;
+  roomCode: string;
+  hostId: string;
+  hostUsername: string;
+  title: string;
+  challengeId: string;
+  challengeName: string;
+  activityType: SkillActivityType;
+  targetValue: number;
+  targetUnit: string;
+  visibility: 'friends' | 'private' | 'public';
+  status: WorkoutPartyStatus;
+  countdownEndsAt?: string | null;
+  startedAt?: string | null;
+  endedAt?: string | null;
+  expiresAt: string;
+  summarySaved: boolean;
+  members: WorkoutPartyMember[];
+  messages: WorkoutPartyMessage[];
+  invitedUserIds: string[];
+  createdAt: string;
+}
+
+export interface WorkoutPartyHistoryEntry {
+  id: string;
+  partyId: string;
+  challengeId: string;
+  challengeName: string;
+  targetValue: number;
+  targetUnit: string;
+  groupTotal: number;
+  userProgress: number;
+  participantsCount: number;
+  completedAt: string;
+}
+
+// --- 3. 2D CHARACTER CUSTOMIZATION & COSMETICS ---
+
+export type CosmeticSlot = 'hairstyle' | 'outfit' | 'color' | 'frame' | 'banner' | 'aura';
+export type CosmeticRarity = 'Common' | 'Rare' | 'Epic' | 'Legendary' | 'Mythic';
+
+export interface CosmeticItemDef {
+  id: string;
+  slot: CosmeticSlot;
+  name: string;
+  description: string;
+  rarity: CosmeticRarity;
+  unlockSource: string;
+  unlockRule: {
+    type: 'starter' | 'level' | 'workouts' | 'habits' | 'achievements' | 'season' | 'territory' | 'milestone';
+    threshold: number;
+  };
+  primaryHex: string;
+  secondaryHex: string;
+  accentHex: string;
+  patternTag: string;
+}
+
+export interface CharacterAppearance {
+  hairstyleId: string | null;
+  outfitId: string | null;
+  colorId: string | null;
+  frameId: string | null;
+  bannerId: string | null;
+  auraId: string | null;
+}
+
+export interface CosmeticCollectionMilestone {
+  id: string;
+  title: string;
+  requiredUnlocked: number;
+  rewardCosmeticId: string;
+  rewardLabel: string;
+}
+
+export interface PlayerCosmeticState {
+  userId: string;
+  unlockedIds: string[];
+  unlockedDetails: Record<string, { unlockedAt: string; sourceRef: string }>;
+  appearance: CharacterAppearance;
+  claimedMilestoneIds: string[];
+  loadouts?: PlayerLoadout[];
+  activeLoadoutId?: string | null;
+  competitionLoadoutId?: string | null;
+  unlockedLoadoutSlots?: number;
+}
+
+// --- 4. COMMUNITY DECISIONS ---
+
+export type CommunityPollCategory =
+  | 'community_event'
+  | 'boss_theme'
+  | 'seasonal_reward'
+  | 'challenge_category';
+
+export type CommunityPollType = 'single_choice' | 'multiple_choice';
+export type CommunityPollStatus = 'active' | 'closed' | 'cancelled' | 'published';
+
+export interface CommunityPollOption {
+  id: string;
+  label: string;
+  description?: string;
+  voteCount: number;
+}
+
+export interface CommunityPoll {
+  id: string;
+  title: string;
+  description: string;
+  category: CommunityPollCategory;
+  pollType: CommunityPollType;
+  maxChoices: number;
+  status: CommunityPollStatus;
+  showLiveResults: boolean;
+  options: CommunityPollOption[];
+  totalVotes: number;
+  mySelectedOptionIds: string[];
+  publishedOutcome?: string | null;
+  closesAt: string;
+  createdAt: string;
+  closedAt?: string | null;
+  reportCount?: number;
+}
+
+export interface CommunityPollReport {
+  id: string;
+  pollId: string;
+  reporterId: string;
+  reason: string;
+  status: 'open' | 'resolved' | 'dismissed';
+  createdAt: string;
+}
+
+// --- 5. TROPHY SHOWCASE ---
+
+export type TrophyCategoryFilter = 'all' | 'achievements' | 'competitions' | 'fitness' | 'seasons';
+
+export interface TrophyShowcaseItem {
+  id: string;
+  sourceKind: 'achievement' | 'global_legend' | 'museum' | 'badge' | 'season';
+  category: Exclude<TrophyCategoryFilter, 'all'>;
+  title: string;
+  description: string;
+  requirement: string;
+  rarity: 'Common' | 'Rare' | 'Epic' | 'Legendary' | 'Mythic' | 'Eternal';
+  unlockedAt: string;
+  isGlobalExclusive?: boolean;
+  globalClaimOrder?: number | null;
+  pinned: boolean;
+}
+
+export interface TrophyShowcaseState {
+  userId: string;
+  trophies: TrophyShowcaseItem[];
+  pinnedIds: string[];
+  totalAvailableCount: number;
+  unlockedCount: number;
+  completionPercent: number;
+}
+
+// --- 6. TERRITORY WARS (GUILD VS GUILD, 2D FICTIONAL MAP) ---
+
+export type TerritoryMissionStance = 'offensive' | 'defensive';
+
+export interface TerritoryRegion {
+  id: string;
+  name: string;
+  subtitle: string;
+  regionTheme: string;
+  mapX: number; // percentage 0..100
+  mapY: number; // percentage 0..100
+  bonusCosmeticId: string;
+  bonusCosmeticName: string;
+  ownerGuildId: string | null;
+  ownerGuildName: string | null;
+  ownerGuildTag: string | null;
+  guildScores: Record<string, { guildId: string; guildName: string; guildTag: string; points: number }>;
+  totalPoints: number;
+}
+
+export interface TerritoryGuildStanding {
+  rank: number;
+  guildId: string;
+  guildName: string;
+  guildTag: string;
+  territoriesControlled: number;
+  totalPoints: number;
+  contributorsCount: number;
+}
+
+export interface TerritoryWarHistoryEntry {
+  id: string;
+  campaignId: string;
+  territoryId: string;
+  territoryName: string;
+  winningGuildId: string | null;
+  winningGuildName: string | null;
+  winningGuildTag: string | null;
+  totalPoints: number;
+  resolvedAt: string;
+}
+
+export interface TerritoryWarsStateResponse {
+  campaign: {
+    id: string;
+    title: string;
+    seasonNumber: number;
+    status: 'scheduled' | 'active' | 'resolved';
+    minGuildMembers: number;
+    startsAt: string;
+    endsAt: string;
+  };
+  territories: TerritoryRegion[];
+  standings: TerritoryGuildStanding[];
+  history: TerritoryWarHistoryEntry[];
+  playerStatus: {
+    guildId: string | null;
+    guildName: string | null;
+    guildTag: string | null;
+    eligible: boolean;
+    eligibilityReason?: string;
+    selectedTerritoryId: string;
+    selectedStance: TerritoryMissionStance;
+    playerPoints: number;
+    dailyPointsToday: number;
+    dailyPointsCap: number;
+  };
+}
+
+// ==============================================================================
+// LIFEQUEST AAA 15-FEATURE SUITE TYPES
+// ==============================================================================
+
+// --- AAA 1: 50-LEVEL BATTLE PASS EXTENSIONS ---
+export type BattlePassRewardType =
+  | 'cosmetic_crest'
+  | 'cosmetic_frame'
+  | 'cosmetic_banner'
+  | 'cosmetic_outfit'
+  | 'cosmetic_aura'
+  | 'title'
+  | 'badge'
+  | 'relic'
+  | 'collectible_card'
+  | 'card_pack'
+  | 'fragments'
+  | 'gold'
+  | 'achievement';
+
+// --- AAA 2: COLLECTIBLE CARD SYSTEM ---
+export type CollectibleCardRarity = 'Common' | 'Rare' | 'Epic' | 'Legendary' | 'Mythic';
+export type CollectibleCardCategory = 'fitness_milestone' | 'seasonal_theme' | 'community_event' | 'mythic_hero';
+
+export interface CollectibleCardDef {
+  id: string;
+  name: string;
+  subtitle: string;
+  rarity: CollectibleCardRarity;
+  category: CollectibleCardCategory;
+  seasonTag?: string;
+  limitedEdition?: boolean;
+  lore: string;
+  motif: 'flame' | 'shield' | 'crown' | 'canopy' | 'blade' | 'star' | 'wave' | 'titan';
+  primaryHex: string;
+  secondaryHex: string;
+  accentHex: string;
+  flavorStatLabel: string;
+  flavorStatValue: string;
+}
+
+export interface PlayerCollectibleCardEntry {
+  cardId: string;
+  quantity: number;
+  firstObtainedAt: string;
+  isFavorite: boolean;
+  favoriteSlot: number | null;
+  sourceRef: string;
+}
+
+export interface CardPackDef {
+  id: string;
+  name: string;
+  description: string;
+  cardCount: number;
+  priceGold: number;
+  priceFragments: number;
+  guaranteedMinRarity: CollectibleCardRarity;
+  dropRates: Record<CollectibleCardRarity, number>; // sums to 100
+  accentHex: string;
+  featuredCategory?: CollectibleCardCategory;
+}
+
+export interface CardCollectionAchievementDef {
+  id: string;
+  title: string;
+  description: string;
+  requiredUniqueCards: number;
+  requiredRarity?: CollectibleCardRarity;
+  rewardGold: number;
+  rewardFragments: number;
+  rewardTitleId?: string;
+}
+
+export interface CardsStateResponse {
+  userId: string;
+  ownedCards: PlayerCollectibleCardEntry[];
+  favoriteCardIds: string[];
+  uniqueOwnedCount: number;
+  totalCatalogCount: number;
+  completionPercent: number;
+  packHistory: Array<{
+    id: string;
+    packId: string;
+    packName: string;
+    cardsDrawn: Array<{ cardId: string; isNew: boolean; fragmentsConverted: number }>;
+    totalFragmentsGranted: number;
+    openedAt: string;
+  }>;
+  claimedCollectionAchievements: string[];
+  duplicateFragmentRates: Record<CollectibleCardRarity, number>;
+}
+
+// --- AAA 3: PLAYER LOADOUT SYSTEM (STRICTLY COSMETIC) ---
+export interface PlayerLoadout {
+  id: string;
+  name: string;
+  context: 'default' | 'competition';
+  appearance: CharacterAppearance;
+  titleId: string | null;
+  secondaryTitleId: string | null;
+  badgeIds: string[];
+  showcaseCardIds?: string[];
+  updatedAt: string;
+}
+
+// --- AAA 4: FRIENDSHIP LEVELS ---
+export interface FriendshipProgressRecord {
+  pairKey: string;
+  friendId: string;
+  friendUsername: string;
+  friendClass: CharacterClass;
+  friendLevel: number;
+  friendshipXp: number;
+  friendshipLevel: number;
+  nextLevelXp: number;
+  totalCoopActivities: number;
+  completedMissionIds: string[];
+  unlockedRewardIds: string[];
+  recentHistory: Array<{
+    id: string;
+    sourceType: 'workout_party' | 'coop_mission' | 'shared_rivalry' | 'milestone_support';
+    label: string;
+    xpAwarded: number;
+    createdAt: string;
+  }>;
+  updatedAt: string;
+}
+
+export interface CoopFriendshipMissionDef {
+  id: string;
+  title: string;
+  description: string;
+  targetActivities: number;
+  friendshipXpReward: number;
+  badgeLabel: string;
+}
+
+// --- AAA 6: COSMETIC MARKETPLACE & WALLET ---
+export type MarketplaceCategory = 'frame' | 'banner' | 'title' | 'aura' | 'outfit' | 'pack';
+
+export interface MarketplaceItemDef {
+  id: string;
+  category: MarketplaceCategory;
+  name: string;
+  description: string;
+  rarity: IdentityRarity;
+  priceGold: number;
+  priceFragments: number;
+  realMoneyUsdDisplay: string; // display-only while real-money checkout is disabled
+  linkedCosmeticId?: string;
+  linkedTitleId?: string;
+  linkedPackId?: string;
+  featuredCollectionTag?: string;
+  rotating?: boolean;
+  primaryHex: string;
+  accentHex: string;
+}
+
+export interface PlayerWalletState {
+  userId: string;
+  goldBalance: number;
+  cosmeticFragments: number;
+  recentTransactions: Array<{
+    id: string;
+    currency: 'gold' | 'fragments';
+    delta: number;
+    source: string;
+    createdAt: string;
+  }>;
+}
+
+export interface MarketplaceStateResponse {
+  wallet: PlayerWalletState;
+  ownedItemIds: string[];
+  wishlistIds: string[];
+  featuredItemIds: string[];
+  rotationEndsAt: string;
+  realMoneyCheckoutEnabled: boolean;
+  realMoneyStatusNotice: string;
+  orders: Array<{
+    id: string;
+    itemId: string;
+    itemName: string;
+    currency: 'gold' | 'fragments';
+    pricePaid: number;
+    createdAt: string;
+  }>;
+}
+
+// --- AAA 7: RANKED DIVISIONS & AAA 13: TOURNAMENTS + SPECTATOR MODE ---
+export type RankedDivisionName =
+  | 'Bronze'
+  | 'Silver'
+  | 'Gold'
+  | 'Platinum'
+  | 'Diamond'
+  | 'Master'
+  | 'Grandmaster';
+
+export interface RankedDivisionDef {
+  division: RankedDivisionName;
+  minRating: number;
+  maxRating: number | null;
+  accentHex: string;
+  rewardTitleId: string;
+  rewardTitleName: string;
+  rewardFrameId: string;
+}
+
+export interface CommunityTournamentMatch {
+  id: string;
+  roundNumber: number;
+  roundLabel: string;
+  playerAId: string;
+  playerAName: string;
+  playerARating: number;
+  playerBId: string | null;
+  playerBName: string;
+  playerBRating: number | null;
+  playerAScore: number;
+  playerBScore: number;
+  winnerId: string | null;
+  status: 'upcoming' | 'live' | 'completed';
+}
+
+export interface CommunityTournament {
+  id: string;
+  title: string;
+  subtitle: string;
+  mode: CompetitiveRivalMode;
+  status: 'upcoming' | 'active' | 'completed';
+  startsAt: string;
+  endsAt: string;
+  participants: Array<{
+    userId: string;
+    username: string;
+    rating: number;
+    division: RankedDivisionName;
+  }>;
+  matches: CommunityTournamentMatch[];
+}
+
+export interface SpectatorLiveMatchSummary {
+  matchId: string;
+  challengeTitle: string;
+  mode: CompetitiveRivalMode;
+  isRanked: boolean;
+  visibility: CompetitiveMatchVisibility;
+  status: CompetitiveMatchStatus;
+  challengerId: string;
+  challengerName: string;
+  challengerRating: number;
+  challengerDivision: RankedDivisionName;
+  challengerScore: number;
+  challengerLoadoutSummary?: string;
+  opponentId: string;
+  opponentName: string;
+  opponentRating: number;
+  opponentDivision: RankedDivisionName;
+  opponentScore: number;
+  opponentLoadoutSummary?: string;
+  targetScore: number;
+  endsAt: string;
+  cheerCounts: Record<string, number>;
+  recentCheers: Array<{
+    id: string;
+    spectatorName: string;
+    targetUserId: string;
+    emoji: string;
+    createdAt: string;
+  }>;
+}
+
+// --- AAA 8: COLLECTION COMPLETION SYSTEM ---
+export interface CollectionCompletionResponse {
+  userId: string;
+  categories: Array<{
+    key: 'trophies' | 'relics' | 'cards' | 'cosmetics' | 'seasonal';
+    label: string;
+    ownedCount: number;
+    totalCount: number;
+    undiscoveredCount: number;
+    percent: number;
+    items: Array<{
+      id: string;
+      name: string;
+      rarity: string;
+      status: 'owned' | 'unowned' | 'undiscovered';
+      hint: string;
+      discontinued?: boolean;
+      seasonalTag?: string;
+    }>;
+  }>;
+  overallOwnedCount: number;
+  overallTotalCount: number;
+  overallPercent: number;
+  milestones: Array<{
+    thresholdPercent: 25 | 50 | 75 | 100;
+    id: string;
+    title: string;
+    rewardLabel: string;
+    rewardTitleId: string;
+    rewardCosmeticId?: string;
+    rewardFragments: number;
+    unlocked: boolean;
+    claimed: boolean;
+  }>;
+}
+
+// --- AAA 10: PEER REPUTATION & ENDORSEMENTS ---
+export type EndorsementCategory = 'helpfulness' | 'sportsmanship' | 'consistency' | 'encouragement';
+
+export interface PlayerEndorsementSummary {
+  targetUserId: string;
+  totalEndorsements: number;
+  countsByCategory: Record<EndorsementCategory, number>;
+  unlockedMilestoneIds: string[];
+  canEndorseToday: boolean;
+  cooldownReason?: string | null;
+  recentEndorsements: Array<{
+    id: string;
+    fromUserId: string;
+    fromUsername: string;
+    category: EndorsementCategory;
+    note?: string | null;
+    createdAt: string;
+  }>;
+}
+
+// --- AAA 11: ADDITIVE PRESTIGE SYSTEM (ZERO RESETS) ---
+export interface PlayerPrestigeState {
+  userId: string;
+  prestigeTier: number;
+  eligibleForNextPrestige: boolean;
+  requiredLevelForNext: number;
+  currentHeroLevel: number;
+  prestigeTitle: string;
+  nextPrestigeTitle: string | null;
+  completedChallengeIds: string[];
+  unlockedRewardIds: string[];
+  history: Array<{
+    tier: number;
+    tierRoman: string;
+    ascendedAt: string;
+    heroLevelAtAscension: number;
+    rewardLabel: string;
+  }>;
+  neverResetsGuarantee: string;
+}
+
+// --- AAA 12: FLEXIBLE DAILY REWARD CALENDAR ---
+export interface DailyCalendarDayState {
+  dayNumber: number;
+  rewardType: 'fragments' | 'gold' | 'quest_bonus' | 'card' | 'card_pack';
+  rewardLabel: string;
+  amount: number;
+  isWeeklyMilestone: boolean;
+  claimed: boolean;
+  claimedMode?: 'workout' | 'rest_recovery' | 'grace_catchup' | null;
+  claimedAt?: string | null;
+}
+
+export interface DailyCalendarStateResponse {
+  userId: string;
+  monthKey: string;
+  todayDateKey: string;
+  claimedToday: boolean;
+  totalClaimedThisMonth: number;
+  activeParticipationDays: number;
+  gracePassesRemaining: number;
+  missedDaysRecoverable: number[];
+  weeklyMilestones: Array<{
+    id: string;
+    dayTarget: number;
+    title: string;
+    rewardLabel: string;
+    unlocked: boolean;
+    claimed: boolean;
+  }>;
+  days: DailyCalendarDayState[];
+}
+
+// --- AAA 15: SEASONAL STATISTICS RECAP ---
+export interface SeasonalStatVisibility {
+  workouts: boolean;
+  activeDays: boolean;
+  personalRecords: boolean;
+  xpAndLevels: boolean;
+  questsAndAchievements: boolean;
+  rivals: boolean;
+  guildAndCommunity: boolean;
+  rarestMilestone: boolean;
+}
+
+export interface SeasonalStatsRecap {
+  seasonId: string;
+  seasonName: string;
+  seasonNumber: number;
+  isArchived: boolean;
+  generatedAt: string;
+  verifiedWorkouts: number;
+  activeDays: number;
+  personalRecordsSet: number;
+  seasonXpGained: number;
+  tierReached: number;
+  questsCompleted: number;
+  achievementsUnlocked: number;
+  rivalsWins: number;
+  rivalsLosses: number;
+  rivalsRatingDelta: number;
+  guildAndCommunityPoints: number;
+  rarestMilestoneTitle: string;
+  rarestMilestoneRarity: string;
+  visibility: SeasonalStatVisibility;
+  previousSeasonComparison?: {
+    previousSeasonName: string;
+    workoutsDelta: number;
+    activeDaysDelta: number;
+    seasonXpDelta: number;
+    rivalsRatingDelta: number;
+  } | null;
+}

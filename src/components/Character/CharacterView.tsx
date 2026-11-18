@@ -1,6 +1,5 @@
 import React from 'react';
 import { useGame } from '../../context/GameContext';
-import { getHeroArtwork } from '../../assets/images';
 import { getHeroById, RPG_ATTRIBUTE_META } from '../../data/heroesData';
 import { EquipmentIllustration } from '../../assets/equipmentArtwork';
 import { getRarityStyle } from '../../utils/rarityStyles';
@@ -9,6 +8,7 @@ import {
   PLAYER_TITLES_CATALOG,
   RARE_BADGES_CATALOG,
 } from '../../data/polish2Data';
+import { COLLECTIBLE_CARDS_CATALOG } from '../../data/aaaGamingData';
 import {
   Shield,
   Swords,
@@ -24,8 +24,17 @@ import {
   Check,
   Calendar,
   Landmark,
+  Palette,
+  Layers,
+  Trophy,
 } from 'lucide-react';
 import { LegendTitleBadge } from '../Social/LegendTitleBadge';
+import { Character2DAvatar, CollectibleCardArtwork } from './Character2DAvatar';
+import { CharacterCustomizationView } from './CharacterCustomizationView';
+import { CollectibleCardsView } from '../Collection/CollectibleCardsView';
+import { TrophyShowcasePanel } from './TrophyShowcasePanel';
+
+const PRESTIGE_ROMANS = ['', 'I', 'II', 'III', 'IV', 'V'];
 
 export const CharacterView: React.FC = () => {
   const {
@@ -41,6 +50,11 @@ export const CharacterView: React.FC = () => {
     activeBuffs,
     setActiveTab,
     setProgressionSubTab,
+    characterSubTab,
+    setCharacterSubTab,
+    cosmeticsState,
+    prestigeState,
+    cardsState,
     hallOfLegends,
     equippedLegendMap,
     equipGlobalLegendTitle,
@@ -48,6 +62,7 @@ export const CharacterView: React.FC = () => {
     museumData,
     rivalsState,
     selectIdentityTitle,
+    selectSecondaryIdentityTitle,
     featureIdentityBadges,
     claimGlobalRareBadge,
     syncVerifiedIdentitySnapshot,
@@ -79,6 +94,10 @@ export const CharacterView: React.FC = () => {
   const equippedIdentityTitle = identityState?.equippedTitleId
     ? PLAYER_TITLES_CATALOG.find(t => t.id === identityState.equippedTitleId) || null
     : null;
+  const equippedSecondaryTitle = identityState?.equippedSecondaryTitleId
+    ? PLAYER_TITLES_CATALOG.find(t => t.id === identityState.equippedSecondaryTitleId) || null
+    : null;
+  const effectivePrestigeTier = prestigeState?.prestigeTier ?? identityState?.prestigeTier ?? 0;
   const unlockedTitleSet = new Set(identityState?.unlockedTitles.map(t => t.titleId) || []);
   const unlockedBadgeSet = new Set(identityState?.unlockedBadges.map(b => b.badgeId) || []);
   const featuredBadgeIds = identityState?.featuredBadgeIds || [];
@@ -107,9 +126,20 @@ export const CharacterView: React.FC = () => {
     setIdentityBusy(true);
     const res = await selectIdentityTitle(titleId);
     if (res.success) {
-      showIdentityNotice('success', titleId ? 'Player title equipped!' : 'Title unequipped.');
+      showIdentityNotice('success', titleId ? 'Primary title equipped!' : 'Primary title unequipped.');
     } else {
       showIdentityNotice('error', res.error || 'Could not update title.');
+    }
+    setIdentityBusy(false);
+  };
+
+  const handleEquipSecondaryTitle = async (titleId: string | null) => {
+    setIdentityBusy(true);
+    const res = await selectSecondaryIdentityTitle(titleId);
+    if (res.success) {
+      showIdentityNotice('success', titleId ? 'Secondary title equipped!' : 'Secondary title cleared.');
+    } else {
+      showIdentityNotice('error', res.error || 'Could not update secondary title.');
     }
     setIdentityBusy(false);
   };
@@ -184,19 +214,90 @@ export const CharacterView: React.FC = () => {
   const critPercent = 10 + (equippedWeapon.critChance ?? 5) + (critBuff ? critBuff.effectValue : 0);
   const mainRarityStyle = getRarityStyle(equippedWeapon.rarity);
 
+  const favoriteCardDefs = (cardsState?.favoriteCardIds || [])
+    .map(id => COLLECTIBLE_CARDS_CATALOG.find(c => c.id === id))
+    .filter((c): c is NonNullable<typeof c> => Boolean(c))
+    .slice(0, 3);
+
+  const subTabs: Array<{
+    id: 'overview' | 'customization' | 'cards' | 'trophies';
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }> = [
+    { id: 'overview', label: 'Hero Overview', icon: Shield },
+    { id: 'customization', label: '2D Wardrobe & Loadouts', icon: Palette },
+    { id: 'cards', label: 'Card Binder', icon: Layers },
+    { id: 'trophies', label: 'Trophies & Prestige', icon: Trophy },
+  ];
+
+  const tabSwitcher = (
+    <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-[#100D19] border border-[#C5A15A]/20 w-fit">
+      {subTabs.map(t => {
+        const Icon = t.icon;
+        const active = characterSubTab === t.id;
+        return (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => setCharacterSubTab(t.id)}
+            className={`px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 ${
+              active
+                ? 'bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/45'
+                : 'text-[#D9D2C5]/70 hover:text-white border border-transparent'
+            }`}
+          >
+            <Icon className="w-3.5 h-3.5" />
+            {t.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+
+  if (characterSubTab === 'customization') {
+    return (
+      <div className="space-y-6 animate-in fade-in pb-12">
+        {tabSwitcher}
+        <CharacterCustomizationView />
+      </div>
+    );
+  }
+
+  if (characterSubTab === 'cards') {
+    return (
+      <div className="space-y-6 animate-in fade-in pb-12">
+        {tabSwitcher}
+        <CollectibleCardsView />
+      </div>
+    );
+  }
+
+  if (characterSubTab === 'trophies') {
+    return (
+      <div className="space-y-6 animate-in fade-in pb-12">
+        {tabSwitcher}
+        <TrophyShowcasePanel />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 animate-in fade-in pb-12">
+      {tabSwitcher}
+
       {/* Banner */}
       <div className="rounded-2xl bg-gradient-to-r from-[#170e2f] via-[#100a20] to-[#1a1236] border border-[#C5A15A]/25 p-6 sm:p-8 shadow-xl">
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
           <div className="relative shrink-0">
-            <img
-              src={getHeroArtwork(selectedHeroId, user?.characterClass)}
-              alt={`${heroDef.name} Emblem`}
-              referrerPolicy="no-referrer"
-              className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl object-cover object-top border-2 border-[#C5A15A]/70 shadow-2xl"
+            <Character2DAvatar
+              heroId={selectedHeroId}
+              characterClass={user?.characterClass}
+              appearance={cosmeticsState?.appearance}
+              size="lg"
+              prestigeTier={effectivePrestigeTier}
+              showBannerBackdrop
             />
-            <span className="absolute -bottom-2 -right-2 bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/60 px-3 py-1 rounded-lg text-xs font-['Cinzel'] font-bold">
+            <span className="absolute -bottom-2 -right-2 bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/60 px-3 py-1 rounded-lg text-xs font-['Cinzel'] font-bold z-20">
               Level {stats.level}
             </span>
           </div>
@@ -206,6 +307,11 @@ export const CharacterView: React.FC = () => {
               <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#D9D2C5]">
                 {user?.characterName || user?.username || 'Hero'}
               </h1>
+              {effectivePrestigeTier > 0 && (
+                <span className="text-xs font-['Cinzel'] font-bold px-2.5 py-0.5 rounded bg-[#2B1D42] text-[#FACC15] border border-[#C5A15A]/60">
+                  Prestige {PRESTIGE_ROMANS[effectivePrestigeTier] || effectivePrestigeTier}
+                </span>
+              )}
               {equippedLegend && (
                 <LegendTitleBadge
                   title={equippedLegend.titleTag}
@@ -219,6 +325,13 @@ export const CharacterView: React.FC = () => {
                   className={`text-xs font-bold px-2.5 py-0.5 rounded border ${IDENTITY_RARITY_STYLE[equippedIdentityTitle.rarity].bg} ${IDENTITY_RARITY_STYLE[equippedIdentityTitle.rarity].border} ${IDENTITY_RARITY_STYLE[equippedIdentityTitle.rarity].text}`}
                 >
                   {equippedIdentityTitle.name}
+                </span>
+              )}
+              {equippedSecondaryTitle && (
+                <span
+                  className={`text-[11px] font-semibold px-2 py-0.5 rounded border ${IDENTITY_RARITY_STYLE[equippedSecondaryTitle.rarity].bg} ${IDENTITY_RARITY_STYLE[equippedSecondaryTitle.rarity].border} ${IDENTITY_RARITY_STYLE[equippedSecondaryTitle.rarity].text}`}
+                >
+                  {equippedSecondaryTitle.name}
                 </span>
               )}
               <span className="text-xs font-bold px-2.5 py-0.5 rounded bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/45">
@@ -672,32 +785,45 @@ export const CharacterView: React.FC = () => {
 
           {/* Player Titles Selector */}
           <div className="lg:col-span-7 p-4 rounded-xl bg-[#0b0816] border border-purple-950/80 space-y-3">
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-wider text-[#C5A15A]">
                 Earned Player Titles ({unlockedTitleSet.size}/{PLAYER_TITLES_CATALOG.length})
               </span>
-              {equippedIdentityTitle && (
-                <button
-                  type="button"
-                  disabled={identityBusy}
-                  onClick={() => void handleEquipIdentityTitle(null)}
-                  className="text-[11px] text-slate-400 hover:text-white underline whitespace-nowrap"
-                >
-                  Unequip Title
-                </button>
-              )}
+              <div className="flex items-center gap-3">
+                {equippedIdentityTitle && (
+                  <button
+                    type="button"
+                    disabled={identityBusy}
+                    onClick={() => void handleEquipIdentityTitle(null)}
+                    className="text-[11px] text-slate-400 hover:text-white underline whitespace-nowrap"
+                  >
+                    Clear Primary
+                  </button>
+                )}
+                {equippedSecondaryTitle && (
+                  <button
+                    type="button"
+                    disabled={identityBusy}
+                    onClick={() => void handleEquipSecondaryTitle(null)}
+                    className="text-[11px] text-purple-300 hover:text-white underline whitespace-nowrap"
+                  >
+                    Clear Secondary
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-72 overflow-y-auto pr-1">
               {PLAYER_TITLES_CATALOG.map(title => {
                 const unlocked = unlockedTitleSet.has(title.id);
-                const equipped = identityState?.equippedTitleId === title.id;
+                const equippedPrimary = identityState?.equippedTitleId === title.id;
+                const equippedSec = identityState?.equippedSecondaryTitleId === title.id;
                 const rStyle = IDENTITY_RARITY_STYLE[title.rarity];
                 return (
                   <div
                     key={title.id}
                     className={`p-3 rounded-xl border flex flex-col justify-between gap-2 ${
-                      equipped
+                      equippedPrimary || equippedSec
                         ? 'bg-[#21153b] border-[#C5A15A]'
                         : unlocked
                         ? 'bg-[#130e24] border-purple-900/70'
@@ -719,24 +845,80 @@ export const CharacterView: React.FC = () => {
                       </p>
                     </div>
                     {unlocked && (
-                      <button
-                        type="button"
-                        disabled={identityBusy}
-                        onClick={() => void handleEquipIdentityTitle(equipped ? null : title.id)}
-                        className={`w-full py-1.5 rounded-lg text-[11px] font-bold transition-colors ${
-                          equipped
-                            ? 'bg-[#C5A15A] text-[#100D19]'
-                            : 'bg-[#251638] hover:bg-[#331e4d] text-[#E8CF96] border border-[#C5A15A]/30'
-                        }`}
-                      >
-                        {equipped ? 'Equipped' : 'Equip Title'}
-                      </button>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <button
+                          type="button"
+                          disabled={identityBusy}
+                          onClick={() => void handleEquipIdentityTitle(equippedPrimary ? null : title.id)}
+                          className={`py-1.5 rounded-lg text-[10px] font-bold transition-colors ${
+                            equippedPrimary
+                              ? 'bg-[#C5A15A] text-[#100D19]'
+                              : 'bg-[#251638] hover:bg-[#331e4d] text-[#E8CF96] border border-[#C5A15A]/30'
+                          }`}
+                        >
+                          {equippedPrimary ? 'Primary' : 'Set Primary'}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={identityBusy || equippedPrimary}
+                          onClick={() => void handleEquipSecondaryTitle(equippedSec ? null : title.id)}
+                          className={`py-1.5 rounded-lg text-[10px] font-bold transition-colors ${
+                            equippedSec
+                              ? 'bg-purple-600 text-white'
+                              : 'bg-[#171128] hover:bg-[#251638] text-purple-200 border border-purple-700/40 disabled:opacity-40'
+                          }`}
+                        >
+                          {equippedSec ? 'Secondary' : 'Set 2nd'}
+                        </button>
+                      </div>
                     )}
                   </div>
                 );
               })}
             </div>
           </div>
+        </div>
+
+        {/* Favorite Collectible Cards 3-Slot Preview */}
+        <div className="p-4 rounded-xl bg-[#0b0816] border border-purple-950/80 space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="font-['Cinzel'] font-bold text-sm text-[#D9D2C5] flex items-center gap-2">
+              <Layers className="w-4 h-4 text-[#C5A15A]" />
+              FAVORITE COLLECTIBLE CARDS SHOWCASE ({favoriteCardDefs.length}/3)
+            </h3>
+            <button
+              type="button"
+              onClick={() => setCharacterSubTab('cards')}
+              className="px-3 py-1.5 rounded-lg bg-[#251638] hover:bg-[#331e4d] border border-[#C5A15A]/35 text-[11px] font-semibold text-[#C5A15A] whitespace-nowrap"
+            >
+              Open Card Binder →
+            </button>
+          </div>
+          {favoriteCardDefs.length === 0 ? (
+            <p className="text-xs text-[#D9D2C5]/60">
+              Open Chronicle Card Packs in your Card Binder and pin up to 3 favorite 2D fantasy cards on your profile.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {favoriteCardDefs.map(card => (
+                <div
+                  key={card.id}
+                  className="p-2.5 rounded-xl bg-[#130e24] border border-[#C5A15A]/25 flex items-center gap-3"
+                >
+                  <CollectibleCardArtwork card={card} compact className="shrink-0" />
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-bold uppercase text-[#C5A15A] block">
+                      {card.rarity}
+                    </span>
+                    <p className="font-['Cinzel'] font-bold text-xs text-white truncate">
+                      {card.name}
+                    </p>
+                    <p className="text-[11px] text-[#D9D2C5]/65 truncate">{card.subtitle}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Rare Badges Showcase */}

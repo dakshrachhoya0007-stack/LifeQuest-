@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import type { Express, Request, Response } from 'express';
+import { resolveVerifiedCaller } from './authGuard.ts';
 import { getSkillAttributeById, getSkillNodeById } from '../src/data/skillTreeData.ts';
 import type { VerifiedActivityMetadata } from '../src/data/skillTreeData.ts';
 import type {
@@ -444,11 +445,12 @@ export function createRecordsMuseumService(
 
   const registerRoutes = (app: Express) => {
     app.get('/api/museum/records', async (req: Request, res: Response) => {
-      const callerId = String(req.headers['x-lifequest-user-id'] || '').trim();
-      if (!callerId) {
-        res.status(401).json({ success: false, error: 'Authentication required.' });
+      const auth = await resolveVerifiedCaller(req);
+      if (!auth.ok || !auth.userId) {
+        res.status(auth.status || 401).json({ success: false, error: auth.error || 'Authentication required.' });
         return;
       }
+      const callerId = auth.userId;
 
       const targetUserId =
         typeof req.query.userId === 'string' && req.query.userId.trim()
@@ -544,11 +546,12 @@ export function createRecordsMuseumService(
     });
 
     app.post('/api/museum/reconcile', async (req: Request, res: Response) => {
-      const callerId = String(req.headers['x-lifequest-user-id'] || '').trim();
-      if (!callerId) {
-        res.status(401).json({ success: false, error: 'Authentication required.' });
+      const auth = await resolveVerifiedCaller(req);
+      if (!auth.ok || !auth.userId) {
+        res.status(auth.status || 401).json({ success: false, error: auth.error || 'Authentication required.' });
         return;
       }
+      const callerId = auth.userId;
 
       const body = req.body && typeof req.body === 'object' ? req.body : {};
       const workouts = Array.isArray(body.workouts) ? body.workouts.slice(0, 250) : [];
@@ -681,11 +684,12 @@ export function createRecordsMuseumService(
     });
 
     app.post('/api/museum/privacy', async (req: Request, res: Response) => {
-      const callerId = String(req.headers['x-lifequest-user-id'] || '').trim();
-      if (!callerId) {
-        res.status(401).json({ success: false, error: 'Authentication required.' });
+      const auth = await resolveVerifiedCaller(req);
+      if (!auth.ok || !auth.userId) {
+        res.status(auth.status || 401).json({ success: false, error: auth.error || 'Authentication required.' });
         return;
       }
+      const callerId = auth.userId;
       const allowPublic = Boolean(req.body?.allowPublic);
       await withLock(() => {
         const ledger = readLedger();

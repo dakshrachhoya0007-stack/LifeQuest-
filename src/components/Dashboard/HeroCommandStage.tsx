@@ -43,6 +43,8 @@ interface HeroCommandStageProps {
   onNavigate: (tab: string) => void;
   onOpenHeroSelect: () => void;
   equippedIdentityTitle?: { name: string; rarity: string } | null;
+  equippedSecondaryTitle?: { name: string; rarity: string } | null;
+  prestigeTier?: number;
   unreadNotificationsCount?: number;
 }
 
@@ -77,6 +79,8 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
   onNavigate,
   onOpenHeroSelect,
   equippedIdentityTitle,
+  equippedSecondaryTitle,
+  prestigeTier = 0,
   unreadNotificationsCount = 0,
 }) => {
   const { equippedLegendMap } = useGame();
@@ -195,6 +199,11 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
               <h1 className="font-['Cinzel'] font-black text-lg sm:text-xl text-[#F2ECE1] tracking-wide truncate">
                 Welcome, {user?.characterName || user?.username || heroDef.name}
               </h1>
+              {prestigeTier > 0 && (
+                <span className="text-[11px] font-['Cinzel'] font-bold px-2 py-0.5 rounded bg-[#2B1D42] text-[#FACC15] border border-[#C5A15A]/55">
+                  Prestige {['', 'I', 'II', 'III', 'IV', 'V'][prestigeTier] || prestigeTier}
+                </span>
+              )}
               {equippedLegend && (
                 <LegendTitleBadge
                   title={equippedLegend.titleTag}
@@ -206,6 +215,11 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
               {equippedIdentityTitle && (
                 <span className="text-xs font-semibold text-[#E8CF96]">
                   · {equippedIdentityTitle.name}
+                </span>
+              )}
+              {equippedSecondaryTitle && (
+                <span className="text-xs font-medium text-purple-200">
+                  · {equippedSecondaryTitle.name}
                 </span>
               )}
             </div>

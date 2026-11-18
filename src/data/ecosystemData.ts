@@ -298,14 +298,12 @@ export const COMPETITIVE_TIERS: Array<{
   { tier: 'Platinum', minRating: 1500, maxRating: 1699, accentHex: '#38BDF8' },
   { tier: 'Diamond', minRating: 1700, maxRating: 1899, accentHex: '#A78BFA' },
   { tier: 'Master', minRating: 1900, maxRating: 2099, accentHex: '#F472B6' },
-  { tier: 'Grandmaster', minRating: 2100, maxRating: 2299, accentHex: '#FB7185' },
-  { tier: 'Legendary', minRating: 2300, maxRating: null, accentHex: '#FACC15' },
+  { tier: 'Grandmaster', minRating: 2100, maxRating: null, accentHex: '#FBBF24' },
 ];
 
 export const computeCompetitiveTier = (
   rating: number
 ): 'Bronze' | 'Silver' | 'Gold' | 'Platinum' | 'Diamond' | 'Master' | 'Grandmaster' | 'Legendary' => {
-  if (rating >= 2300) return 'Legendary';
   if (rating >= 2100) return 'Grandmaster';
   if (rating >= 1900) return 'Master';
   if (rating >= 1700) return 'Diamond';

@@ -428,9 +428,15 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                                 </span>
                               )}
                             </div>
-                            {player.equippedTitleName && (
+                            {(player.equippedTitleName ||
+                              (typeof player.reputationScore === 'number' &&
+                                player.reputationScore > 0)) && (
                               <span className={`text-[10px] font-semibold block ${titleColorClass}`}>
-                                {player.equippedTitleName}
+                                {player.equippedTitleName || 'Champion'}
+                                {typeof player.reputationScore === 'number' &&
+                                player.reputationScore > 0
+                                  ? ` · ${player.reputationScore.toLocaleString()} Rep`
+                                  : ''}
                               </span>
                             )}
                           </div>

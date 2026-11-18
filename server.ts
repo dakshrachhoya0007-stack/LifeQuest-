@@ -20,6 +20,14 @@ import { createLeaderboardService } from './server/leaderboardService.ts';
 import { attachPresenceAndPrivacySystem } from './server/presenceAndPrivacy.ts';
 import { resolveVerifiedCaller } from './server/authGuard.ts';
 import { GLOBAL_EXCLUSIVE_ACHIEVEMENTS } from './src/data/globalLegendsData.ts';
+import { createActivityFeedService } from './server/activityFeedService.ts';
+import { createWorkoutPartyService } from './server/workoutPartyService.ts';
+import { createCustomizationService } from './server/customizationService.ts';
+import { createCommunityDecisionsService } from './server/communityDecisionsService.ts';
+import { createTrophyShowcaseService } from './server/trophyShowcaseService.ts';
+import { createTerritoryWarsService } from './server/territoryWarsService.ts';
+import { createAaaEconomyCardsService } from './server/aaaEconomyCardsService.ts';
+import { createSocialEngagementService } from './server/socialEngagementService.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -1399,6 +1407,25 @@ async function startServer() {
   registerSkillTreeRoutes(app, __dirname);
 
   const notificationService = createNotificationService(__dirname);
+
+  const customizationService = createCustomizationService(__dirname, {
+    onCosmeticUnlocked: async ({ userId, cosmeticName, rarity, cosmeticId }) => {
+      await notificationService.emitNotification({
+        userId,
+        category: 'player_progression',
+        preferenceKey: 'achievement',
+        eventKey: `cosmetic:${cosmeticId}`,
+        type: 'cosmetic_unlocked',
+        title: `2D Cosmetic Unlocked: ${cosmeticName}`,
+        body: `Your ${rarity} appearance item is ready to equip in the Customization Sanctum.`,
+        actionTab: 'customization',
+      });
+    },
+  });
+
+  let aaaEconomyCardsService!: ReturnType<typeof createAaaEconomyCardsService>;
+  let socialEngagementService!: ReturnType<typeof createSocialEngagementService>;
+
   const identityService = createIdentityService(__dirname, {
     onIdentityUnlocked: async ({ userId, kind, itemId, itemName, rarity }) => {
       await notificationService.emitNotification({
@@ -1412,7 +1439,48 @@ async function startServer() {
         actionTab: 'character',
       });
     },
+    creditGold: (userId, amount, source, idempotencyKey) =>
+      aaaEconomyCardsService.creditGold(userId, amount, source, idempotencyKey),
+    creditFragments: (userId, amount, source, idempotencyKey) =>
+      aaaEconomyCardsService.creditFragments(userId, amount, source, idempotencyKey),
+    grantDirectCosmetic: params => customizationService.grantDirectCosmetic(params),
+    getUniqueCardCount: userId => aaaEconomyCardsService.getUniqueCardCountSync(userId),
+    getCollectionPercent: userId => aaaEconomyCardsService.getCollectionPercentSync(userId),
+    getMaxFriendshipLevel: userId => socialEngagementService.getMaxFriendshipLevelSync(userId),
+    getMarketplaceUnlockCount: userId => aaaEconomyCardsService.getMarketplaceUnlockCountSync(userId),
+    isPairBlocked: (a, b) => presenceHelper.getRelationForUsers(a, b).relation === 'blocked',
   });
+
+  aaaEconomyCardsService = createAaaEconomyCardsService(__dirname, {
+    grantDirectCosmetic: params => customizationService.grantDirectCosmetic(params),
+    grantDirectTitle: async params => {
+      await identityService.grantDirectTitle(params);
+    },
+    evaluateIdentity: async ({ userId }) => {
+      await identityService.evaluateAndRecordActivity({ userId });
+    },
+    isPairBlocked: (a, b) => presenceHelper.getRelationForUsers(a, b).relation === 'blocked',
+    onRewardNotification: async ({ userId, eventKey, title, body, actionTab }) => {
+      await notificationService.emitNotification({
+        userId,
+        category: 'player_progression',
+        preferenceKey: 'achievement',
+        eventKey,
+        type: 'aaa_reward',
+        title,
+        body,
+        actionTab: actionTab || 'character',
+      });
+    },
+  });
+
+  socialEngagementService = createSocialEngagementService(__dirname, {
+    privacyHelper: presenceHelper,
+    economyCards: aaaEconomyCardsService,
+    identity: identityService,
+    getCosmeticAppearance: userId => customizationService.getAppearanceSync(userId),
+  });
+
   const seasonService = createSeasonService(__dirname, {
     onSeasonMilestoneReached: async ({ userId, seasonName, milestoneTitle, rewardLabel, milestoneId }) => {
       await notificationService.emitNotification({
@@ -1426,6 +1494,27 @@ async function startServer() {
         actionTab: 'seasons',
       });
     },
+    onUnlockCosmetic: async ({ userId, cosmeticId, sourceRef }) => {
+      await customizationService.grantDirectCosmetic({ userId, cosmeticId, sourceRef });
+    },
+    onGrantGold: async p => {
+      await aaaEconomyCardsService.creditGold(p.userId, p.amount, p.source, p.idempotencyKey);
+    },
+    onGrantFragments: async p => {
+      await aaaEconomyCardsService.creditFragments(p.userId, p.amount, p.source, p.idempotencyKey);
+    },
+    onGrantCard: async p => {
+      await aaaEconomyCardsService.grantCollectibleCard(p);
+    },
+    onGrantCardPack: async p => {
+      await aaaEconomyCardsService.grantCardPack(p);
+    },
+    onGrantTitle: async p => {
+      await identityService.grantDirectTitle(p);
+    },
+    onGrantRelic: async p => {
+      await aaaEconomyCardsService.grantRelic(p);
+    },
   });
   const leaderboardService = createLeaderboardService(__dirname);
 
@@ -1433,9 +1522,47 @@ async function startServer() {
     privacyHelper: presenceHelper,
   });
   const weeklyBossService = createWeeklyBossService(__dirname);
+
+  const activityFeedService = createActivityFeedService(__dirname, {
+    privacyHelper: presenceHelper,
+    onSocialInteraction: async ({ recipientUserId, actorUsername, kind, postId, postTitle, detail }) => {
+      await notificationService.emitNotification({
+        userId: recipientUserId,
+        category: 'social',
+        preferenceKey: 'social',
+        eventKey: `feed:${kind}:${postId}:${actorUsername}:${Date.now()}`,
+        type: `feed_${kind}`,
+        title: kind === 'comment' ? `${actorUsername} commented on your post` : `${actorUsername} reacted to your activity`,
+        body: detail ? `${postTitle}: "${detail}"` : postTitle,
+        actionTab: 'activity-feed',
+      });
+    },
+  });
+
   const rivalService = createRivalService(__dirname, {
     getPresenceStatus: (targetUserId, viewerId) =>
       presenceHelper.computeEffectivePresenceForTarget(targetUserId, viewerId).status,
+    isFriendsWith: (a, b) => presenceHelper.getRelationForUsers(a, b).relation === 'friends',
+    getCompetitorLoadoutSummary: userId => {
+      const app = customizationService.getAppearanceSync(userId);
+      const pieces = [app?.outfitColorId, app?.frameId, app?.auraId].filter(Boolean);
+      return pieces.length > 0 ? pieces.slice(0, 2).join(' · ') : 'Citadel Vanguard';
+    },
+    onGrantTitle: async p => {
+      await identityService.grantDirectTitle(p);
+    },
+    onUnlockCosmetic: async p => {
+      await customizationService.grantDirectCosmetic(p);
+    },
+    onFriendDuelSettled: async ({ challengerId, opponentId, matchId, challengeTitle }) => {
+      await socialEngagementService.awardVerifiedCoopInternal({
+        userId: challengerId,
+        friendId: opponentId,
+        sourceType: 'shared_rivalry',
+        label: `Completed Rivals Match: ${challengeTitle}`,
+        idempotencyKey: `riv:${matchId}`,
+      });
+    },
     onRivalryCompleted: async rivalry => {
       if (!rivalry.winnerId || rivalry.isTie) return;
       const winScore =
@@ -1459,6 +1586,15 @@ async function startServer() {
         sourceActivityRef: `rivalry:${rivalry.id}`,
         rarity: 'Epic',
       });
+      await activityFeedService.publishVerifiedPost({
+        authorId: rivalry.winnerId,
+        authorUsername: rivalry.winnerId === rivalry.challengerId ? rivalry.challengerName : rivalry.opponentName,
+        category: 'competition',
+        eventKey: `rivalry_win:${rivalry.id}`,
+        title: `Won Competitive Duel: ${rivalry.challengeTitle}`,
+        summary: `Prevailed against ${opponentName} with ${winScore} verified pts.`,
+        highlightValue: `${winScore} pts`,
+      });
       await notificationService.emitNotification({
         userId: rivalry.winnerId,
         category: 'social',
@@ -1471,7 +1607,109 @@ async function startServer() {
       });
     },
   });
-  const communityEventsService = createCommunityEventsService(__dirname);
+
+  const communityEventsService = createCommunityEventsService(__dirname, {
+    onBroadcast: (eventType, payload) => presenceHelper.broadcastDomainEvent(eventType, payload),
+    getKnownUserIds: () => presenceHelper.getKnownUserIds(),
+    onGrantCard: async p => {
+      await aaaEconomyCardsService.grantCollectibleCard(p);
+    },
+    onGrantTitle: async p => {
+      await identityService.grantDirectTitle(p);
+    },
+    onUnlockCosmetic: async p => {
+      await customizationService.grantDirectCosmetic(p);
+    },
+    onNotifyUsers: async ({ userIds, eventKey, title, body }) => {
+      for (const uid of userIds) {
+        await notificationService.emitNotification({
+          userId: uid,
+          category: 'game_world',
+          preferenceKey: 'community',
+          eventKey,
+          type: 'community_moment_update',
+          title,
+          body,
+          actionTab: 'events',
+        });
+      }
+    },
+  });
+
+  const workoutPartyService = createWorkoutPartyService(__dirname, {
+    privacyHelper: presenceHelper,
+    getAppearance: userId => customizationService.getAppearanceSync(userId),
+    onPartyInvite: async ({ inviteeId, hostUsername, partyId, roomCode, challengeName }) => {
+      await notificationService.emitNotification({
+        userId: inviteeId,
+        category: 'social',
+        preferenceKey: 'social',
+        eventKey: `party_invite:${partyId}:${inviteeId}`,
+        type: 'workout_party_invite',
+        title: `${hostUsername} invited you to a Workout Party`,
+        body: `Join room ${roomCode} for "${challengeName}".`,
+        actionTab: 'workout-parties',
+      });
+    },
+    onVerifiedCoopProgress: async ({ userId, teammateIds, partyTitle, sessionRef }) => {
+      for (const teammateId of teammateIds) {
+        const rel = presenceHelper.getRelationForUsers(teammateId, userId).relation;
+        if (rel === 'friends') {
+          await socialEngagementService.awardVerifiedCoopInternal({
+            userId,
+            friendId: teammateId,
+            sourceType: 'workout_party',
+            label: `Workout Party: ${partyTitle}`,
+            idempotencyKey: `wp:${sessionRef}:${teammateId}`,
+          });
+        }
+      }
+    },
+  });
+
+  const communityDecisionsService = createCommunityDecisionsService(__dirname, {
+    getKnownUserIds: () => presenceHelper.getKnownUserIds(),
+    onPollBroadcast: (eventType, payload) => presenceHelper.broadcastDomainEvent(eventType, payload),
+    onPollNotification: async ({ eventKey, title, body, userIds }) => {
+      for (const uid of userIds) {
+        await notificationService.emitNotification({
+          userId: uid,
+          category: 'game_world',
+          preferenceKey: 'community',
+          eventKey,
+          type: 'community_decision',
+          title,
+          body,
+          actionTab: 'decisions',
+        });
+      }
+    },
+  });
+
+  const trophyShowcaseService = createTrophyShowcaseService(__dirname, {
+    privacyHelper: presenceHelper,
+  });
+
+  const territoryWarsService = createTerritoryWarsService(__dirname, {
+    privacyHelper: presenceHelper,
+    grantSharedCosmetic: async ({ userId, cosmeticId, sourceRef }) =>
+      customizationService.grantDirectCosmetic({ userId, cosmeticId, sourceRef }),
+    onCampaignNotification: async ({ userIds, eventKey, title, body }) => {
+      for (const uid of userIds) {
+        await notificationService.emitNotification({
+          userId: uid,
+          category: 'game_world',
+          preferenceKey: 'community',
+          eventKey,
+          type: 'territory_war_outcome',
+          title,
+          body,
+          actionTab: 'territory-wars',
+        });
+      }
+    },
+  });
+
   const aiMentorService = createAiMentorService(__dirname, {
     geminiModel: GEMINI_MODEL,
     getGeminiClient,
@@ -1488,6 +1726,15 @@ async function startServer() {
   identityService.registerRoutes(app);
   seasonService.registerRoutes(app);
   leaderboardService.registerRoutes(app);
+  customizationService.registerRoutes(app);
+  activityFeedService.registerRoutes(app);
+  workoutPartyService.registerRoutes(app);
+  communityDecisionsService.registerRoutes(app);
+  trophyShowcaseService.registerRoutes(app);
+  territoryWarsService.registerRoutes(app);
+  aaaEconomyCardsService.registerRoutes(app);
+  socialEngagementService.registerRoutes(app);
+
   registerEcosystemDispatcherRoutes(app, {
     weeklyBoss: weeklyBossService,
     rivals: rivalService,
@@ -1495,6 +1742,8 @@ async function startServer() {
     museum: recordsMuseumService,
     seasons: seasonService,
     identity: identityService,
+    territoryWars: territoryWarsService,
+    activityFeed: activityFeedService,
     notifications: notificationService,
   });
 

@@ -91,6 +91,27 @@ export const selectIdentityTitleServer = async (
   }
 };
 
+export const selectSecondaryIdentityTitleServer = async (
+  userId: string,
+  titleId: string | null
+): Promise<{ ok: boolean; state?: PlayerIdentityState; error?: string }> => {
+  try {
+    const headers = await getLifequestAuthHeaders(userId, true);
+    const res = await fetch('/api/identity/select-secondary-title', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ titleId }),
+    });
+    const parsed = await safeJson(res);
+    if (!parsed.ok || !parsed.data?.state) {
+      return { ok: false, error: parsed.data?.error || 'Could not equip secondary title.' };
+    }
+    return { ok: true, state: parsed.data.state as PlayerIdentityState };
+  } catch (err: any) {
+    return { ok: false, error: err?.message || 'Network error.' };
+  }
+};
+
 export const featureIdentityBadgesServer = async (
   userId: string,
   badgeIds: string[]
@@ -147,6 +168,8 @@ export const fetchPublicIdentitySummaryServer = async (targetUserId: string): Pr
   ok: boolean;
   identity?: {
     equippedIdentityTitle: { id: string; name: string; rarity: string } | null;
+    equippedSecondaryTitle?: { id: string; name: string; rarity: string } | null;
+    prestigeTier?: number;
     featuredBadges: Array<{
       id: string;
       name: string;
@@ -184,9 +207,8 @@ export const fetchNotificationsStateServer = async (
 ): Promise<{ ok: boolean; data?: NotificationsStatePayload; error?: string }> => {
   try {
     const qs = new URLSearchParams({ category });
-    const res = await fetch(`/api/notifications/state?${qs.toString()}`, {
-      headers: { 'x-lifequest-user-id': userId },
-    });
+    const headers = await getLifequestAuthHeaders(userId, false);
+    const res = await fetch(`/api/notifications/state?${qs.toString()}`, { headers });
     const parsed = await safeJson(res);
     if (!parsed.ok || !parsed.data) {
       return { ok: false, error: parsed.data?.error || 'Failed to load notifications.' };
@@ -201,9 +223,8 @@ export const fetchNotificationPreferencesServer = async (
   userId: string
 ): Promise<{ ok: boolean; preferences?: ServerNotificationPreferences; error?: string }> => {
   try {
-    const res = await fetch('/api/notifications/preferences', {
-      headers: { 'x-lifequest-user-id': userId },
-    });
+    const headers = await getLifequestAuthHeaders(userId, false);
+    const res = await fetch('/api/notifications/preferences', { headers });
     const parsed = await safeJson(res);
     if (!parsed.ok || !parsed.data?.preferences) {
       return { ok: false, error: parsed.data?.error || 'Failed to load preferences.' };
@@ -219,12 +240,10 @@ export const saveNotificationPreferencesServer = async (
   prefs: Partial<ServerNotificationPreferences>
 ): Promise<{ ok: boolean; preferences?: ServerNotificationPreferences; error?: string }> => {
   try {
+    const headers = await getLifequestAuthHeaders(userId, true);
     const res = await fetch('/api/notifications/preferences', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-lifequest-user-id': userId,
-      },
+      headers,
       body: JSON.stringify(prefs),
     });
     const parsed = await safeJson(res);
@@ -242,12 +261,10 @@ export const markNotificationReadApiServer = async (
   notificationId: string
 ): Promise<{ ok: boolean; error?: string }> => {
   try {
+    const headers = await getLifequestAuthHeaders(userId, true);
     const res = await fetch('/api/notifications/read', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-lifequest-user-id': userId,
-      },
+      headers,
       body: JSON.stringify({ notificationId }),
     });
     const parsed = await safeJson(res);
@@ -264,12 +281,10 @@ export const markAllNotificationsReadApiServer = async (
   category: NotificationCategory | 'all' = 'all'
 ): Promise<{ ok: boolean; error?: string }> => {
   try {
+    const headers = await getLifequestAuthHeaders(userId, true);
     const res = await fetch('/api/notifications/read-all', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-lifequest-user-id': userId,
-      },
+      headers,
       body: JSON.stringify({ category }),
     });
     const parsed = await safeJson(res);
@@ -286,12 +301,10 @@ export const dismissNotificationApiServer = async (
   notificationId: string
 ): Promise<{ ok: boolean; error?: string }> => {
   try {
+    const headers = await getLifequestAuthHeaders(userId, true);
     const res = await fetch('/api/notifications/dismiss', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-lifequest-user-id': userId,
-      },
+      headers,
       body: JSON.stringify({ notificationId }),
     });
     const parsed = await safeJson(res);
@@ -308,13 +321,12 @@ export const dismissNotificationApiServer = async (
 export const fetchSeasonStateServer = async (
   userId: string,
   page: number = 1,
-  limit: number = 10
+  limit: number = 50
 ): Promise<{ ok: boolean; data?: PlayerSeasonStateResponse; error?: string }> => {
   try {
     const qs = new URLSearchParams({ page: String(page), limit: String(limit) });
-    const res = await fetch(`/api/seasons/state?${qs.toString()}`, {
-      headers: { 'x-lifequest-user-id': userId },
-    });
+    const headers = await getLifequestAuthHeaders(userId, false);
+    const res = await fetch(`/api/seasons/state?${qs.toString()}`, { headers });
     const parsed = await safeJson(res);
     if (!parsed.ok || !parsed.data?.season) {
       return { ok: false, error: parsed.data?.error || 'Failed to load seasonal progression.' };
@@ -335,12 +347,10 @@ export const claimSeasonChallengeServer = async (
   error?: string;
 }> => {
   try {
+    const headers = await getLifequestAuthHeaders(userId, true);
     const res = await fetch('/api/seasons/claim-challenge', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-lifequest-user-id': userId,
-      },
+      headers,
       body: JSON.stringify({ challengeId }),
     });
     const parsed = await safeJson(res);
@@ -357,9 +367,34 @@ export const claimSeasonChallengeServer = async (
   }
 };
 
+export const unlockSeasonEliteServer = async (
+  userId: string
+): Promise<{
+  ok: boolean;
+  data?: PlayerSeasonStateResponse;
+  error?: string;
+}> => {
+  try {
+    const headers = await getLifequestAuthHeaders(userId, true);
+    const res = await fetch('/api/seasons/unlock-elite', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({}),
+    });
+    const parsed = await safeJson(res);
+    if (!parsed.ok || !parsed.data?.season) {
+      return { ok: false, error: parsed.data?.error || 'Could not unlock Elite Cosmetic Track.' };
+    }
+    return { ok: true, data: parsed.data as PlayerSeasonStateResponse };
+  } catch (err: any) {
+    return { ok: false, error: err?.message || 'Network error.' };
+  }
+};
+
 export const claimSeasonMilestoneServer = async (
   userId: string,
-  milestoneId: string
+  milestoneId: string,
+  track: 'free' | 'elite' = 'free'
 ): Promise<{
   ok: boolean;
   rewardLabel?: string;
@@ -367,13 +402,11 @@ export const claimSeasonMilestoneServer = async (
   error?: string;
 }> => {
   try {
+    const headers = await getLifequestAuthHeaders(userId, true);
     const res = await fetch('/api/seasons/claim-milestone', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-lifequest-user-id': userId,
-      },
-      body: JSON.stringify({ milestoneId }),
+      headers,
+      body: JSON.stringify({ milestoneId, track }),
     });
     const parsed = await safeJson(res);
     if (!parsed.ok || !parsed.data?.season) {
@@ -399,12 +432,10 @@ export const queryAdvancedLeaderboardServer = async (params: {
   supabaseEntries?: LeaderboardEntry[];
 }): Promise<{ ok: boolean; data?: AdvancedLeaderboardResponse; error?: string }> => {
   try {
+    const headers = await getLifequestAuthHeaders(params.userId, true);
     const res = await fetch('/api/leaderboards/query', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-lifequest-user-id': params.userId,
-      },
+      headers,
       body: JSON.stringify({
         scope: params.scope,
         page: params.page || 1,

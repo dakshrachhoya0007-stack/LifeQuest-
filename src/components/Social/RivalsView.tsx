@@ -3,14 +3,19 @@ import { useGame } from '../../context/GameContext';
 import {
   COMPETITIVE_RIVAL_MODES,
   COMPETITIVE_TIERS,
-  RIVAL_CHALLENGE_CATALOG,
 } from '../../data/ecosystemData';
+import {
+  PLACEMENT_MATCHES_REQUIRED,
+  RANKED_DIVISIONS_CATALOG,
+  computeRankedDivision,
+} from '../../data/aaaGamingData';
 import type {
   CompetitiveLeaderboardEntry,
   CompetitiveMatchVisibility,
   CompetitiveRivalMatch,
   CompetitiveRivalMode,
   CompetitiveTier,
+  RankedDivisionName,
 } from '../../types/game';
 import { PresenceBadge } from '../Brand/PresenceBadge';
 import { GoldenWorldTreeEmblem } from '../Brand/GoldenWorldTreeEmblem';
@@ -19,11 +24,16 @@ import {
   Award,
   Ban,
   Check,
+  ChevronDown,
+  ChevronUp,
   Clock,
   Crown,
+  Eye,
   Flame,
+  Heart,
   History,
   Lock,
+  Plus,
   RefreshCw,
   RotateCcw,
   Scale,
@@ -37,7 +47,7 @@ import {
   X,
 } from 'lucide-react';
 
-type ArenaTab = 'queue' | 'challenge' | 'matches' | 'history' | 'rankings';
+type ArenaTab = 'queue' | 'challenge' | 'matches' | 'tournaments' | 'spectate' | 'history' | 'rankings';
 
 const TIER_ACCENT_MAP: Record<CompetitiveTier, string> = COMPETITIVE_TIERS.reduce(
   (acc, item) => {
@@ -76,10 +86,26 @@ export const RivalsView: React.FC = () => {
     openPublicProfile,
     getPlayerPresence,
     queryPresencesBatch,
+    claimRankedDivisionReward,
+    tournaments,
+    refreshTournaments,
+    createTournament,
+    joinTournament,
+    spectatorMatches,
+    followedCompetitorIds,
+    refreshSpectatorMatches,
+    sendSpectatorCheer,
+    toggleFollowCompetitor,
   } = useGame();
 
   const [arenaTab, setArenaTab] = useState<ArenaTab>('queue');
   const [queueMode, setQueueMode] = useState<CompetitiveRivalMode>('overall_fitness');
+  const [showDivisionRoadmap, setShowDivisionRoadmap] = useState(false);
+
+  // Tournament creation form state
+  const [newTourneyTitle, setNewTourneyTitle] = useState('');
+  const [newTourneySubtitle, setNewTourneySubtitle] = useState('');
+  const [newTourneyMode, setNewTourneyMode] = useState<CompetitiveRivalMode>('overall_fitness');
 
   // Direct Challenge form state
   const [selectedOpponentId, setSelectedOpponentId] = useState<string>('');
@@ -95,6 +121,7 @@ export const RivalsView: React.FC = () => {
   // Rankings filter state
   const [lbScope, setLbScope] = useState<'global' | 'friends' | 'seasonal' | 'weekly'>('global');
   const [lbMode, setLbMode] = useState<CompetitiveRivalMode | 'all'>('all');
+  const [lbDivision, setLbDivision] = useState<RankedDivisionName | 'all'>('all');
   const [filteredLeaderboard, setFilteredLeaderboard] = useState<CompetitiveLeaderboardEntry[] | null>(
     null
   );
@@ -199,10 +226,22 @@ export const RivalsView: React.FC = () => {
   }, [selectableOpponents.length, matches.length, defaultLeaderboard.length]);
 
   useEffect(() => {
+    if (arenaTab === 'tournaments') {
+      void refreshTournaments();
+    } else if (arenaTab === 'spectate') {
+      void refreshSpectatorMatches();
+    }
+  }, [arenaTab]);
+
+  useEffect(() => {
     if (arenaTab !== 'rankings') return;
     let active = true;
     setLbLoading(true);
-    fetchRivalsLeaderboard({ scope: lbScope, mode: lbMode }).then(res => {
+    fetchRivalsLeaderboard({
+      scope: lbScope,
+      mode: lbMode,
+      division: lbDivision === 'all' ? undefined : lbDivision,
+    }).then(res => {
       if (!active) return;
       if (res.ok && res.leaderboard) {
         setFilteredLeaderboard(res.leaderboard);
@@ -212,7 +251,7 @@ export const RivalsView: React.FC = () => {
     return () => {
       active = false;
     };
-  }, [arenaTab, lbScope, lbMode]);
+  }, [arenaTab, lbScope, lbMode, lbDivision]);
 
   const incomingInvites = matches.filter(
     m => m.status === 'pending' && m.opponentId === user?.id
@@ -384,9 +423,96 @@ export const RivalsView: React.FC = () => {
     }
   };
 
+  const handleClaimDivisionReward = async (division: RankedDivisionName) => {
+    setBusyId(`div-${division}`);
+    setFeedback(null);
+    try {
+      const res = await claimRankedDivisionReward(division);
+      setFeedback({
+        type: res.success ? 'success' : 'error',
+        text: res.success
+          ? `Claimed ${division} Division reward${res.rewardTitleName ? `: ${res.rewardTitleName}` : ''}!`
+          : res.error || 'Could not claim division reward.',
+      });
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleCreateTournament = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newTourneyTitle.trim().length < 3) {
+      setFeedback({ type: 'error', text: 'Tournament title must be at least 3 characters.' });
+      return;
+    }
+    setBusyId('create-tourney');
+    setFeedback(null);
+    try {
+      const res = await createTournament({
+        title: newTourneyTitle.trim(),
+        subtitle: newTourneySubtitle.trim() || undefined,
+        mode: newTourneyMode,
+      });
+      if (res.success) {
+        setFeedback({ type: 'success', text: 'Community tournament opened for real competitors.' });
+        setNewTourneyTitle('');
+        setNewTourneySubtitle('');
+      } else {
+        setFeedback({ type: 'error', text: res.error || 'Could not create tournament.' });
+      }
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleJoinTournament = async (tournamentId: string) => {
+    setBusyId(`join-tourney-${tournamentId}`);
+    setFeedback(null);
+    try {
+      const res = await joinTournament(tournamentId);
+      setFeedback({
+        type: res.success ? 'success' : 'error',
+        text: res.success ? 'Entered tournament bracket!' : res.error || 'Could not join tournament.',
+      });
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleCheer = async (matchId: string, targetUserId: string, emoji: string) => {
+    setBusyId(`cheer-${matchId}-${targetUserId}-${emoji}`);
+    setFeedback(null);
+    try {
+      const res = await sendSpectatorCheer({ matchId, targetUserId, emoji });
+      if (!res.success) {
+        setFeedback({ type: 'error', text: res.error || 'Could not send spectator cheer.' });
+      }
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleToggleFollow = async (targetUserId: string) => {
+    setBusyId(`follow-${targetUserId}`);
+    try {
+      const res = await toggleFollowCompetitor(targetUserId);
+      if (!res.success && res.error) {
+        setFeedback({ type: 'error', text: res.error });
+      }
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   const playerRating = profile?.rating ?? 1200;
   const playerTier: CompetitiveTier = profile?.tier ?? 'Silver';
-  const tierHex = TIER_ACCENT_MAP[playerTier] || '#E8CF96';
+  const playerDivision = computeRankedDivision(playerRating);
+  const playerDivisionMeta =
+    RANKED_DIVISIONS_CATALOG.find(d => d.division === playerDivision) || RANKED_DIVISIONS_CATALOG[1];
+  const placementPlayed = profile?.placementMatchesPlayed ?? profile?.matchesPlayed ?? 0;
+  const placementDone = Boolean(profile?.placementCompleted || placementPlayed >= PLACEMENT_MATCHES_REQUIRED);
+  const demotionShieldRemaining = profile?.demotionShieldRemaining ?? 0;
+  const tierHex = TIER_ACCENT_MAP[playerTier] || playerDivisionMeta.accentHex || '#E8CF96';
   const wins = profile?.wins ?? rivalsState?.stats.wins ?? 0;
   const losses = profile?.losses ?? rivalsState?.stats.losses ?? 0;
   const ties = profile?.ties ?? rivalsState?.stats.ties ?? 0;
@@ -459,15 +585,22 @@ export const RivalsView: React.FC = () => {
         {/* Rating & Competitive Metrics Strip */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-4 border-t border-[#C5A15A]/15">
           <div className="rounded-xl bg-[#08060f] border border-[#C5A15A]/20 p-3.5">
-            <span className="text-[11px] text-[#D9D2C5]/60 block">Arena Elo Rating</span>
+            <span className="text-[11px] text-[#D9D2C5]/60 block">Arena Elo &amp; Division</span>
             <div className="flex items-baseline gap-2 mt-0.5">
               <span className="text-xl font-black font-mono text-white tabular-nums">
                 {playerRating}
               </span>
               <span className="text-xs font-bold uppercase" style={{ color: tierHex }}>
-                {playerTier}
+                {playerDivision}
               </span>
             </div>
+            <span className="text-[10px] text-[#D9D2C5]/55 tabular-nums block mt-0.5">
+              {placementDone
+                ? demotionShieldRemaining > 0
+                  ? `Shield: ${demotionShieldRemaining} games`
+                  : `${playerTier} Bracket`
+                : `Placement ${Math.min(placementPlayed, PLACEMENT_MATCHES_REQUIRED)}/${PLACEMENT_MATCHES_REQUIRED}`}
+            </span>
           </div>
           <div className="rounded-xl bg-[#08060f] border border-[#C5A15A]/20 p-3.5">
             <span className="text-[11px] text-[#D9D2C5]/60 block">Match Record</span>
@@ -502,6 +635,75 @@ export const RivalsView: React.FC = () => {
             </span>
           </div>
         </div>
+
+        {/* Collapsible 7-Division Ranked Roadmap */}
+        <div className="pt-2 border-t border-[#C5A15A]/15">
+          <button
+            type="button"
+            onClick={() => setShowDivisionRoadmap(v => !v)}
+            className="text-xs font-semibold text-[#E8CF96] hover:text-[#C5A15A] flex items-center gap-1.5 transition-colors"
+          >
+            <Shield className="w-3.5 h-3.5 text-[#C5A15A]" />
+            <span>Ranked Divisions &amp; Milestone Rewards (7 Tiers)</span>
+            {showDivisionRoadmap ? (
+              <ChevronUp className="w-3.5 h-3.5" />
+            ) : (
+              <ChevronDown className="w-3.5 h-3.5" />
+            )}
+          </button>
+
+          {showDivisionRoadmap && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-2.5 mt-3">
+              {RANKED_DIVISIONS_CATALOG.map(div => {
+                const isCurrent = div.division === playerDivision;
+                const unlocked = Math.max(playerRating, peakRating) >= div.minRating;
+                return (
+                  <div
+                    key={div.division}
+                    className={`rounded-xl p-3 border space-y-2 ${
+                      isCurrent
+                        ? 'bg-[#251638] border-[#C5A15A]'
+                        : unlocked
+                        ? 'bg-[#0c0916] border-[#C5A15A]/30'
+                        : 'bg-[#08060f] border-purple-950/60 opacity-75'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-1">
+                      <span
+                        className="font-['Cinzel'] font-bold text-xs"
+                        style={{ color: div.accentHex }}
+                      >
+                        {div.division}
+                      </span>
+                      <span className="text-[10px] font-mono text-[#D9D2C5]/60 tabular-nums">
+                        {div.maxRating ? `${div.minRating}–${div.maxRating}` : `${div.minRating}+`}
+                      </span>
+                    </div>
+                    <p className="text-[11px] font-semibold text-white truncate">
+                      {div.rewardTitleName}
+                    </p>
+                    <button
+                      type="button"
+                      disabled={!unlocked || busyId === `div-${div.division}`}
+                      onClick={() => void handleClaimDivisionReward(div.division)}
+                      className={`w-full py-1.5 rounded-lg text-[10px] font-bold transition-colors whitespace-nowrap ${
+                        unlocked
+                          ? 'bg-[#C5A15A]/20 hover:bg-[#C5A15A] text-[#E8CF96] hover:text-[#100D19] border border-[#C5A15A]/45'
+                          : 'bg-[#130e24] text-[#D9D2C5]/40 border border-white/5 cursor-not-allowed'
+                      }`}
+                    >
+                      {unlocked
+                        ? busyId === `div-${div.division}`
+                          ? 'Claiming...'
+                          : 'Claim Title'
+                        : 'Locked'}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Arena Navigation Tabs */}
@@ -515,6 +717,8 @@ export const RivalsView: React.FC = () => {
               label: `Matches (${activeDuels.length + incomingInvites.length})`,
               icon: Trophy,
             },
+            { id: 'tournaments', label: 'Tournaments', icon: Award },
+            { id: 'spectate', label: 'Spectate', icon: Eye },
             { id: 'history', label: 'Archive & H2H', icon: History },
             { id: 'rankings', label: 'Rankings', icon: Crown },
           ] as const
@@ -1230,6 +1434,322 @@ export const RivalsView: React.FC = () => {
         </div>
       )}
 
+      {/* TAB: COMMUNITY TOURNAMENTS (REAL COMPETITORS ONLY) */}
+      {arenaTab === 'tournaments' && (
+        <div className="space-y-5">
+          <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/25 p-5 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h2 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
+                  <Award className="w-4 h-4 text-[#C5A15A]" />
+                  Community Tournaments
+                </h2>
+                <p className="text-xs text-[#D9D2C5]/65 mt-0.5">
+                  Multi-round brackets composed strictly of real verified LIFEQUEST competitors (zero AI bots or simulated opponents).
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void refreshTournaments()}
+                className="px-3 py-1.5 rounded-xl bg-[#251638] hover:bg-[#331e4d] border border-[#C5A15A]/30 text-xs font-semibold text-[#C5A15A] whitespace-nowrap shrink-0"
+              >
+                Refresh Brackets
+              </button>
+            </div>
+
+            <form
+              onSubmit={handleCreateTournament}
+              className="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-3 border-t border-[#C5A15A]/15"
+            >
+              <input
+                type="text"
+                maxLength={60}
+                value={newTourneyTitle}
+                onChange={e => setNewTourneyTitle(e.target.value)}
+                placeholder="Host Tournament Title..."
+                className="rounded-xl bg-[#08060f] border border-[#C5A15A]/25 px-3 py-2 text-xs text-white placeholder-[#D9D2C5]/40 focus:outline-none focus:border-[#C5A15A]"
+              />
+              <input
+                type="text"
+                maxLength={80}
+                value={newTourneySubtitle}
+                onChange={e => setNewTourneySubtitle(e.target.value)}
+                placeholder="Theme or stipulation (optional)"
+                className="rounded-xl bg-[#08060f] border border-[#C5A15A]/25 px-3 py-2 text-xs text-white placeholder-[#D9D2C5]/40 focus:outline-none focus:border-[#C5A15A]"
+              />
+              <select
+                value={newTourneyMode}
+                onChange={e => setNewTourneyMode(e.target.value as CompetitiveRivalMode)}
+                className="rounded-xl bg-[#08060f] border border-[#C5A15A]/25 px-3 py-2 text-xs text-white focus:outline-none focus:border-[#C5A15A]"
+              >
+                {COMPETITIVE_RIVAL_MODES.map(m => (
+                  <option key={m.id} value={m.id}>
+                    {m.title}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="submit"
+                disabled={busyId === 'create-tourney'}
+                className="px-4 py-2 rounded-xl bg-[#C5A15A] hover:bg-[#d8b46d] disabled:opacity-50 text-[#100D19] font-['Cinzel'] font-bold text-xs flex items-center justify-center gap-1.5 whitespace-nowrap"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                {busyId === 'create-tourney' ? 'Opening...' : 'Host Bracket'}
+              </button>
+            </form>
+          </div>
+
+          {tournaments.length === 0 ? (
+            <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-8 text-center text-xs text-[#D9D2C5]/65">
+              No active community brackets yet. Host the first verified tournament above!
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {tournaments.map(t => {
+                const isJoined = t.participants.some(p => p.userId === user?.id);
+                return (
+                  <div
+                    key={t.id}
+                    className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/25 p-5 space-y-4"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider font-semibold text-[#C5A15A]">
+                          <span>{t.status}</span>
+                          <span>·</span>
+                          <span>{t.mode.replace('_', ' ')}</span>
+                          <span>·</span>
+                          <span className="tabular-nums">{t.participants.length} Real Competitors</span>
+                        </div>
+                        <h3 className="font-['Cinzel'] font-bold text-base text-white mt-0.5">
+                          {t.title}
+                        </h3>
+                        {t.subtitle && (
+                          <p className="text-xs text-[#D9D2C5]/65 mt-0.5">{t.subtitle}</p>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        disabled={isJoined || busyId === `join-tourney-${t.id}`}
+                        onClick={() => void handleJoinTournament(t.id)}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 ${
+                          isJoined
+                            ? 'bg-emerald-950/60 border border-emerald-500/40 text-emerald-300'
+                            : 'bg-[#C5A15A] hover:bg-[#d8b46d] text-[#100D19]'
+                        }`}
+                      >
+                        {isJoined
+                          ? 'Registered'
+                          : busyId === `join-tourney-${t.id}`
+                          ? 'Joining...'
+                          : 'Join Tournament'}
+                      </button>
+                    </div>
+
+                    {t.matches.length > 0 && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3 border-t border-[#C5A15A]/15">
+                        {t.matches.map(bm => (
+                          <div
+                            key={bm.id}
+                            className="rounded-xl bg-[#08060f] border border-[#C5A15A]/15 p-3 text-xs space-y-1.5"
+                          >
+                            <div className="flex items-center justify-between text-[10px] text-[#C5A15A] uppercase font-semibold">
+                              <span>{bm.roundLabel}</span>
+                              <span>{bm.status}</span>
+                            </div>
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-bold text-white truncate">
+                                {bm.playerAName}{' '}
+                                <span className="text-[10px] font-mono text-[#D9D2C5]/50">
+                                  ({bm.playerARating})
+                                </span>
+                              </span>
+                              <span className="font-mono font-bold text-[#E8CF96] tabular-nums">
+                                {bm.playerAScore}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-bold text-purple-200 truncate">
+                                {bm.playerBId ? bm.playerBName : 'Awaiting Opponent'}
+                                {bm.playerBRating ? (
+                                  <span className="text-[10px] font-mono text-[#D9D2C5]/50 ml-1">
+                                    ({bm.playerBRating})
+                                  </span>
+                                ) : null}
+                              </span>
+                              <span className="font-mono font-bold text-[#E8CF96] tabular-nums">
+                                {bm.playerBScore}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* TAB: READ-ONLY SPECTATOR MODE & CHEERING */}
+      {arenaTab === 'spectate' && (
+        <div className="space-y-4">
+          <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/25 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h2 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
+                <Eye className="w-4 h-4 text-[#C5A15A]" />
+                Arena Spectator Gallery
+              </h2>
+              <p className="text-xs text-[#D9D2C5]/65 mt-0.5">
+                Follow top competitors and watch live public/friends Rivals matches in read-only mode. Send encouraging cheers without influencing match scores.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => void refreshSpectatorMatches()}
+              className="px-3.5 py-2 rounded-xl bg-[#251638] hover:bg-[#331e4d] border border-[#C5A15A]/30 text-xs font-semibold text-[#C5A15A] whitespace-nowrap shrink-0"
+            >
+              Refresh Live Matches
+            </button>
+          </div>
+
+          {spectatorMatches.length === 0 ? (
+            <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-8 text-center text-xs text-[#D9D2C5]/65">
+              No public or friends-visible matches are currently live to spectate.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {spectatorMatches.map(m => {
+                const total = Math.max(1, m.challengerScore + m.opponentScore);
+                const cShare = Math.round((m.challengerScore / total) * 100);
+                const followingChallenger = followedCompetitorIds.includes(m.challengerId);
+                const followingOpponent = followedCompetitorIds.includes(m.opponentId);
+                return (
+                  <div
+                    key={m.matchId}
+                    className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/25 p-5 space-y-4"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <span className="text-[11px] font-['Cinzel'] font-bold text-[#C5A15A]">
+                          {m.challengeTitle} · {m.isRanked ? 'Ranked' : 'Casual'} · Read-Only
+                        </span>
+                        <p className="text-xs text-[#D9D2C5]/60 mt-0.5 tabular-nums">
+                          Target {m.targetScore} pts · {formatRemainingTime(m.endsAt)}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div className="rounded-xl bg-[#08060f] border border-[#C5A15A]/15 p-3 space-y-2">
+                        <div className="flex items-center justify-between gap-1">
+                          <button
+                            type="button"
+                            onClick={() => openPublicProfile(m.challengerId)}
+                            className="font-bold text-white hover:text-[#C5A15A] truncate"
+                          >
+                            {m.challengerName}
+                          </button>
+                          {m.challengerId !== user?.id && (
+                            <button
+                              type="button"
+                              disabled={busyId === `follow-${m.challengerId}`}
+                              onClick={() => void handleToggleFollow(m.challengerId)}
+                              className={`text-[10px] px-2 py-0.5 rounded border whitespace-nowrap ${
+                                followingChallenger
+                                  ? 'border-emerald-500/50 text-emerald-300 bg-emerald-950/40'
+                                  : 'border-[#C5A15A]/30 text-[#C5A15A]'
+                              }`}
+                            >
+                              {followingChallenger ? 'Following' : 'Follow'}
+                            </button>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-[#D9D2C5]/65 font-mono tabular-nums">
+                          {m.challengerDivision} ({m.challengerRating}) · {m.challengerScore} pts
+                        </p>
+                        <div className="flex flex-wrap gap-1">
+                          {(['🔥', '⚔️', '🏆', '💪'] as const).map(emoji => (
+                            <button
+                              key={emoji}
+                              type="button"
+                              onClick={() => void handleCheer(m.matchId, m.challengerId, emoji)}
+                              className="px-2 py-1 rounded-lg bg-[#161124] hover:bg-[#251638] border border-white/10 text-xs"
+                              title={`Cheer ${m.challengerName}`}
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="rounded-xl bg-[#08060f] border border-[#C5A15A]/15 p-3 space-y-2">
+                        <div className="flex items-center justify-between gap-1">
+                          <button
+                            type="button"
+                            onClick={() => openPublicProfile(m.opponentId)}
+                            className="font-bold text-purple-200 hover:text-[#C5A15A] truncate"
+                          >
+                            {m.opponentName}
+                          </button>
+                          {m.opponentId !== user?.id && (
+                            <button
+                              type="button"
+                              disabled={busyId === `follow-${m.opponentId}`}
+                              onClick={() => void handleToggleFollow(m.opponentId)}
+                              className={`text-[10px] px-2 py-0.5 rounded border whitespace-nowrap ${
+                                followingOpponent
+                                  ? 'border-emerald-500/50 text-emerald-300 bg-emerald-950/40'
+                                  : 'border-[#C5A15A]/30 text-[#C5A15A]'
+                              }`}
+                            >
+                              {followingOpponent ? 'Following' : 'Follow'}
+                            </button>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-[#D9D2C5]/65 font-mono tabular-nums">
+                          {m.opponentDivision} ({m.opponentRating}) · {m.opponentScore} pts
+                        </p>
+                        <div className="flex flex-wrap gap-1">
+                          {(['🔥', '⚔️', '🏆', '💪'] as const).map(emoji => (
+                            <button
+                              key={emoji}
+                              type="button"
+                              onClick={() => void handleCheer(m.matchId, m.opponentId, emoji)}
+                              className="px-2 py-1 rounded-lg bg-[#161124] hover:bg-[#251638] border border-white/10 text-xs"
+                              title={`Cheer ${m.opponentName}`}
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="h-2 w-full rounded-full bg-[#251638] overflow-hidden flex">
+                      <div className="bg-emerald-500 h-full transition-all" style={{ width: `${cShare}%` }} />
+                    </div>
+
+                    {m.recentCheers && m.recentCheers.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#D9D2C5]/70">
+                        <Heart className="w-3 h-3 text-rose-400 shrink-0" />
+                        {m.recentCheers.slice(0, 4).map(ch => (
+                          <span key={ch.id} className="px-2 py-0.5 rounded bg-[#08060f] border border-white/5">
+                            {ch.emoji} {ch.spectatorName}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* TAB 5: COMPETITIVE ELO RANKINGS (ISOLATED FROM XP LEADERBOARDS) */}
       {arenaTab === 'rankings' && (
         <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 overflow-hidden shadow-xl">
@@ -1261,6 +1781,19 @@ export const RivalsView: React.FC = () => {
                   </button>
                 ))}
               </div>
+
+              <select
+                value={lbDivision}
+                onChange={e => setLbDivision(e.target.value as RankedDivisionName | 'all')}
+                className="rounded-lg bg-[#08060f] border border-[#C5A15A]/25 px-2.5 py-1.5 text-xs text-white focus:outline-none"
+              >
+                <option value="all">All Divisions</option>
+                {RANKED_DIVISIONS_CATALOG.map(d => (
+                  <option key={d.division} value={d.division}>
+                    {d.division}
+                  </option>
+                ))}
+              </select>
 
               <select
                 value={lbMode}

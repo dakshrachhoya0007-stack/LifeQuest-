@@ -20,6 +20,9 @@ import heroRangerImg from './images/hero_ranger_1794719350899.jpg';
 import heroPaladinImg from './images/hero_paladin_1794719351246.jpg';
 import weeklyBossTitanImg from './images/weekly_boss_titan_1794920809847.jpg';
 import recordsMuseumHallImg from './images/records_museum_hall_1794920809521.jpg';
+import territoryAetheriaMapImg from './images/territory_aetheria_map_1795022646231.jpg';
+import wardrobeSanctumBgImg from './images/wardrobe_sanctum_bg_1795022646444.jpg';
+import realmCitadelGatheringImg from './images/realm_citadel_gathering_1795022646872.jpg';
 import type { PlayableHeroId } from '../types/game';
 
 export {
@@ -45,6 +48,9 @@ export {
   heroPaladinImg,
   weeklyBossTitanImg,
   recordsMuseumHallImg,
+  territoryAetheriaMapImg,
+  wardrobeSanctumBgImg,
+  realmCitadelGatheringImg,
 };
 
 export const HERO_ARTWORK_BY_ID: Record<PlayableHeroId, string> = {
@@ -78,6 +84,9 @@ const ASSET_MAP: Record<string, string> = {
   'hero_paladin_1794719351246.jpg': heroPaladinImg,
   'weekly_boss_titan_1794920809847.jpg': weeklyBossTitanImg,
   'records_museum_hall_1794920809521.jpg': recordsMuseumHallImg,
+  'territory_aetheria_map_1795022646231.jpg': territoryAetheriaMapImg,
+  'wardrobe_sanctum_bg_1795022646444.jpg': wardrobeSanctumBgImg,
+  'realm_citadel_gathering_1795022646872.jpg': realmCitadelGatheringImg,
 };
 
 export const getHeroArtwork = (

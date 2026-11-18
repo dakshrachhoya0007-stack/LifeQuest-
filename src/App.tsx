@@ -138,13 +138,20 @@ const MainAppContent: React.FC = () => {
       case 'hall-of-legends':
       case 'skill-tree':
       case 'seasons':
+      case 'daily-calendar':
         return <ProgressionHubView />;
-      case 'character': return <CharacterView />;
+      case 'character':
+      case 'customization':
+      case 'cards':
+      case 'trophies':
+        return <CharacterView />;
       case 'fitness': return <FitnessView />;
       case 'nutrition': return <NutritionView />;
       case 'aether-vision': return <AetherVisionView />;
       case 'armory': return <ArmoryView />;
-      case 'store': return <StoreView />;
+      case 'store':
+      case 'marketplace':
+        return <StoreView />;
       case 'buffs': return <BuffsView />;
       case 'boss-battles': return <BossBattleView />;
       case 'storyline': return <StorylineView />;
@@ -152,13 +159,20 @@ const MainAppContent: React.FC = () => {
       case 'leaderboard':
       case 'friends':
       case 'chat':
+      case 'activity-feed':
+      case 'workout-parties':
+      case 'friendships':
         return <SocialHubView />;
       case 'rivals':
         return <RivalsView />;
       case 'mentor': return <AiMentorView />;
-      case 'events': return <CommunityEventsView />;
+      case 'events':
+      case 'decisions':
+        return <CommunityEventsView />;
       case 'museum': return <RecordsMuseumView />;
-      case 'guilds': return <GuildsView />;
+      case 'guilds':
+      case 'territory-wars':
+        return <GuildsView />;
       case 'notifications': return <NotificationCenterView />;
       case 'settings': return <SettingsView />;
       default: return <DashboardView />;

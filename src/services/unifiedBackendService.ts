@@ -1012,6 +1012,11 @@ export interface UnifiedRealtimeHandlers {
   onFriendshipChange?: () => void;
   onGuildChange?: () => void;
   onProfileUpdate?: (row: any) => void;
+  onFeedChange?: () => void;
+  onPartyChange?: () => void;
+  onDecisionsChange?: () => void;
+  onTerritoryChange?: () => void;
+  onCommunityMomentsChange?: () => void;
 }
 
 export const subscribeUnifiedRealtime = (
@@ -1067,6 +1072,31 @@ export const subscribeUnifiedRealtime = (
       'postgres_changes',
       { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${userId}` },
       payload => handlers.onProfileUpdate?.(payload.new)
+    )
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'activity_feed_posts' },
+      () => handlers.onFeedChange?.()
+    )
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'workout_parties' },
+      () => handlers.onPartyChange?.()
+    )
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'community_polls' },
+      () => handlers.onDecisionsChange?.()
+    )
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'territory_wars_territories' },
+      () => handlers.onTerritoryChange?.()
+    )
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'community_event_announcements' },
+      () => handlers.onCommunityMomentsChange?.()
     )
     .subscribe();
 

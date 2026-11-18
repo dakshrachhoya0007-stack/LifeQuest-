@@ -3,7 +3,10 @@ import { useGame } from '../../context/GameContext';
 import { LeaderboardView } from '../Leaderboard/LeaderboardView';
 import { DiscoverPlayersView } from './DiscoverPlayersView';
 import { ChatView } from '../Chat/ChatView';
-import { Trophy, UserPlus, MessageSquare } from 'lucide-react';
+import { AdventurersFeedView } from './AdventurersFeedView';
+import { WorkoutPartiesView } from './WorkoutPartiesView';
+import { FriendshipProgressView } from './FriendshipProgressView';
+import { Trophy, UserPlus, MessageSquare, Newspaper, Users, HeartHandshake } from 'lucide-react';
 
 export const SocialHubView: React.FC = () => {
   const {
@@ -11,20 +14,27 @@ export const SocialHubView: React.FC = () => {
     setSocialSubTab,
     friends,
     chatMessages,
+    workoutParties,
   } = useGame();
 
   const acceptedFriendsCount = friends.filter(f => f.status === 'accepted').length;
   const incomingRequestsCount = friends.filter(
     f => f.status === 'pending' && f.direction === 'incoming'
   ).length;
+  const activePartiesCount = workoutParties.filter(
+    p => p.status !== 'completed' && p.status !== 'expired'
+  ).length;
 
   const tabs: Array<{
-    id: 'leaderboard' | 'friends' | 'chat';
+    id: 'leaderboard' | 'activity-feed' | 'workout-parties' | 'friendships' | 'friends' | 'chat';
     label: string;
     icon: React.ComponentType<{ className?: string }>;
     badge?: number;
   }> = [
     { id: 'leaderboard', label: 'Leaderboard', icon: Trophy },
+    { id: 'activity-feed', label: 'Activity Feed', icon: Newspaper },
+    { id: 'workout-parties', label: 'Workout Parties', icon: Users, badge: activePartiesCount },
+    { id: 'friendships', label: 'Friendships', icon: HeartHandshake },
     { id: 'friends', label: 'Friends', icon: UserPlus, badge: incomingRequestsCount },
     { id: 'chat', label: 'Chat', icon: MessageSquare },
   ];
@@ -33,7 +43,7 @@ export const SocialHubView: React.FC = () => {
     <div className="space-y-6 animate-in fade-in">
       {/* Unified Social Hub Header */}
       <div className="rounded-2xl bg-gradient-to-r from-[#170e2f] via-[#100a20] to-[#1a1236] border border-[#C5A15A]/25 p-5 sm:p-6 shadow-xl">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-5">
           <div>
             <div className="flex items-center gap-2 mb-1.5 text-xs">
               <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#C5A15A]">
@@ -52,7 +62,7 @@ export const SocialHubView: React.FC = () => {
               SOCIAL
             </h1>
             <p className="text-xs sm:text-sm text-[#D9D2C5]/75 max-w-2xl mt-1">
-              Track realm XP standings, connect with companions, and converse across realm channels. Competitive 1v1 matchmaking now lives in its own Rivals Arena.
+              Follow friends&apos; verified achievements on the Activity Feed, train together in live Workout Parties, deepen Co-Op Friendships, and check realm standings.
             </p>
           </div>
 
@@ -60,7 +70,7 @@ export const SocialHubView: React.FC = () => {
           <div
             role="tablist"
             aria-label="Social sections"
-            className="flex flex-wrap sm:flex-nowrap items-center gap-1.5 p-1.5 bg-[#090714]/90 border border-[#C5A15A]/20 rounded-xl self-start lg:self-auto"
+            className="flex flex-wrap items-center gap-1.5 p-1.5 bg-[#090714]/90 border border-[#C5A15A]/20 rounded-xl self-start xl:self-auto"
           >
             {tabs.map(tab => {
               const Icon = tab.icon;
@@ -72,7 +82,7 @@ export const SocialHubView: React.FC = () => {
                   aria-selected={isActive}
                   type="button"
                   onClick={() => setSocialSubTab(tab.id)}
-                  className={`relative flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
+                  className={`relative flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
                     isActive
                       ? 'bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/45 shadow-md'
                       : 'text-[#D9D2C5]/65 hover:text-[#D9D2C5] hover:bg-[#1a112b]/70 border border-transparent'
@@ -95,6 +105,9 @@ export const SocialHubView: React.FC = () => {
       {/* Active Social Tab Content */}
       <div role="tabpanel">
         {socialSubTab === 'leaderboard' && <LeaderboardView embedded />}
+        {socialSubTab === 'activity-feed' && <AdventurersFeedView />}
+        {socialSubTab === 'workout-parties' && <WorkoutPartiesView />}
+        {socialSubTab === 'friendships' && <FriendshipProgressView />}
         {socialSubTab === 'friends' && <DiscoverPlayersView embedded />}
         {socialSubTab === 'chat' && <ChatView embedded />}
       </div>

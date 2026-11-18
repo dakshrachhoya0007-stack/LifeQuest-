@@ -62,6 +62,35 @@ import {
   PlayerIdentityState,
   PlayerSeasonStateResponse,
   ServerNotificationPreferences,
+  FeedFilter,
+  FeedListResponse,
+  FeedPost,
+  FeedReactionKey,
+  FeedCommentPermission,
+  WorkoutParty,
+  WorkoutPartyHistoryEntry,
+  PlayerCosmeticState,
+  CosmeticSlot,
+  CommunityPoll,
+  TrophyShowcaseState,
+  HiddenAchievementClientView,
+  TerritoryMissionStance,
+  TerritoryWarsStateResponse,
+  PlayerWalletState,
+  CardsStateResponse,
+  MarketplaceStateResponse,
+  CollectionCompletionResponse,
+  FriendshipProgressRecord,
+  EndorsementCategory,
+  PlayerEndorsementSummary,
+  PlayerPrestigeState,
+  DailyCalendarStateResponse,
+  SeasonalStatsRecap,
+  SeasonalStatVisibility,
+  CommunityTournament,
+  SpectatorLiveMatchSummary,
+  RankedDivisionName,
+  PlayerLoadout,
 } from '../types/game';
 import { createEmptySkillTreeState, type VerifiedActivityMetadata } from '../data/skillTreeData';
 import { DEFAULT_SERVER_NOTIFICATION_PREFS } from '../data/polish2Data';
@@ -127,8 +156,80 @@ import {
   queryAdvancedLeaderboardServer,
   saveNotificationPreferencesServer,
   selectIdentityTitleServer,
+  selectSecondaryIdentityTitleServer,
   syncVerifiedIdentitySnapshotServer,
+  unlockSeasonEliteServer,
 } from '../services/polish2Service';
+import {
+  fetchFeedPostsServer,
+  shareFeedWorkoutNoteServer,
+  reactToFeedPostServer,
+  commentOnFeedPostServer,
+  deleteFeedPostServer,
+  updateFeedCommentPermissionServer,
+  fetchWorkoutPartiesStateServer,
+  createWorkoutPartyServer,
+  joinWorkoutPartyServer,
+  inviteToWorkoutPartyServer,
+  startWorkoutPartyServer,
+  saveWorkoutPartySummaryServer,
+  leaveWorkoutPartyServer,
+  submitWorkoutPartyProgressServer,
+  sendWorkoutPartyMessageServer,
+  fetchCosmeticsStateServer,
+  syncVerifiedCosmeticsServer,
+  equipCosmeticServer,
+  unequipCosmeticSlotServer,
+  claimCosmeticMilestoneServer,
+  fetchCommunityDecisionsServer,
+  castCommunityDecisionVoteServer,
+  reportCommunityDecisionPollServer,
+  updatePinnedTrophiesServer,
+  fetchTerritoryWarsStateServer,
+  registerGuildTerritoryWarServer,
+  selectTerritoryMissionServer,
+  claimCommunityChallengeServer,
+} from '../services/expansionService';
+import {
+  syncInitialWalletGoldServer,
+  fetchCardsStateServer,
+  openCardPackServer,
+  setFavoriteCardsServer,
+  claimCardAchievementServer,
+  saveLoadoutServer,
+  equipLoadoutServer,
+  duplicateLoadoutServer,
+  deleteLoadoutServer,
+  fetchFriendshipsStateServer,
+  claimFriendshipCoopMissionServer,
+  resetFriendshipOnRemovalServer,
+  fetchTrophiesAndHiddenServer,
+  fetchMarketplaceStateServer,
+  toggleMarketplaceWishlistServer,
+  purchaseMarketplaceItemServer,
+  attemptMarketplaceRmCheckoutServer,
+  claimRankedDivisionRewardServer,
+  fetchTournamentsStateServer,
+  createTournamentServer,
+  joinTournamentServer,
+  fetchSpectatorMatchesServer,
+  sendSpectatorCheerServer,
+  toggleFollowCompetitorServer,
+  fetchCollectionCompletionServer,
+  syncCollectionRelicsServer,
+  claimCollectionMilestoneServer,
+  giveEndorsementServer,
+  reportEndorsementAbuseServer,
+  fetchPrestigeStateServer,
+  unlockPrestigeTierServer,
+  claimPrestigeChallengeServer,
+  fetchDailyCalendarStateServer,
+  claimDailyCalendarCheckinServer,
+  claimCalendarWeeklyMilestoneServer,
+  fetchSeasonalRecapServer,
+  updateSeasonalRecapVisibilityServer,
+  purchaseBattlePassRmDisabledServer,
+} from '../services/aaaGamingService';
 import { getHeroById, mapClassToDefaultHeroId } from '../data/heroesData';
 import { CAMPAIGN_CHAPTERS, TUTORIAL_STEPS } from '../data/campaignData';
 import {
@@ -284,11 +385,21 @@ interface GameContextType {
   unreadNotificationsCount: number;
   unifiedBackendReady: boolean;
   activeTab: string;
-  socialSubTab: 'leaderboard' | 'friends' | 'chat';
-  setSocialSubTab: (subTab: 'leaderboard' | 'friends' | 'chat') => void;
-  progressionSubTab: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree' | 'seasons';
+  socialSubTab: 'leaderboard' | 'friends' | 'chat' | 'activity-feed' | 'workout-parties' | 'friendships';
+  setSocialSubTab: (
+    subTab: 'leaderboard' | 'friends' | 'chat' | 'activity-feed' | 'workout-parties' | 'friendships'
+  ) => void;
+  characterSubTab: 'overview' | 'customization' | 'cards' | 'trophies';
+  setCharacterSubTab: (subTab: 'overview' | 'customization' | 'cards' | 'trophies') => void;
+  storeSubTab: 'bazaar' | 'relics' | 'marketplace';
+  setStoreSubTab: (subTab: 'bazaar' | 'relics' | 'marketplace') => void;
+  guildsSubTab: 'directory' | 'territory-wars';
+  setGuildsSubTab: (subTab: 'directory' | 'territory-wars') => void;
+  eventsSubTab: 'events' | 'decisions';
+  setEventsSubTab: (subTab: 'events' | 'decisions') => void;
+  progressionSubTab: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree' | 'seasons' | 'daily-calendar';
   setProgressionSubTab: (
-    subTab: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree' | 'seasons'
+    subTab: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree' | 'seasons' | 'daily-calendar'
   ) => void;
   // Polish 2.0 Phase 1: Advanced Player Identity
   identityState: PlayerIdentityState | null;
@@ -296,6 +407,7 @@ interface GameContextType {
   refreshIdentityState: () => Promise<void>;
   syncVerifiedIdentitySnapshot: () => Promise<void>;
   selectIdentityTitle: (titleId: string | null) => Promise<{ success: boolean; error?: string }>;
+  selectSecondaryIdentityTitle: (titleId: string | null) => Promise<{ success: boolean; error?: string }>;
   featureIdentityBadges: (badgeIds: string[]) => Promise<{ success: boolean; error?: string }>;
   claimGlobalRareBadge: (
     badgeId: string
@@ -309,7 +421,7 @@ interface GameContextType {
   ) => Promise<{ success: boolean; error?: string }>;
   dismissNotification: (notificationId: string) => Promise<void>;
   navigateFromNotification: (notif: AppNotification) => void;
-  // Polish 2.0 Phase 3: Seasonal Progression
+  // Polish 2.0 Phase 3: 50-Level Seasonal Battle Pass
   seasonState: PlayerSeasonStateResponse | null;
   seasonLoading: boolean;
   refreshSeasonState: (page?: number) => Promise<void>;
@@ -317,8 +429,143 @@ interface GameContextType {
     challengeId: string
   ) => Promise<{ success: boolean; seasonXpAwarded?: number; error?: string }>;
   claimSeasonMilestone: (
-    milestoneId: string
+    milestoneId: string,
+    track?: 'free' | 'elite'
   ) => Promise<{ success: boolean; rewardLabel?: string; error?: string }>;
+  unlockSeasonElite: () => Promise<{ success: boolean; error?: string }>;
+  purchaseBattlePassRmDisabled: () => Promise<{ ok: boolean; error?: string }>;
+  // Expansion 3.0 & AAA-15 State & Actions
+  feedData: FeedListResponse | null;
+  feedFilter: FeedFilter;
+  feedLoading: boolean;
+  refreshActivityFeed: (filter?: FeedFilter, page?: number) => Promise<void>;
+  shareFeedWorkoutNote: (params: {
+    verifiedRef: string;
+    title: string;
+    summary: string;
+    highlightValue?: string;
+    commentPermission?: FeedCommentPermission;
+  }) => Promise<{ success: boolean; error?: string }>;
+  reactToFeedPost: (postId: string, emoji: FeedReactionKey) => Promise<{ success: boolean; error?: string }>;
+  commentOnFeedPost: (postId: string, body: string) => Promise<{ success: boolean; error?: string }>;
+  deleteFeedPost: (postId: string) => Promise<{ success: boolean; error?: string }>;
+  updateFeedCommentPermission: (
+    postId: string,
+    permission: FeedCommentPermission
+  ) => Promise<{ success: boolean; error?: string }>;
+  workoutParties: WorkoutParty[];
+  workoutPartyHistory: WorkoutPartyHistoryEntry[];
+  partiesLoading: boolean;
+  refreshWorkoutParties: () => Promise<void>;
+  createWorkoutParty: (params: {
+    title?: string;
+    challengeId: string;
+    visibility?: 'friends' | 'private' | 'public';
+    inviteFriendIds?: string[];
+  }) => Promise<{ success: boolean; party?: WorkoutParty; error?: string }>;
+  joinWorkoutPartyByCode: (roomCode: string) => Promise<{ success: boolean; party?: WorkoutParty; error?: string }>;
+  inviteToWorkoutParty: (partyId: string, inviteeId: string) => Promise<{ success: boolean; error?: string }>;
+  startWorkoutParty: (partyId: string) => Promise<{ success: boolean; error?: string }>;
+  saveWorkoutPartySummary: (partyId: string) => Promise<{ success: boolean; error?: string }>;
+  leaveWorkoutParty: (partyId: string) => Promise<{ success: boolean; error?: string }>;
+  submitWorkoutPartyProgress: (
+    partyId: string,
+    verifiedSessionId: string,
+    params: { durationMinutes?: number; repetitions?: number; verifiedWithAetherVision?: boolean }
+  ) => Promise<{ success: boolean; error?: string }>;
+  sendWorkoutPartyMessage: (
+    partyId: string,
+    content: string,
+    kind?: 'message' | 'reaction'
+  ) => Promise<{ success: boolean; error?: string }>;
+  cosmeticsState: PlayerCosmeticState | null;
+  refreshCosmeticsState: () => Promise<void>;
+  equipCosmetic: (cosmeticId: string) => Promise<{ success: boolean; error?: string }>;
+  unequipCosmeticSlot: (slot: CosmeticSlot) => Promise<{ success: boolean; error?: string }>;
+  claimCosmeticMilestone: (milestoneId: string) => Promise<{ success: boolean; error?: string }>;
+  saveLoadout: (
+    loadout: Partial<PlayerLoadout> & { name: string; context: 'default' | 'competition' }
+  ) => Promise<{ success: boolean; error?: string }>;
+  equipLoadout: (loadoutId: string, applyAs?: 'default' | 'competition') => Promise<{ success: boolean; error?: string }>;
+  duplicateLoadout: (loadoutId: string) => Promise<{ success: boolean; error?: string }>;
+  deleteLoadout: (loadoutId: string) => Promise<{ success: boolean; error?: string }>;
+  communityDecisionPolls: CommunityPoll[];
+  communityDecisionArchive: CommunityPoll[];
+  refreshCommunityDecisions: () => Promise<void>;
+  castCommunityDecisionVote: (pollId: string, optionIds: string[]) => Promise<{ success: boolean; error?: string }>;
+  reportCommunityDecisionPoll: (pollId: string, reason: string) => Promise<{ success: boolean; error?: string }>;
+  trophyShowcase: TrophyShowcaseState | null;
+  hiddenAchievements: HiddenAchievementClientView[];
+  refreshTrophyShowcase: () => Promise<void>;
+  updatePinnedTrophies: (pinnedIds: string[]) => Promise<{ success: boolean; error?: string }>;
+  territoryWarsState: TerritoryWarsStateResponse | null;
+  refreshTerritoryWars: () => Promise<void>;
+  registerGuildTerritoryWar: (
+    guildId: string,
+    guildName: string,
+    guildTag: string,
+    membersCount: number
+  ) => Promise<{ success: boolean; error?: string }>;
+  selectTerritoryMission: (
+    territoryId: string,
+    stance: TerritoryMissionStance
+  ) => Promise<{ success: boolean; error?: string }>;
+  claimCommunityChallenge: (challengeId: string) => Promise<{ success: boolean; error?: string }>;
+  // AAA-15 Economy, Cards, Marketplace, Collection, Friendships, Prestige, Calendar, Recap, Tournaments, Spectator
+  walletState: PlayerWalletState | null;
+  cardsState: CardsStateResponse | null;
+  refreshCardsState: () => Promise<void>;
+  openCardPack: (
+    packId: string,
+    currency: 'gold' | 'fragments'
+  ) => Promise<{
+    success: boolean;
+    drawnCards?: Array<{ cardId: string; isNew: boolean; fragmentsConverted: number }>;
+    fragmentsGrantedFromDuplicates?: number;
+    error?: string;
+  }>;
+  setFavoriteCards: (cardIds: string[]) => Promise<{ success: boolean; error?: string }>;
+  claimCardAchievement: (achievementId: string) => Promise<{ success: boolean; error?: string }>;
+  marketplaceState: MarketplaceStateResponse | null;
+  refreshMarketplaceState: () => Promise<void>;
+  toggleMarketplaceWishlist: (itemId: string) => Promise<{ success: boolean; error?: string }>;
+  purchaseMarketplaceItem: (
+    itemId: string,
+    currency: 'gold' | 'fragments'
+  ) => Promise<{ success: boolean; error?: string }>;
+  attemptMarketplaceRmCheckout: () => Promise<{ ok: boolean; error?: string }>;
+  collectionState: CollectionCompletionResponse | null;
+  refreshCollectionState: () => Promise<void>;
+  claimCollectionMilestone: (milestoneId: string) => Promise<{ success: boolean; error?: string }>;
+  friendshipLevels: FriendshipProgressRecord[];
+  refreshFriendshipsExtended: () => Promise<void>;
+  claimFriendshipCoopMission: (friendId: string, missionId: string) => Promise<{ success: boolean; error?: string }>;
+  prestigeState: PlayerPrestigeState | null;
+  refreshPrestigeState: () => Promise<void>;
+  unlockPrestigeTier: () => Promise<{ success: boolean; error?: string }>;
+  claimPrestigeChallenge: (challengeId: string) => Promise<{ success: boolean; error?: string }>;
+  dailyCalendarState: DailyCalendarStateResponse | null;
+  refreshDailyCalendar: () => Promise<void>;
+  claimDailyCalendarCheckin: (params: {
+    mode: 'workout' | 'rest_recovery';
+    catchUpDayNumber?: number;
+  }) => Promise<{ success: boolean; dayNumber?: number; rewardSummary?: string; error?: string }>;
+  claimCalendarWeeklyMilestone: (milestoneId: string) => Promise<{ success: boolean; error?: string }>;
+  seasonalRecap: SeasonalStatsRecap | null;
+  refreshSeasonalRecap: (seasonId?: string) => Promise<void>;
+  updateSeasonalRecapVisibility: (visibility: SeasonalStatVisibility) => Promise<{ success: boolean; error?: string }>;
+  claimRankedDivisionReward: (division: RankedDivisionName) => Promise<{ success: boolean; rewardTitleName?: string; error?: string }>;
+  tournaments: CommunityTournament[];
+  refreshTournaments: () => Promise<void>;
+  createTournament: (params: { title: string; subtitle?: string; mode: CompetitiveRivalMode }) => Promise<{ success: boolean; error?: string }>;
+  joinTournament: (tournamentId: string) => Promise<{ success: boolean; error?: string }>;
+  spectatorMatches: SpectatorLiveMatchSummary[];
+  followedCompetitorIds: string[];
+  refreshSpectatorMatches: () => Promise<void>;
+  sendSpectatorCheer: (params: { matchId: string; targetUserId: string; emoji: string }) => Promise<{ success: boolean; error?: string }>;
+  toggleFollowCompetitor: (targetUserId: string) => Promise<{ success: boolean; error?: string }>;
+  giveEndorsement: (params: { targetUserId: string; category: EndorsementCategory; note?: string }) => Promise<{ success: boolean; summary?: PlayerEndorsementSummary; error?: string }>;
+  reportEndorsementAbuse: (params: { targetUserId: string; endorsementId?: string; reason: string }) => Promise<{ success: boolean; error?: string }>;
   // Polish 2.0 Phase 4: Advanced Leaderboards
   queryAdvancedLeaderboard: (
     scope: LeaderboardScope,
@@ -385,6 +632,7 @@ interface GameContextType {
   fetchRivalsLeaderboard: (params?: {
     scope?: 'global' | 'friends' | 'seasonal' | 'weekly';
     mode?: CompetitiveRivalMode | 'all';
+    division?: string;
   }) => Promise<{ ok: boolean; leaderboard?: CompetitiveLeaderboardEntry[]; error?: string }>;
   blockRivalUser: (targetUserId: string, unblock?: boolean) => Promise<{ success: boolean; error?: string }>;
   // Phase 4: AI Fitness Mentor
@@ -974,9 +1222,17 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [unifiedBackendReady, setUnifiedBackendReady] = useState<boolean>(false);
 
   const [activeTab, setActiveTabState] = useState<string>('dashboard');
-  const [socialSubTab, setSocialSubTabState] = useState<'leaderboard' | 'friends' | 'chat'>('leaderboard');
+  const [socialSubTab, setSocialSubTabState] = useState<
+    'leaderboard' | 'friends' | 'chat' | 'activity-feed' | 'workout-parties' | 'friendships'
+  >('leaderboard');
+  const [characterSubTab, setCharacterSubTabState] = useState<
+    'overview' | 'customization' | 'cards' | 'trophies'
+  >('overview');
+  const [storeSubTab, setStoreSubTabState] = useState<'bazaar' | 'relics' | 'marketplace'>('bazaar');
+  const [guildsSubTab, setGuildsSubTabState] = useState<'directory' | 'territory-wars'>('directory');
+  const [eventsSubTab, setEventsSubTabState] = useState<'events' | 'decisions'>('events');
   const [progressionSubTab, setProgressionSubTabState] = useState<
-    'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree' | 'seasons'
+    'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree' | 'seasons' | 'daily-calendar'
   >('quests');
   const [identityState, setIdentityState] = useState<PlayerIdentityState | null>(null);
   const [identityLoading, setIdentityLoading] = useState<boolean>(false);
@@ -988,6 +1244,30 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   >({});
   const [seasonState, setSeasonState] = useState<PlayerSeasonStateResponse | null>(null);
   const [seasonLoading, setSeasonLoading] = useState<boolean>(false);
+  // Expansion 3.0 & AAA-15 States
+  const [feedData, setFeedData] = useState<FeedListResponse | null>(null);
+  const [feedFilter, setFeedFilter] = useState<FeedFilter>('all');
+  const [feedLoading, setFeedLoading] = useState<boolean>(false);
+  const [workoutParties, setWorkoutParties] = useState<WorkoutParty[]>([]);
+  const [workoutPartyHistory, setWorkoutPartyHistory] = useState<WorkoutPartyHistoryEntry[]>([]);
+  const [partiesLoading, setPartiesLoading] = useState<boolean>(false);
+  const [cosmeticsState, setCosmeticsState] = useState<PlayerCosmeticState | null>(null);
+  const [communityDecisionPolls, setCommunityDecisionPolls] = useState<CommunityPoll[]>([]);
+  const [communityDecisionArchive, setCommunityDecisionArchive] = useState<CommunityPoll[]>([]);
+  const [trophyShowcase, setTrophyShowcase] = useState<TrophyShowcaseState | null>(null);
+  const [hiddenAchievements, setHiddenAchievements] = useState<HiddenAchievementClientView[]>([]);
+  const [territoryWarsState, setTerritoryWarsState] = useState<TerritoryWarsStateResponse | null>(null);
+  const [walletState, setWalletState] = useState<PlayerWalletState | null>(null);
+  const [cardsState, setCardsState] = useState<CardsStateResponse | null>(null);
+  const [marketplaceState, setMarketplaceState] = useState<MarketplaceStateResponse | null>(null);
+  const [collectionState, setCollectionState] = useState<CollectionCompletionResponse | null>(null);
+  const [friendshipLevels, setFriendshipLevels] = useState<FriendshipProgressRecord[]>([]);
+  const [prestigeState, setPrestigeState] = useState<PlayerPrestigeState | null>(null);
+  const [dailyCalendarState, setDailyCalendarState] = useState<DailyCalendarStateResponse | null>(null);
+  const [seasonalRecap, setSeasonalRecap] = useState<SeasonalStatsRecap | null>(null);
+  const [tournaments, setTournaments] = useState<CommunityTournament[]>([]);
+  const [spectatorMatches, setSpectatorMatches] = useState<SpectatorLiveMatchSummary[]>([]);
+  const [followedCompetitorIds, setFollowedCompetitorIds] = useState<string[]>([]);
   const [skillTreeState, setSkillTreeState] = useState<PlayerSkillTreeState>(() =>
     createEmptySkillTreeState()
   );
@@ -1213,13 +1493,42 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  const setSocialSubTab = (subTab: 'leaderboard' | 'friends' | 'chat') => {
+  const setSocialSubTab = (
+    subTab: 'leaderboard' | 'friends' | 'chat' | 'activity-feed' | 'workout-parties' | 'friendships'
+  ) => {
     sound.playClick();
     setSocialSubTabState(subTab);
   };
 
+  const setCharacterSubTab = (subTab: 'overview' | 'customization' | 'cards' | 'trophies') => {
+    sound.playClick();
+    setCharacterSubTabState(subTab);
+  };
+
+  const setStoreSubTab = (subTab: 'bazaar' | 'relics' | 'marketplace') => {
+    sound.playClick();
+    setStoreSubTabState(subTab);
+  };
+
+  const setGuildsSubTab = (subTab: 'directory' | 'territory-wars') => {
+    sound.playClick();
+    setGuildsSubTabState(subTab);
+  };
+
+  const setEventsSubTab = (subTab: 'events' | 'decisions') => {
+    sound.playClick();
+    setEventsSubTabState(subTab);
+  };
+
   const setProgressionSubTab = (
-    subTab: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree' | 'seasons'
+    subTab:
+      | 'quests'
+      | 'daily-report'
+      | 'achievements'
+      | 'hall-of-legends'
+      | 'skill-tree'
+      | 'seasons'
+      | 'daily-calendar'
   ) => {
     sound.playClick();
     setProgressionSubTabState(subTab);
@@ -1233,9 +1542,29 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     sound.playClick();
 
     // Unified hub routing while keeping Rivals Arena as an independent top-level tab
-    if (tab === 'leaderboard' || tab === 'friends' || tab === 'chat') {
+    if (
+      tab === 'leaderboard' ||
+      tab === 'friends' ||
+      tab === 'chat' ||
+      tab === 'activity-feed' ||
+      tab === 'workout-parties' ||
+      tab === 'friendships'
+    ) {
       setSocialSubTabState(tab);
       setActiveTabState('social');
+    } else if (tab === 'customization' || tab === 'cards' || tab === 'trophies') {
+      setCharacterSubTabState(tab);
+      setActiveTabState('character');
+      updateReclaimHonorObjective('view_attributes');
+    } else if (tab === 'marketplace') {
+      setStoreSubTabState('marketplace');
+      setActiveTabState('store');
+    } else if (tab === 'territory-wars') {
+      setGuildsSubTabState('territory-wars');
+      setActiveTabState('guilds');
+    } else if (tab === 'decisions') {
+      setEventsSubTabState('decisions');
+      setActiveTabState('events');
     } else if (tab === 'rivals') {
       setActiveTabState('rivals');
     } else if (tab === 'social') {
@@ -1246,7 +1575,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       tab === 'achievements' ||
       tab === 'hall-of-legends' ||
       tab === 'skill-tree' ||
-      tab === 'seasons'
+      tab === 'seasons' ||
+      tab === 'daily-calendar'
     ) {
       setProgressionSubTabState(tab);
       setActiveTabState('progression');
@@ -1400,6 +1730,26 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     setMentorGreeting(null);
     setRecentGlobalUnlockCelebration(null);
+    setFeedData(null);
+    setWorkoutParties([]);
+    setWorkoutPartyHistory([]);
+    setCosmeticsState(null);
+    setCommunityDecisionPolls([]);
+    setCommunityDecisionArchive([]);
+    setTrophyShowcase(null);
+    setHiddenAchievements([]);
+    setTerritoryWarsState(null);
+    setWalletState(null);
+    setCardsState(null);
+    setMarketplaceState(null);
+    setCollectionState(null);
+    setFriendshipLevels([]);
+    setPrestigeState(null);
+    setDailyCalendarState(null);
+    setSeasonalRecap(null);
+    setTournaments([]);
+    setSpectatorMatches([]);
+    setFollowedCompetitorIds([]);
   };
 
   const applyServerProfileToStats = (prof: any) => {
@@ -2089,6 +2439,76 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (seasonRes.ok && seasonRes.data) {
           setSeasonState(seasonRes.data);
         }
+        // Hydrate Expansion 3.0 + AAA-15 server states in background without blocking initial login
+        const initialGold = Number(srvProf?.gold_balance ?? gsStats?.gold ?? 0);
+        const unlockedWeaponIds = (cloudRes.gameState?.weapons || INITIAL_WEAPONS)
+          .filter((w: any) => w.unlocked)
+          .map((w: any) => w.id);
+        void Promise.all([
+          syncInitialWalletGoldServer(sbUser.id, initialGold).then(r => {
+            if (r.ok && r.wallet) {
+              setWalletState(r.wallet);
+              setStats(prev => ({ ...prev, gold: r.wallet!.goldBalance }));
+            }
+          }),
+          fetchCosmeticsStateServer(sbUser.id).then(r => {
+            if (r.ok && r.state) setCosmeticsState(r.state);
+          }),
+          syncVerifiedCosmeticsServer(sbUser.id).then(r => {
+            if (r.ok && r.state) setCosmeticsState(r.state);
+          }),
+          fetchCardsStateServer(sbUser.id).then(r => {
+            if (r.ok && r.state) setCardsState(r.state);
+            if (r.ok && r.wallet) setWalletState(r.wallet);
+          }),
+          fetchMarketplaceStateServer(sbUser.id).then(r => {
+            if (r.ok && r.state) setMarketplaceState(r.state);
+          }),
+          syncCollectionRelicsServer(sbUser.id, unlockedWeaponIds).then(r => {
+            if (r.ok && r.state) setCollectionState(r.state);
+          }),
+          fetchTrophiesAndHiddenServer(sbUser.id).then(r => {
+            if (r.ok && r.state) setTrophyShowcase(r.state);
+            if (r.ok && r.hiddenAchievements) setHiddenAchievements(r.hiddenAchievements);
+          }),
+          fetchFriendshipsStateServer(sbUser.id).then(r => {
+            if (r.ok && r.friendships) setFriendshipLevels(r.friendships);
+          }),
+          fetchPrestigeStateServer(sbUser.id).then(r => {
+            if (r.ok && r.state) setPrestigeState(r.state);
+          }),
+          fetchDailyCalendarStateServer(sbUser.id, userTimezone).then(r => {
+            if (r.ok && r.state) setDailyCalendarState(r.state);
+          }),
+          fetchSeasonalRecapServer(sbUser.id).then(r => {
+            if (r.ok && r.recap) setSeasonalRecap(r.recap);
+          }),
+          fetchFeedPostsServer({ userId: sbUser.id, filter: 'all', page: 1 }).then(r => {
+            if (r.ok && r.data) setFeedData(r.data);
+          }),
+          fetchWorkoutPartiesStateServer(sbUser.id).then(r => {
+            if (r.ok && r.data) {
+              setWorkoutParties([...(r.data.parties || []), ...(r.data.invitedParties || [])]);
+              setWorkoutPartyHistory(r.data.history || []);
+            }
+          }),
+          fetchCommunityDecisionsServer(sbUser.id).then(r => {
+            if (r.ok) {
+              setCommunityDecisionPolls(r.activePolls || []);
+              setCommunityDecisionArchive(r.archivePolls || []);
+            }
+          }),
+          fetchTerritoryWarsStateServer(sbUser.id).then(r => {
+            if (r.ok && r.data) setTerritoryWarsState(r.data);
+          }),
+          fetchTournamentsStateServer(sbUser.id).then(r => {
+            if (r.ok && r.tournaments) setTournaments(r.tournaments);
+          }),
+          fetchSpectatorMatchesServer(sbUser.id).then(r => {
+            if (r.ok && r.matches) setSpectatorMatches(r.matches);
+            if (r.ok && r.followedCompetitorIds) setFollowedCompetitorIds(r.followedCompetitorIds);
+          }),
+        ]);
         const hydratedWorkouts = Array.isArray(cloudRes.workoutSessions) ? cloudRes.workoutSessions : [];
         const hydratedHabits = Array.isArray(cloudRes.gameState?.habits) ? cloudRes.gameState!.habits : [];
         const hydratedStreak = Number(srvProf?.current_streak ?? gsStats?.currentStreak ?? 0);
@@ -4350,7 +4770,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const removeFriend = async (friendshipId: string) => {
     if (!unifiedBackendReady || !user) return;
+    const removed = friends.find(f => f.friendshipId === friendshipId);
     await removeFriendServer(friendshipId);
+    if (removed?.champion?.id) {
+      await resetFriendshipOnRemovalServer(user.id, removed.champion.id);
+      setFriendshipLevels(prev => prev.filter(fr => fr.friendId !== removed.champion.id));
+    }
     const refreshed = await fetchFriendshipsServer(user.id);
     if (refreshed.ok && refreshed.data) setFriends(refreshed.data);
   };
@@ -6138,6 +6563,33 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
               }));
             } else if (msg.type === 'presence:batch' && msg.peers) {
               setPresenceMap(prev => ({ ...prev, ...msg.peers }));
+            } else if (msg.type === 'activity_feed:new_post' && msg.payload) {
+              setFeedData(prev => {
+                if (!prev) return prev;
+                const incoming = msg.payload as FeedPost;
+                if (prev.posts.some(p => p.id === incoming.id)) return prev;
+                return { ...prev, posts: [incoming, ...prev.posts], totalPosts: prev.totalPosts + 1 };
+              });
+            } else if (msg.type === 'party:update' && msg.payload) {
+              const updatedParty = msg.payload as WorkoutParty;
+              setWorkoutParties(prev => {
+                const exists = prev.some(p => p.id === updatedParty.id);
+                if (updatedParty.status !== 'active') {
+                  return prev.filter(p => p.id !== updatedParty.id);
+                }
+                return exists
+                  ? prev.map(p => (p.id === updatedParty.id ? updatedParty : p))
+                  : [updatedParty, ...prev];
+              });
+            } else if (msg.type === 'community_decision:update' && msg.payload) {
+              const updatedPoll = msg.payload as CommunityPoll;
+              setCommunityDecisionPolls(prev =>
+                prev.map(p => (p.id === updatedPoll.id ? updatedPoll : p))
+              );
+            } else if (msg.type === 'territory_war:update') {
+              void refreshTerritoryWars();
+            } else if (msg.type === 'community_moment:update') {
+              void refreshCommunityEventState();
             }
           } catch {
             // ignore malformed frame
@@ -6887,6 +7339,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchRivalsLeaderboard = async (params?: {
     scope?: 'global' | 'friends' | 'seasonal' | 'weekly';
     mode?: CompetitiveRivalMode | 'all';
+    division?: string;
   }) => {
     const uid = activeSessionUserIdRef.current || user?.id;
     if (!uid) return { ok: false, error: 'Authentication required.' };
@@ -6895,6 +7348,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       userId: uid,
       scope: params?.scope || 'global',
       mode: params?.mode || 'all',
+      division: params?.division,
       friendIds: acceptedFriendIds,
     });
   };
@@ -7271,13 +7725,27 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { success: false, error: res.error || 'Could not save notification preferences.' };
   };
 
-  // --- POLISH 2.0 PHASE 3: SEASONAL PROGRESSION ---
+  const selectSecondaryIdentityTitle = async (
+    titleId: string | null
+  ): Promise<{ success: boolean; error?: string }> => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await selectSecondaryIdentityTitleServer(uid, titleId);
+    if (res.ok && res.state) {
+      setIdentityState(res.state);
+      sound.playClick();
+      return { success: true };
+    }
+    return { success: false, error: res.error || 'Could not update secondary title.' };
+  };
+
+  // --- POLISH 2.0 PHASE 3 + AAA-1: 50-LEVEL SEASONAL BATTLE PASS ---
   const refreshSeasonState = async (page: number = 1) => {
     const uid = activeSessionUserIdRef.current || user?.id;
     if (!uid) return;
     setSeasonLoading(true);
     try {
-      const res = await fetchSeasonStateServer(uid, page, 10);
+      const res = await fetchSeasonStateServer(uid, page, 50);
       if (res.ok && res.data) {
         setSeasonState(res.data);
       }
@@ -7296,26 +7764,841 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSeasonState(res.data);
       sound.playQuestComplete();
       void refreshNotificationsState();
+      void refreshSeasonalRecap();
       return { success: true, seasonXpAwarded: res.seasonXpAwarded };
     }
     return { success: false, error: res.error || 'Could not claim seasonal challenge.' };
   };
 
   const claimSeasonMilestone = async (
-    milestoneId: string
+    milestoneId: string,
+    track: 'free' | 'elite' = 'free'
   ): Promise<{ success: boolean; rewardLabel?: string; error?: string }> => {
     const uid = activeSessionUserIdRef.current || user?.id;
     if (!uid) return { success: false, error: 'Authentication required.' };
-    const res = await claimSeasonMilestoneServer(uid, milestoneId);
+    const res = await claimSeasonMilestoneServer(uid, milestoneId, track);
     if (res.ok && res.data) {
       setSeasonState(res.data);
       sound.playVictory();
       confetti({ particleCount: 75, spread: 70, origin: { y: 0.6 }, colors: ['#C5A15A', '#7046A5', '#34D399'] });
       void refreshIdentityState();
+      void refreshCosmeticsState();
+      void refreshCardsState();
+      void refreshCollectionState();
       void refreshNotificationsState();
       return { success: true, rewardLabel: res.rewardLabel };
     }
     return { success: false, error: res.error || 'Could not claim seasonal milestone.' };
+  };
+
+  const unlockSeasonElite = async (): Promise<{ success: boolean; error?: string }> => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await unlockSeasonEliteServer(uid);
+    if (res.ok && res.data) {
+      setSeasonState(res.data);
+      sound.playVictory();
+      return { success: true };
+    }
+    return { success: false, error: res.error || 'Could not unlock Elite track.' };
+  };
+
+  const purchaseBattlePassRmDisabled = async () => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { ok: false, error: 'Authentication required.' };
+    return purchaseBattlePassRmDisabledServer(uid);
+  };
+
+  // --- EXPANSION 3.0 & AAA-15 ACTIONS ---
+  const applyWalletSync = (w?: PlayerWalletState) => {
+    if (!w) return;
+    setWalletState(w);
+    setStats(prev => ({ ...prev, gold: w.goldBalance }));
+  };
+
+  const refreshActivityFeed = async (filter: FeedFilter = feedFilter, page: number = 1) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    setFeedFilter(filter);
+    setFeedLoading(true);
+    try {
+      const res = await fetchFeedPostsServer({ userId: uid, filter, page, limit: 15 });
+      if (res.ok && res.data) {
+        setFeedData(prev =>
+          page > 1 && prev
+            ? { ...res.data!, posts: [...prev.posts, ...res.data!.posts] }
+            : res.data!
+        );
+      }
+    } finally {
+      setFeedLoading(false);
+    }
+  };
+
+  const shareFeedWorkoutNote = async (params: {
+    verifiedRef: string;
+    title: string;
+    summary: string;
+    highlightValue?: string;
+    commentPermission?: FeedCommentPermission;
+  }) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid || !user) return { success: false, error: 'Authentication required.' };
+    const res = await shareFeedWorkoutNoteServer({ ...params, userId: uid, username: user.username });
+    if (res.ok) {
+      await refreshActivityFeed(feedFilter, 1);
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const reactToFeedPost = async (postId: string, emoji: FeedReactionKey) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid || !user) return { success: false, error: 'Authentication required.' };
+    const res = await reactToFeedPostServer({ userId: uid, username: user.username, postId, emoji });
+    if (res.ok && res.post) {
+      setFeedData(prev =>
+        prev ? { ...prev, posts: prev.posts.map(p => (p.id === postId ? res.post! : p)) } : prev
+      );
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const commentOnFeedPost = async (postId: string, body: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid || !user) return { success: false, error: 'Authentication required.' };
+    const res = await commentOnFeedPostServer({ userId: uid, username: user.username, postId, body });
+    if (res.ok && res.post) {
+      setFeedData(prev =>
+        prev ? { ...prev, posts: prev.posts.map(p => (p.id === postId ? res.post! : p)) } : prev
+      );
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const deleteFeedPost = async (postId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await deleteFeedPostServer(uid, postId);
+    if (res.ok) {
+      setFeedData(prev =>
+        prev ? { ...prev, posts: prev.posts.filter(p => p.id !== postId) } : prev
+      );
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const updateFeedCommentPermission = async (postId: string, permission: FeedCommentPermission) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await updateFeedCommentPermissionServer(uid, postId, permission);
+    if (res.ok && res.post) {
+      setFeedData(prev =>
+        prev ? { ...prev, posts: prev.posts.map(p => (p.id === postId ? res.post! : p)) } : prev
+      );
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const refreshWorkoutParties = async () => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    setPartiesLoading(true);
+    try {
+      const res = await fetchWorkoutPartiesStateServer(uid);
+      if (res.ok && res.data) {
+        setWorkoutParties([...(res.data.parties || []), ...(res.data.invitedParties || [])]);
+        setWorkoutPartyHistory(res.data.history || []);
+      }
+    } finally {
+      setPartiesLoading(false);
+    }
+  };
+
+  const createWorkoutParty = async (params: {
+    title?: string;
+    challengeId: string;
+    visibility?: 'friends' | 'private' | 'public';
+    inviteFriendIds?: string[];
+  }) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid || !user) return { success: false, error: 'Authentication required.' };
+    const res = await createWorkoutPartyServer({
+      userId: uid,
+      username: user.username,
+      title: params.title,
+      challengeId: params.challengeId,
+      visibility: params.visibility || 'friends',
+      inviteFriendIds: params.inviteFriendIds,
+    });
+    if (res.ok && res.party) {
+      setWorkoutParties(prev => [res.party!, ...prev]);
+      return { success: true, party: res.party };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const joinWorkoutPartyByCode = async (roomCode: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid || !user) return { success: false, error: 'Authentication required.' };
+    const res = await joinWorkoutPartyServer({
+      userId: uid,
+      username: user.username,
+      roomCode,
+    });
+    if (res.ok && res.party) {
+      await refreshWorkoutParties();
+      return { success: true, party: res.party };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const inviteToWorkoutParty = async (partyId: string, inviteeId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await inviteToWorkoutPartyServer({
+      userId: uid,
+      partyId,
+      friendId: inviteeId,
+    });
+    if (res.ok) {
+      await refreshWorkoutParties();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const startWorkoutParty = async (partyId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await startWorkoutPartyServer(uid, partyId);
+    if (res.ok && res.party) {
+      setWorkoutParties(prev => prev.map(p => (p.id === partyId ? res.party! : p)));
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const saveWorkoutPartySummary = async (partyId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await saveWorkoutPartySummaryServer(uid, partyId);
+    if (res.ok) {
+      await refreshWorkoutParties();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const leaveWorkoutParty = async (partyId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await leaveWorkoutPartyServer(uid, partyId);
+    if (res.ok) {
+      await refreshWorkoutParties();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const submitWorkoutPartyProgress = async (
+    partyId: string,
+    verifiedSessionId: string,
+    params: { durationMinutes?: number; repetitions?: number; verifiedWithAetherVision?: boolean }
+  ) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await submitWorkoutPartyProgressServer({
+      userId: uid,
+      partyId,
+      verifiedSessionId,
+      durationMinutes: params.durationMinutes,
+      repetitions: params.repetitions,
+      verifiedWithAetherVision: params.verifiedWithAetherVision,
+    });
+    if (res.ok) {
+      await refreshWorkoutParties();
+      void refreshFriendshipsExtended();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const sendWorkoutPartyMessage = async (
+    partyId: string,
+    content: string,
+    kind: 'message' | 'reaction' = 'message'
+  ) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid || !user) return { success: false, error: 'Authentication required.' };
+    const res = await sendWorkoutPartyMessageServer({
+      userId: uid,
+      username: user.username,
+      partyId,
+      content,
+      kind,
+    });
+    if (res.ok && res.party) {
+      setWorkoutParties(prev => prev.map(p => (p.id === partyId ? res.party! : p)));
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const refreshCosmeticsState = async () => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    const res = await fetchCosmeticsStateServer(uid);
+    if (res.ok && res.state) setCosmeticsState(res.state);
+  };
+
+  const equipCosmetic = async (cosmeticId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await equipCosmeticServer(uid, cosmeticId);
+    if (res.ok && res.state) {
+      setCosmeticsState(res.state);
+      sound.playClick();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const unequipCosmeticSlot = async (slot: CosmeticSlot) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await unequipCosmeticSlotServer(uid, slot);
+    if (res.ok && res.state) {
+      setCosmeticsState(res.state);
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const claimCosmeticMilestone = async (milestoneId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await claimCosmeticMilestoneServer(uid, milestoneId);
+    if (res.ok && res.state) {
+      setCosmeticsState(res.state);
+      sound.playVictory();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const saveLoadout = async (
+    loadout: Partial<PlayerLoadout> & { name: string; context: 'default' | 'competition' }
+  ) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await saveLoadoutServer({ userId: uid, loadout });
+    if (res.ok && res.state) {
+      setCosmeticsState(res.state);
+      sound.playClick();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const equipLoadout = async (loadoutId: string, applyAs: 'default' | 'competition' = 'default') => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await equipLoadoutServer(uid, loadoutId, applyAs);
+    if (res.ok && res.state) {
+      setCosmeticsState(res.state);
+      sound.playClick();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const duplicateLoadout = async (loadoutId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await duplicateLoadoutServer(uid, loadoutId);
+    if (res.ok && res.state) {
+      setCosmeticsState(res.state);
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const deleteLoadout = async (loadoutId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await deleteLoadoutServer(uid, loadoutId);
+    if (res.ok && res.state) {
+      setCosmeticsState(res.state);
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const refreshCommunityDecisions = async () => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    const res = await fetchCommunityDecisionsServer(uid);
+    if (res.ok) {
+      setCommunityDecisionPolls(res.activePolls || []);
+      setCommunityDecisionArchive(res.archivePolls || []);
+    }
+  };
+
+  const castCommunityDecisionVote = async (pollId: string, optionIds: string[]) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await castCommunityDecisionVoteServer({ userId: uid, pollId, optionIds });
+    if (res.ok && res.poll) {
+      setCommunityDecisionPolls(prev => prev.map(p => (p.id === pollId ? res.poll! : p)));
+      sound.playClick();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const reportCommunityDecisionPoll = async (pollId: string, reason: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await reportCommunityDecisionPollServer({ userId: uid, pollId, reason });
+    return { success: res.ok, error: res.error };
+  };
+
+  const refreshTrophyShowcase = async () => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    const res = await fetchTrophiesAndHiddenServer(uid);
+    if (res.ok && res.state) setTrophyShowcase(res.state);
+    if (res.ok && res.hiddenAchievements) setHiddenAchievements(res.hiddenAchievements);
+  };
+
+  const updatePinnedTrophies = async (pinnedIds: string[]) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await updatePinnedTrophiesServer(uid, pinnedIds);
+    if (res.ok && res.state) {
+      setTrophyShowcase(res.state);
+      sound.playClick();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const refreshTerritoryWars = async () => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    const res = await fetchTerritoryWarsStateServer(uid);
+    if (res.ok && res.data) setTerritoryWarsState(res.data);
+  };
+
+  const registerGuildTerritoryWar = async (
+    guildId: string,
+    guildName: string,
+    guildTag: string,
+    membersCount: number
+  ) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await registerGuildTerritoryWarServer({
+      userId: uid,
+      guildId,
+      guildName,
+      guildTag,
+      membersCount,
+    });
+    if (res.ok && res.data) {
+      setTerritoryWarsState(res.data);
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const selectTerritoryMission = async (territoryId: string, stance: TerritoryMissionStance) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await selectTerritoryMissionServer({ userId: uid, territoryId, stance });
+    if (res.ok && res.data) {
+      setTerritoryWarsState(res.data);
+      sound.playClick();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const claimCommunityChallenge = async (challengeId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await claimCommunityChallengeServer(uid, challengeId);
+    if (res.ok && res.data) {
+      setCommunityEventState(res.data);
+      sound.playQuestComplete();
+      void refreshCardsState();
+      void refreshIdentityState();
+      void refreshCosmeticsState();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const refreshCardsState = async () => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    const res = await fetchCardsStateServer(uid);
+    if (res.ok && res.state) setCardsState(res.state);
+    if (res.ok && res.wallet) applyWalletSync(res.wallet);
+  };
+
+  const openCardPack = async (packId: string, currency: 'gold' | 'fragments') => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await openCardPackServer({ userId: uid, packId, currency });
+    if (res.ok && res.state) {
+      setCardsState(res.state);
+      applyWalletSync(res.wallet);
+      sound.playVictory();
+      void refreshCollectionState();
+      void refreshIdentityState();
+      return {
+        success: true,
+        drawnCards: res.drawnCards,
+        fragmentsGrantedFromDuplicates: res.fragmentsGrantedFromDuplicates,
+      };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const setFavoriteCards = async (cardIds: string[]) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await setFavoriteCardsServer(uid, cardIds);
+    if (res.ok && res.state) {
+      setCardsState(res.state);
+      sound.playClick();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const claimCardAchievement = async (achievementId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await claimCardAchievementServer(uid, achievementId);
+    if (res.ok && res.state) {
+      setCardsState(res.state);
+      applyWalletSync(res.wallet);
+      sound.playVictory();
+      void refreshIdentityState();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const refreshMarketplaceState = async () => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    const res = await fetchMarketplaceStateServer(uid);
+    if (res.ok && res.state) {
+      setMarketplaceState(res.state);
+      applyWalletSync(res.state.wallet);
+    }
+  };
+
+  const toggleMarketplaceWishlist = async (itemId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await toggleMarketplaceWishlistServer(uid, itemId);
+    if (res.ok && res.state) {
+      setMarketplaceState(res.state);
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const purchaseMarketplaceItem = async (itemId: string, currency: 'gold' | 'fragments') => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await purchaseMarketplaceItemServer(uid, itemId, currency);
+    if (res.ok && res.state) {
+      setMarketplaceState(res.state);
+      applyWalletSync(res.state.wallet);
+      sound.playVictory();
+      void refreshCosmeticsState();
+      void refreshIdentityState();
+      void refreshCardsState();
+      void refreshCollectionState();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const attemptMarketplaceRmCheckout = async () => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { ok: false, error: 'Authentication required.' };
+    return attemptMarketplaceRmCheckoutServer(uid);
+  };
+
+  const refreshCollectionState = async () => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    const res = await fetchCollectionCompletionServer(uid);
+    if (res.ok && res.state) setCollectionState(res.state);
+  };
+
+  const claimCollectionMilestone = async (milestoneId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await claimCollectionMilestoneServer(uid, milestoneId);
+    if (res.ok && res.state) {
+      setCollectionState(res.state);
+      applyWalletSync(res.wallet);
+      sound.playVictory();
+      void refreshCosmeticsState();
+      void refreshIdentityState();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const refreshFriendshipsExtended = async () => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    const res = await fetchFriendshipsStateServer(uid);
+    if (res.ok && res.friendships) setFriendshipLevels(res.friendships);
+  };
+
+  const claimFriendshipCoopMission = async (friendId: string, missionId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await claimFriendshipCoopMissionServer(uid, friendId, missionId);
+    if (res.ok && res.record) {
+      await refreshFriendshipsExtended();
+      sound.playVictory();
+      void refreshIdentityState();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const refreshPrestigeState = async () => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    const res = await fetchPrestigeStateServer(uid);
+    if (res.ok && res.state) setPrestigeState(res.state);
+  };
+
+  const unlockPrestigeTier = async () => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await unlockPrestigeTierServer(uid, stats.level);
+    if (res.ok && res.state) {
+      setPrestigeState(res.state);
+      sound.playVictory();
+      confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 }, colors: ['#C5A15A', '#7046A5', '#FBBF24'] });
+      void refreshIdentityState();
+      void refreshCosmeticsState();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const claimPrestigeChallenge = async (challengeId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await claimPrestigeChallengeServer(uid, challengeId);
+    if (res.ok && res.state) {
+      setPrestigeState(res.state);
+      sound.playQuestComplete();
+      void refreshMarketplaceState();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const refreshDailyCalendar = async () => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    const res = await fetchDailyCalendarStateServer(uid, getUserTimezone());
+    if (res.ok && res.state) setDailyCalendarState(res.state);
+  };
+
+  const claimDailyCalendarCheckin = async (params: {
+    mode: 'workout' | 'rest_recovery';
+    catchUpDayNumber?: number;
+  }) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await claimDailyCalendarCheckinServer({
+      userId: uid,
+      mode: params.mode,
+      catchUpDayNumber: params.catchUpDayNumber,
+      timezone: getUserTimezone(),
+    });
+    if (res.ok && res.state) {
+      setDailyCalendarState(res.state);
+      sound.playQuestComplete();
+      void refreshCardsState();
+      void refreshMarketplaceState();
+      return { success: true, dayNumber: res.dayNumber, rewardSummary: res.rewardSummary };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const claimCalendarWeeklyMilestone = async (milestoneId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await claimCalendarWeeklyMilestoneServer(uid, milestoneId, getUserTimezone());
+    if (res.ok && res.state) {
+      setDailyCalendarState(res.state);
+      sound.playVictory();
+      void refreshMarketplaceState();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const refreshSeasonalRecap = async (seasonId?: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    const res = await fetchSeasonalRecapServer(uid, seasonId);
+    if (res.ok && res.recap) setSeasonalRecap(res.recap);
+  };
+
+  const updateSeasonalRecapVisibility = async (visibility: SeasonalStatVisibility) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await updateSeasonalRecapVisibilityServer(uid, visibility);
+    if (res.ok && res.recap) {
+      setSeasonalRecap(res.recap);
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const claimRankedDivisionReward = async (division: RankedDivisionName) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await claimRankedDivisionRewardServer(uid, division);
+    if (res.ok) {
+      sound.playVictory();
+      await refreshRivalsState();
+      void refreshIdentityState();
+      void refreshCosmeticsState();
+      return { success: true, rewardTitleName: res.rewardTitleName };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const refreshTournaments = async () => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    const res = await fetchTournamentsStateServer(uid);
+    if (res.ok && res.tournaments) setTournaments(res.tournaments);
+  };
+
+  const createTournament = async (params: {
+    title: string;
+    subtitle?: string;
+    mode: CompetitiveRivalMode;
+  }) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid || !user) return { success: false, error: 'Authentication required.' };
+    const res = await createTournamentServer({ ...params, userId: uid, username: user.username });
+    if (res.ok && res.tournaments) {
+      setTournaments(res.tournaments);
+      sound.playClick();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const joinTournament = async (tournamentId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid || !user) return { success: false, error: 'Authentication required.' };
+    const res = await joinTournamentServer({ userId: uid, tournamentId, username: user.username });
+    if (res.ok && res.tournaments) {
+      setTournaments(res.tournaments);
+      sound.playVictory();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const refreshSpectatorMatches = async () => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return;
+    const res = await fetchSpectatorMatchesServer(uid);
+    if (res.ok) {
+      setSpectatorMatches(res.matches || []);
+      setFollowedCompetitorIds(res.followedCompetitorIds || []);
+    }
+  };
+
+  const sendSpectatorCheer = async (params: {
+    matchId: string;
+    targetUserId: string;
+    emoji: string;
+  }) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid || !user) return { success: false, error: 'Authentication required.' };
+    const res = await sendSpectatorCheerServer({
+      userId: uid,
+      matchId: params.matchId,
+      targetUserId: params.targetUserId,
+      emoji: params.emoji,
+      spectatorName: user.username,
+    });
+    if (res.ok && res.match) {
+      setSpectatorMatches(prev => prev.map(m => (m.matchId === res.match!.matchId ? res.match! : m)));
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const toggleFollowCompetitor = async (targetUserId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await toggleFollowCompetitorServer(uid, targetUserId);
+    if (res.ok && res.followedCompetitorIds) {
+      setFollowedCompetitorIds(res.followedCompetitorIds);
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const giveEndorsement = async (params: {
+    targetUserId: string;
+    category: EndorsementCategory;
+    note?: string;
+  }) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid || !user) return { success: false, error: 'Authentication required.' };
+    const res = await giveEndorsementServer({
+      userId: uid,
+      targetUserId: params.targetUserId,
+      category: params.category,
+      note: params.note,
+      username: user.username,
+    });
+    if (res.ok) {
+      sound.playClick();
+      return { success: true, summary: res.summary };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const reportEndorsementAbuse = async (params: {
+    targetUserId: string;
+    endorsementId?: string;
+    reason: string;
+  }) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await reportEndorsementAbuseServer({ userId: uid, ...params });
+    return { success: res.ok, error: res.error };
   };
 
   // --- POLISH 2.0 PHASE 4: ADVANCED LEADERBOARDS ---
@@ -7394,6 +8677,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         activeTab,
         socialSubTab,
         setSocialSubTab,
+        characterSubTab,
+        setCharacterSubTab,
+        storeSubTab,
+        setStoreSubTab,
+        guildsSubTab,
+        setGuildsSubTab,
+        eventsSubTab,
+        setEventsSubTab,
         progressionSubTab,
         setProgressionSubTab,
         identityState,
@@ -7401,6 +8692,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         refreshIdentityState,
         syncVerifiedIdentitySnapshot,
         selectIdentityTitle,
+        selectSecondaryIdentityTitle,
         featureIdentityBadges,
         claimGlobalRareBadge,
         notificationPreferences,
@@ -7414,6 +8706,92 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         refreshSeasonState,
         claimSeasonChallenge,
         claimSeasonMilestone,
+        unlockSeasonElite,
+        purchaseBattlePassRmDisabled,
+        feedData,
+        feedFilter,
+        feedLoading,
+        refreshActivityFeed,
+        shareFeedWorkoutNote,
+        reactToFeedPost,
+        commentOnFeedPost,
+        deleteFeedPost,
+        updateFeedCommentPermission,
+        workoutParties,
+        workoutPartyHistory,
+        partiesLoading,
+        refreshWorkoutParties,
+        createWorkoutParty,
+        joinWorkoutPartyByCode,
+        inviteToWorkoutParty,
+        startWorkoutParty,
+        saveWorkoutPartySummary,
+        leaveWorkoutParty,
+        submitWorkoutPartyProgress,
+        sendWorkoutPartyMessage,
+        cosmeticsState,
+        refreshCosmeticsState,
+        equipCosmetic,
+        unequipCosmeticSlot,
+        claimCosmeticMilestone,
+        saveLoadout,
+        equipLoadout,
+        duplicateLoadout,
+        deleteLoadout,
+        communityDecisionPolls,
+        communityDecisionArchive,
+        refreshCommunityDecisions,
+        castCommunityDecisionVote,
+        reportCommunityDecisionPoll,
+        trophyShowcase,
+        hiddenAchievements,
+        refreshTrophyShowcase,
+        updatePinnedTrophies,
+        territoryWarsState,
+        refreshTerritoryWars,
+        registerGuildTerritoryWar,
+        selectTerritoryMission,
+        claimCommunityChallenge,
+        walletState,
+        cardsState,
+        refreshCardsState,
+        openCardPack,
+        setFavoriteCards,
+        claimCardAchievement,
+        marketplaceState,
+        refreshMarketplaceState,
+        toggleMarketplaceWishlist,
+        purchaseMarketplaceItem,
+        attemptMarketplaceRmCheckout,
+        collectionState,
+        refreshCollectionState,
+        claimCollectionMilestone,
+        friendshipLevels,
+        refreshFriendshipsExtended,
+        claimFriendshipCoopMission,
+        prestigeState,
+        refreshPrestigeState,
+        unlockPrestigeTier,
+        claimPrestigeChallenge,
+        dailyCalendarState,
+        refreshDailyCalendar,
+        claimDailyCalendarCheckin,
+        claimCalendarWeeklyMilestone,
+        seasonalRecap,
+        refreshSeasonalRecap,
+        updateSeasonalRecapVisibility,
+        claimRankedDivisionReward,
+        tournaments,
+        refreshTournaments,
+        createTournament,
+        joinTournament,
+        spectatorMatches,
+        followedCompetitorIds,
+        refreshSpectatorMatches,
+        sendSpectatorCheer,
+        toggleFollowCompetitor,
+        giveEndorsement,
+        reportEndorsementAbuse,
         queryAdvancedLeaderboard,
         skillTreeState,
         skillTreeLoading,
