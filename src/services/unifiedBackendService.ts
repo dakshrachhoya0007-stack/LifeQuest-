@@ -25,15 +25,10 @@ import {
   MyGuildInviteRecord,
   ProfileVisibility,
   PublicPlayerProfile,
+  PresenceStatus,
+  GranularPrivacySettings,
   RelationshipStatus,
   ShopItem,
-  GoldenTreeStage,
-  LandmarkId,
-  WorldGraphicsQuality,
-  WorldLandmarkState,
-  WorldPersistenceState,
-  WorldPlayerPosition,
-  WorldRegionId,
   PlayerSkillTreeState,
   SkillActivityAwardResult,
   SkillActivityType,
@@ -57,6 +52,32 @@ export const resolveSocialRpgAvatar = (
     return getRpgAvatarForClass(characterClass || 'Warrior');
   }
   return avatarUrl;
+};
+
+export const getLifequestAuthHeaders = async (
+  userId?: string,
+  withContentType: boolean = false
+): Promise<Record<string, string>> => {
+  const headers: Record<string, string> = {};
+  if (withContentType) {
+    headers['Content-Type'] = 'application/json';
+  }
+  if (userId) {
+    headers['x-lifequest-user-id'] = userId;
+  }
+  try {
+    const supabase = getSupabase();
+    if (supabase) {
+      const { data } = await supabase.auth.getSession();
+      const token = data?.session?.access_token;
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+    }
+  } catch {
+    // Non-fatal fallback to header userId in local offline/Express mode
+  }
+  return headers;
 };
 
 export const createIdempotencyKey = (): string => {
@@ -1345,9 +1366,10 @@ export const claimGlobalAchievementServer = async (params: {
 
   if (res.schemaMissing) {
     try {
+      const headers = await getLifequestAuthHeaders(params.ownerId, true);
       const httpRes = await fetch('/api/legends/claim', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(params),
       });
       const payload = await httpRes.json().catch(() => ({}));
@@ -1387,9 +1409,10 @@ export const setEquippedLegendTitleServer = async (params: {
 
   if (res.schemaMissing) {
     try {
+      const headers = await getLifequestAuthHeaders(params.ownerId, true);
       const httpRes = await fetch('/api/legends/equip', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(params),
       });
       const payload = await httpRes.json().catch(() => ({}));
@@ -1403,54 +1426,6 @@ export const setEquippedLegendTitleServer = async (params: {
   }
 
   return res;
-};
-
-// -----------------------------------------------------------------------------
-// PHASE 1: EXPLORABLE 3D WORLD FOUNDATION (THE HEARTLANDS)
-// -----------------------------------------------------------------------------
-
-export const getWorldStateServer = async (): Promise<
-  RpcResult<{ worldState: WorldPersistenceState }>
-> => {
-  const res = await callRpc<any>('rpc_get_world_state');
-  if (!res.ok) return res as any;
-  if (res.data?.success === false) {
-    return { ok: false, error: res.data?.error || 'Could not load world state.' };
-  }
-  return {
-    ok: true,
-    data: {
-      worldState: res.data?.worldState as WorldPersistenceState,
-    },
-  };
-};
-
-export const saveWorldStateServer = async (params: {
-  hasEnteredWorld?: boolean;
-  selectedRegionId?: WorldRegionId;
-  goldenTreeStage?: GoldenTreeStage;
-  landmarks?: Partial<Record<LandmarkId, WorldLandmarkState>>;
-  graphicsQuality?: WorldGraphicsQuality;
-  lastPlayerPosition?: WorldPlayerPosition | null;
-}): Promise<RpcResult<{ worldState: WorldPersistenceState }>> => {
-  const res = await callRpc<any>('rpc_save_world_state', {
-    p_has_entered_world: params.hasEnteredWorld ?? null,
-    p_selected_region_id: params.selectedRegionId ?? null,
-    p_golden_tree_stage: params.goldenTreeStage ?? null,
-    p_landmark_states: params.landmarks ?? null,
-    p_graphics_quality: params.graphicsQuality ?? null,
-    p_last_player_position: params.lastPlayerPosition ?? null,
-  });
-  if (!res.ok) return res as any;
-  if (res.data?.success === false) {
-    return { ok: false, error: res.data?.error || 'Could not save world state.' };
-  }
-  return {
-    ok: true,
-    data: {
-      worldState: res.data?.worldState as WorldPersistenceState,
-    },
-  };
 };
 
 // --- PHASE 1: REAL-LIFE SKILL TREE SERVICE (SUPABASE RPC + EXPRESS AUTHORITATIVE FALLBACK) ---
@@ -1478,6 +1453,9 @@ export const normalizeSkillTreeState = (raw: any): PlayerSkillTreeState => {
     ? raw.claimedMilestoneIds.map(String)
     : [];
   base.recentEvents = Array.isArray(raw.recentEvents) ? raw.recentEvents : [];
+  if (raw.analytics && typeof raw.analytics === 'object') {
+    base.analytics = raw.analytics;
+  }
   return base;
 };
 
@@ -1718,5 +1696,208 @@ export const claimSkillMilestoneServer = async (params: {
     return { success: false, error: err?.message || 'Skill Tree service unavailable.' };
   }
 };
+
+// -----------------------------------------------------------------------------
+// PHASE 7: DISCORD-STYLE PRESENCE & GRANULAR PRIVACY ENGINE
+// -----------------------------------------------------------------------------
+
+export interface PresenceSyncStatePayload {
+  manualStatus: 'online' | 'away' | 'dnd';
+  effectiveStatus: PresenceStatus;
+  autoAwayEnabled: boolean;
+  autoAwayMinutes: number;
+  isAutoAway: boolean;
+  lastActiveAt: string | null;
+}
+
+export const setPresenceStatusServer = async (params: {
+  userId: string;
+  manualStatus?: 'online' | 'away' | 'dnd';
+  isAutoAway?: boolean;
+  autoAwayEnabled?: boolean;
+  autoAwayMinutes?: number;
+  disconnected?: boolean;
+}): Promise<{ ok: boolean; self?: PresenceSyncStatePayload }> => {
+  if (!params.userId) return { ok: false };
+  try {
+    const headers = await getLifequestAuthHeaders(params.userId, true);
+    const res = await fetch('/api/presence/state', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(params),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || json?.success === false) return { ok: false };
+    return { ok: true, self: json.self as PresenceSyncStatePayload };
+  } catch {
+    return { ok: false };
+  }
+};
+
+export const sendPresenceHeartbeatServer = async (params: {
+  userId: string;
+  isAutoAway?: boolean;
+}): Promise<{ ok: boolean; self?: PresenceSyncStatePayload }> => {
+  if (!params.userId) return { ok: false };
+  try {
+    const headers = await getLifequestAuthHeaders(params.userId, true);
+    const res = await fetch('/api/presence/state', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        userId: params.userId,
+        heartbeatOnly: true,
+        isAutoAway: Boolean(params.isAutoAway),
+      }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || json?.success === false) return { ok: false };
+    return { ok: true, self: json.self as PresenceSyncStatePayload };
+  } catch {
+    return { ok: false };
+  }
+};
+
+export const sendPresenceOfflineBeacon = (userId: string) => {
+  if (!userId || typeof navigator === 'undefined') return;
+  try {
+    const payload = JSON.stringify({ userId });
+    if (typeof navigator.sendBeacon === 'function') {
+      const blob = new Blob([payload], { type: 'text/plain;charset=UTF-8' });
+      navigator.sendBeacon('/api/presence/offline', blob);
+    } else {
+      fetch('/api/presence/offline', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: payload,
+        keepalive: true,
+      }).catch(() => {});
+    }
+  } catch {
+    // non-fatal during unload
+  }
+};
+
+export const fetchPresenceBatchServer = async (params: {
+  viewerId: string;
+  userIds: string[];
+}): Promise<Record<string, { userId: string; status: PresenceStatus; lastActiveAt: string | null; hidden?: boolean }>> => {
+  if (!params.userIds.length) return {};
+  try {
+    const headers = await getLifequestAuthHeaders(params.viewerId, true);
+    const res = await fetch('/api/presence/batch', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ viewerId: params.viewerId, userIds: params.userIds }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || !json?.presences) return {};
+    return json.presences;
+  } catch {
+    return {};
+  }
+};
+
+export const syncPrivacyProfileServer = async (profile: {
+  id: string;
+  username: string;
+  avatarUrl?: string;
+  characterClass?: string;
+  level?: number;
+  aetherRank?: string;
+  playerXP?: number;
+  playerXPNextLevel?: number;
+  aetherPoints?: number;
+  currentStreak?: number;
+  longestStreak?: number;
+  bio?: string;
+  guildId?: string | null;
+  guildName?: string | null;
+  guildTag?: string | null;
+  legendTitle?: string | null;
+  legendTitleStyle?: string | null;
+  legendEmblem?: string | null;
+  achievementsUnlocked?: number;
+  totalWorkouts?: number;
+  totalVerifiedReps?: number;
+  totalActiveMinutes?: number;
+  todayStats?: {
+    habitsCompleted: number;
+    activeMinutes: number;
+    waterGlasses: number;
+  };
+  recentWorkouts?: Array<{ id: string; exerciseName: string; reps: number; xpEarned: number; date: string }>;
+  personalRecords?: Array<{ title: string; displayValue: string; achievedAt: string }>;
+  privacySettings: GranularPrivacySettings;
+  friendIds: string[];
+  blockedIds: string[];
+}): Promise<void> => {
+  if (!profile.id) return;
+  try {
+    const headers = await getLifequestAuthHeaders(profile.id, true);
+    await fetch('/api/privacy/sync-profile', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(profile),
+    });
+  } catch {
+    // non-fatal background sync
+  }
+};
+
+export const fetchServerFilteredPublicProfile = async (params: {
+  targetUserId: string;
+  viewerId?: string;
+  previewAs?: 'public' | 'friend' | 'restricted';
+}): Promise<{
+  ok: boolean;
+  found?: boolean;
+  relation?: string;
+  profile?: any;
+}> => {
+  try {
+    const qs = new URLSearchParams();
+    if (params.viewerId) qs.set('viewerId', params.viewerId);
+    if (params.previewAs) qs.set('previewAs', params.previewAs);
+    const headers = await getLifequestAuthHeaders(params.viewerId, false);
+    const res = await fetch(
+      `/api/profile/public/${encodeURIComponent(params.targetUserId)}?${qs.toString()}`,
+      { headers }
+    );
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || !json?.found) {
+      return { ok: false, found: false };
+    }
+    return {
+      ok: true,
+      found: true,
+      relation: json.relation,
+      profile: json.profile,
+    };
+  } catch {
+    return { ok: false };
+  }
+};
+
+export const enforceDirectoryPrivacyServer = async (
+  viewerId: string,
+  entries: ChampionSummary[]
+): Promise<ChampionSummary[]> => {
+  if (!entries.length) return entries;
+  try {
+    const headers = await getLifequestAuthHeaders(viewerId, true);
+    const res = await fetch('/api/social/filter-directory', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ viewerId, entries }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || !Array.isArray(json?.entries)) return entries;
+    return json.entries as ChampionSummary[];
+  } catch {
+    return entries;
+  }
+};
+
 
 

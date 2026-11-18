@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Hammer, Shield, Sparkles, Swords, User, Users } from 'lucide-react';
 import { EquipmentIllustration } from '../../assets/equipmentArtwork';
 import {
@@ -12,10 +12,6 @@ import {
 } from '../../types/game';
 import { getHeroById, RPG_ATTRIBUTE_META } from '../../data/heroesData';
 import { getRarityStyle } from '../../utils/rarityStyles';
-import {
-  AetheriaRelicCanvas,
-  probeWebGLCapabilities,
-} from './world3d/AetheriaRelicCanvas';
 
 interface ChampionArsenalShowcaseProps {
   user: UserAccount | null;
@@ -44,8 +40,6 @@ export const ChampionArsenalShowcase: React.FC<ChampionArsenalShowcaseProps> = (
   onNavigate,
   onOpenHeroSelect,
 }) => {
-  const gpuProbe = useMemo(() => probeWebGLCapabilities(), []);
-  const [relicWebglFailed, setRelicWebglFailed] = useState(!gpuProbe.webglAvailable);
   const heroDef = useMemo(() => getHeroById(selectedHeroId), [selectedHeroId]);
 
   const offHand = equippedGear.offHandId
@@ -217,58 +211,46 @@ export const ChampionArsenalShowcase: React.FC<ChampionArsenalShowcaseProps> = (
         </div>
       </div>
 
-      {/* RIGHT (5 cols): Interactive 3D PBR Equipped Weapon & Relic Pedestal */}
+      {/* RIGHT (5 cols): Equipped Weapon & Relic Pedestal Showcase */}
       <div className="xl:col-span-5 rounded-2xl bg-[#100D19] border border-[#C5A15A]/25 p-5 shadow-xl flex flex-col justify-between gap-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <span className="text-[10px] uppercase tracking-widest text-[#C5A15A] font-semibold flex items-center gap-1.5">
               <Swords className="w-3 h-3" />
-              Equipped Armament · 3D Inspect
+              Equipped Armament
             </span>
             <h3 className="font-['Cinzel'] font-bold text-base sm:text-lg text-[#D9D2C5] truncate mt-0.5">
               {equippedWeapon.name}
             </h3>
-            <p className="text-[11px] text-[#D9D2C5]/65">
+            <p className="text-[11px] text-[#D9D2C5]/65 tabular-nums">
               {equippedWeapon.category} · Lv.{equippedWeapon.level}/{equippedWeapon.maxLevel} ·{' '}
               {equippedWeapon.evolutionStage}
             </p>
           </div>
-          <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded shrink-0 ${rarityStyle.badge}`}>
+          <span className={`text-[10px] uppercase font-bold tracking-wider shrink-0 ${rarityStyle.text}`}>
             {equippedWeapon.rarity}
           </span>
         </div>
 
-        {/* Interactive 3D PBR Canvas Stage OR Illustrated Fallback */}
-        <div className="relative h-56 sm:h-60 rounded-xl bg-radial from-[#251638]/55 via-[#130e20] to-[#0b0812] border border-[#C5A15A]/20 overflow-hidden">
-          {!relicWebglFailed ? (
-            <AetheriaRelicCanvas
-              category={equippedWeapon.category}
+        {/* High-craft 2D Relic Pedestal */}
+        <div className="relative h-56 sm:h-60 rounded-xl bg-radial from-[#251638]/65 via-[#130e20] to-[#08060f] border border-[#C5A15A]/20 overflow-hidden flex items-center justify-center">
+          <div
+            className="w-40 h-40 rounded-full border border-[#C5A15A]/20 flex items-center justify-center p-4 shadow-[0_0_50px_rgba(112,70,165,0.28)] animate-hero-breathe"
+          >
+            <EquipmentIllustration
+              itemId={equippedWeapon.id}
               rarity={equippedWeapon.rarity}
               level={equippedWeapon.level}
-              isSoftwareGl={gpuProbe.isSoftwareGl}
-              onWebglError={() => setRelicWebglFailed(true)}
+              evolutionStage={equippedWeapon.evolutionStage}
             />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center p-6">
-              <div className="w-36 h-36">
-                <EquipmentIllustration
-                  itemId={equippedWeapon.id}
-                  rarity={equippedWeapon.rarity}
-                  level={equippedWeapon.level}
-                  evolutionStage={equippedWeapon.evolutionStage}
-                />
-              </div>
-            </div>
-          )}
+          </div>
 
-          {!relicWebglFailed && (
-            <span className="pointer-events-none absolute bottom-2 right-2.5 text-[10px] text-[#D9D2C5]/50 font-mono">
-              Drag to rotate · Scroll to zoom
-            </span>
-          )}
-          <span className="pointer-events-none absolute top-2.5 left-3 text-[10px] font-semibold text-[#C5A15A]/85 flex items-center gap-1">
+          <span className="pointer-events-none absolute top-2.5 left-3 text-[10px] font-semibold text-[#C5A15A]/90 flex items-center gap-1">
             <Sparkles className="w-3 h-3" />
             {equippedWeapon.element || 'Physical'} Mastery Lv.{equippedWeapon.masteryLevel}
+          </span>
+          <span className="pointer-events-none absolute bottom-2.5 right-3 text-[10px] text-[#D9D2C5]/55 font-mono tabular-nums">
+            Crit +{equippedWeapon.critChance ?? 5}%
           </span>
         </div>
 

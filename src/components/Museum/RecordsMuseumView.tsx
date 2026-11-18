@@ -3,18 +3,18 @@ import { useGame } from '../../context/GameContext';
 import { recordsMuseumHallImg } from '../../assets/images';
 import { MUSEUM_CATEGORY_META, MUSEUM_LOCKED_MILESTONES } from '../../data/ecosystemData';
 import type { MuseumCategory, MuseumRarity, MuseumRecord } from '../../types/game';
-import { GoldenWorldTreeEmblem } from '../Welcome/WelcomeLanding';
+import { GoldenWorldTreeEmblem } from '../Brand/GoldenWorldTreeEmblem';
+import { syncMuseumPrivacyServer } from '../../services/ecosystemService';
 import {
-  Award,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Crown,
+  Eye,
+  EyeOff,
   Lock,
+  RefreshCw,
   Search,
   ShieldCheck,
-  Sparkles,
-  Trophy,
   X,
 } from 'lucide-react';
 
@@ -27,22 +27,63 @@ const RARITY_COLOR: Record<MuseumRarity, string> = {
 };
 
 export const RecordsMuseumView: React.FC = () => {
-  const { museumData, museumLoading, refreshMuseumRecords } = useGame();
+  const {
+    user,
+    museumData,
+    museumLoading,
+    refreshMuseumRecords,
+    reconcileMuseum,
+  } = useGame();
 
   const [category, setCategory] = useState<MuseumCategory | 'all'>('all');
+  const [pbOnly, setPbOnly] = useState<boolean>(false);
   const [search, setSearch] = useState<string>('');
   const [sort, setSort] = useState<'newest' | 'oldest' | 'rarity' | 'value'>('newest');
   const [page, setPage] = useState<number>(1);
   const [selectedRecord, setSelectedRecord] = useState<MuseumRecord | null>(null);
+  const [syncing, setSyncing] = useState<boolean>(false);
+  const [syncNotice, setSyncNotice] = useState<string | null>(null);
 
   useEffect(() => {
-    void refreshMuseumRecords({ category, search, sort, page });
-  }, [category, sort, page]);
+    void refreshMuseumRecords({ category, pbOnly, search, sort, page });
+  }, [category, pbOnly, sort, page]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setPage(1);
-    void refreshMuseumRecords({ category, search, sort, page: 1 });
+    void refreshMuseumRecords({ category, pbOnly, search, sort, page: 1 });
+  };
+
+  const handleReconcileMuseum = async () => {
+    if (syncing) return;
+    setSyncing(true);
+    setSyncNotice(null);
+    try {
+      const res = await reconcileMuseum();
+      if (res.ok) {
+        setSyncNotice(
+          res.reconciledCount && res.reconciledCount > 0
+            ? `Enshrined ${res.reconciledCount} historical milestone records.`
+            : 'Museum archive and personal bests are fully synchronized.'
+        );
+      } else {
+        setSyncNotice('Could not synchronize historical records right now.');
+      }
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const handleToggleMuseumPrivacy = async () => {
+    if (!user?.id || syncing) return;
+    setSyncing(true);
+    try {
+      const nextAllow = !(museumData?.allowPublic ?? true);
+      await syncMuseumPrivacyServer(user.id, nextAllow);
+      await refreshMuseumRecords({ category, pbOnly, search, sort, page });
+    } finally {
+      setSyncing(false);
+    }
   };
 
   const records = museumData?.records || [];
@@ -50,6 +91,8 @@ export const RecordsMuseumView: React.FC = () => {
   const counts = museumData?.categoryCounts || { all: 0 };
   const totalPages = museumData?.totalPages || 1;
   const totalRecords = museumData?.totalRecords || 0;
+  const authoritativePbCount = museumData?.personalBestCount ?? personalBests.length;
+  const authoritativeArchiveCount = museumData?.archiveCount ?? counts.all ?? 0;
 
   const archivedTitles = new Set(records.map(r => r.title.toLowerCase()));
   const unlockedPbTitles = new Set(personalBests.map(r => r.title.toLowerCase()));
@@ -72,12 +115,12 @@ export const RecordsMuseumView: React.FC = () => {
                 <GoldenWorldTreeEmblem className="w-7 h-7" />
               </div>
               <div>
-                <div className="flex items-center gap-2 text-xs text-[#C5A15A] font-semibold uppercase tracking-widest">
+                <div className="flex flex-wrap items-center gap-2 text-xs text-[#C5A15A] font-semibold uppercase tracking-widest">
                   <span className="font-['Cinzel']">Permanent Archive</span>
                   <span className="text-[#D9D2C5]/35" aria-hidden="true">·</span>
-                  <span className="tabular-nums">{counts.all || 0} Enshrined Records</span>
+                  <span className="tabular-nums font-mono">{authoritativeArchiveCount} Enshrined Records</span>
                   <span className="text-[#D9D2C5]/35" aria-hidden="true">·</span>
-                  <span className="tabular-nums">{personalBests.length} Active Personal Bests</span>
+                  <span className="tabular-nums font-mono">{authoritativePbCount} Active Personal Bests</span>
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-white mt-0.5">
                   PERSONAL RECORDS MUSEUM
@@ -87,9 +130,53 @@ export const RecordsMuseumView: React.FC = () => {
                 </p>
               </div>
             </div>
+
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <button
+                type="button"
+                disabled={syncing}
+                onClick={() => void handleToggleMuseumPrivacy()}
+                className="px-3.5 py-2 rounded-xl bg-[#08060f]/90 hover:bg-[#161124] border border-[#C5A15A]/30 text-xs font-semibold text-[#D9D2C5] flex items-center gap-1.5 whitespace-nowrap shrink-0"
+              >
+                {museumData?.allowPublic === false || user?.privacySettings?.personalRecords === 'nobody' ? (
+                  <>
+                    <EyeOff className="w-3.5 h-3.5 text-[#C5A15A]" />
+                    Museum Hidden
+                  </>
+                ) : (
+                  <>
+                    <Eye className="w-3.5 h-3.5 text-emerald-400" />
+                    Showcase Public
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                disabled={syncing || museumLoading}
+                onClick={() => void handleReconcileMuseum()}
+                className="px-3.5 py-2 rounded-xl bg-[#251638] hover:bg-[#331e4d] border border-[#C5A15A]/35 text-xs font-semibold text-[#C5A15A] flex items-center gap-1.5 whitespace-nowrap shrink-0"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} />
+                Sync History
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      {syncNotice && (
+        <div className="rounded-xl bg-emerald-950/50 border border-emerald-500/40 px-4 py-2.5 text-xs text-emerald-200 flex items-center justify-between gap-2">
+          <span>{syncNotice}</span>
+          <button
+            type="button"
+            onClick={() => setSyncNotice(null)}
+            className="text-emerald-200/70 hover:text-white"
+            aria-label="Dismiss message"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* Personal Best Trophy Showcase */}
       <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-5 space-y-4">
@@ -155,7 +242,33 @@ export const RecordsMuseumView: React.FC = () => {
             </button>
           </form>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1 p-1 bg-[#08060f] rounded-xl border border-[#C5A15A]/20">
+              <button
+                type="button"
+                onClick={() => {
+                  setPbOnly(false);
+                  setPage(1);
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap ${
+                  !pbOnly ? 'bg-[#251638] text-[#C5A15A]' : 'text-[#D9D2C5]/65 hover:text-white'
+                }`}
+              >
+                Full History Archive
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setPbOnly(true);
+                  setPage(1);
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap ${
+                  pbOnly ? 'bg-[#251638] text-[#C5A15A]' : 'text-[#D9D2C5]/65 hover:text-white'
+                }`}
+              >
+                Active PBs Only ({authoritativePbCount})
+              </button>
+            </div>
             <label className="text-xs text-[#D9D2C5]/60">Sort:</label>
             <select
               value={sort}

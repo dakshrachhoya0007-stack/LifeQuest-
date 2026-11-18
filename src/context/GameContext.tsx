@@ -47,12 +47,13 @@ import {
   GlobalTitleStyle,
   AdaptiveDifficultyTier,
   HallOfLegendsStatus,
-  GoldenTreeStage,
-  LandmarkId,
-  LandmarkRestorationStage,
-  WorldGraphicsQuality,
-  WorldPersistenceState,
-  WorldPlayerPosition,
+  PresenceStatus,
+  GranularPrivacySettings,
+  CompetitiveRivalMode,
+  CompetitiveMatchRules,
+  CompetitiveMatchVisibility,
+  CompetitiveLeaderboardEntry,
+  CompetitiveRivalMatch,
   PlayerSkillTreeState,
   SkillActivityAwardResult,
   SkillActivityType,
@@ -64,6 +65,12 @@ import {
 } from '../types/game';
 import { createEmptySkillTreeState, type VerifiedActivityMetadata } from '../data/skillTreeData';
 import { DEFAULT_SERVER_NOTIFICATION_PREFS } from '../data/polish2Data';
+import {
+  DEFAULT_GRANULAR_PRIVACY_SETTINGS,
+  deriveLegacyVisibilityFromGranular,
+  normalizeGranularPrivacySettings,
+  normalizePresenceStatus,
+} from '../utils/presence';
 import type {
   CommunityEventPlayerState,
   MentorChatMessage,
@@ -79,20 +86,30 @@ import {
   archiveSkillNodeMuseumServer,
   blockRivalUserServer,
   cancelRivalInviteServer,
+  cancelRivalsQueueServer,
   claimCommunityMilestoneServer,
   claimWeeklyBossRewardServer,
   dispatchVerifiedEcosystemActivityServer,
+  disputeRivalMatchServer,
   endActiveRivalryServer,
   fetchAiMentorStateServer,
   fetchCommunityEventsStateServer,
   fetchMuseumRecordsServer,
+  fetchRivalsArenaStateServer,
+  fetchRivalsLeaderboardServer,
   fetchRivalsStateServer,
   fetchWeeklyBossStateServer,
   inviteRivalServer,
+  joinRivalsQueueServer,
+  reconcileMuseumServer,
+  reconcileSkillTreeServer,
+  rematchRivalServer,
   requestMentorWeeklyAnalysisServer,
   respondRivalInviteServer,
   sendAiMentorMessageServer,
+  sendDirectRivalChallengeServer,
   syncMuseumPrivacyServer,
+  updateRivalsPrivacyServer,
   type MuseumQueryResponse,
   type RivalsStateResponse,
 } from '../services/ecosystemService';
@@ -112,7 +129,6 @@ import {
   selectIdentityTitleServer,
   syncVerifiedIdentitySnapshotServer,
 } from '../services/polish2Service';
-import { DEFAULT_WORLD_STATE } from '../data/heartlandsWorldData';
 import { getHeroById, mapClassToDefaultHeroId } from '../data/heroesData';
 import { CAMPAIGN_CHAPTERS, TUTORIAL_STEPS } from '../data/campaignData';
 import {
@@ -225,13 +241,19 @@ import {
   fetchHallOfLegendsServer,
   claimGlobalAchievementServer,
   setEquippedLegendTitleServer,
-  getWorldStateServer,
-  saveWorldStateServer,
   createIdempotencyKey,
   fetchSkillTreeStateServer,
+  normalizeSkillTreeState,
   recordVerifiedSkillActivityServer,
   unlockSkillNodeServer,
   claimSkillMilestoneServer,
+  setPresenceStatusServer,
+  sendPresenceHeartbeatServer,
+  sendPresenceOfflineBeacon,
+  fetchPresenceBatchServer,
+  syncPrivacyProfileServer,
+  fetchServerFilteredPublicProfile,
+  enforceDirectoryPrivacyServer,
 } from '../services/unifiedBackendService';
 import { CloudSyncStatus } from '../components/Navigation/CloudSyncIndicator';
 import { User as SupabaseUser } from '@supabase/supabase-js';
@@ -262,8 +284,8 @@ interface GameContextType {
   unreadNotificationsCount: number;
   unifiedBackendReady: boolean;
   activeTab: string;
-  socialSubTab: 'leaderboard' | 'friends' | 'chat' | 'rivals';
-  setSocialSubTab: (subTab: 'leaderboard' | 'friends' | 'chat' | 'rivals') => void;
+  socialSubTab: 'leaderboard' | 'friends' | 'chat';
+  setSocialSubTab: (subTab: 'leaderboard' | 'friends' | 'chat') => void;
   progressionSubTab: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree' | 'seasons';
   setProgressionSubTab: (
     subTab: 'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree' | 'seasons'
@@ -314,6 +336,7 @@ interface GameContextType {
   lastSkillAwardBanner: SkillActivityAwardResult | null;
   dismissSkillAwardBanner: () => void;
   refreshSkillTreeState: () => Promise<void>;
+  reconcileSkillTree: () => Promise<{ ok: boolean; reconciledCount?: number }>;
   unlockSkillNode: (nodeId: string) => Promise<{ success: boolean; error?: string }>;
   claimSkillMilestone: (milestoneId: string) => Promise<{ success: boolean; error?: string }>;
   logVerifiedStudySession: (params: {
@@ -329,10 +352,22 @@ interface GameContextType {
     claimType: 'mission' | 'milestone' | 'participation' | 'defeat' | 'top_contributor',
     claimId: string
   ) => Promise<{ success: boolean; error?: string; rewards?: { xp: number; forgeXp: number; gold: number } }>;
-  // Phase 3: Friend Rival System
+  // Phase 2 (Competitive Arena): Independent Rivals Platform
   rivalsState: RivalsStateResponse | null;
   rivalsLoading: boolean;
   refreshRivalsState: () => Promise<void>;
+  joinRivalsQueue: (
+    mode: CompetitiveRivalMode
+  ) => Promise<{ success: boolean; matched?: boolean; match?: CompetitiveRivalMatch | null; error?: string }>;
+  cancelRivalsQueue: () => Promise<{ success: boolean; error?: string }>;
+  sendDirectRivalChallenge: (params: {
+    opponentId: string;
+    opponentName: string;
+    mode?: CompetitiveRivalMode;
+    challengeType?: RivalChallengeType;
+    visibility?: CompetitiveMatchVisibility;
+    rules?: Partial<CompetitiveMatchRules>;
+  }) => Promise<{ success: boolean; error?: string }>;
   sendRivalInvite: (
     opponentId: string,
     opponentName: string,
@@ -344,6 +379,13 @@ interface GameContextType {
   ) => Promise<{ success: boolean; error?: string }>;
   cancelRivalInvite: (rivalryId: string) => Promise<{ success: boolean; error?: string }>;
   endActiveRivalry: (rivalryId: string) => Promise<{ success: boolean; error?: string }>;
+  rematchRival: (matchId: string) => Promise<{ success: boolean; error?: string }>;
+  disputeRivalMatch: (matchId: string, reason: string) => Promise<{ success: boolean; error?: string }>;
+  updateRivalsPrivacy: (allowNonFriendChallenges: boolean) => Promise<{ success: boolean; error?: string }>;
+  fetchRivalsLeaderboard: (params?: {
+    scope?: 'global' | 'friends' | 'seasonal' | 'weekly';
+    mode?: CompetitiveRivalMode | 'all';
+  }) => Promise<{ ok: boolean; leaderboard?: CompetitiveLeaderboardEntry[]; error?: string }>;
   blockRivalUser: (targetUserId: string, unblock?: boolean) => Promise<{ success: boolean; error?: string }>;
   // Phase 4: AI Fitness Mentor
   mentorMessages: MentorChatMessage[];
@@ -365,10 +407,12 @@ interface GameContextType {
   museumLoading: boolean;
   refreshMuseumRecords: (params?: {
     category?: MuseumCategory | 'all';
+    pbOnly?: boolean;
     search?: string;
     sort?: 'newest' | 'oldest' | 'rarity' | 'value';
     page?: number;
   }) => Promise<void>;
+  reconcileMuseum: () => Promise<{ ok: boolean; reconciledCount?: number }>;
   inspectPlayerMuseumRecords: (
     targetUserId: string,
     page?: number
@@ -622,17 +666,17 @@ interface GameContextType {
   performMigration: () => Promise<boolean>;
   skipMigration: () => void;
   triggerManualCloudSave: () => Promise<boolean>;
-  // Phase 1: Explorable 3D World Foundation (The Heartlands)
-  worldState: WorldPersistenceState;
-  markWorldEntered: () => Promise<void>;
-  setWorldGoldenTreeStage: (stage: GoldenTreeStage) => Promise<void>;
-  setWorldLandmarkStage: (
-    landmarkId: LandmarkId,
-    stage: LandmarkRestorationStage,
-    restorationPercent: number
-  ) => Promise<void>;
-  setWorldGraphicsQuality: (quality: WorldGraphicsQuality) => Promise<void>;
-  saveWorldPlayerPosition: (pos: WorldPlayerPosition) => void;
+  // Phase 7: Discord-Style Player Presence & Granular Privacy
+  myManualPresence: 'online' | 'away' | 'dnd';
+  myEffectivePresence: PresenceStatus;
+  autoAwayEnabled: boolean;
+  autoAwayMinutes: number;
+  presenceMap: Record<string, { status: PresenceStatus; lastActiveAt?: string | null; hidden?: boolean }>;
+  setManualPresenceStatus: (status: 'online' | 'away' | 'dnd') => Promise<void>;
+  updatePresencePreferences: (prefs: { autoAwayEnabled?: boolean; autoAwayMinutes?: number }) => Promise<void>;
+  getPlayerPresence: (userId: string) => { status: PresenceStatus; lastActiveAt?: string | null; hidden?: boolean };
+  queryPresencesBatch: (userIds: string[]) => Promise<void>;
+  previewPublicProfileAs: (mode: 'public' | 'friend' | 'restricted') => Promise<any>;
 }
 
 const STORAGE_KEY_PREFIX = 'lifequest_v1_';
@@ -674,8 +718,6 @@ const ROUTE_TO_TAB: Record<string, string> = {
   '/legends': 'hall-of-legends',
   '/skill-tree': 'skill-tree',
   '/skills': 'skill-tree',
-  '/world': 'world',
-  '/heartlands': 'world',
   '/seasons': 'seasons',
   '/notifications': 'notifications',
   '/settings': 'settings',
@@ -932,7 +974,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [unifiedBackendReady, setUnifiedBackendReady] = useState<boolean>(false);
 
   const [activeTab, setActiveTabState] = useState<string>('dashboard');
-  const [socialSubTab, setSocialSubTabState] = useState<'leaderboard' | 'friends' | 'chat' | 'rivals'>('leaderboard');
+  const [socialSubTab, setSocialSubTabState] = useState<'leaderboard' | 'friends' | 'chat'>('leaderboard');
   const [progressionSubTab, setProgressionSubTabState] = useState<
     'quests' | 'daily-report' | 'achievements' | 'hall-of-legends' | 'skill-tree' | 'seasons'
   >('quests');
@@ -1142,51 +1184,21 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useState<HallOfLegendsEntry | null>(null);
   const [hallLoading, setHallLoading] = useState<boolean>(false);
 
-  // Phase 1: Explorable 3D World State (The Heartlands)
-  const [worldState, setWorldState] = useState<WorldPersistenceState>(DEFAULT_WORLD_STATE);
-  const worldStateRef = useRef<WorldPersistenceState>(DEFAULT_WORLD_STATE);
-  const worldPosSaveTimerRef = useRef<any>(null);
-
-  const normalizeWorldState = (raw: any): WorldPersistenceState => {
-    const src = raw && typeof raw === 'object' ? raw : {};
-    return {
-      hasEnteredWorld: Boolean(src.hasEnteredWorld),
-      selectedRegionId: 'heartlands',
-      goldenTreeStage: (['fallen', 'awakening', 'growing', 'radiant', 'eternal'].includes(src.goldenTreeStage)
-        ? src.goldenTreeStage
-        : DEFAULT_WORLD_STATE.goldenTreeStage) as GoldenTreeStage,
-      landmarks: {
-        ancient_castle: {
-          ...DEFAULT_WORLD_STATE.landmarks.ancient_castle,
-          ...(src.landmarks?.ancient_castle || {}),
-          id: 'ancient_castle',
-        },
-        forgotten_village: {
-          ...DEFAULT_WORLD_STATE.landmarks.forgotten_village,
-          ...(src.landmarks?.forgotten_village || {}),
-          id: 'forgotten_village',
-        },
-        ancient_bridge: {
-          ...DEFAULT_WORLD_STATE.landmarks.ancient_bridge,
-          ...(src.landmarks?.ancient_bridge || {}),
-          id: 'ancient_bridge',
-        },
-        sacred_shrine: {
-          ...DEFAULT_WORLD_STATE.landmarks.sacred_shrine,
-          ...(src.landmarks?.sacred_shrine || {}),
-          id: 'sacred_shrine',
-        },
-      },
-      graphicsQuality: src.graphicsQuality === 'low' ? 'low' : 'high',
-      lastPlayerPosition:
-        src.lastPlayerPosition &&
-        typeof src.lastPlayerPosition.x === 'number' &&
-        typeof src.lastPlayerPosition.y === 'number' &&
-        typeof src.lastPlayerPosition.z === 'number'
-          ? src.lastPlayerPosition
-          : DEFAULT_WORLD_STATE.lastPlayerPosition,
-    };
-  };
+  // Phase 7: Presence State (WS + Heartbeat + Auto-Away)
+  const [myManualPresence, setMyManualPresence] = useState<'online' | 'away' | 'dnd'>('online');
+  const [myEffectivePresence, setMyEffectivePresence] = useState<PresenceStatus>('online');
+  const [autoAwayEnabled, setAutoAwayEnabled] = useState<boolean>(true);
+  const [autoAwayMinutes, setAutoAwayMinutes] = useState<number>(5);
+  const [presenceMap, setPresenceMap] = useState<
+    Record<string, { status: PresenceStatus; lastActiveAt?: string | null; hidden?: boolean }>
+  >({});
+  const presenceWsRef = useRef<WebSocket | null>(null);
+  const presenceSessionIdRef = useRef<string>(createIdempotencyKey());
+  const myManualPresenceRef = useRef<'online' | 'away' | 'dnd'>('online');
+  const autoAwayEnabledRef = useRef<boolean>(true);
+  const autoAwayMinutesRef = useRef<number>(5);
+  const isAutoAwayRef = useRef<boolean>(false);
+  const lastInteractionAtRef = useRef<number>(Date.now());
 
   const updateReclaimHonorObjective = (key: keyof ReclaimHonorQuestState['objectives']) => {
     setReclaimHonorQuest(prev => {
@@ -1201,7 +1213,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  const setSocialSubTab = (subTab: 'leaderboard' | 'friends' | 'chat' | 'rivals') => {
+  const setSocialSubTab = (subTab: 'leaderboard' | 'friends' | 'chat') => {
     sound.playClick();
     setSocialSubTabState(subTab);
   };
@@ -1220,10 +1232,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!isAuthenticated || !user) return;
     sound.playClick();
 
-    // Unified hub routing while preserving all deep-links and tutorial/quest tracking
-    if (tab === 'leaderboard' || tab === 'friends' || tab === 'chat' || tab === 'rivals') {
+    // Unified hub routing while keeping Rivals Arena as an independent top-level tab
+    if (tab === 'leaderboard' || tab === 'friends' || tab === 'chat') {
       setSocialSubTabState(tab);
       setActiveTabState('social');
+    } else if (tab === 'rivals') {
+      setActiveTabState('rivals');
     } else if (tab === 'social') {
       setActiveTabState('social');
     } else if (
@@ -1373,16 +1387,17 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setMentorError(null);
     setCommunityEventState(null);
     setMuseumData(null);
-    if (worldPosSaveTimerRef.current) {
-      clearTimeout(worldPosSaveTimerRef.current);
-      worldPosSaveTimerRef.current = null;
+    setPresenceMap({});
+    setMyManualPresence('online');
+    setMyEffectivePresence('offline');
+    if (presenceWsRef.current) {
+      try {
+        presenceWsRef.current.close();
+      } catch {
+        // ignore
+      }
+      presenceWsRef.current = null;
     }
-    if (activeSessionUserIdRef.current) {
-      localStorage.removeItem(STORAGE_KEY_PREFIX + 'world_state_' + activeSessionUserIdRef.current);
-    }
-    localStorage.removeItem(STORAGE_KEY_PREFIX + 'world_state_guest');
-    worldStateRef.current = DEFAULT_WORLD_STATE;
-    setWorldState(DEFAULT_WORLD_STATE);
     setMentorGreeting(null);
     setRecentGlobalUnlockCelebration(null);
   };
@@ -1629,6 +1644,19 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             leaderboardVisible: p?.leaderboard_visible ?? true,
             createdAt: sbUser.created_at || new Date().toISOString(),
             isOnboarded: resolvedOnboarded,
+            presenceStatus: normalizePresenceStatus(clientPrefs?.manualPresenceStatus || 'online'),
+            autoAwayEnabled: typeof clientPrefs?.autoAwayEnabled === 'boolean' ? clientPrefs.autoAwayEnabled : true,
+            autoAwayMinutes: typeof clientPrefs?.autoAwayMinutes === 'number' ? clientPrefs.autoAwayMinutes : 5,
+            privacySettings: normalizeGranularPrivacySettings(
+              clientPrefs?.privacySettings || p?.privacy_settings,
+              {
+                profileVisibility: (p?.profile_visibility as ProfileVisibility) || existing?.profileVisibility || 'public',
+                showAchievements: typeof p?.show_achievements === 'boolean' ? p.show_achievements : existing?.showAchievements ?? true,
+                showEquipment: typeof p?.show_equipment === 'boolean' ? p.show_equipment : existing?.showEquipment ?? true,
+                showStats: typeof p?.show_stats === 'boolean' ? p.show_stats : existing?.showStats ?? true,
+                showGuild: typeof p?.show_guild === 'boolean' ? p.show_guild : existing?.showGuild ?? true,
+              }
+            ),
             legendTitle: p?.equipped_legend_title ?? existing?.legendTitle ?? null,
             legendTitleStyle: (p?.equipped_legend_style as GlobalTitleStyle) ?? existing?.legendTitleStyle ?? null,
             legendEmblem: p?.equipped_legend_emblem ?? existing?.legendEmblem ?? null,
@@ -1766,45 +1794,15 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (srvPrefs.dailyReport && typeof srvPrefs.dailyReport === 'object') {
               setDailyReport(srvPrefs.dailyReport);
             }
-            if (srvPrefs.worldState && typeof srvPrefs.worldState === 'object') {
-              const normFromPrefs = normalizeWorldState(srvPrefs.worldState);
-              worldStateRef.current = normFromPrefs;
-              setWorldState(normFromPrefs);
-            }
           }
 
-          // Hydrate Dynamic Quests, Daily Report, Hall of Legends & 3D World State from SQL tables if migrated
+          // Hydrate Dynamic Quests, Daily Report & Hall of Legends from SQL tables if migrated
           const todayPeriod = getPeriodKeyForFrequency('daily', userTimezone);
-          const [dynRes, repRes, hallRes, worldRes] = await Promise.all([
+          const [dynRes, repRes, hallRes] = await Promise.all([
             fetchPlayerDynamicQuestsServer(sbUser.id, todayPeriod),
             fetchDailyReportServer(sbUser.id, todayPeriod),
             fetchHallOfLegendsServer(),
-            getWorldStateServer(),
           ]);
-          if (worldRes.ok && worldRes.data?.worldState) {
-            const normSrvWorld = normalizeWorldState(worldRes.data.worldState);
-            worldStateRef.current = normSrvWorld;
-            setWorldState(normSrvWorld);
-            try {
-              localStorage.setItem(
-                STORAGE_KEY_PREFIX + 'world_state_' + sbUser.id,
-                JSON.stringify(normSrvWorld)
-              );
-            } catch {
-              // ignore storage quota
-            }
-          } else {
-            try {
-              const cachedWorld = localStorage.getItem(STORAGE_KEY_PREFIX + 'world_state_' + sbUser.id);
-              if (cachedWorld) {
-                const parsedWorld = normalizeWorldState(JSON.parse(cachedWorld));
-                worldStateRef.current = parsedWorld;
-                setWorldState(parsedWorld);
-              }
-            } catch {
-              // ignore
-            }
-          }
           if (dynRes.ok && Array.isArray(dynRes.data) && dynRes.data.length > 0) {
             setDynamicDailyQuests(dynRes.data);
           }
@@ -2011,7 +2009,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ] = await Promise.all([
           fetchSkillTreeStateServer(sbUser.id, userTimezone),
           fetchWeeklyBossStateServer(sbUser.id, 1, 10, userTimezone),
-          fetchRivalsStateServer(sbUser.id),
+          fetchRivalsArenaStateServer({
+            userId: sbUser.id,
+            username: localUser.username,
+            characterClass: localUser.characterClass,
+            level: Number(srvProf?.level ?? gsStats?.level ?? 1),
+          }),
           fetchAiMentorStateServer(sbUser.id),
           fetchCommunityEventsStateServer(sbUser.id),
           fetchMuseumRecordsServer({ callerUserId: sbUser.id, page: 1, limit: 12 }),
@@ -2086,6 +2089,66 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (seasonRes.ok && seasonRes.data) {
           setSeasonState(seasonRes.data);
         }
+        const hydratedWorkouts = Array.isArray(cloudRes.workoutSessions) ? cloudRes.workoutSessions : [];
+        const hydratedHabits = Array.isArray(cloudRes.gameState?.habits) ? cloudRes.gameState!.habits : [];
+        const hydratedStreak = Number(srvProf?.current_streak ?? gsStats?.currentStreak ?? 0);
+        // Backfill & reconcile historical verified records idempotently for Skill Tree & Museum
+        if (hydratedWorkouts.length > 0 || hydratedHabits.length > 0) {
+          void reconcileSkillTreeServer({
+            userId: sbUser.id,
+            timezone: userTimezone,
+            workouts: hydratedWorkouts.map(w => ({
+              id: w.id,
+              exerciseName: w.exerciseName,
+              exerciseType: w.exerciseType,
+              reps: w.repetitions,
+              durationMinutes: w.durationMinutes,
+              date: w.timestamp,
+            })),
+            habits: hydratedHabits.map(h => ({
+              id: h.id,
+              name: h.name,
+              category: h.category,
+              completedCount: h.history?.length || (h.completedToday ? 1 : 0),
+              lastCompleted: h.lastCompletedDate || null,
+            })),
+          }).then(rec => {
+            if (rec.ok && rec.state) {
+              setSkillTreeState(normalizeSkillTreeState(rec.state));
+            }
+          });
+          if (hydratedWorkouts.length > 0 || hydratedStreak > 0) {
+            void reconcileMuseumServer({
+              userId: sbUser.id,
+              workouts: hydratedWorkouts.map(w => ({
+                id: w.id,
+                exerciseName: w.exerciseName,
+                exerciseType: w.exerciseType,
+                reps: w.repetitions,
+                durationMinutes: w.durationMinutes,
+                date: w.timestamp,
+              })),
+              currentStreak: hydratedStreak,
+            }).then(rec => {
+              if (rec.ok && (rec.reconciledCount || 0) > 0) {
+                void fetchMuseumRecordsServer({ callerUserId: sbUser.id, page: 1, limit: 12 }).then(m => {
+                  if (m.ok && m.data) setMuseumData(m.data);
+                });
+              }
+            });
+          }
+        }
+        const effectiveManual =
+          localUser.presenceStatus === 'away' || localUser.presenceStatus === 'dnd'
+            ? localUser.presenceStatus
+            : 'online';
+        myManualPresenceRef.current = effectiveManual;
+        autoAwayEnabledRef.current = localUser.autoAwayEnabled ?? true;
+        autoAwayMinutesRef.current = localUser.autoAwayMinutes ?? 5;
+        setMyManualPresence(effectiveManual);
+        setMyEffectivePresence(effectiveManual);
+        setAutoAwayEnabled(localUser.autoAwayEnabled ?? true);
+        setAutoAwayMinutes(localUser.autoAwayMinutes ?? 5);
         void syncMuseumPrivacyServer(
           sbUser.id,
           localUser.profileVisibility === 'public' && localUser.privacySettings?.personalRecords === 'everyone'
@@ -2214,9 +2277,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (session?.user) {
         await loadUserCloudData(session.user);
         const routeTab = isOAuthCallback ? null : resolveTabFromPathname(window.location.pathname);
-        if (routeTab === 'leaderboard' || routeTab === 'friends' || routeTab === 'chat' || routeTab === 'rivals') {
+        if (routeTab === 'leaderboard' || routeTab === 'friends' || routeTab === 'chat') {
           setSocialSubTabState(routeTab);
           setActiveTabState('social');
+        } else if (routeTab === 'rivals') {
+          setActiveTabState('rivals');
         } else if (
           routeTab === 'quests' ||
           routeTab === 'daily-report' ||
@@ -3920,9 +3985,46 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!unifiedBackendReady) {
       return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
-    const res = await getPublicPlayerProfileServer(userId);
+    const [res, overlay] = await Promise.all([
+      getPublicPlayerProfileServer(userId),
+      fetchServerFilteredPublicProfile({ targetUserId: userId, viewerId: user?.id }),
+    ]);
     if (!res.ok || !res.data) {
+      if (overlay.ok && overlay.profile) {
+        return {
+          success: true,
+          data: {
+            accessible: Boolean(overlay.profile.accessible),
+            restrictedReason: overlay.profile.restrictedReason,
+            blocked: Boolean(overlay.profile.blocked),
+            blockedByMe: Boolean(overlay.profile.blockedByMe),
+            player: overlay.profile,
+          },
+        };
+      }
       return { success: false, error: res.error || 'Could not load player profile.' };
+    }
+    if (overlay.ok && overlay.profile && res.data.player) {
+      const ov = overlay.profile;
+      const basePlayer = res.data.player;
+      return {
+        success: true,
+        data: {
+          ...res.data,
+          accessible: ov.accessible ?? res.data.accessible,
+          restrictedReason: ov.restrictedReason ?? res.data.restrictedReason,
+          player: {
+            ...basePlayer,
+            presenceStatus: ov.presenceStatus ?? basePlayer.presenceStatus,
+            lastActiveAt: ov.lastActiveAt ?? basePlayer.lastActiveAt,
+            hiddenFields: ov.hiddenFields ?? basePlayer.hiddenFields,
+            achievements: ov.achievements === null ? [] : basePlayer.achievements,
+            workoutHistory: ov.recentWorkouts === null ? [] : basePlayer.workoutHistory,
+            personalRecords: ov.personalRecords === null ? [] : basePlayer.personalRecords,
+            bio: ov.bio === null ? '' : basePlayer.bio,
+          },
+        },
+      };
     }
     return { success: true, data: res.data };
   };
@@ -4201,7 +4303,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const searchChampions = async (query = '', limit = 40, offset = 0): Promise<ChampionSummary[]> => {
     if (!unifiedBackendReady) return [];
     const res = await searchChampionsServer(query, limit, offset);
-    return res.ok && res.data ? res.data : [];
+    if (!res.ok || !res.data) return [];
+    if (!user?.id) return res.data;
+    const filtered = await enforceDirectoryPrivacyServer(user.id, res.data);
+    void queryPresencesBatch(filtered.map(c => c.id));
+    return filtered;
   };
 
   const sendFriendRequest = async (targetUserId: string): Promise<{ success: boolean; error?: string }> => {
@@ -4531,6 +4637,19 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     sound.playClick();
+    const prevUid = activeSessionUserIdRef.current || user?.id;
+    if (prevUid) {
+      sendPresenceOfflineBeacon(prevUid);
+      void setPresenceStatusServer({ userId: prevUid, disconnected: true });
+    }
+    if (presenceWsRef.current) {
+      try {
+        presenceWsRef.current.close();
+      } catch {
+        // ignore
+      }
+      presenceWsRef.current = null;
+    }
     activeSessionUserIdRef.current = null;
     cloudHydratedRef.current = false;
     setAuthError(null);
@@ -4640,10 +4759,25 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateUser = async (updates: Partial<UserAccount>): Promise<{ success: boolean; error?: string }> => {
     if (!isAuthenticated || !user) return { success: false, error: 'Not authenticated.' };
     sound.playClick();
-    const safeUpdates: Partial<UserAccount> = heroLocked
+    let mergedUpdates: Partial<UserAccount> = heroLocked
       ? { ...updates, characterClass: user.characterClass }
-      : updates;
-    const updated: UserAccount = { ...user, ...safeUpdates };
+      : { ...updates };
+
+    if (mergedUpdates.privacySettings) {
+      const normalizedPrivacy = normalizeGranularPrivacySettings(mergedUpdates.privacySettings, user);
+      const legacyDerived = deriveLegacyVisibilityFromGranular(normalizedPrivacy);
+      mergedUpdates = {
+        ...mergedUpdates,
+        privacySettings: normalizedPrivacy,
+        ...legacyDerived,
+      };
+      void syncMuseumPrivacyServer(
+        user.id,
+        legacyDerived.profileVisibility === 'public' && normalizedPrivacy.personalRecords === 'everyone'
+      );
+    }
+
+    const updated: UserAccount = { ...user, ...mergedUpdates };
     setUser(updated);
 
     if (isSupabaseConfigured()) {
@@ -4681,12 +4815,16 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         show_stats: updated.showStats ?? true,
         show_guild: updated.showGuild ?? true,
       });
-      if (unifiedBackendReady && (updated.ageYears || updated.ageGroup || updated.biologicalSex)) {
+      if (unifiedBackendReady) {
         void saveClientPreferencesServer({
           soundEnabled: stats.soundEnabled,
           ageYears: updated.ageYears ?? null,
           ageGroup: updated.ageGroup ?? null,
           biologicalSex: updated.biologicalSex ?? null,
+          privacySettings: updated.privacySettings,
+          manualPresenceStatus: myManualPresenceRef.current,
+          autoAwayEnabled: autoAwayEnabledRef.current,
+          autoAwayMinutes: autoAwayMinutesRef.current,
         });
       }
       if (!res.success) {
@@ -5629,6 +5767,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ),
       mealsLoggedTotal: Math.max(serverLegendMetrics?.meals_logged_total ?? 0, meals.length),
       waterGlassesCurrent: Math.max(serverLegendMetrics?.water_glasses_current ?? 0, waterGlasses),
+      hydrationGoalsTotal: Math.max(
+        serverLegendMetrics?.hydration_goals_total ?? 0,
+        waterGlasses >= 8 ? 1 : 0
+      ),
       questsClaimedTotal: Math.max(
         serverLegendMetrics?.quests_claimed_total ?? 0,
         claimedClassicQuests + claimedDynAll.length
@@ -5781,24 +5923,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (res.data.profile) {
       syncProfileWithCelebration(res.data.profile);
     } else if (res.data.isFallbackLedger) {
-      setStats(prev => {
-        let nextXp = prev.playerXP + entry.rewardPlayerXp;
-        let nextLevel = prev.level;
-        let nextReq = prev.playerXPNextLevel;
-        while (nextXp >= nextReq) {
-          nextXp -= nextReq;
-          nextLevel += 1;
-          nextReq = Math.floor(nextReq * 1.25);
-        }
-        return {
-          ...prev,
-          level: nextLevel,
-          playerXP: nextXp,
-          playerXPNextLevel: nextReq,
-          forgeXP: prev.forgeXP + entry.rewardForgeXp,
-          gold: prev.gold + entry.rewardGold,
-        };
-      });
+      // Phase 4 Rule: Global Exclusive Achievements grant Prestige + Forge XP + Gold ONLY (zero Leaderboard XP)
+      setStats(prev => ({
+        ...prev,
+        forgeXP: prev.forgeXP + entry.rewardForgeXp,
+        gold: prev.gold + entry.rewardGold,
+      }));
     }
 
     const ownership: GlobalAchievementOwnership = res.data.ownership || {
@@ -5931,138 +6061,348 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setRecentGlobalUnlockCelebration(null);
   };
 
-  // Phase 1: Explorable 3D World Persistence & Preview Handlers
-  const persistWorldState = async (
-    nextState: WorldPersistenceState,
-    rpcPatch?: {
-      hasEnteredWorld?: boolean;
-      selectedRegionId?: 'heartlands';
-      goldenTreeStage?: GoldenTreeStage;
-      landmarks?: WorldPersistenceState['landmarks'];
-      graphicsQuality?: WorldGraphicsQuality;
-      lastPlayerPosition?: WorldPlayerPosition | null;
+  // Phase 7: Discord-Style Player Presence Engine (WebSocket + Heartbeat + Auto-Away + Privacy Sync)
+  const sendPresenceWsPayload = (payload: Record<string, any>) => {
+    const ws = presenceWsRef.current;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      try {
+        ws.send(JSON.stringify(payload));
+        return true;
+      } catch {
+        return false;
+      }
     }
-  ) => {
-    const uid = activeSessionUserIdRef.current;
-    try {
-      const storageKey = uid
-        ? STORAGE_KEY_PREFIX + 'world_state_' + uid
-        : STORAGE_KEY_PREFIX + 'world_state_guest';
-      localStorage.setItem(storageKey, JSON.stringify(nextState));
-    } catch {
-      // ignore storage quota
+    return false;
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id || typeof window === 'undefined') {
+      return;
     }
+    const uid = user.id;
+    let disposed = false;
+    let reconnectTimer: any = null;
+    let heartbeatTimer: any = null;
+    let idleCheckTimer: any = null;
+    let reconnectAttempts = 0;
 
-    if (!isSupabaseConfigured() || !uid) return;
+    const connectPresenceSocket = () => {
+      if (disposed) return;
+      try {
+        const wsProto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const ws = new WebSocket(`${wsProto}//${window.location.host}/ws/presence`);
+        presenceWsRef.current = ws;
 
-    const res = await saveWorldStateServer(rpcPatch || nextState);
-    if (!res.ok && res.schemaMissing && unifiedBackendReady) {
-      await saveClientPreferencesServer({
-        soundEnabled: stats.soundEnabled,
-        activeTab,
-        equippedGear,
-        selectedHeroId,
-        heroLocked,
-        heroSelectedAt,
-        reclaimHonor: reclaimHonorQuest,
-        campaignProgress,
-        attributeBonuses,
-        tutorialState: {
-          completed: tutorialState.completed,
-          skipped: tutorialState.skipped,
+        ws.onopen = () => {
+          reconnectAttempts = 0;
+          ws.send(
+            JSON.stringify({
+              type: 'auth',
+              userId: uid,
+              sessionId: presenceSessionIdRef.current,
+              manualStatus: myManualPresenceRef.current,
+              autoAwayEnabled: autoAwayEnabledRef.current,
+              autoAwayMinutes: autoAwayMinutesRef.current,
+              isAutoAway: isAutoAwayRef.current,
+            })
+          );
+        };
+
+        ws.onmessage = evt => {
+          try {
+            const msg = JSON.parse(String(evt.data || '{}'));
+            if (msg.type === 'presence:snapshot') {
+              if (msg.self?.effectiveStatus) {
+                setMyEffectivePresence(normalizePresenceStatus(msg.self.effectiveStatus));
+              }
+              if (msg.peers && typeof msg.peers === 'object') {
+                setPresenceMap(prev => ({ ...prev, ...msg.peers }));
+              }
+            } else if (msg.type === 'presence:self' && msg.self) {
+              setMyEffectivePresence(normalizePresenceStatus(msg.self.effectiveStatus));
+              if (msg.self.manualStatus) {
+                const normMan = normalizePresenceStatus(msg.self.manualStatus);
+                if (normMan === 'online' || normMan === 'away' || normMan === 'dnd') {
+                  myManualPresenceRef.current = normMan;
+                  setMyManualPresence(normMan);
+                }
+              }
+            } else if (msg.type === 'presence:update' && msg.userId) {
+              setPresenceMap(prev => ({
+                ...prev,
+                [msg.userId]: {
+                  status: normalizePresenceStatus(msg.status),
+                  lastActiveAt: msg.lastActiveAt || null,
+                  hidden: Boolean(msg.hidden),
+                },
+              }));
+            } else if (msg.type === 'presence:batch' && msg.peers) {
+              setPresenceMap(prev => ({ ...prev, ...msg.peers }));
+            }
+          } catch {
+            // ignore malformed frame
+          }
+        };
+
+        ws.onclose = () => {
+          if (disposed) return;
+          const backoffMs = Math.min(30000, 1500 * Math.pow(2, reconnectAttempts));
+          reconnectAttempts = Math.min(reconnectAttempts + 1, 5);
+          reconnectTimer = setTimeout(connectPresenceSocket, backoffMs);
+        };
+
+        ws.onerror = () => {
+          // onclose handles reconnect
+        };
+      } catch {
+        // Fallback to HTTP heartbeat below if WS fails
+      }
+    };
+
+    connectPresenceSocket();
+
+    // Initial HTTP presence registration for immediate availability
+    void setPresenceStatusServer({
+      userId: uid,
+      manualStatus: myManualPresenceRef.current,
+      isAutoAway: isAutoAwayRef.current,
+      autoAwayEnabled: autoAwayEnabledRef.current,
+      autoAwayMinutes: autoAwayMinutesRef.current,
+    }).then(res => {
+      if (res.ok && res.self) {
+        setMyEffectivePresence(normalizePresenceStatus(res.self.effectiveStatus));
+      }
+    });
+
+    const handleUserActivity = () => {
+      lastInteractionAtRef.current = Date.now();
+      if (isAutoAwayRef.current) {
+        isAutoAwayRef.current = false;
+        if (!sendPresenceWsPayload({ type: 'heartbeat', isAutoAway: false })) {
+          void sendPresenceHeartbeatServer({ userId: uid, isAutoAway: false });
+        }
+        if (myManualPresenceRef.current === 'online') {
+          setMyEffectivePresence('online');
+        }
+      }
+    };
+
+    window.addEventListener('mousemove', handleUserActivity, { passive: true });
+    window.addEventListener('keydown', handleUserActivity, { passive: true });
+    window.addEventListener('pointerdown', handleUserActivity, { passive: true });
+
+    const handleUnload = () => {
+      sendPresenceOfflineBeacon(uid);
+    };
+    window.addEventListener('beforeunload', handleUnload);
+    window.addEventListener('pagehide', handleUnload);
+
+    heartbeatTimer = setInterval(() => {
+      const sent = sendPresenceWsPayload({
+        type: 'heartbeat',
+        isAutoAway: isAutoAwayRef.current,
+      });
+      if (!sent) {
+        void sendPresenceHeartbeatServer({
+          userId: uid,
+          isAutoAway: isAutoAwayRef.current,
+        });
+      }
+    }, 25000);
+
+    idleCheckTimer = setInterval(() => {
+      if (!autoAwayEnabledRef.current || myManualPresenceRef.current !== 'online') return;
+      const idleMs = Date.now() - lastInteractionAtRef.current;
+      const thresholdMs = Math.max(1, autoAwayMinutesRef.current) * 60_000;
+      if (idleMs >= thresholdMs && !isAutoAwayRef.current) {
+        isAutoAwayRef.current = true;
+        setMyEffectivePresence('away');
+        if (!sendPresenceWsPayload({ type: 'presence:set', isAutoAway: true })) {
+          void setPresenceStatusServer({ userId: uid, isAutoAway: true });
+        }
+      }
+    }, 15000);
+
+    return () => {
+      disposed = true;
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+      if (heartbeatTimer) clearInterval(heartbeatTimer);
+      if (idleCheckTimer) clearInterval(idleCheckTimer);
+      window.removeEventListener('mousemove', handleUserActivity);
+      window.removeEventListener('keydown', handleUserActivity);
+      window.removeEventListener('pointerdown', handleUserActivity);
+      window.removeEventListener('beforeunload', handleUnload);
+      window.removeEventListener('pagehide', handleUnload);
+      if (presenceWsRef.current) {
+        try {
+          presenceWsRef.current.close();
+        } catch {
+          // ignore
+        }
+        presenceWsRef.current = null;
+      }
+    };
+  }, [isAuthenticated, user?.id]);
+
+  // Sync user's latest profile snapshot + granular privacy rules to server privacy engine
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id) return;
+    const timer = setTimeout(() => {
+      const acceptedFriendIds = friends.filter(f => f.status === 'accepted').map(f => f.champion.id);
+      const blockedUserIds = blockedUsers.map(b => b.id);
+      const todayKey = new Date().toISOString().split('T')[0];
+      const workoutsToday = fitnessSessions.filter(w => String(w.timestamp || '').startsWith(todayKey));
+      const activeMinutesTotal = fitnessSessions.reduce((s, w) => s + (Number(w.durationMinutes) || 0), 0);
+      const activeMinutesToday = workoutsToday.reduce((s, w) => s + (Number(w.durationMinutes) || 0), 0);
+      const habitsCompletedToday = habits.filter(h => isHabitClaimedForCurrentPeriod(h)).length;
+
+      void syncPrivacyProfileServer({
+        id: user.id,
+        username: user.username,
+        avatarUrl: user.avatar,
+        characterClass: user.characterClass,
+        level: stats.level,
+        aetherRank: stats.aetherRank,
+        playerXP: stats.playerXP,
+        playerXPNextLevel: stats.playerXPNextLevel,
+        aetherPoints: stats.aetherPoints,
+        currentStreak: stats.currentStreak,
+        longestStreak: Math.max(stats.currentStreak, identityState?.lifetimeStats?.longestStreak || 0),
+        bio: user.bio || '',
+        guildId: null,
+        guildName: null,
+        guildTag: null,
+        legendTitle: user.legendTitle || null,
+        legendTitleStyle: user.legendTitleStyle || null,
+        legendEmblem: user.legendEmblem || null,
+        achievementsUnlocked: achievements.filter(a => a.unlocked).length,
+        totalWorkouts: Math.max(stats.totalWorkoutsCompleted, fitnessSessions.length),
+        totalVerifiedReps: stats.totalVerifiedReps,
+        totalActiveMinutes: activeMinutesTotal,
+        todayStats: {
+          habitsCompleted: habitsCompletedToday,
+          activeMinutes: activeMinutesToday,
+          waterGlasses,
         },
-        worldState: nextState,
-        savedAt: new Date().toISOString(),
+        recentWorkouts: fitnessSessions.slice(0, 8).map(w => ({
+          id: w.id,
+          exerciseName: w.exerciseName,
+          reps: Number(w.repetitions || 0),
+          xpEarned: w.playerXpEarned,
+          date: w.timestamp,
+        })),
+        personalRecords: (museumData?.personalBests || []).slice(0, 8).map(p => ({
+          title: p.title,
+          displayValue: p.displayValue,
+          achievedAt: p.achievedAt,
+        })),
+        privacySettings: user.privacySettings || DEFAULT_GRANULAR_PRIVACY_SETTINGS,
+        friendIds: acceptedFriendIds,
+        blockedIds: blockedUserIds,
+      });
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [
+    isAuthenticated,
+    user?.id,
+    user?.username,
+    user?.avatar,
+    user?.bio,
+    user?.privacySettings,
+    user?.legendTitle,
+    stats.level,
+    stats.playerXP,
+    stats.currentStreak,
+    stats.totalWorkoutsCompleted,
+    stats.totalVerifiedReps,
+    friends.length,
+    blockedUsers.length,
+    fitnessSessions.length,
+    museumData?.personalBestCount,
+    habits,
+    waterGlasses,
+  ]);
+
+  const setManualPresenceStatus = async (status: 'online' | 'away' | 'dnd') => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    sound.playClick();
+    myManualPresenceRef.current = status;
+    isAutoAwayRef.current = false;
+    setMyManualPresence(status);
+    setMyEffectivePresence(status);
+    setUser(prev => (prev ? { ...prev, presenceStatus: status } : prev));
+    if (!uid) return;
+    sendPresenceWsPayload({ type: 'presence:set', manualStatus: status, isAutoAway: false });
+    await setPresenceStatusServer({ userId: uid, manualStatus: status, isAutoAway: false });
+    if (unifiedBackendReady) {
+      void saveClientPreferencesServer({ manualPresenceStatus: status });
+    }
+  };
+
+  const updatePresencePreferences = async (prefs: { autoAwayEnabled?: boolean; autoAwayMinutes?: number }) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    const nextEnabled =
+      typeof prefs.autoAwayEnabled === 'boolean' ? prefs.autoAwayEnabled : autoAwayEnabledRef.current;
+    const nextMins =
+      typeof prefs.autoAwayMinutes === 'number'
+        ? Math.max(1, Math.min(60, prefs.autoAwayMinutes))
+        : autoAwayMinutesRef.current;
+    autoAwayEnabledRef.current = nextEnabled;
+    autoAwayMinutesRef.current = nextMins;
+    setAutoAwayEnabled(nextEnabled);
+    setAutoAwayMinutes(nextMins);
+    setUser(prev => (prev ? { ...prev, autoAwayEnabled: nextEnabled, autoAwayMinutes: nextMins } : prev));
+    if (!uid) return;
+    sendPresenceWsPayload({
+      type: 'presence:set',
+      autoAwayEnabled: nextEnabled,
+      autoAwayMinutes: nextMins,
+    });
+    await setPresenceStatusServer({
+      userId: uid,
+      autoAwayEnabled: nextEnabled,
+      autoAwayMinutes: nextMins,
+    });
+    if (unifiedBackendReady) {
+      void saveClientPreferencesServer({
+        autoAwayEnabled: nextEnabled,
+        autoAwayMinutes: nextMins,
       });
     }
   };
 
-  const markWorldEntered = async () => {
-    if (worldStateRef.current.hasEnteredWorld) return;
-    const next: WorldPersistenceState = {
-      ...worldStateRef.current,
-      hasEnteredWorld: true,
-    };
-    worldStateRef.current = next;
-    setWorldState(next);
-    await persistWorldState(next, { hasEnteredWorld: true });
-  };
-
-  const setWorldGoldenTreeStage = async (stage: GoldenTreeStage) => {
-    sound.playClick();
-    const next: WorldPersistenceState = {
-      ...worldStateRef.current,
-      goldenTreeStage: stage,
-    };
-    worldStateRef.current = next;
-    setWorldState(next);
-    await persistWorldState(next, { goldenTreeStage: stage });
-  };
-
-  const setWorldLandmarkStage = async (
-    landmarkId: LandmarkId,
-    stage: LandmarkRestorationStage,
-    restorationPercent: number
-  ) => {
-    sound.playClick();
-    const clampedPct = Math.max(0, Math.min(100, Math.round(restorationPercent)));
-    const nextLandmarks = {
-      ...worldStateRef.current.landmarks,
-      [landmarkId]: {
-        id: landmarkId,
-        stage,
-        restorationPercent: clampedPct,
-      },
-    };
-    const next: WorldPersistenceState = {
-      ...worldStateRef.current,
-      landmarks: nextLandmarks,
-    };
-    worldStateRef.current = next;
-    setWorldState(next);
-    await persistWorldState(next, { landmarks: nextLandmarks });
-  };
-
-  const setWorldGraphicsQuality = async (quality: WorldGraphicsQuality) => {
-    sound.playClick();
-    const next: WorldPersistenceState = {
-      ...worldStateRef.current,
-      graphicsQuality: quality,
-    };
-    worldStateRef.current = next;
-    setWorldState(next);
-    await persistWorldState(next, { graphicsQuality: quality });
-  };
-
-  const saveWorldPlayerPosition = (pos: WorldPlayerPosition) => {
-    const sanitized: WorldPlayerPosition = {
-      x: Math.round(Math.max(-145, Math.min(145, pos.x)) * 100) / 100,
-      y: Math.round(Math.max(-20, Math.min(60, pos.y)) * 100) / 100,
-      z: Math.round(Math.max(-145, Math.min(145, pos.z)) * 100) / 100,
-    };
-    const next: WorldPersistenceState = {
-      ...worldStateRef.current,
-      lastPlayerPosition: sanitized,
-    };
-    worldStateRef.current = next;
-    setWorldState(next);
-
-    const uid = activeSessionUserIdRef.current;
-    try {
-      const storageKey = uid
-        ? STORAGE_KEY_PREFIX + 'world_state_' + uid
-        : STORAGE_KEY_PREFIX + 'world_state_guest';
-      localStorage.setItem(storageKey, JSON.stringify(next));
-    } catch {
-      // ignore
+  const getPlayerPresence = (
+    targetUserId: string
+  ): { status: PresenceStatus; lastActiveAt?: string | null; hidden?: boolean } => {
+    if (user && targetUserId === user.id) {
+      return { status: myEffectivePresence, lastActiveAt: new Date().toISOString(), hidden: false };
     }
+    const cached = presenceMap[targetUserId];
+    if (cached) return cached;
+    return { status: 'offline', lastActiveAt: null, hidden: false };
+  };
 
-    if (worldPosSaveTimerRef.current) {
-      clearTimeout(worldPosSaveTimerRef.current);
+  const queryPresencesBatch = async (userIds: string[]) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid || !userIds.length) return;
+    const uniqueIds = Array.from(new Set(userIds.filter(Boolean))).slice(0, 60);
+    if (!uniqueIds.length) return;
+    sendPresenceWsPayload({ type: 'presence:query', userIds: uniqueIds });
+    const batch = await fetchPresenceBatchServer({ viewerId: uid, userIds: uniqueIds });
+    if (Object.keys(batch).length > 0) {
+      setPresenceMap(prev => ({ ...prev, ...batch }));
     }
-    worldPosSaveTimerRef.current = setTimeout(() => {
-      void persistWorldState(worldStateRef.current, { lastPlayerPosition: sanitized });
-    }, 1800);
+  };
+
+  const previewPublicProfileAs = async (mode: 'public' | 'friend' | 'restricted') => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return null;
+    const res = await fetchServerFilteredPublicProfile({
+      targetUserId: uid,
+      viewerId: uid,
+      previewAs: mode,
+    });
+    return res.ok ? res.profile : null;
   };
 
   // Reset & Export
@@ -6120,6 +6460,41 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (res.ok && res.data?.state) {
         setSkillTreeState(res.data.state);
       }
+    } finally {
+      setSkillTreeLoading(false);
+    }
+  };
+
+  const reconcileSkillTree = async (): Promise<{ ok: boolean; reconciledCount?: number }> => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { ok: false };
+    setSkillTreeLoading(true);
+    try {
+      const tz = user?.timezone || getUserTimezone();
+      const res = await reconcileSkillTreeServer({
+        userId: uid,
+        timezone: tz,
+        workouts: fitnessSessions.map(w => ({
+          id: w.id,
+          exerciseName: w.exerciseName,
+          exerciseType: w.exerciseType,
+          reps: w.repetitions,
+          durationMinutes: w.durationMinutes,
+          date: w.timestamp,
+        })),
+        habits: habits.map(h => ({
+          id: h.id,
+          name: h.name,
+          category: h.category,
+          completedCount: h.history?.length || (h.completedToday ? 1 : 0),
+          lastCompleted: h.lastCompletedDate || null,
+        })),
+      });
+      if (res.ok && res.state) {
+        setSkillTreeState(normalizeSkillTreeState(res.state));
+        return { ok: true, reconciledCount: res.reconciledCount || 0 };
+      }
+      return { ok: false };
     } finally {
       setSkillTreeLoading(false);
     }
@@ -6348,13 +6723,18 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { success: false, error: res.error || 'Could not claim reward.' };
   };
 
-  // --- PHASE 3: FRIEND RIVAL SYSTEM ---
+  // --- PHASE 2 (COMPETITIVE ARENA): INDEPENDENT RIVALS PLATFORM ---
   const refreshRivalsState = async () => {
     const uid = activeSessionUserIdRef.current || user?.id;
     if (!uid) return;
     setRivalsLoading(true);
     try {
-      const res = await fetchRivalsStateServer(uid);
+      const res = await fetchRivalsArenaStateServer({
+        userId: uid,
+        username: user?.username,
+        characterClass: user?.characterClass,
+        level: stats.level,
+      });
       if (res.ok && res.data) {
         setRivalsState(res.data);
       }
@@ -6363,23 +6743,60 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const sendRivalInvite = async (
-    opponentId: string,
-    opponentName: string,
-    challengeType: RivalChallengeType
-  ) => {
+  const joinRivalsQueue = async (mode: CompetitiveRivalMode) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid || !user) return { success: false, error: 'Authentication required.' };
+    const res = await joinRivalsQueueServer({
+      userId: uid,
+      mode,
+      username: user.username,
+      characterClass: user.characterClass,
+      level: stats.level,
+    });
+    if (res.ok) {
+      if (res.data) setRivalsState(res.data);
+      if (res.matched) sound.playQuestComplete();
+      else sound.playClick();
+      return { success: true, matched: res.matched, match: res.match || null };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const cancelRivalsQueue = async () => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await cancelRivalsQueueServer(uid);
+    if (res.ok) {
+      if (res.data) setRivalsState(res.data);
+      sound.playClick();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const sendDirectRivalChallenge = async (params: {
+    opponentId: string;
+    opponentName: string;
+    mode?: CompetitiveRivalMode;
+    challengeType?: RivalChallengeType;
+    visibility?: CompetitiveMatchVisibility;
+    rules?: Partial<CompetitiveMatchRules>;
+  }) => {
     const uid = activeSessionUserIdRef.current || user?.id;
     if (!uid || !user) return { success: false, error: 'Authentication required.' };
     const isAcceptedFriend = friends.some(
-      f => f.status === 'accepted' && f.champion.id === opponentId
+      f => f.status === 'accepted' && f.champion.id === params.opponentId
     );
-    const res = await inviteRivalServer({
+    const res = await sendDirectRivalChallengeServer({
       userId: uid,
       challengerName: user.username,
-      opponentId,
-      opponentName,
-      challengeType,
+      opponentId: params.opponentId,
+      opponentName: params.opponentName,
+      mode: params.mode,
+      challengeType: params.challengeType,
       isFriend: isAcceptedFriend,
+      visibility: params.visibility,
+      rules: params.rules,
     });
     if (res.ok && res.data) {
       setRivalsState(res.data);
@@ -6387,6 +6804,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: true };
     }
     return { success: false, error: res.error };
+  };
+
+  const sendRivalInvite = async (
+    opponentId: string,
+    opponentName: string,
+    challengeType: RivalChallengeType
+  ) => {
+    return sendDirectRivalChallenge({ opponentId, opponentName, challengeType });
   };
 
   const respondRivalInvite = async (rivalryId: string, decision: 'accept' | 'decline') => {
@@ -6421,6 +6846,57 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: true };
     }
     return { success: false, error: res.error };
+  };
+
+  const rematchRival = async (matchId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await rematchRivalServer({ userId: uid, matchId });
+    if (res.ok && res.data) {
+      setRivalsState(res.data);
+      sound.playClick();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const disputeRivalMatch = async (matchId: string, reason: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await disputeRivalMatchServer({ userId: uid, matchId, reason });
+    if (res.ok && res.data) {
+      setRivalsState(res.data);
+      sound.playClick();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const updateRivalsPrivacy = async (allowNonFriendChallenges: boolean) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await updateRivalsPrivacyServer({ userId: uid, allowNonFriendChallenges });
+    if (res.ok && res.data) {
+      setRivalsState(res.data);
+      sound.playClick();
+      return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const fetchRivalsLeaderboard = async (params?: {
+    scope?: 'global' | 'friends' | 'seasonal' | 'weekly';
+    mode?: CompetitiveRivalMode | 'all';
+  }) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { ok: false, error: 'Authentication required.' };
+    const acceptedFriendIds = friends.filter(f => f.status === 'accepted').map(f => f.champion.id);
+    return fetchRivalsLeaderboardServer({
+      userId: uid,
+      scope: params?.scope || 'global',
+      mode: params?.mode || 'all',
+      friendIds: acceptedFriendIds,
+    });
   };
 
   const blockRivalUser = async (targetUserId: string, unblock: boolean = false) => {
@@ -6593,6 +7069,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // --- PHASE 6: PERSONAL RECORDS MUSEUM ---
   const refreshMuseumRecords = async (params?: {
     category?: MuseumCategory | 'all';
+    pbOnly?: boolean;
     search?: string;
     sort?: 'newest' | 'oldest' | 'rarity' | 'value';
     page?: number;
@@ -6604,6 +7081,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await fetchMuseumRecordsServer({
         callerUserId: uid,
         category: params?.category || 'all',
+        pbOnly: params?.pbOnly,
         search: params?.search || '',
         sort: params?.sort || 'newest',
         page: params?.page || 1,
@@ -6612,6 +7090,33 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (res.ok && res.data) {
         setMuseumData(res.data);
       }
+    } finally {
+      setMuseumLoading(false);
+    }
+  };
+
+  const reconcileMuseum = async (): Promise<{ ok: boolean; reconciledCount?: number }> => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { ok: false };
+    setMuseumLoading(true);
+    try {
+      const rec = await reconcileMuseumServer({
+        userId: uid,
+        workouts: fitnessSessions.map(w => ({
+          id: w.id,
+          exerciseName: w.exerciseName,
+          exerciseType: w.exerciseType,
+          reps: w.repetitions,
+          durationMinutes: w.durationMinutes,
+          date: w.timestamp,
+        })),
+        currentStreak: stats.currentStreak,
+      });
+      if (rec.ok) {
+        await refreshMuseumRecords({ page: 1 });
+        return { ok: true, reconciledCount: rec.reconciledCount || 0 };
+      }
+      return { ok: false };
     } finally {
       setMuseumLoading(false);
     }
@@ -6915,6 +7420,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         lastSkillAwardBanner,
         dismissSkillAwardBanner,
         refreshSkillTreeState,
+        reconcileSkillTree,
         unlockSkillNode,
         claimSkillMilestone,
         logVerifiedStudySession,
@@ -6925,10 +7431,17 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         rivalsState,
         rivalsLoading,
         refreshRivalsState,
+        joinRivalsQueue,
+        cancelRivalsQueue,
+        sendDirectRivalChallenge,
         sendRivalInvite,
         respondRivalInvite,
         cancelRivalInvite,
         endActiveRivalry,
+        rematchRival,
+        disputeRivalMatch,
+        updateRivalsPrivacy,
+        fetchRivalsLeaderboard,
         blockRivalUser,
         mentorMessages,
         mentorQuests,
@@ -6946,6 +7459,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         museumData,
         museumLoading,
         refreshMuseumRecords,
+        reconcileMuseum,
         inspectPlayerMuseumRecords,
         dynamicDailyQuests,
         dynamicQuestHistory,
@@ -7070,12 +7584,16 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toggleSound,
         resetAllData,
         exportData,
-        worldState,
-        markWorldEntered,
-        setWorldGoldenTreeStage,
-        setWorldLandmarkStage,
-        setWorldGraphicsQuality,
-        saveWorldPlayerPosition,
+        myManualPresence,
+        myEffectivePresence,
+        autoAwayEnabled,
+        autoAwayMinutes,
+        presenceMap,
+        setManualPresenceStatus,
+        updatePresencePreferences,
+        getPlayerPresence,
+        queryPresencesBatch,
+        previewPublicProfileAs,
       }}
     >
       {children}

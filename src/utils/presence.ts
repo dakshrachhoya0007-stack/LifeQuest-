@@ -42,17 +42,6 @@ export const PRESENCE_STATUS_META: Record<PresenceStatus, PresenceStatusMeta> = 
     textColor: '#FCD34D',
     borderColor: 'rgba(245, 158, 11, 0.45)',
   },
-  busy: {
-    status: 'busy',
-    label: 'Busy',
-    shortLabel: 'Busy',
-    description: 'Locked in training, deep focus, or a boss encounter.',
-    dotColor: '#A855F7',
-    ringColor: 'rgba(168, 85, 247, 0.3)',
-    glowShadow: '0 0 10px rgba(168, 85, 247, 0.7)',
-    textColor: '#D8B4FE',
-    borderColor: 'rgba(168, 85, 247, 0.48)',
-  },
   dnd: {
     status: 'dnd',
     label: 'Do Not Disturb',
@@ -68,7 +57,7 @@ export const PRESENCE_STATUS_META: Record<PresenceStatus, PresenceStatusMeta> = 
     status: 'offline',
     label: 'Offline',
     shortLabel: 'Offline',
-    description: 'Appear offline across Aetheria without broadcasting live presence.',
+    description: 'Offline from Aetheria or disconnected from live realm session.',
     dotColor: '#64748B',
     ringColor: 'rgba(100, 116, 139, 0.22)',
     glowShadow: 'none',
@@ -77,7 +66,15 @@ export const PRESENCE_STATUS_META: Record<PresenceStatus, PresenceStatusMeta> = 
   },
 };
 
-export const PRESENCE_OPTIONS: PresenceStatus[] = ['online', 'away', 'busy', 'dnd', 'offline'];
+export const MANUAL_PRESENCE_OPTIONS: readonly ('online' | 'away' | 'dnd')[] = ['online', 'away', 'dnd'];
+export const PRESENCE_OPTIONS: readonly PresenceStatus[] = ['online', 'away', 'dnd', 'offline'];
+
+export const normalizePresenceStatus = (raw?: unknown): PresenceStatus => {
+  const val = typeof raw === 'string' ? raw.trim().toLowerCase() : '';
+  if (val === 'busy' || val === 'dnd' || val === 'do_not_disturb') return 'dnd';
+  if (val === 'online' || val === 'away' || val === 'offline') return val;
+  return 'offline';
+};
 
 export const DEFAULT_GRANULAR_PRIVACY_SETTINGS: GranularPrivacySettings = {
   privateByDefault: false,
@@ -144,7 +141,7 @@ export const PRIVACY_FIELD_DEFINITIONS: Array<{
   {
     key: 'onlineStatus',
     label: 'Online / Presence Status',
-    description: 'Controls who sees whether you are Online, Away, Busy, or Do Not Disturb.',
+    description: 'Controls who sees whether you are Online, Away, or Do Not Disturb.',
   },
   {
     key: 'lastActive',

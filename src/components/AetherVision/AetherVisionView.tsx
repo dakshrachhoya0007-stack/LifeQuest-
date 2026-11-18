@@ -1290,7 +1290,7 @@ export const AetherVisionView: React.FC = () => {
                   <>
                     <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none">
                       <div className="flex items-center gap-2 bg-[#090714]/85 backdrop-blur-md px-3 py-1.5 rounded-lg border border-purple-800/60 text-xs font-semibold text-purple-200">
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
                         <span>
                           {isSandboxDemo
                             ? `DEMO PREVIEW: ${currentCameraExercise.name.toUpperCase()}`

@@ -26,7 +26,7 @@ import { SettingsView } from './components/Settings/SettingsView';
 import { HeroSelectionModal } from './components/HeroSelect/HeroSelectionModal';
 import { InteractiveTutorialOverlay } from './components/Tutorial/InteractiveTutorialOverlay';
 import { GlobalLegendUnlockModal } from './components/Achievements/GlobalLegendUnlockModal';
-import { WorldExplorationView } from './components/world3d/heartlands/WorldExplorationView';
+import { RivalsView } from './components/Social/RivalsView';
 import { AiMentorView } from './components/Mentor/AiMentorView';
 import { CommunityEventsView } from './components/Events/CommunityEventsView';
 import { RecordsMuseumView } from './components/Museum/RecordsMuseumView';
@@ -151,14 +151,14 @@ const MainAppContent: React.FC = () => {
       case 'social':
       case 'leaderboard':
       case 'friends':
-      case 'rivals':
       case 'chat':
         return <SocialHubView />;
+      case 'rivals':
+        return <RivalsView />;
       case 'mentor': return <AiMentorView />;
       case 'events': return <CommunityEventsView />;
       case 'museum': return <RecordsMuseumView />;
       case 'guilds': return <GuildsView />;
-      case 'world': return <WorldExplorationView />;
       case 'notifications': return <NotificationCenterView />;
       case 'settings': return <SettingsView />;
       default: return <DashboardView />;
@@ -174,11 +174,7 @@ const MainAppContent: React.FC = () => {
       <div className="flex-1 max-w-7xl w-full mx-auto flex">
         <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-        <main
-          className={`flex-1 min-w-0 overflow-y-auto ${
-            activeTab === 'world' ? 'p-2 sm:p-3 lg:p-4' : 'p-4 sm:p-6 lg:p-8'
-          }`}
-        >
+        <main className="flex-1 min-w-0 overflow-y-auto p-4 sm:p-6 lg:p-8">
           {renderCurrentView()}
         </main>
       </div>

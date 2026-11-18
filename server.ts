@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import type { Request, Response } from 'express';
+import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -16,6 +17,9 @@ import { createNotificationService } from './server/notificationService.ts';
 import { createIdentityService } from './server/identityService.ts';
 import { createSeasonService } from './server/seasonService.ts';
 import { createLeaderboardService } from './server/leaderboardService.ts';
+import { attachPresenceAndPrivacySystem } from './server/presenceAndPrivacy.ts';
+import { resolveVerifiedCaller } from './server/authGuard.ts';
+import { GLOBAL_EXCLUSIVE_ACHIEVEMENTS } from './src/data/globalLegendsData.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -139,7 +143,10 @@ const extractErrorStatus = (err: any): { status: number; message: string } => {
 
 async function startServer() {
   const app = express();
+  const httpServer = http.createServer(app);
   app.use(express.json({ limit: '25mb' }));
+
+  const presenceHelper = attachPresenceAndPrivacySystem(app, httpServer, __dirname);
 
   app.get('/api/health', (_req: Request, res: Response) => {
     res.json({ ok: true });
@@ -1139,38 +1146,147 @@ async function startServer() {
     });
   });
 
-  app.post('/api/legends/claim', async (req: Request, res: Response) => {
-    const {
-      achievementId,
-      achievementName,
-      titleTag,
-      titleStyle,
-      emblemIcon,
-      rarity,
-      ownerId,
-      ownerUsername,
-      threshold,
-      progressValue,
-    } = req.body || {};
+  const safeJson = (filePath: string): any => {
+    try {
+      if (fs.existsSync(filePath)) {
+        return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      }
+    } catch {
+      // ignore corrupted read
+    }
+    return null;
+  };
 
-    if (!achievementId || !ownerId || !ownerUsername) {
-      res.status(400).json({ success: false, error: 'Missing required claim fields.' });
+  const resolveServerVerifiedLegendMetric = (
+    userId: string,
+    requirementType: string
+  ): number => {
+    const socialLedger = safeJson(path.join(__dirname, '.lifequest_social_privacy_state.json'));
+    const identityLedger = safeJson(path.join(__dirname, '.lifequest_identity_ledger.json'));
+    const bossLedger = safeJson(path.join(__dirname, '.lifequest_weekly_boss.json'));
+    const skillLedger = safeJson(path.join(__dirname, '.lifequest_skill_tree_ledger.json'));
+
+    const syncedProfile = socialLedger?.profiles?.[userId] || {};
+    const identUser = identityLedger?.users?.[userId];
+    const snap = identUser?.verifiedSnapshot || {};
+    const skillUser = skillLedger?.users?.[userId];
+
+    const bossContribs = Array.isArray(bossLedger?.contributions)
+      ? bossLedger.contributions.filter((c: any) => c.userId === userId)
+      : [];
+    const defeatedEventsParticipated = Array.isArray(bossLedger?.events)
+      ? bossLedger.events.filter(
+          (e: any) =>
+            e.status === 'defeated' &&
+            bossContribs.some((c: any) => c.eventId === e.id)
+        ).length
+      : 0;
+
+    let skillActivities = 0;
+    if (skillUser?.attributes) {
+      for (const attr of Object.values(skillUser.attributes) as any[]) {
+        skillActivities += Number(attr?.totalActivities || 0);
+      }
+    }
+
+    switch (requirementType) {
+      case 'level':
+        return Math.max(Number(syncedProfile.level || 0), Number(snap.level || 0));
+      case 'total_xp':
+        return Number(syncedProfile.totalXp || 0);
+      case 'current_streak':
+        return Math.max(
+          Number(syncedProfile.currentStreak || 0),
+          Number(snap.longestStreak || 0),
+          Number(snap.currentStreak || 0)
+        );
+      case 'total_workouts':
+        return Math.max(
+          Number(syncedProfile.totalWorkoutsCompleted || 0),
+          Number(snap.totalWorkoutsCompleted || 0)
+        );
+      case 'total_verified_reps':
+        return Math.max(
+          Number(syncedProfile.totalVerifiedReps || 0),
+          Number(snap.totalVerifiedReps || 0)
+        );
+      case 'total_bosses_defeated':
+        return Math.max(
+          Number(syncedProfile.totalBossesDefeated || 0),
+          Number(snap.totalBossesDefeated || 0),
+          defeatedEventsParticipated
+        );
+      case 'aether_points':
+        return Number(syncedProfile.aetherPoints || 0);
+      case 'habits_claimed_total':
+        return Math.max(Number(snap.totalHabitsCompleted || 0), skillActivities);
+      case 'normal_achievements_unlocked':
+        return Math.max(
+          Number(snap.totalAchievementsUnlocked || 0),
+          Array.isArray(syncedProfile.achievements) ? syncedProfile.achievements.length : 0
+        );
+      case 'unlocked_weapons_count':
+        return Number(syncedProfile.unlockedWeaponsCount || 0);
+      case 'friends_count':
+        return Array.isArray(syncedProfile.friendIds) ? syncedProfile.friendIds.length : 0;
+      case 'guild_joined':
+        return syncedProfile.guild?.id ? 1 : 0;
+      case 'guild_leader':
+        return syncedProfile.guild?.role === 'leader' ? 1 : 0;
+      default:
+        // For specialized counters tracked only in Supabase / pre-migration sync, look up server counters or 0
+        return Number((syncedProfile as any)?.[requirementType] || 0);
+    }
+  };
+
+  app.post('/api/legends/claim', async (req: Request, res: Response) => {
+    const body = req.body || {};
+    const caller = await resolveVerifiedCaller(req, {
+      expectedOwnerId: body.ownerId ? String(body.ownerId) : undefined,
+    });
+    if (!caller.ok || !caller.userId) {
+      res.status(caller.status || 401).json({
+        success: false,
+        error: caller.error || 'Authentication required.',
+      });
       return;
     }
 
-    const reqThreshold = Math.max(1, Number(threshold || 1));
-    const verifiedProg = Number(progressValue || 0);
-    if (verifiedProg < reqThreshold) {
+    const achievementId = String(body.achievementId || '').trim();
+    if (!achievementId) {
+      res.status(400).json({ success: false, error: 'Missing achievementId.' });
+      return;
+    }
+
+    const achievementDef = GLOBAL_EXCLUSIVE_ACHIEVEMENTS.find(a => a.id === achievementId);
+    if (!achievementDef) {
+      res.status(400).json({ success: false, error: 'Unknown global exclusive achievement.' });
+      return;
+    }
+
+    // Never trust client threshold, rewardPlayerXp, title, or inflated unverified progressValue
+    if ('threshold' in body || 'rewardPlayerXp' in body) {
       res.status(400).json({
         success: false,
-        error: `Requirement not yet met (${verifiedProg}/${reqThreshold}).`,
+        error: 'Client-supplied thresholds or reward overrides are rejected.',
+      });
+      return;
+    }
+
+    const ownerId = caller.userId;
+    const ownerUsername = String(body.ownerUsername || 'Champion').trim().slice(0, 48) || 'Champion';
+    const verifiedProg = resolveServerVerifiedLegendMetric(ownerId, achievementDef.requirementType);
+    if (verifiedProg < achievementDef.threshold) {
+      res.status(400).json({
+        success: false,
+        error: `Verified requirement not yet met for ${achievementDef.name} (${verifiedProg}/${achievementDef.threshold}).`,
       });
       return;
     }
 
     const result = await withLedgerLock(() => {
       const ledger = readLedger();
-      const existing = ledger.claims[String(achievementId)];
+      const existing = ledger.claims[achievementDef.id];
       if (existing) {
         return {
           status: 409,
@@ -1187,28 +1303,28 @@ async function startServer() {
 
       const claimedAt = new Date().toISOString();
       const claimRecord = {
-        achievementId: String(achievementId),
-        ownerId: String(ownerId),
-        ownerUsername: String(ownerUsername),
+        achievementId: achievementDef.id,
+        ownerId,
+        ownerUsername,
         claimedAt,
       };
-      ledger.claims[String(achievementId)] = claimRecord;
-      ledger.equippedByUser[String(ownerId)] = {
-        achievementId: String(achievementId),
-        titleTag: String(titleTag || 'LEGEND'),
-        titleStyle: String(titleStyle || 'gold'),
-        emblemIcon: String(emblemIcon || 'Crown'),
+      ledger.claims[achievementDef.id] = claimRecord;
+      ledger.equippedByUser[ownerId] = {
+        achievementId: achievementDef.id,
+        titleTag: achievementDef.titleTag,
+        titleStyle: achievementDef.titleStyle,
+        emblemIcon: achievementDef.emblemIcon,
       };
       ledger.announcements.unshift({
         id: `ann-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-        achievementId: String(achievementId),
-        achievementName: String(achievementName || achievementId),
-        titleTag: String(titleTag || 'LEGEND'),
-        titleStyle: String(titleStyle || 'gold'),
-        emblemIcon: String(emblemIcon || 'Crown'),
-        rarity: String(rarity || 'Legendary'),
-        ownerId: String(ownerId),
-        ownerUsername: String(ownerUsername),
+        achievementId: achievementDef.id,
+        achievementName: achievementDef.name,
+        titleTag: achievementDef.titleTag,
+        titleStyle: achievementDef.titleStyle,
+        emblemIcon: achievementDef.emblemIcon,
+        rarity: achievementDef.rarity,
+        ownerId,
+        ownerUsername,
         announcedAt: claimedAt,
       });
       ledger.announcements = ledger.announcements.slice(0, 50);
@@ -1219,6 +1335,11 @@ async function startServer() {
         payload: {
           success: true,
           ownership: claimRecord,
+          rewards: {
+            rewardPlayerXp: 0, // Zero XP leaderboard inflation
+            rewardForgeXp: achievementDef.rewardForgeXp,
+            rewardGold: achievementDef.rewardGold,
+          },
           announcements: ledger.announcements.slice(0, 25),
           equippedByUser: ledger.equippedByUser,
         },
@@ -1229,33 +1350,43 @@ async function startServer() {
   });
 
   app.post('/api/legends/equip', async (req: Request, res: Response) => {
-    const { ownerId, achievementId, titleTag, titleStyle, emblemIcon } = req.body || {};
-    if (!ownerId) {
-      res.status(400).json({ success: false, error: 'Missing ownerId.' });
+    const body = req.body || {};
+    const caller = await resolveVerifiedCaller(req, {
+      expectedOwnerId: body.ownerId ? String(body.ownerId) : undefined,
+    });
+    if (!caller.ok || !caller.userId) {
+      res.status(caller.status || 401).json({
+        success: false,
+        error: caller.error || 'Authentication required.',
+      });
       return;
     }
+
+    const ownerId = caller.userId;
+    const achievementId = body.achievementId ? String(body.achievementId).trim() : '';
 
     const result = await withLedgerLock(() => {
       const ledger = readLedger();
       if (!achievementId) {
-        delete ledger.equippedByUser[String(ownerId)];
+        delete ledger.equippedByUser[ownerId];
         writeLedger(ledger);
         return { status: 200, payload: { success: true } };
       }
 
-      const existing = ledger.claims[String(achievementId)];
-      if (!existing || existing.ownerId !== String(ownerId)) {
+      const existing = ledger.claims[achievementId];
+      if (!existing || existing.ownerId !== ownerId) {
         return {
           status: 403,
           payload: { success: false, error: 'You do not own this Global Exclusive Title.' },
         };
       }
 
-      ledger.equippedByUser[String(ownerId)] = {
-        achievementId: String(achievementId),
-        titleTag: String(titleTag || 'LEGEND'),
-        titleStyle: String(titleStyle || 'gold'),
-        emblemIcon: String(emblemIcon || 'Crown'),
+      const def = GLOBAL_EXCLUSIVE_ACHIEVEMENTS.find(a => a.id === achievementId);
+      ledger.equippedByUser[ownerId] = {
+        achievementId,
+        titleTag: def?.titleTag || 'LEGEND',
+        titleStyle: def?.titleStyle || 'gold',
+        emblemIcon: def?.emblemIcon || 'Crown',
       };
       writeLedger(ledger);
       return { status: 200, payload: { success: true } };
@@ -1298,9 +1429,13 @@ async function startServer() {
   });
   const leaderboardService = createLeaderboardService(__dirname);
 
-  const recordsMuseumService = createRecordsMuseumService(__dirname);
+  const recordsMuseumService = createRecordsMuseumService(__dirname, {
+    privacyHelper: presenceHelper,
+  });
   const weeklyBossService = createWeeklyBossService(__dirname);
   const rivalService = createRivalService(__dirname, {
+    getPresenceStatus: (targetUserId, viewerId) =>
+      presenceHelper.computeEffectivePresenceForTarget(targetUserId, viewerId).status,
     onRivalryCompleted: async rivalry => {
       if (!rivalry.winnerId || rivalry.isTie) return;
       const winScore =
@@ -1316,8 +1451,8 @@ async function startServer() {
         idempotencyKey: `rivalry_win:${rivalry.id}`,
         category: 'rivalry',
         metricKey: `rivalry_win_${rivalry.id}`,
-        title: `Rivalry Victory: ${rivalry.challengeTitle}`,
-        description: `Prevailed against ${opponentName} in a 7-day Friend Rivalry challenge.`,
+        title: `Rivals Victory: ${rivalry.challengeTitle}`,
+        description: `Prevailed against ${opponentName} in a competitive Rivals match.`,
         numericValue: winScore,
         displayValue: `${winScore} pts`,
         trackAsPersonalBest: false,
@@ -1330,10 +1465,9 @@ async function startServer() {
         preferenceKey: 'social',
         eventKey: `rival_win:${rivalry.id}`,
         type: 'rivalry_victory',
-        title: 'Friend Rivalry Victory!',
+        title: 'Rivals Match Victory!',
         body: `You prevailed against ${opponentName} in ${rivalry.challengeTitle}.`,
-        actionTab: 'social',
-        actionSubTab: 'rivals',
+        actionTab: 'rivals',
       });
     },
   });
@@ -1389,7 +1523,7 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
+  httpServer.listen(PORT, '0.0.0.0', () => {
     console.log(`LifeQuest server listening on http://0.0.0.0:${PORT}`);
   });
 }

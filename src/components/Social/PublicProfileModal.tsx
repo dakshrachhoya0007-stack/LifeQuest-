@@ -7,10 +7,11 @@ import { PublicPlayerProfile } from '../../types/game';
 import { fetchPublicIdentitySummaryServer } from '../../services/polish2Service';
 import { IDENTITY_RARITY_STYLE } from '../../data/polish2Data';
 import type { IdentityRarity } from '../../types/game';
+import { PresenceBadge } from '../Brand/PresenceBadge';
+import { formatLastActiveRelative } from '../../utils/presence';
 import {
   X,
   UserPlus,
-  UserMinus,
   UserCheck,
   Shield,
   Ban,
@@ -44,6 +45,8 @@ export const PublicProfileModal: React.FC = () => {
     hallOfLegends,
     equippedLegendMap,
     equipGlobalLegendTitle,
+    getPlayerPresence,
+    queryPresencesBatch,
   } = useGame();
 
   const [loading, setLoading] = useState(false);
@@ -100,6 +103,7 @@ export const PublicProfileModal: React.FC = () => {
       return;
     }
     void loadProfile(selectedPublicProfileId);
+    void queryPresencesBatch([selectedPublicProfileId]);
   }, [selectedPublicProfileId]);
 
   useEffect(() => {
@@ -328,8 +332,14 @@ export const PublicProfileModal: React.FC = () => {
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-['Cinzel'] font-bold text-xl text-white truncate">
-                        {player.username}
+                        {player.username || 'Champion'}
                       </h3>
+                      {(() => {
+                        const liveP = getPlayerPresence(player.id);
+                        const statusToShow = player.presenceStatus || (!liveP.hidden ? liveP.status : undefined);
+                        if (!statusToShow) return null;
+                        return <PresenceBadge status={statusToShow} showLabel size="xs" />;
+                      })()}
                       {playerEquippedLegend && (
                         <LegendTitleBadge
                           title={playerEquippedLegend.titleTag}
@@ -345,9 +355,10 @@ export const PublicProfileModal: React.FC = () => {
                       )}
                     </div>
                     <p className="text-xs text-purple-300 mt-1 tabular-nums">
-                      {player.characterClass}
+                      {player.characterClass || 'Champion'}
                       {typeof player.level === 'number' && ` · Lv.${player.level}`}
                       {player.aetherRank && ` · ${player.aetherRank}`}
+                      {player.lastActiveAt && ` · Active ${formatLastActiveRelative(player.lastActiveAt)}`}
                       {(player.equippedIdentityTitle || identitySummary?.equippedIdentityTitle) &&
                         ` · ${(player.equippedIdentityTitle || identitySummary?.equippedIdentityTitle)?.name}`}
                       {(() => {
@@ -741,6 +752,47 @@ export const PublicProfileModal: React.FC = () => {
                               <p className="text-[11px] text-slate-400 truncate">{ach.description}</p>
                             </div>
                           ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Privacy-Gated Personal Records & Recent Workout History */}
+                  {(player.personalRecords?.length || player.workoutHistory?.length || player.dailyActivity) && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {player.personalRecords && player.personalRecords.length > 0 && (
+                        <div className="p-4 rounded-xl bg-[#130f24] border border-purple-950/80 space-y-2.5">
+                          <span className="text-xs font-semibold text-[#C5A15A] block">
+                            Personal Records
+                          </span>
+                          <div className="space-y-1.5 text-xs">
+                            {player.personalRecords.slice(0, 5).map((pr, idx) => (
+                              <div key={`${pr.exerciseName}-${idx}`} className="flex justify-between gap-2">
+                                <span className="text-slate-200 truncate">{pr.exerciseName}</span>
+                                <span className="font-mono text-[#E8CF96] tabular-nums shrink-0">
+                                  {pr.bestReps ? `${pr.bestReps} reps` : `${pr.bestDurationMinutes ?? 0} min`}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {player.workoutHistory && player.workoutHistory.length > 0 && (
+                        <div className="p-4 rounded-xl bg-[#130f24] border border-purple-950/80 space-y-2.5">
+                          <span className="text-xs font-semibold text-slate-200 block">
+                            Recent Workouts
+                          </span>
+                          <div className="space-y-1.5 text-xs">
+                            {player.workoutHistory.slice(0, 5).map(w => (
+                              <div key={w.id} className="flex justify-between gap-2">
+                                <span className="text-slate-300 truncate">{w.exerciseName}</span>
+                                <span className="font-mono text-slate-400 tabular-nums shrink-0">
+                                  {w.durationMinutes}m
+                                </span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>

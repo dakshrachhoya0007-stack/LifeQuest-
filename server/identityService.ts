@@ -8,6 +8,7 @@ import {
   getReputationTierLabel,
 } from '../src/data/polish2Data.ts';
 import { computeAttributeProgress, SKILL_ATTRIBUTE_IDS } from '../src/data/skillTreeData.ts';
+import { resolveVerifiedCaller } from './authGuard.ts';
 import type {
   PlayerIdentityState,
   PlayerLifetimeStatistics,
@@ -199,13 +200,16 @@ export function createIdentityService(
         ).length
       : 0;
 
-    const completedRivalries = Array.isArray(rivalsLedger?.rivalries)
-      ? rivalsLedger.rivalries.filter(
-          (r: any) =>
-            r.status === 'completed' &&
-            (r.challengerId === userId || r.opponentId === userId)
-        )
+    const rawRivals = Array.isArray(rivalsLedger?.matches)
+      ? rivalsLedger.matches
+      : Array.isArray(rivalsLedger?.rivalries)
+      ? rivalsLedger.rivalries
       : [];
+    const completedRivalries = rawRivals.filter(
+      (r: any) =>
+        r.status === 'completed' &&
+        (r.challengerId === userId || r.opponentId === userId)
+    );
     const rivalryWins = completedRivalries.filter((r: any) => r.winnerId === userId).length;
 
     const communityContribs = Array.isArray(communityLedger?.contributions)
@@ -672,11 +676,14 @@ export function createIdentityService(
 
     // Race-safe atomic claim for Global First-Achiever Rare Badges
     app.post('/api/identity/claim-global-badge', async (req: Request, res: Response) => {
-      const userId = String(req.headers['x-lifequest-user-id'] || '').trim();
-      if (!userId) {
-        res.status(401).json({ success: false, error: 'Authentication required.' });
+      const caller = await resolveVerifiedCaller(req, {
+        expectedOwnerId: req.body?.userId ? String(req.body.userId) : undefined,
+      });
+      if (!caller.ok || !caller.userId) {
+        res.status(caller.status || 401).json({ success: false, error: caller.error || 'Authentication required.' });
         return;
       }
+      const userId = caller.userId;
 
       const badgeId = String(req.body?.badgeId || '').trim();
       const username = String(req.body?.username || 'Champion').slice(0, 48);
@@ -702,16 +709,45 @@ export function createIdentityService(
         }
 
         const u = ensureUser(ledger, userId);
-        const { lifetimeStats } = aggregateVerifiedPlayerMetrics(userId, u);
-        if (
-          badgeDef.conditionType === 'bosses_defeated' &&
-          lifetimeStats.totalBossesDefeated < badgeDef.threshold
-        ) {
+        const { lifetimeStats, reputationBreakdown, seasonTier } =
+          aggregateVerifiedPlayerMetrics(userId, u);
+        const repScore = computeTotalReputation(reputationBreakdown);
+
+        const actualMetricValue = (() => {
+          switch (badgeDef.conditionType) {
+            case 'workouts_total':
+              return lifetimeStats.totalWorkouts;
+            case 'verified_reps_total':
+              return lifetimeStats.totalVerifiedReps;
+            case 'streak_days':
+              return lifetimeStats.longestStreak;
+            case 'boss_damage_total':
+              return lifetimeStats.totalBossDamage;
+            case 'bosses_defeated':
+              return lifetimeStats.totalBossesDefeated;
+            case 'skill_nodes_unlocked':
+              return lifetimeStats.skillNodesUnlocked;
+            case 'rivalry_wins':
+              return lifetimeStats.rivalryWins;
+            case 'community_points':
+              return lifetimeStats.communityPoints;
+            case 'museum_records':
+              return lifetimeStats.totalPersonalRecords;
+            case 'season_tier':
+              return seasonTier;
+            case 'reputation_score':
+              return repScore;
+            default:
+              return 0;
+          }
+        })();
+
+        if (actualMetricValue < badgeDef.threshold) {
           return {
             status: 400,
             payload: {
               success: false,
-              error: `Requirement not yet met (${lifetimeStats.totalBossesDefeated}/${badgeDef.threshold} Weekly Bosses defeated).`,
+              error: `Verified requirement not yet met for ${badgeDef.name} (${actualMetricValue}/${badgeDef.threshold}).`,
             },
           };
         }

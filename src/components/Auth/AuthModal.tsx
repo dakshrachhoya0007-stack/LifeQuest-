@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
+import { GoldenWorldTreeEmblem } from '../Brand/GoldenWorldTreeEmblem';
 import {
   X,
   Shield,
@@ -196,10 +197,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         {/* Brand & Title */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-950/60 border border-purple-700/40 text-purple-300 text-[10px] font-bold uppercase tracking-widest mb-3">
-            <span>⚔ LIFEQUEST</span>
-            <span className="text-purple-500">·</span>
-            <span>World of Aetheria</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-[#161028] border border-[#C5A15A]/30 text-[#E8CF96] text-[10px] font-bold uppercase tracking-widest mb-3">
+            <GoldenWorldTreeEmblem className="w-4 h-4" />
+            <span className="font-['Cinzel']">LIFEQUEST</span>
+            <span className="text-[#C5A15A]/50">·</span>
+            <span className="text-purple-200/80">World of Aetheria</span>
           </div>
           <div className="w-12 h-12 mx-auto rounded-xl bg-purple-900/40 border border-purple-500/50 flex items-center justify-center text-purple-300 mb-3 shadow-lg">
             <Shield className="w-6 h-6" />

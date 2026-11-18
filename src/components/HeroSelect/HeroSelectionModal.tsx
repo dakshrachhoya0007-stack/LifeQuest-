@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { PlayableHeroId } from '../../types/game';
 import { PLAYABLE_HEROES, RPG_ATTRIBUTE_META } from '../../data/heroesData';
 import { aetheriaCitadelKingdomImg, getHeroArtwork } from '../../assets/images';
-import { AtmosphereParticlesCanvas } from '../Dashboard/world3d/AtmosphereParticlesCanvas';
+import { AtmosphereParticlesCanvas } from '../Dashboard/AtmosphereParticlesCanvas';
 import {
   AlertTriangle,
   ArrowLeft,

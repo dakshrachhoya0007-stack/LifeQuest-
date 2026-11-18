@@ -29,6 +29,7 @@ import {
   Target,
 } from 'lucide-react';
 import { LegendTitleBadge } from '../Social/LegendTitleBadge';
+import { PresenceBadge } from '../Brand/PresenceBadge';
 
 const EMBLEM_OPTIONS = [
   { id: 'Shield', label: 'Shield', Icon: Shield },
@@ -69,6 +70,8 @@ export const GuildsView: React.FC = () => {
     searchChampions,
     openPublicProfile,
     equippedLegendMap,
+    queryPresencesBatch,
+    getPlayerPresence,
   } = useGame();
 
   const [selectedGuildId, setSelectedGuildId] = useState<string | null>(null);
@@ -133,6 +136,10 @@ export const GuildsView: React.FC = () => {
     const res = await getGuildDetails(guildId);
     if (res.success && res.data) {
       setGuildDetails(res.data);
+      const ids = res.data.members.map(m => m.userId).filter(Boolean);
+      if (ids.length > 0) {
+        void queryPresencesBatch(ids);
+      }
     } else {
       showNotice('error', res.error || 'Could not load guild details.');
     }
@@ -641,12 +648,17 @@ export const GuildsView: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => openPublicProfile(member.userId)}
-                                className="shrink-0"
+                                className="relative shrink-0"
                               >
                                 <img
                                   src={getRpgAvatarForClass(member.characterClass)}
                                   alt={member.username}
                                   className="w-10 h-10 rounded-xl object-cover object-top border border-purple-700/70"
+                                />
+                                <PresenceBadge
+                                  status={getPlayerPresence(member.userId)?.status}
+                                  size="sm"
+                                  className="absolute -bottom-0.5 -right-0.5"
                                 />
                               </button>
                               <div className="min-w-0">

@@ -9,6 +9,8 @@ import type {
   ServerNotificationPreferences,
 } from '../types/game';
 
+import { getLifequestAuthHeaders } from './unifiedBackendService';
+
 const safeJson = async (res: Response) => {
   try {
     const data = await res.json();
@@ -24,9 +26,8 @@ export const fetchIdentityStateServer = async (
   userId: string
 ): Promise<{ ok: boolean; state?: PlayerIdentityState; error?: string }> => {
   try {
-    const res = await fetch('/api/identity/state', {
-      headers: { 'x-lifequest-user-id': userId },
-    });
+    const headers = await getLifequestAuthHeaders(userId, false);
+    const res = await fetch('/api/identity/state', { headers });
     const parsed = await safeJson(res);
     if (!parsed.ok || !parsed.data?.state) {
       return { ok: false, error: parsed.data?.error || 'Failed to load player identity.' };
@@ -53,12 +54,10 @@ export const syncVerifiedIdentitySnapshotServer = async (params: {
   };
 }): Promise<{ ok: boolean; state?: PlayerIdentityState; error?: string }> => {
   try {
+    const headers = await getLifequestAuthHeaders(params.userId, true);
     const res = await fetch('/api/identity/sync-verified', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-lifequest-user-id': params.userId,
-      },
+      headers,
       body: JSON.stringify({ snapshot: params.snapshot }),
     });
     const parsed = await safeJson(res);
@@ -76,12 +75,10 @@ export const selectIdentityTitleServer = async (
   titleId: string | null
 ): Promise<{ ok: boolean; state?: PlayerIdentityState; error?: string }> => {
   try {
+    const headers = await getLifequestAuthHeaders(userId, true);
     const res = await fetch('/api/identity/select-title', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-lifequest-user-id': userId,
-      },
+      headers,
       body: JSON.stringify({ titleId }),
     });
     const parsed = await safeJson(res);
@@ -99,12 +96,10 @@ export const featureIdentityBadgesServer = async (
   badgeIds: string[]
 ): Promise<{ ok: boolean; state?: PlayerIdentityState; error?: string }> => {
   try {
+    const headers = await getLifequestAuthHeaders(userId, true);
     const res = await fetch('/api/identity/feature-badges', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-lifequest-user-id': userId,
-      },
+      headers,
       body: JSON.stringify({ badgeIds }),
     });
     const parsed = await safeJson(res);
@@ -128,12 +123,10 @@ export const claimGlobalRareBadgeServer = async (
   error?: string;
 }> => {
   try {
+    const headers = await getLifequestAuthHeaders(userId, true);
     const res = await fetch('/api/identity/claim-global-badge', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-lifequest-user-id': userId,
-      },
+      headers,
       body: JSON.stringify({ badgeId, username }),
     });
     const parsed = await safeJson(res);

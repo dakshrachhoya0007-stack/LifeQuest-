@@ -398,8 +398,9 @@ export const HallOfLegendsView: React.FC = () => {
 
                 {/* Rewards Row */}
                 <div className="flex items-center justify-between text-[11px] font-mono tabular-nums text-slate-300">
-                  <span className="flex items-center gap-1 text-purple-300">
-                    <Sparkles className="w-3 h-3" />+{entry.rewardPlayerXp} XP
+                  <span className="flex items-center gap-1 text-[#C5A15A]">
+                    <Crown className="w-3 h-3" />
+                    {entry.rewardPlayerXp > 0 ? `+${entry.rewardPlayerXp} XP` : 'Prestige Title'}
                   </span>
                   <span className="flex items-center gap-1 text-amber-300">
                     <Hammer className="w-3 h-3" />+{entry.rewardForgeXp} Forge

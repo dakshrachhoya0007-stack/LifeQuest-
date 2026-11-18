@@ -13,10 +13,21 @@ import {
   ActivityLevel,
   AgeGroup,
   BiologicalSex,
-  ProfileVisibility,
+  FieldVisibilityLevel,
+  GranularPrivacySettings,
 } from '../../types/game';
 import {
-  Settings,
+  FRIENDS_ONLY_PRESET,
+  MANUAL_PRESENCE_OPTIONS,
+  PRESENCE_STATUS_META,
+  PRIVACY_FIELD_DEFINITIONS,
+  PRIVATE_BY_DEFAULT_PRESET,
+  PUBLIC_CHAMPION_PRESET,
+  deriveLegacyVisibilityFromGranular,
+  normalizeGranularPrivacySettings,
+} from '../../utils/presence';
+import { PresenceBadge } from '../Brand/PresenceBadge';
+import {
   User,
   Shield,
   Volume2,
@@ -31,6 +42,8 @@ import {
   RefreshCw,
   Lock,
   Bell,
+  Eye,
+  Radio,
 } from 'lucide-react';
 
 export const SettingsView: React.FC = () => {
@@ -51,6 +64,13 @@ export const SettingsView: React.FC = () => {
     setShowHeroSelectModal,
     notificationPreferences,
     saveServerNotificationPreferences,
+    myManualPresence,
+    myEffectivePresence,
+    autoAwayEnabled,
+    autoAwayMinutes,
+    setManualPresenceStatus,
+    updatePresencePreferences,
+    previewPublicProfileAs,
   } = useGame();
   const boundHero = getHeroById(selectedHeroId);
 
@@ -75,13 +95,12 @@ export const SettingsView: React.FC = () => {
   const [timezone, setTimezone] = useState(user?.timezone || 'UTC');
   const [leaderboardVisible, setLeaderboardVisible] = useState<boolean>(user?.leaderboardVisible ?? true);
   const [bio, setBio] = useState(user?.bio || '');
-  const [profileVisibility, setProfileVisibility] = useState<ProfileVisibility>(
-    user?.profileVisibility || 'public'
+  const [privacySettings, setPrivacySettings] = useState<GranularPrivacySettings>(() =>
+    normalizeGranularPrivacySettings(user?.privacySettings, user)
   );
-  const [showAchievements, setShowAchievements] = useState<boolean>(user?.showAchievements ?? true);
-  const [showEquipment, setShowEquipment] = useState<boolean>(user?.showEquipment ?? true);
-  const [showStats, setShowStats] = useState<boolean>(user?.showStats ?? true);
-  const [showGuild, setShowGuild] = useState<boolean>(user?.showGuild ?? true);
+  const [previewMode, setPreviewMode] = useState<'public' | 'friend' | 'restricted' | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewResult, setPreviewResult] = useState<any | null>(null);
   const [notifPrefs, setNotifPrefs] = useState(
     user?.notificationPreferences || {
       dailyReminders: true,
@@ -98,6 +117,19 @@ export const SettingsView: React.FC = () => {
     setManualSyncing(true);
     await triggerManualCloudSave();
     setTimeout(() => setManualSyncing(false), 600);
+  };
+
+  const handleRunPreview = async (mode: 'public' | 'friend' | 'restricted') => {
+    setPreviewMode(mode);
+    setPreviewLoading(true);
+    const derived = deriveLegacyVisibilityFromGranular(privacySettings);
+    await updateUser({
+      privacySettings,
+      ...derived,
+    });
+    const res = await previewPublicProfileAs(mode);
+    setPreviewResult(res);
+    setPreviewLoading(false);
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -121,6 +153,8 @@ export const SettingsView: React.FC = () => {
         : 'adult'
       : ageGroup || undefined;
 
+    const derivedLegacy = deriveLegacyVisibilityFromGranular(privacySettings);
+
     await updateUser({
       username: username.trim() || 'Hero',
       characterName: characterName.trim() || username.trim() || 'Hero',
@@ -141,11 +175,8 @@ export const SettingsView: React.FC = () => {
       notificationPreferences: notifPrefs,
       leaderboardVisible,
       bio: bio.trim(),
-      profileVisibility,
-      showAchievements,
-      showEquipment,
-      showStats,
-      showGuild,
+      privacySettings,
+      ...derivedLegacy,
     });
     await saveServerNotificationPreferences(notificationPreferences);
     setSavedSuccess(true);
@@ -504,11 +535,40 @@ export const SettingsView: React.FC = () => {
               </div>
             </div>
 
-            {/* Bio & Public Profile Privacy */}
-            <div className="p-3.5 rounded-xl bg-[#130f24] border border-purple-900/70 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-white">Public Profile &amp; Privacy</span>
-                <span className="text-[10px] text-slate-400">Email &amp; health fields stay private</span>
+            {/* Bio & Granular 11-Field Privacy Matrix */}
+            <div className="p-4 rounded-xl bg-[#130f24] border border-[#C5A15A]/20 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-wider text-[#C5A15A] block">
+                    Granular Profile Privacy Matrix
+                  </span>
+                  <span className="text-[11px] text-[#D9D2C5]/60">
+                    Choose Everyone, Friends Only, or Nobody per category. Email &amp; private health details never leave your account.
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setPrivacySettings(PUBLIC_CHAMPION_PRESET)}
+                    className="px-2.5 py-1 rounded-lg bg-[#08060f] hover:bg-[#251638] border border-[#C5A15A]/20 text-[11px] text-[#D9D2C5]"
+                  >
+                    Public Preset
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPrivacySettings(FRIENDS_ONLY_PRESET)}
+                    className="px-2.5 py-1 rounded-lg bg-[#08060f] hover:bg-[#251638] border border-[#C5A15A]/20 text-[11px] text-[#D9D2C5]"
+                  >
+                    Friends Preset
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPrivacySettings(PRIVATE_BY_DEFAULT_PRESET)}
+                    className="px-2.5 py-1 rounded-lg bg-[#08060f] hover:bg-[#251638] border border-[#C5A15A]/20 text-[11px] text-[#D9D2C5]"
+                  >
+                    Private Preset
+                  </button>
+                </div>
               </div>
 
               <div>
@@ -524,60 +584,154 @@ export const SettingsView: React.FC = () => {
                   rows={2}
                   onChange={e => setBio(e.target.value)}
                   placeholder="Share your quest ethos, training focus, or guild motto..."
-                  className="w-full bg-[#090714] border border-purple-900 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-500 resize-none"
+                  className="w-full bg-[#090714] border border-purple-900 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#C5A15A] resize-none"
                 />
               </div>
 
-              <div>
-                <label className="block font-medium text-slate-300 mb-1">Profile Visibility</label>
-                <select
-                  value={profileVisibility}
-                  onChange={e => setProfileVisibility(e.target.value as ProfileVisibility)}
-                  className="w-full bg-[#090714] border border-purple-900 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-500"
-                >
-                  <option value="public">Public — Anyone in Aetheria can view</option>
-                  <option value="friends_only">Friends Only — Visible after friend acceptance</option>
-                  <option value="private">Private — Hidden from discovery &amp; inspection</option>
-                </select>
+              <label className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-[#090714] border border-[#C5A15A]/15 cursor-pointer">
+                <div>
+                  <span className="font-semibold text-white block">Private-by-Default Mode</span>
+                  <span className="text-[10px] text-[#D9D2C5]/55">
+                    Restrict default profile discovery and treat non-public fields strictly.
+                  </span>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={privacySettings.privateByDefault}
+                  onChange={e =>
+                    setPrivacySettings(prev => ({
+                      ...prev,
+                      privateByDefault: e.target.checked,
+                    }))
+                  }
+                  className="w-4 h-4 accent-[#C5A15A] cursor-pointer"
+                />
+              </label>
+
+              <div className="divide-y divide-white/5 border border-white/10 rounded-xl overflow-hidden bg-[#090714]">
+                {PRIVACY_FIELD_DEFINITIONS.map(field => {
+                  const val = privacySettings[field.key];
+                  return (
+                    <div
+                      key={field.key}
+                      className="px-3 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                    >
+                      <div className="min-w-0">
+                        <span className="font-semibold text-[#F5EFE6] block">{field.label}</span>
+                        <span className="text-[10px] text-[#D9D2C5]/55 block">
+                          {field.description}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 p-0.5 rounded-lg bg-[#100D19] border border-white/10 shrink-0">
+                        {(['everyone', 'friends', 'nobody'] as FieldVisibilityLevel[]).map(opt => (
+                          <button
+                            key={opt}
+                            type="button"
+                            onClick={() =>
+                              setPrivacySettings(prev => ({
+                                ...prev,
+                                [field.key]: opt,
+                              }))
+                            }
+                            className={`px-2 py-1 rounded text-[10px] font-semibold capitalize transition-colors whitespace-nowrap ${
+                              val === opt
+                                ? 'bg-[#251638] text-[#C5A15A]'
+                                : 'text-[#D9D2C5]/55 hover:text-white'
+                            }`}
+                          >
+                            {opt === 'everyone' ? 'Everyone' : opt === 'friends' ? 'Friends' : 'Nobody'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="grid grid-cols-2 gap-2 pt-1">
-                <label className="flex items-center justify-between gap-2 text-[11px] text-slate-300 cursor-pointer">
-                  <span>Show Achievements</span>
+                <label className="flex items-center justify-between gap-2 text-[11px] text-slate-300 cursor-pointer p-2 rounded-lg bg-[#090714] border border-white/5">
+                  <span>Show Equipped Gear</span>
                   <input
                     type="checkbox"
-                    checked={showAchievements}
-                    onChange={e => setShowAchievements(e.target.checked)}
-                    className="accent-purple-600 cursor-pointer"
+                    checked={privacySettings.showEquipment !== false}
+                    onChange={e =>
+                      setPrivacySettings(prev => ({ ...prev, showEquipment: e.target.checked }))
+                    }
+                    className="accent-[#C5A15A] cursor-pointer"
                   />
                 </label>
-                <label className="flex items-center justify-between gap-2 text-[11px] text-slate-300 cursor-pointer">
-                  <span>Show Equipment</span>
+                <label className="flex items-center justify-between gap-2 text-[11px] text-slate-300 cursor-pointer p-2 rounded-lg bg-[#090714] border border-white/5">
+                  <span>Show Guild Affiliation</span>
                   <input
                     type="checkbox"
-                    checked={showEquipment}
-                    onChange={e => setShowEquipment(e.target.checked)}
-                    className="accent-purple-600 cursor-pointer"
+                    checked={privacySettings.showGuild !== false}
+                    onChange={e =>
+                      setPrivacySettings(prev => ({ ...prev, showGuild: e.target.checked }))
+                    }
+                    className="accent-[#C5A15A] cursor-pointer"
                   />
                 </label>
-                <label className="flex items-center justify-between gap-2 text-[11px] text-slate-300 cursor-pointer">
-                  <span>Show Stats &amp; Streaks</span>
-                  <input
-                    type="checkbox"
-                    checked={showStats}
-                    onChange={e => setShowStats(e.target.checked)}
-                    className="accent-purple-600 cursor-pointer"
-                  />
-                </label>
-                <label className="flex items-center justify-between gap-2 text-[11px] text-slate-300 cursor-pointer">
-                  <span>Show Guild</span>
-                  <input
-                    type="checkbox"
-                    checked={showGuild}
-                    onChange={e => setShowGuild(e.target.checked)}
-                    className="accent-purple-600 cursor-pointer"
-                  />
-                </label>
+              </div>
+
+              {/* Preview Public Profile As */}
+              <div className="pt-2 border-t border-white/10 space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-[11px] font-semibold text-[#C5A15A] flex items-center gap-1.5">
+                    <Eye className="w-3.5 h-3.5" />
+                    Preview Profile As Visitor
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {(
+                      [
+                        { id: 'public', label: 'Public Stranger' },
+                        { id: 'friend', label: 'Friend' },
+                        { id: 'restricted', label: 'Blocked / Restricted' },
+                      ] as const
+                    ).map(m => (
+                      <button
+                        key={m.id}
+                        type="button"
+                        disabled={previewLoading}
+                        onClick={() => void handleRunPreview(m.id)}
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold border transition-colors ${
+                          previewMode === m.id
+                            ? 'bg-[#251638] border-[#C5A15A]/60 text-[#C5A15A]'
+                            : 'bg-[#08060f] border-white/10 text-[#D9D2C5]/75 hover:text-white'
+                        }`}
+                      >
+                        {m.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {previewMode && (
+                  <div className="rounded-lg bg-[#08060f] border border-[#C5A15A]/20 p-3 text-[11px] text-[#D9D2C5]/80 space-y-1">
+                    {previewLoading ? (
+                      <span>Verifying server privacy filter...</span>
+                    ) : previewResult ? (
+                      <>
+                        <div className="font-semibold text-white">
+                          Viewing as <span className="text-[#C5A15A] capitalize">{previewMode}</span>:{' '}
+                          {previewResult.accessible === false
+                            ? 'Profile restricted / inaccessible'
+                            : `${previewResult.player?.username || 'Hidden Champion'} · Level ${
+                                previewResult.player?.level ?? 'Hidden'
+                              }`}
+                        </div>
+                        <div className="text-[10px] text-[#D9D2C5]/60">
+                          Visible sections:{' '}
+                          {previewResult.permittedFields?.length
+                            ? previewResult.permittedFields.join(', ')
+                            : previewResult.accessible === false
+                            ? 'None (Restricted)'
+                            : 'Minimal public identity'}
+                        </div>
+                      </>
+                    ) : (
+                      <span>Server preview ready once profile saves.</span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -606,8 +760,76 @@ export const SettingsView: React.FC = () => {
           </form>
         </div>
 
-        {/* Audio, Privacy & Data Management */}
+        {/* Right Column: Live Presence, Audio, Privacy & Data Management */}
         <div className="space-y-6">
+          {/* Online Presence Status & Auto-Away Card (4 Discord-style statuses: Online / Away / DND / Offline) */}
+          <div className="bg-[#0e0a1b] border border-[#C5A15A]/25 rounded-2xl p-6 shadow-md space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="font-['Cinzel'] font-bold text-base text-slate-100 flex items-center gap-2">
+                <Radio className="w-4 h-4 text-[#C5A15A]" />
+                ONLINE PRESENCE STATUS
+              </h3>
+              <PresenceBadge status={myEffectivePresence} showLabel size="md" />
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Your real-time presence updates across Friends, Guilds, Rivals, Chat, and Leaderboards via live heartbeat. Offline sets automatically when you close Aetheria or log out.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              {MANUAL_PRESENCE_OPTIONS.map(opt => {
+                const meta = PRESENCE_STATUS_META[opt];
+                const selected = myManualPresence === opt;
+                return (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => void setManualPresenceStatus(opt)}
+                    className={`p-3 rounded-xl border text-left transition-colors ${
+                      selected
+                        ? 'bg-[#251638] border-[#C5A15A]/65'
+                        : 'bg-[#08060f] border-white/10 hover:border-[#C5A15A]/35'
+                    }`}
+                  >
+                    <PresenceBadge status={opt} showLabel size="sm" />
+                    <span className="text-[10px] text-[#D9D2C5]/60 block mt-1 leading-snug">
+                      {meta.description}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="pt-2 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <label className="flex items-center gap-2 text-slate-300 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={autoAwayEnabled}
+                  onChange={e =>
+                    void updatePresencePreferences({ autoAwayEnabled: e.target.checked })
+                  }
+                  className="accent-[#C5A15A] cursor-pointer"
+                />
+                <span>Auto-mark Away after inactivity</span>
+              </label>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] text-slate-400">Idle timeout:</span>
+                <select
+                  disabled={!autoAwayEnabled}
+                  value={autoAwayMinutes}
+                  onChange={e =>
+                    void updatePresencePreferences({ autoAwayMinutes: Number(e.target.value) })
+                  }
+                  className="rounded-lg bg-[#08060f] border border-purple-900 px-2.5 py-1 text-xs text-white focus:outline-none disabled:opacity-45"
+                >
+                  {[3, 5, 10, 15, 30].map(mins => (
+                    <option key={mins} value={mins}>
+                      {mins} min
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
           {/* Interactive Guided Tutorial & Hero Oath */}
           <div className="bg-[#0e0a1b] border border-purple-950 rounded-2xl p-6 shadow-md space-y-3">
             <h3 className="font-['Cinzel'] font-bold text-base text-slate-100 flex items-center gap-2">
@@ -687,14 +909,14 @@ export const SettingsView: React.FC = () => {
                 CLOUD SAVE &amp; SYNC
               </h3>
               <span
-                className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${
+                className={`text-[11px] font-mono font-semibold ${
                   cloudStatus === 'saved'
-                    ? 'bg-emerald-950/70 border-emerald-600 text-emerald-300'
+                    ? 'text-emerald-300'
                     : cloudStatus === 'saving'
-                    ? 'bg-amber-950/70 border-amber-600 text-amber-300'
+                    ? 'text-amber-300'
                     : cloudStatus === 'error'
-                    ? 'bg-rose-950/70 border-rose-600 text-rose-300'
-                    : 'bg-slate-900 border-slate-700 text-slate-400'
+                    ? 'text-rose-300'
+                    : 'text-slate-400'
                 }`}
               >
                 {cloudStatus === 'saved'

@@ -37,7 +37,14 @@ const RARITY_RANK: Record<MuseumRarity, number> = {
   Mythic: 5,
 };
 
-export function createRecordsMuseumService(rootDir: string) {
+export function createRecordsMuseumService(
+  rootDir: string,
+  opts?: {
+    privacyHelper?: {
+      canViewPersonalRecords?: (targetUserId: string, viewerId: string | null) => boolean;
+    };
+  }
+) {
   const LEDGER_PATH = path.join(rootDir, '.lifequest_museum.json');
   let queue: Promise<void> = Promise.resolve();
 
@@ -449,6 +456,7 @@ export function createRecordsMuseumService(rootDir: string) {
           : callerId;
 
       const category = typeof req.query.category === 'string' ? req.query.category.trim() : 'all';
+      const pbOnly = req.query.pbOnly === 'true' || req.query.pbOnly === '1';
       const search = typeof req.query.search === 'string' ? req.query.search.trim().toLowerCase() : '';
       const sort = typeof req.query.sort === 'string' ? req.query.sort : 'newest';
       const page = Math.max(1, Math.round(Number(req.query.page || 1)));
@@ -458,8 +466,17 @@ export function createRecordsMuseumService(rootDir: string) {
         const ledger = readLedger();
 
         if (targetUserId !== callerId) {
-          const isPublic = ledger.publicVisibilityByUser[targetUserId] === true;
-          if (!isPublic) {
+          const explicitMuseumToggle = ledger.publicVisibilityByUser[targetUserId];
+          const granularAllowed = opts?.privacyHelper?.canViewPersonalRecords
+            ? opts.privacyHelper.canViewPersonalRecords(targetUserId, callerId)
+            : false;
+
+          const canView =
+            explicitMuseumToggle === false
+              ? false
+              : explicitMuseumToggle === true || granularAllowed;
+
+          if (!canView) {
             return {
               status: 403,
               payload: {
@@ -470,20 +487,23 @@ export function createRecordsMuseumService(rootDir: string) {
           }
         }
 
-        let userRecords = ledger.records.filter(r => r.userId === targetUserId);
-        const personalBests = userRecords.filter(r => r.isPersonalBest);
+        const allUserRecords = ledger.records.filter(r => r.userId === targetUserId);
+        const personalBests = allUserRecords
+          .filter(r => r.isPersonalBest)
+          .sort((a, b) => Date.parse(b.achievedAt) - Date.parse(a.achievedAt));
 
-        const categoryCounts: Record<string, number> = { all: userRecords.length };
-        for (const r of userRecords) {
+        const categoryCounts: Record<string, number> = { all: allUserRecords.length };
+        for (const r of allUserRecords) {
           categoryCounts[r.category] = (categoryCounts[r.category] || 0) + 1;
         }
 
+        let filtered = pbOnly ? [...personalBests] : [...allUserRecords];
         if (category !== 'all' && VALID_CATEGORIES.has(category as MuseumCategory)) {
-          userRecords = userRecords.filter(r => r.category === category);
+          filtered = filtered.filter(r => r.category === category);
         }
 
         if (search) {
-          userRecords = userRecords.filter(
+          filtered = filtered.filter(
             r =>
               r.title.toLowerCase().includes(search) ||
               r.description.toLowerCase().includes(search) ||
@@ -491,14 +511,14 @@ export function createRecordsMuseumService(rootDir: string) {
           );
         }
 
-        userRecords = [...userRecords].sort((a, b) => {
+        filtered.sort((a, b) => {
           if (sort === 'oldest') return Date.parse(a.achievedAt) - Date.parse(b.achievedAt);
           if (sort === 'rarity') return (RARITY_RANK[b.rarity] || 1) - (RARITY_RANK[a.rarity] || 1);
           if (sort === 'value') return b.numericValue - a.numericValue;
           return Date.parse(b.achievedAt) - Date.parse(a.achievedAt);
         });
 
-        const totalRecords = userRecords.length;
+        const totalRecords = filtered.length;
         const totalPages = Math.max(1, Math.ceil(totalRecords / limit));
         const safePage = Math.min(page, totalPages);
         const startIdx = (safePage - 1) * limit;
@@ -507,8 +527,11 @@ export function createRecordsMuseumService(rootDir: string) {
           status: 200,
           payload: {
             success: true,
-            records: userRecords.slice(startIdx, startIdx + limit),
+            records: filtered.slice(startIdx, startIdx + limit),
             personalBests,
+            personalBestCount: personalBests.length,
+            archiveCount: allUserRecords.length,
+            allowPublic: ledger.publicVisibilityByUser[targetUserId] ?? true,
             categoryCounts,
             totalRecords,
             page: safePage,
@@ -518,6 +541,143 @@ export function createRecordsMuseumService(rootDir: string) {
       });
 
       res.status(outcome.status).json(outcome.payload);
+    });
+
+    app.post('/api/museum/reconcile', async (req: Request, res: Response) => {
+      const callerId = String(req.headers['x-lifequest-user-id'] || '').trim();
+      if (!callerId) {
+        res.status(401).json({ success: false, error: 'Authentication required.' });
+        return;
+      }
+
+      const body = req.body && typeof req.body === 'object' ? req.body : {};
+      const workouts = Array.isArray(body.workouts) ? body.workouts.slice(0, 250) : [];
+      const currentStreak = Math.max(0, Math.round(Number(body.currentStreak || 0)));
+
+      const result = await withLock(() => {
+        const ledger = readLedger();
+        let reconciledCount = 0;
+
+        // Sort workouts chronologically so PB upgrades chain cleanly & preserve history!
+        const sortedWorkouts = [...workouts].sort(
+          (a, b) => Date.parse(String(a?.timestamp || 0)) - Date.parse(String(b?.timestamp || 0))
+        );
+
+        for (const w of sortedWorkouts) {
+          const wid = String(w?.id || '').trim();
+          if (!wid) continue;
+          const dur = Math.max(0, Math.round(Number(w?.durationMinutes || 0)));
+          const reps = Math.max(0, Math.round(Number(w?.repetitions || 0)));
+          const dist = Math.max(0, Number(w?.distanceKm || 0));
+          const exType = String(w?.exerciseType || 'gym').toLowerCase();
+          const exLabel = String(w?.exerciseName || exType || 'Training');
+          const achievedAt =
+            typeof w?.timestamp === 'string' && !Number.isNaN(Date.parse(w.timestamp))
+              ? w.timestamp
+              : new Date().toISOString();
+
+          const firstRes = archiveRecordInternal(ledger, {
+            userId: callerId,
+            idempotencyKey: 'milestone:first_workout',
+            category: 'fitness',
+            metricKey: 'first_verified_workout',
+            title: 'First Verified Training',
+            description: `Logged verified ${exLabel} session into your permanent chronicle.`,
+            numericValue: 1,
+            displayValue: `${exLabel} Verified`,
+            trackAsPersonalBest: false,
+            sourceActivityRef: `workout_session_reconcile:${wid}`,
+            rarity: 'Common',
+            achievedAt,
+          });
+          if (firstRes.created) reconciledCount += 1;
+
+          if (dur >= 5) {
+            const durRes = archiveRecordInternal(ledger, {
+              userId: callerId,
+              idempotencyKey: `pb:duration:workout:${wid}`,
+              category: 'personal_best',
+              metricKey: 'pb_workout_duration_minutes',
+              title: 'Longest Verified Workout Session',
+              description: `Achieved a new personal best active duration during ${exLabel}.`,
+              numericValue: dur,
+              displayValue: `${dur} min`,
+              trackAsPersonalBest: true,
+              sourceActivityRef: `workout_session_reconcile:${wid}`,
+              rarity: dur >= 45 ? 'Epic' : dur >= 25 ? 'Rare' : 'Common',
+              achievedAt,
+            });
+            if (durRes.created) reconciledCount += 1;
+          }
+
+          if (reps > 0) {
+            const repsRes = archiveRecordInternal(ledger, {
+              userId: callerId,
+              idempotencyKey: `pb:reps:workout:${wid}`,
+              category: 'strength',
+              metricKey: `pb_strength_reps_${exType}`,
+              title: `${exLabel} Single-Session Rep Best`,
+              description: `Recorded a new highest verified repetition count for ${exLabel}.`,
+              numericValue: reps,
+              displayValue: `${reps} reps`,
+              trackAsPersonalBest: true,
+              sourceActivityRef: `workout_session_reconcile:${wid}`,
+              rarity: reps >= 50 ? 'Legendary' : reps >= 25 ? 'Epic' : 'Rare',
+              achievedAt,
+            });
+            if (repsRes.created) reconciledCount += 1;
+          }
+
+          if (dist > 0) {
+            const distRes = archiveRecordInternal(ledger, {
+              userId: callerId,
+              idempotencyKey: `pb:dist:workout:${wid}`,
+              category: 'endurance',
+              metricKey: 'pb_cardio_distance_km',
+              title: 'Longest Cardio Distance',
+              description: `Surpassed previous verified cardio distance in ${exLabel}.`,
+              numericValue: dist,
+              displayValue: `${dist.toFixed(1)} km`,
+              trackAsPersonalBest: true,
+              sourceActivityRef: `workout_session_reconcile:${wid}`,
+              rarity: dist >= 10 ? 'Legendary' : dist >= 5 ? 'Epic' : 'Rare',
+              achievedAt,
+            });
+            if (distRes.created) reconciledCount += 1;
+          }
+        }
+
+        if (currentStreak >= 3) {
+          const stRes = archiveRecordInternal(ledger, {
+            userId: callerId,
+            idempotencyKey: `pb:streak:${currentStreak}:reconcile`,
+            category: 'consistency',
+            metricKey: 'pb_habit_streak_days',
+            title: 'Longest Habit Streak',
+            description: 'Sustained verified daily consistency without breaking your oath.',
+            numericValue: currentStreak,
+            displayValue: `${currentStreak} days`,
+            trackAsPersonalBest: true,
+            sourceActivityRef: 'streak_reconcile',
+            rarity: currentStreak >= 21 ? 'Legendary' : currentStreak >= 7 ? 'Epic' : 'Rare',
+          });
+          if (stRes.created) reconciledCount += 1;
+        }
+
+        if (reconciledCount > 0) {
+          writeLedger(ledger);
+        }
+
+        const mine = ledger.records.filter(r => r.userId === callerId);
+        return {
+          success: true,
+          reconciledCount,
+          personalBestCount: mine.filter(r => r.isPersonalBest).length,
+          archiveCount: mine.length,
+        };
+      });
+
+      res.json(result);
     });
 
     app.post('/api/museum/privacy', async (req: Request, res: Response) => {

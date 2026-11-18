@@ -11,6 +11,10 @@ import {
   Calendar,
   Zap,
   Dumbbell,
+  Footprints,
+  Bike,
+  Wind,
+  Target,
 } from 'lucide-react';
 
 export const FitnessView: React.FC = () => {
@@ -26,13 +30,13 @@ export const FitnessView: React.FC = () => {
   const isImperial = user?.preferredUnits === 'imperial';
 
   const activityOptions = [
-    { type: 'walking' as ExerciseType, label: 'Walking', icon: '🚶' },
-    { type: 'running' as ExerciseType, label: 'Running', icon: '🏃' },
-    { type: 'cycling' as ExerciseType, label: 'Cycling', icon: '🚴' },
-    { type: 'gym' as ExerciseType, label: 'Gym Workout', icon: '🏋️' },
-    { type: 'yoga' as ExerciseType, label: 'Yoga & Mobility', icon: '🧘' },
-    { type: 'squat' as ExerciseType, label: 'Squat Training', icon: '🦵' },
-    { type: 'pushup' as ExerciseType, label: 'Push-up Training', icon: '💪' },
+    { type: 'walking' as ExerciseType, label: 'Walking', Icon: Footprints },
+    { type: 'running' as ExerciseType, label: 'Running', Icon: Zap },
+    { type: 'cycling' as ExerciseType, label: 'Cycling', Icon: Bike },
+    { type: 'gym' as ExerciseType, label: 'Gym Workout', Icon: Dumbbell },
+    { type: 'yoga' as ExerciseType, label: 'Yoga & Mobility', Icon: Wind },
+    { type: 'squat' as ExerciseType, label: 'Squat Training', Icon: Target },
+    { type: 'pushup' as ExerciseType, label: 'Push-up Training', Icon: Flame },
   ];
 
   const openQuickLogForActivity = (actLabel: string) => {
@@ -242,7 +246,11 @@ export const FitnessView: React.FC = () => {
                         : 'bg-purple-950/70 border-purple-700/60 text-purple-300'
                     }`}
                   >
-                    {session.verifiedWithAetherVision ? '⚡' : '💪'}
+                    {session.verifiedWithAetherVision ? (
+                      <Zap className="w-4 h-4 text-amber-300" />
+                    ) : (
+                      <Dumbbell className="w-4 h-4 text-purple-300" />
+                    )}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
@@ -299,7 +307,7 @@ export const FitnessView: React.FC = () => {
                           : 'bg-[#130f24] border-purple-950 text-slate-300 hover:text-white'
                       }`}
                     >
-                      <span>{opt.icon}</span>
+                      <opt.Icon className="w-3.5 h-3.5 text-[#C5A15A] shrink-0" />
                       <span>{opt.label}</span>
                     </button>
                   ))}

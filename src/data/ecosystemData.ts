@@ -219,8 +219,190 @@ export const calculateSafeBossDamage = (
   };
 };
 
-// --- PHASE 3: RIVAL SYSTEM CONFIG & SCORING ---
+// --- PHASE 2 (COMPETITIVE ARENA): INDEPENDENT RIVALS CONFIG & RATING ENGINE ---
 
+export const COMPETITIVE_RIVAL_MODES: Array<{
+  id: 'strength' | 'endurance' | 'consistency' | 'discipline' | 'overall_fitness' | 'custom';
+  title: string;
+  subtitle: string;
+  description: string;
+  legacyChallengeType: RivalChallengeType;
+  defaultDurationDays: number;
+  defaultTargetScore: number;
+}> = [
+  {
+    id: 'overall_fitness',
+    title: 'Overall Fitness Duel',
+    subtitle: 'Full-spectrum athleticism & consistency',
+    description: 'Balanced competitive match scoring verified workouts, habits, study focus, and active recovery.',
+    legacyChallengeType: 'weekly_activity_score',
+    defaultDurationDays: 7,
+    defaultTargetScore: 500,
+  },
+  {
+    id: 'strength',
+    title: 'Strength Duel',
+    subtitle: 'Resistance & bodyweight output',
+    description: 'Focused head-to-head match rewarding verified strength workouts and healthy recovery support.',
+    legacyChallengeType: 'strength_milestones',
+    defaultDurationDays: 7,
+    defaultTargetScore: 450,
+  },
+  {
+    id: 'endurance',
+    title: 'Endurance Duel',
+    subtitle: 'Cardio pacing, running & stamina',
+    description: 'Distance and sustained aerobic training duel rewarding verified walks, runs, and cycling.',
+    legacyChallengeType: 'endurance_achievements',
+    defaultDurationDays: 7,
+    defaultTargetScore: 450,
+  },
+  {
+    id: 'consistency',
+    title: 'Consistency Duel',
+    subtitle: 'Steady daily rhythm & rest respect',
+    description: 'Rewards unbroken daily workouts and restorative recovery habits without rewarding burnout.',
+    legacyChallengeType: 'workout_consistency',
+    defaultDurationDays: 7,
+    defaultTargetScore: 420,
+  },
+  {
+    id: 'discipline',
+    title: 'Discipline Duel',
+    subtitle: 'Habits, hydration & focus rituals',
+    description: 'Competitive duel built around verified daily routines, hydration, and mindful study.',
+    legacyChallengeType: 'habit_completion',
+    defaultDurationDays: 7,
+    defaultTargetScore: 420,
+  },
+  {
+    id: 'custom',
+    title: 'Custom Challenge',
+    subtitle: 'Tailored duration & win conditions',
+    description: 'Custom competitive match (3–14 days, ranked or unranked, custom target score).',
+    legacyChallengeType: 'weekly_activity_score',
+    defaultDurationDays: 5,
+    defaultTargetScore: 350,
+  },
+];
+
+export const COMPETITIVE_TIERS: Array<{
+  tier: 'Bronze' | 'Silver' | 'Gold' | 'Platinum' | 'Diamond' | 'Master' | 'Grandmaster' | 'Legendary';
+  minRating: number;
+  maxRating: number | null;
+  accentHex: string;
+}> = [
+  { tier: 'Bronze', minRating: 0, maxRating: 1099, accentHex: '#CD7F32' },
+  { tier: 'Silver', minRating: 1100, maxRating: 1299, accentHex: '#CBD5E1' },
+  { tier: 'Gold', minRating: 1300, maxRating: 1499, accentHex: '#E8CF96' },
+  { tier: 'Platinum', minRating: 1500, maxRating: 1699, accentHex: '#38BDF8' },
+  { tier: 'Diamond', minRating: 1700, maxRating: 1899, accentHex: '#A78BFA' },
+  { tier: 'Master', minRating: 1900, maxRating: 2099, accentHex: '#F472B6' },
+  { tier: 'Grandmaster', minRating: 2100, maxRating: 2299, accentHex: '#FB7185' },
+  { tier: 'Legendary', minRating: 2300, maxRating: null, accentHex: '#FACC15' },
+];
+
+export const computeCompetitiveTier = (
+  rating: number
+): 'Bronze' | 'Silver' | 'Gold' | 'Platinum' | 'Diamond' | 'Master' | 'Grandmaster' | 'Legendary' => {
+  if (rating >= 2300) return 'Legendary';
+  if (rating >= 2100) return 'Grandmaster';
+  if (rating >= 1900) return 'Master';
+  if (rating >= 1700) return 'Diamond';
+  if (rating >= 1500) return 'Platinum';
+  if (rating >= 1300) return 'Gold';
+  if (rating >= 1100) return 'Silver';
+  return 'Bronze';
+};
+
+export const mapRivalModeToLegacyType = (
+  mode: string
+): RivalChallengeType => {
+  switch (mode) {
+    case 'strength':
+      return 'strength_milestones';
+    case 'endurance':
+      return 'endurance_achievements';
+    case 'consistency':
+      return 'workout_consistency';
+    case 'discipline':
+      return 'habit_completion';
+    default:
+      return 'weekly_activity_score';
+  }
+};
+
+export const mapLegacyTypeToRivalMode = (
+  challengeType: string
+): 'strength' | 'endurance' | 'consistency' | 'discipline' | 'overall_fitness' | 'custom' => {
+  switch (challengeType) {
+    case 'strength_milestones':
+      return 'strength';
+    case 'endurance_achievements':
+      return 'endurance';
+    case 'workout_consistency':
+      return 'consistency';
+    case 'habit_completion':
+      return 'discipline';
+    case 'custom':
+      return 'custom';
+    default:
+      return 'overall_fitness';
+  }
+};
+
+/**
+ * Pure Elo/Glicko-inspired Competitive Rating calculation.
+ * Never touches Player XP, Gold, or Boss Battle rewards.
+ */
+export const calculateCompetitiveRatingChange = (params: {
+  ratingA: number;
+  ratingB: number;
+  rdA?: number;
+  rdB?: number;
+  actualScoreA: 1 | 0.5 | 0;
+  kFactorA?: number;
+  kFactorB?: number;
+}): {
+  newRatingA: number;
+  newRatingB: number;
+  deltaA: number;
+  deltaB: number;
+  newRdA: number;
+  newRdB: number;
+} => {
+  const rA = Math.max(100, Math.min(4000, Math.round(params.ratingA)));
+  const rB = Math.max(100, Math.min(4000, Math.round(params.ratingB)));
+  const rdA = Math.max(40, Math.min(350, Number(params.rdA ?? 200)));
+  const rdB = Math.max(40, Math.min(350, Number(params.rdB ?? 200)));
+
+  // RD uncertainty scaling (closer to Glicko uncertainty weighting while staying clean & bounded)
+  const kBaseA = params.kFactorA ?? (rdA >= 160 ? 36 : rdA >= 90 ? 28 : 22);
+  const kBaseB = params.kFactorB ?? (rdB >= 160 ? 36 : rdB >= 90 ? 28 : 22);
+
+  const expectedA = 1 / (1 + Math.pow(10, (rB - rA) / 400));
+  const expectedB = 1 - expectedA;
+  const actualB = 1 - params.actualScoreA;
+
+  const deltaA = Math.round(kBaseA * (params.actualScoreA - expectedA));
+  const deltaB = Math.round(kBaseB * (actualB - expectedB));
+
+  const newRatingA = Math.max(100, Math.min(4000, rA + deltaA));
+  const newRatingB = Math.max(100, Math.min(4000, rB + deltaB));
+  const newRdA = Math.max(50, Math.round((rdA * 0.9) * 10) / 10);
+  const newRdB = Math.max(50, Math.round((rdB * 0.9) * 10) / 10);
+
+  return {
+    newRatingA,
+    newRatingB,
+    deltaA: newRatingA - rA,
+    deltaB: newRatingB - rB,
+    newRdA,
+    newRdB,
+  };
+};
+
+// Legacy alias kept for safe compatibility across imports
 export const RIVAL_CHALLENGE_CATALOG: Record<
   RivalChallengeType,
   {
@@ -230,45 +412,56 @@ export const RIVAL_CHALLENGE_CATALOG: Record<
   }
 > = {
   weekly_activity_score: {
-    title: 'Weekly Activity Score',
+    title: 'Overall Fitness Duel',
     description: 'Balanced 7-day duel across workouts, habits, study focus, and recovery.',
     unitLabel: 'pts',
   },
   workout_consistency: {
-    title: 'Workout Consistency',
+    title: 'Consistency Duel',
     description: 'Normalized points for steady workouts and restorative yoga/recovery days.',
     unitLabel: 'pts',
   },
   strength_milestones: {
-    title: 'Strength Milestones',
+    title: 'Strength Duel',
     description: 'Focused 7-day duel on verified resistance & bodyweight sessions.',
     unitLabel: 'pts',
   },
   endurance_achievements: {
-    title: 'Endurance Achievements',
+    title: 'Endurance Duel',
     description: 'Focused 7-day duel on verified walks, runs, and cardio pacing.',
     unitLabel: 'pts',
   },
   habit_completion: {
-    title: 'Habit Completion',
+    title: 'Discipline Duel',
     description: 'Daily discipline, hydration, and routine consistency duel.',
     unitLabel: 'pts',
   },
 };
 
 export const calculateSafeRivalScoreDelta = (
-  challengeType: RivalChallengeType,
+  challengeTypeOrMode: RivalChallengeType | string,
   activityType: SkillActivityType,
   metadata: VerifiedActivityMetadata = {},
   currentDailyScore: number = 0
 ): { pointsAwarded: number; safetyCapped: boolean; label: string } => {
+  const normalizedType =
+    challengeTypeOrMode === 'strength' || challengeTypeOrMode === 'strength_milestones'
+      ? 'strength_milestones'
+      : challengeTypeOrMode === 'endurance' || challengeTypeOrMode === 'endurance_achievements'
+      ? 'endurance_achievements'
+      : challengeTypeOrMode === 'consistency' || challengeTypeOrMode === 'workout_consistency'
+      ? 'workout_consistency'
+      : challengeTypeOrMode === 'discipline' || challengeTypeOrMode === 'habit_completion'
+      ? 'habit_completion'
+      : 'weekly_activity_score';
+
   const duration = Math.min(45, Math.max(0, Math.round(Number(metadata.durationMinutes) || 0)));
   const visionBonus = metadata.verifiedWithAetherVision ? 8 : 0;
 
   let rawPoints = 0;
   let label = 'Verified Contribution';
 
-  switch (challengeType) {
+  switch (normalizedType) {
     case 'weekly_activity_score':
       if (activityType === 'strength_workout' || activityType === 'cardio_workout') {
         rawPoints = 30 + Math.min(12, Math.floor(duration / 4)) + visionBonus;
@@ -286,7 +479,7 @@ export const calculateSafeRivalScoreDelta = (
         rawPoints = 35 + visionBonus;
         label = 'Workout Session';
       } else if (activityType === 'recovery_habit') {
-        rawPoints = 25; // Rest/recovery respected
+        rawPoints = 25;
         label = 'Active Recovery';
       }
       break;

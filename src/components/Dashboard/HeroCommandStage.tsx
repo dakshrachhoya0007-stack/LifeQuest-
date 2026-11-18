@@ -11,7 +11,6 @@ import {
   ChevronDown,
   ChevronUp,
   Lock,
-  Compass,
   Bell,
 } from 'lucide-react';
 import {
@@ -27,7 +26,7 @@ import {
 import { getHeroById, RPG_ATTRIBUTE_META } from '../../data/heroesData';
 import { aetheriaCitadelKingdomImg, getHeroArtwork } from '../../assets/images';
 import { EquipmentIllustration } from '../../assets/equipmentArtwork';
-import { AtmosphereParticlesCanvas } from './world3d/AtmosphereParticlesCanvas';
+import { AtmosphereParticlesCanvas } from './AtmosphereParticlesCanvas';
 import { LegendTitleBadge } from '../Social/LegendTitleBadge';
 import { useGame } from '../../context/GameContext';
 
@@ -262,11 +261,11 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
             )}
             <button
               type="button"
-              onClick={() => onNavigate('world')}
+              onClick={() => onNavigate('rivals')}
               className="px-3.5 py-2 rounded-lg bg-[#251638]/95 hover:bg-[#331e4d] border border-[#C5A15A]/55 text-xs font-['Cinzel'] font-bold text-[#F5EFE6] flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 shadow-sm"
             >
-              <Compass className="w-3.5 h-3.5 text-[#C5A15A]" />
-              Explore 3D World
+              <Swords className="w-3.5 h-3.5 text-[#C5A15A]" />
+              Rivals Arena
             </button>
             <button
               type="button"

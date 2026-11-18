@@ -23,11 +23,13 @@ import {
   ChevronRight,
   Clock,
   History,
+  Crown,
   TrendingUp,
   TrendingDown,
   Minus,
 } from 'lucide-react';
 import { LegendTitleBadge } from '../Social/LegendTitleBadge';
+import { PresenceBadge } from '../Brand/PresenceBadge';
 
 const SCOPE_LABELS: Record<LeaderboardScope, string> = {
   global: 'Global Realm Standings',
@@ -121,6 +123,8 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
     openPublicProfile,
     setActiveTab: setAppTab,
     equippedLegendMap,
+    getPlayerPresence,
+    queryPresencesBatch,
   } = useGame();
 
   const [activeScope, setActiveScope] = useState<LeaderboardScope>('global');
@@ -144,12 +148,14 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
         setBoardData(res.data);
         setFallbackEntries(res.data.entries);
         setIsLiveBackend(res.isLiveBackend);
+        void queryPresencesBatch(res.data.entries.map(e => e.userId));
       } else {
         const legacy = await fetchLeaderboard(activeScope);
         if (!active) return;
         setBoardData(null);
         setFallbackEntries(legacy.entries);
         setIsLiveBackend(legacy.isLiveBackend);
+        void queryPresencesBatch(legacy.entries.map(e => e.userId));
       }
       setLoading(false);
     });
@@ -374,9 +380,14 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                     >
                       <td className="py-3.5 px-4 text-center font-mono font-bold tabular-nums">
                         <div className="inline-flex items-center justify-center gap-1.5">
-                          {player.rank === 1 && <span className="text-amber-400 text-base">🥇</span>}
-                          {player.rank === 2 && <span className="text-slate-300 text-base">🥈</span>}
-                          {player.rank === 3 && <span className="text-amber-600 text-base">🥉</span>}
+                          {player.rank === 1 && (
+                            <span className="inline-flex items-center gap-1 text-[#C5A15A]">
+                              <Crown className="w-3.5 h-3.5" />
+                              #1
+                            </span>
+                          )}
+                          {player.rank === 2 && <span className="text-slate-200">#2</span>}
+                          {player.rank === 3 && <span className="text-amber-500">#3</span>}
                           {player.rank > 3 && <span className="text-slate-400">#{player.rank}</span>}
                           {renderRankDelta(player.rankDelta)}
                         </div>
@@ -393,10 +404,15 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                           <img
                             src={getRpgAvatarForClass(player.characterClass)}
                             alt={player.name}
-                            className="w-8 h-8 rounded-full object-cover object-top border border-purple-600 shrink-0"
+                            className="w-8 h-8 rounded-lg object-cover object-top border border-purple-600 shrink-0"
                           />
                           <div className="min-w-0">
                             <div className="flex flex-wrap items-center gap-1.5">
+                              {(() => {
+                                const liveP = getPlayerPresence(player.userId);
+                                if (player.identityHidden || liveP.hidden) return null;
+                                return <PresenceBadge status={player.presenceStatus || liveP.status} size="xs" />;
+                              })()}
                               <span className="font-bold text-slate-100 group-hover:text-amber-300 transition-colors">
                                 {player.name}
                               </span>
@@ -422,7 +438,7 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                       </td>
                       <td className="py-3.5 px-4 text-purple-300">{player.characterClass}</td>
                       <td className="py-3.5 px-4 text-center font-mono font-bold text-slate-200 tabular-nums">
-                        Lv.{player.level}
+                        {player.levelHidden ? 'Private' : `Lv.${player.level}`}
                       </td>
                       <td className="py-3.5 px-4 text-center font-mono text-amber-400 tabular-nums">
                         {player.streak}d

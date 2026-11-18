@@ -5,7 +5,7 @@ import { WebSocketServer, WebSocket } from 'ws';
 import fs from 'fs';
 import path from 'path';
 
-export type PresenceStatus = 'online' | 'offline' | 'away' | 'busy' | 'dnd';
+export type PresenceStatus = 'online' | 'offline' | 'away' | 'dnd';
 export type FieldVisibilityLevel = 'everyone' | 'friends' | 'nobody';
 export type PrivacyFieldKey =
   | 'usernameAvatar'
@@ -98,7 +98,14 @@ interface PersistedStateFile {
   >;
 }
 
-const VALID_STATUSES = new Set<PresenceStatus>(['online', 'offline', 'away', 'busy', 'dnd']);
+const VALID_STATUSES = new Set<PresenceStatus>(['online', 'offline', 'away', 'dnd']);
+const normalizePresenceInput = (raw: unknown): PresenceStatus | undefined => {
+  if (typeof raw !== 'string') return undefined;
+  const s = raw.trim().toLowerCase();
+  if (s === 'busy' || s === 'dnd' || s === 'do_not_disturb') return 'dnd';
+  if (s === 'online' || s === 'away' || s === 'offline') return s;
+  return undefined;
+};
 const VALID_VIS_LEVELS = new Set<FieldVisibilityLevel>(['everyone', 'friends', 'nobody']);
 const HEARTBEAT_TTL_MS = 42_000;
 const SWEEP_INTERVAL_MS = 10_000;
@@ -227,7 +234,8 @@ export function attachPresenceAndPrivacySystem(
 
   // Hydrate known offline records from persisted preferences (NEVER hydrate as online!)
   for (const [uid, pref] of Object.entries(persisted.presencePrefs)) {
-    const manual = VALID_STATUSES.has(pref.manualStatus) ? pref.manualStatus : 'online';
+    const manual = normalizePresenceInput(pref.manualStatus) || 'online';
+    persisted.presencePrefs[uid].manualStatus = manual;
     livePresence.set(uid, {
       userId: uid,
       manualStatus: manual,
@@ -349,10 +357,13 @@ export function attachPresenceAndPrivacySystem(
     const existing = livePresence.get(userId);
     const pref = persisted.presencePrefs[userId];
 
+    const normalizedIncoming = normalizePresenceInput(opts.manualStatus);
     let manualStatus: PresenceStatus =
-      opts.manualStatus && VALID_STATUSES.has(opts.manualStatus)
-        ? opts.manualStatus
-        : existing?.manualStatus || pref?.manualStatus || 'online';
+      normalizedIncoming
+        ? normalizedIncoming
+        : normalizePresenceInput(existing?.manualStatus) ||
+          normalizePresenceInput(pref?.manualStatus) ||
+          'online';
 
     const autoAwayEnabled =
       typeof opts.autoAwayEnabled === 'boolean'
@@ -457,9 +468,10 @@ export function attachPresenceAndPrivacySystem(
         set.add(boundMeta);
 
         const pref = persisted.presencePrefs[userId];
-        const requestedStatus = VALID_STATUSES.has(msg.manualStatus)
-          ? (msg.manualStatus as PresenceStatus)
-          : pref?.manualStatus || 'online';
+        const requestedStatus =
+          normalizePresenceInput(msg.manualStatus) ||
+          normalizePresenceInput(pref?.manualStatus) ||
+          'online';
 
         const updated = updateServerPresence(userId, {
           manualStatus: requestedStatus,
@@ -496,9 +508,7 @@ export function attachPresenceAndPrivacySystem(
       if (!boundMeta) return;
 
       if (msg.type === 'presence:set') {
-        const manualStatus = VALID_STATUSES.has(msg.manualStatus)
-          ? (msg.manualStatus as PresenceStatus)
-          : undefined;
+        const manualStatus = normalizePresenceInput(msg.manualStatus);
         const updated = updateServerPresence(boundMeta.userId, {
           manualStatus,
           autoAwayEnabled: typeof msg.autoAwayEnabled === 'boolean' ? msg.autoAwayEnabled : undefined,
@@ -834,9 +844,7 @@ export function attachPresenceAndPrivacySystem(
     }
 
     const updated = updateServerPresence(userId, {
-      manualStatus: VALID_STATUSES.has(body.manualStatus)
-        ? (body.manualStatus as PresenceStatus)
-        : undefined,
+      manualStatus: normalizePresenceInput(body.manualStatus),
       isAutoAway: typeof body.isAutoAway === 'boolean' ? body.isAutoAway : undefined,
       autoAwayEnabled: typeof body.autoAwayEnabled === 'boolean' ? body.autoAwayEnabled : undefined,
       autoAwayMinutes: typeof body.autoAwayMinutes === 'number' ? body.autoAwayMinutes : undefined,
@@ -1112,4 +1120,22 @@ export function attachPresenceAndPrivacySystem(
     }
     res.json(cloned);
   });
+
+  const canViewPersonalRecords = (targetUserId: string, viewerId: string | null): boolean => {
+    const rel = getRelation(targetUserId, viewerId).relation;
+    if (rel === 'self') return true;
+    if (rel === 'blocked') return false;
+    const target = persisted.profiles[targetUserId];
+    const privacy = target?.privacySettings || DEFAULT_PRIVACY_SETTINGS;
+    return canViewField(privacy, 'personalRecords', rel);
+  };
+
+  const getRelationForUsers = (targetUserId: string, viewerId: string | null) =>
+    getRelation(targetUserId, viewerId);
+
+  return {
+    canViewPersonalRecords,
+    getRelationForUsers,
+    computeEffectivePresenceForTarget,
+  };
 }

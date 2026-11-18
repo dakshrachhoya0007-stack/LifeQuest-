@@ -9,7 +9,7 @@ export type BiologicalSex = 'female' | 'male' | 'non_binary' | 'prefer_not_to_sa
 
 export type ProfileVisibility = 'public' | 'friends_only' | 'private';
 
-export type PresenceStatus = 'online' | 'offline' | 'away' | 'busy' | 'dnd';
+export type PresenceStatus = 'online' | 'offline' | 'away' | 'dnd';
 
 export type FieldVisibilityLevel = 'everyone' | 'friends' | 'nobody';
 
@@ -856,6 +856,7 @@ export interface PublicPlayerProfile {
     friendshipId?: string | null;
     presenceStatus?: PresenceStatus;
     lastActiveAt?: string | null;
+    hiddenFields?: PrivacyFieldKey[];
     equippedWeapon?: {
       weaponId: string;
       name: string;
@@ -1218,6 +1219,7 @@ export type GlobalRequirementType =
   | 'habits_claimed_total'
   | 'meals_logged_total'
   | 'water_glasses_current'
+  | 'hydration_goals_total'
   | 'quests_claimed_total'
   | 'dynamic_quests_claimed_total'
   | 'dynamic_physical_claimed'
@@ -1437,11 +1439,34 @@ export interface SkillActivityLedgerEntry {
   createdAt: string;
 }
 
+export interface SkillTreeDailyPoint {
+  date: string;
+  totalXp: number;
+  strength: number;
+  endurance: number;
+  discipline: number;
+  focus: number;
+  resilience: number;
+  vitality: number;
+  activitiesCount: number;
+}
+
+export interface SkillTreeAnalyticsPayload {
+  totalSkillXp: number;
+  totalActivities: number;
+  reconciledCount?: number;
+  attributeDistribution: Record<SkillAttributeId, { xp: number; percent: number; level: number }>;
+  dailySeries7d: SkillTreeDailyPoint[];
+  dailySeries30d: SkillTreeDailyPoint[];
+  lastUpdatedAt: string;
+}
+
 export interface PlayerSkillTreeState {
   attributes: Record<SkillAttributeId, PlayerAttributeProgress>;
   unlockedNodeIds: string[];
   claimedMilestoneIds: string[];
   recentEvents: SkillActivityLedgerEntry[];
+  analytics?: SkillTreeAnalyticsPayload;
 }
 
 export interface SkillActivityAwardResult {
@@ -1555,7 +1580,146 @@ export interface WeeklyBossStatePayload {
   recentContributions: WeeklyBossContributionEntry[];
 }
 
-// --- PHASE 3: FRIEND RIVAL SYSTEM ---
+// --- PHASE 2 (COMPETITIVE ARENA): INDEPENDENT RIVALS PLATFORM ---
+
+export type CompetitiveRivalMode =
+  | 'strength'
+  | 'endurance'
+  | 'consistency'
+  | 'discipline'
+  | 'overall_fitness'
+  | 'custom';
+
+export type CompetitiveTier =
+  | 'Bronze'
+  | 'Silver'
+  | 'Gold'
+  | 'Platinum'
+  | 'Diamond'
+  | 'Master'
+  | 'Grandmaster'
+  | 'Legendary';
+
+export type CompetitiveMatchStatus =
+  | 'pending'
+  | 'accepted'
+  | 'active'
+  | 'completed'
+  | 'cancelled'
+  | 'expired'
+  | 'disputed';
+
+export type CompetitiveMatchVisibility = 'friends' | 'public' | 'private';
+
+export interface CompetitiveMatchRules {
+  durationDays: number;
+  targetScore: number;
+  allowRestDays: boolean;
+  ranked: boolean;
+  customFocusNote?: string;
+}
+
+export interface CompetitiveRivalProfile {
+  userId: string;
+  username: string;
+  characterClass: CharacterClass;
+  level: number;
+  rating: number;
+  ratingDeviation: number;
+  volatility: number;
+  kFactor: number;
+  tier: CompetitiveTier;
+  wins: number;
+  losses: number;
+  ties: number;
+  matchesPlayed: number;
+  winRate: number;
+  currentStreak: number;
+  bestStreak: number;
+  peakRating: number;
+  seasonalRating: number;
+  allowNonFriendChallenges: boolean;
+  presenceStatus?: PresenceStatus;
+  updatedAt: string;
+}
+
+export interface CompetitiveRivalMatch {
+  id: string;
+  challengerId: string;
+  challengerName: string;
+  challengerRatingSnapshot?: number;
+  challengerTierSnapshot?: CompetitiveTier;
+  opponentId: string;
+  opponentName: string;
+  opponentRatingSnapshot?: number;
+  opponentTierSnapshot?: CompetitiveTier;
+  mode: CompetitiveRivalMode;
+  challengeType: RivalChallengeType; // legacy compatibility mapping
+  challengeTitle: string;
+  rules: CompetitiveMatchRules;
+  visibility: CompetitiveMatchVisibility;
+  status: CompetitiveMatchStatus;
+  isRanked: boolean;
+  challengerScore: number;
+  opponentScore: number;
+  winnerId: string | null;
+  isTie: boolean;
+  challengerRatingBefore?: number | null;
+  challengerRatingAfter?: number | null;
+  challengerRatingDelta?: number | null;
+  opponentRatingBefore?: number | null;
+  opponentRatingAfter?: number | null;
+  opponentRatingDelta?: number | null;
+  rematchOfMatchId?: string | null;
+  disputeReason?: string | null;
+  startsAt: string;
+  endsAt: string;
+  createdAt: string;
+  resolvedAt: string | null;
+}
+
+export interface CompetitiveH2HRecord {
+  opponentId: string;
+  opponentName: string;
+  opponentRating: number;
+  opponentTier: CompetitiveTier;
+  wins: number;
+  losses: number;
+  ties: number;
+  totalMatches: number;
+  lastPlayedAt: string | null;
+}
+
+export interface CompetitiveLeaderboardEntry {
+  rank: number;
+  userId: string;
+  username: string;
+  characterClass: CharacterClass;
+  rating: number;
+  seasonalRating: number;
+  tier: CompetitiveTier;
+  wins: number;
+  losses: number;
+  ties: number;
+  winRate: number;
+  currentStreak: number;
+  peakRating: number;
+  presenceStatus?: PresenceStatus;
+  isCurrent?: boolean;
+}
+
+export interface MatchmakingQueueEntry {
+  id: string;
+  userId: string;
+  mode: CompetitiveRivalMode;
+  ratingSnapshot: number;
+  minRating: number;
+  maxRating: number;
+  status: 'searching' | 'matched' | 'cancelled' | 'expired';
+  matchedMatchId?: string | null;
+  createdAt: string;
+  expiresAt: string;
+}
 
 export type RivalChallengeType =
   | 'weekly_activity_score'
@@ -1605,6 +1769,19 @@ export interface RivalryStatsSummary {
   pendingIncomingCount: number;
   titlesUnlocked: string[];
   achievementsUnlocked: string[];
+}
+
+export interface RivalsArenaStateResponse {
+  profile: CompetitiveRivalProfile;
+  queueEntry: MatchmakingQueueEntry | null;
+  matches: CompetitiveRivalMatch[];
+  events: RivalryScoreEntry[];
+  h2hRecords: CompetitiveH2HRecord[];
+  leaderboard: CompetitiveLeaderboardEntry[];
+  candidates: CompetitiveRivalProfile[];
+  // Legacy-compatible projection
+  rivalries: RivalryRecord[];
+  summary: RivalryStatsSummary;
 }
 
 // --- PHASE 4: AI FITNESS MENTOR ---

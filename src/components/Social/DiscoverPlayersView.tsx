@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { getRpgAvatarForClass } from '../../assets/images';
 import { ChampionSummary, CharacterClass } from '../../types/game';
+import { PresenceBadge } from '../Brand/PresenceBadge';
+import { formatLastActiveRelative } from '../../utils/presence';
 import {
   Search,
   UserPlus,
@@ -34,6 +36,8 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
     unblockUser,
     openPublicProfile,
     equippedLegendMap,
+    getPlayerPresence,
+    queryPresencesBatch,
   } = useGame();
 
   const [section, setSection] = useState<SocialSection>('discover');
@@ -77,6 +81,15 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
   useEffect(() => {
     void loadDirectory('');
   }, [unifiedBackendReady]);
+
+  useEffect(() => {
+    const ids = new Set<string>();
+    champions.forEach(c => ids.add(c.id));
+    friends.forEach(f => ids.add(f.champion.id));
+    if (ids.size > 0) {
+      void queryPresencesBatch(Array.from(ids));
+    }
+  }, [champions.length, friends.length]);
 
   const acceptedFriends = useMemo(
     () => friends.filter(f => f.status === 'accepted'),
@@ -364,6 +377,15 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
+                            {(() => {
+                              const liveP = getPlayerPresence(champ.id);
+                              const effectiveStatus = liveP.hidden
+                                ? 'offline'
+                                : champ.presenceStatus || liveP.status;
+                              return !liveP.hidden ? (
+                                <PresenceBadge status={effectiveStatus} size="xs" />
+                              ) : null;
+                            })()}
                             <button
                               type="button"
                               onClick={() => openPublicProfile(champ.id)}
@@ -391,7 +413,13 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                           </span>
                         </div>
                         <p className="text-xs text-purple-300 mt-0.5 tabular-nums">
-                          Lv.{champ.level} · {champ.characterClass} · {champ.aetherRank}
+                          {champ.levelHidden ? 'Level Private' : `Lv.${champ.level}`} · {champ.characterClass} · {champ.aetherRank}
+                          {(() => {
+                            const liveP = getPlayerPresence(champ.id);
+                            if (liveP.hidden || liveP.status === 'online') return '';
+                            const ts = champ.lastActiveAt || liveP.lastActiveAt;
+                            return ts ? ` · Last active ${formatLastActiveRelative(ts)}` : '';
+                          })()}
                         </p>
                         {champ.guildName && (
                           <p className="text-[11px] text-slate-400 mt-1 truncate">
@@ -519,6 +547,12 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                   </button>
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
+                      {(() => {
+                        const liveP = getPlayerPresence(f.champion.id);
+                        return !liveP.hidden ? (
+                          <PresenceBadge status={f.champion.presenceStatus || liveP.status} size="xs" />
+                        ) : null;
+                      })()}
                       <button
                         type="button"
                         onClick={() => openPublicProfile(f.champion.id)}
@@ -535,6 +569,13 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                     </div>
                     <p className="text-xs text-slate-400 tabular-nums">
                       Lv.{f.champion.level} · {f.champion.characterClass} · {f.champion.currentStreak}d streak
+                      {(() => {
+                        const liveP = getPlayerPresence(f.champion.id);
+                        if (liveP.hidden) return '';
+                        if (liveP.status === 'online') return ' · Online now';
+                        const ts = f.champion.lastActiveAt || liveP.lastActiveAt;
+                        return ts ? ` · Last active ${formatLastActiveRelative(ts)}` : '';
+                      })()}
                     </p>
                   </div>
                 </div>

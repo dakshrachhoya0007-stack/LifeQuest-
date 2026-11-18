@@ -8,7 +8,7 @@ import {
 } from '../../assets/images';
 import { PLAYABLE_HEROES, RPG_ATTRIBUTE_META } from '../../data/heroesData';
 import { PlayableHeroId } from '../../types/game';
-import { AtmosphereParticlesCanvas } from '../Dashboard/world3d/AtmosphereParticlesCanvas';
+import { AtmosphereParticlesCanvas } from '../Dashboard/AtmosphereParticlesCanvas';
 import {
   ArrowDown,
   Award,
@@ -27,47 +27,13 @@ import {
   X,
 } from 'lucide-react';
 
+import { GoldenWorldTreeEmblem } from '../Brand/GoldenWorldTreeEmblem';
+export { GoldenWorldTreeEmblem };
+
 interface WelcomeLandingProps {
   onStartJourney: () => void;
   onReturningPlayer: () => void;
 }
-
-export const GoldenWorldTreeEmblem: React.FC<{ className?: string }> = ({ className = 'w-9 h-9' }) => (
-  <svg
-    viewBox="0 0 64 64"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    aria-hidden="true"
-  >
-    <circle cx="32" cy="32" r="29" stroke="#C5A15A" strokeWidth="1.75" strokeOpacity="0.85" />
-    <circle cx="32" cy="32" r="24" stroke="#C5A15A" strokeWidth="0.75" strokeOpacity="0.4" />
-    {/* Roots */}
-    <path
-      d="M32 45C32 45 27 50 20 51M32 45C32 45 37 50 44 51M32 45V53"
-      stroke="#C5A15A"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-    {/* Trunk */}
-    <path d="M32 24V46" stroke="#E5C57D" strokeWidth="2.6" strokeLinecap="round" />
-    {/* Branches */}
-    <path
-      d="M32 32L22 23M32 32L42 23M32 27L25 18M32 27L39 18"
-      stroke="#C5A15A"
-      strokeWidth="1.9"
-      strokeLinecap="round"
-    />
-    {/* Canopy Leaves / Crown Stars */}
-    <circle cx="32" cy="14" r="2.6" fill="#F2D89B" />
-    <circle cx="21" cy="21" r="2.1" fill="#C5A15A" />
-    <circle cx="43" cy="21" r="2.1" fill="#C5A15A" />
-    <circle cx="25" cy="16" r="1.7" fill="#E5C57D" />
-    <circle cx="39" cy="16" r="1.7" fill="#E5C57D" />
-    <circle cx="17" cy="28" r="1.6" fill="#C5A15A" fillOpacity="0.8" />
-    <circle cx="47" cy="28" r="1.6" fill="#C5A15A" fillOpacity="0.8" />
-  </svg>
-);
 
 export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
   onStartJourney,

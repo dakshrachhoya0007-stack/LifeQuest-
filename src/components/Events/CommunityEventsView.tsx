@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useGame } from '../../context/GameContext';
-import { GoldenWorldTreeEmblem } from '../Welcome/WelcomeLanding';
+import { GoldenWorldTreeEmblem } from '../Brand/GoldenWorldTreeEmblem';
 import { Award, Clock, Sparkles, Trophy, Users } from 'lucide-react';
 
 export const CommunityEventsView: React.FC = () => {

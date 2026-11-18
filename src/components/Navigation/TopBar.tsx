@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { characterWarriorAvatarImg, resolveAssetUrl } from '../../assets/images';
 import { NOTIFICATION_CATEGORY_META } from '../../data/polish2Data';
+import { MANUAL_PRESENCE_OPTIONS, PRESENCE_STATUS_META } from '../../utils/presence';
+import { GoldenWorldTreeEmblem } from '../Brand/GoldenWorldTreeEmblem';
+import { PresenceBadge } from '../Brand/PresenceBadge';
 import {
   Volume2,
   VolumeX,
@@ -14,6 +17,9 @@ import {
   UserPlus,
   Shield,
   Trash2,
+  User,
+  Settings,
+  ChevronDown,
 } from 'lucide-react';
 
 interface TopBarProps {
@@ -37,9 +43,15 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
     respondFriendRequest,
     guildInvites,
     respondGuildInvite,
+    myManualPresence,
+    myEffectivePresence,
+    setManualPresenceStatus,
+    rivalsState,
   } = useGame();
 
   const [showNotifMenu, setShowNotifMenu] = useState(false);
+  const [showPresenceMenu, setShowPresenceMenu] = useState(false);
+  const pendingRivalsCount = rivalsState?.stats?.pendingIncomingCount || 0;
 
   const pendingIncomingFriends = friends.filter(
     f => f.status === 'pending' && f.direction === 'incoming'
@@ -67,12 +79,10 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
             className="group flex items-center gap-2.5 text-left focus:outline-none"
           >
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#251638] via-[#1b112a] to-[#100D19] border border-[#C5A15A]/45 shadow-lg flex items-center justify-center">
-              <span className="font-['Cinzel'] font-bold text-lg text-[#C5A15A] group-hover:scale-105 transition-transform">
-                ⚔
-              </span>
+              <GoldenWorldTreeEmblem className="w-6 h-6 group-hover:scale-105 transition-transform" />
             </div>
             <div className="flex flex-col">
-              <span className="font-['Cinzel'] font-black tracking-wider text-lg text-[#D9D2C5] group-hover:text-[#C5A15A] transition-colors whitespace-nowrap">
+              <span className="font-['Cinzel'] font-black tracking-wider text-lg text-[#F5EFE6] group-hover:text-[#C5A15A] transition-colors whitespace-nowrap">
                 LIFEQUEST
               </span>
               <span className="text-[10px] text-[#C5A15A]/80 uppercase tracking-widest font-semibold hidden sm:inline">
@@ -82,27 +92,32 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
           </button>
         </div>
 
-        {/* Zone 2: Primary Navigation Links */}
-        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-[#D9D2C5]/70">
+        {/* Zone 2: Primary Navigation Links (Single Row, 5 Crisp Links) */}
+        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-[#D9D2C5]/75">
           <button
             onClick={() => setActiveTab('dashboard')}
-            className={`whitespace-nowrap shrink-0 transition-colors hover:text-[#D9D2C5] ${
+            className={`whitespace-nowrap shrink-0 transition-colors hover:text-[#F5EFE6] ${
               activeTab === 'dashboard' ? 'text-[#C5A15A] font-semibold border-b-2 border-[#C5A15A] pb-0.5' : ''
             }`}
           >
             Dashboard
           </button>
           <button
-            onClick={() => setActiveTab('world')}
-            className={`whitespace-nowrap shrink-0 transition-colors hover:text-[#D9D2C5] ${
-              activeTab === 'world' ? 'text-[#C5A15A] font-semibold border-b-2 border-[#C5A15A] pb-0.5' : ''
+            onClick={() => setActiveTab('rivals')}
+            className={`whitespace-nowrap shrink-0 flex items-center gap-1.5 transition-colors hover:text-[#F5EFE6] ${
+              activeTab === 'rivals' ? 'text-[#C5A15A] font-semibold border-b-2 border-[#C5A15A] pb-0.5' : ''
             }`}
           >
-            Explore World
+            <span>Rivals</span>
+            {pendingRivalsCount > 0 && (
+              <span className="text-[10px] font-mono tabular-nums px-1.5 py-0.2 rounded bg-[#C5A15A] text-[#100D19] font-bold">
+                {pendingRivalsCount}
+              </span>
+            )}
           </button>
           <button
             onClick={() => setActiveTab('aether-vision')}
-            className={`whitespace-nowrap shrink-0 transition-colors hover:text-[#D9D2C5] ${
+            className={`whitespace-nowrap shrink-0 transition-colors hover:text-[#F5EFE6] ${
               activeTab === 'aether-vision' ? 'text-[#C5A15A] font-semibold border-b-2 border-[#C5A15A] pb-0.5' : ''
             }`}
           >
@@ -110,23 +125,15 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
           </button>
           <button
             onClick={() => setActiveTab('armory')}
-            className={`whitespace-nowrap shrink-0 transition-colors hover:text-[#D9D2C5] ${
+            className={`whitespace-nowrap shrink-0 transition-colors hover:text-[#F5EFE6] ${
               activeTab === 'armory' ? 'text-[#C5A15A] font-semibold border-b-2 border-[#C5A15A] pb-0.5' : ''
             }`}
           >
             The Armory
           </button>
           <button
-            onClick={() => setActiveTab('store')}
-            className={`whitespace-nowrap shrink-0 transition-colors hover:text-[#D9D2C5] ${
-              activeTab === 'store' ? 'text-[#C5A15A] font-semibold border-b-2 border-[#C5A15A] pb-0.5' : ''
-            }`}
-          >
-            Store
-          </button>
-          <button
             onClick={() => setActiveTab('boss-battles')}
-            className={`whitespace-nowrap shrink-0 transition-colors hover:text-[#D9D2C5] ${
+            className={`whitespace-nowrap shrink-0 transition-colors hover:text-[#F5EFE6] ${
               activeTab === 'boss-battles' ? 'text-[#C5A15A] font-semibold border-b-2 border-[#C5A15A] pb-0.5' : ''
             }`}
           >
@@ -415,29 +422,110 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
             </div>
           </div>
 
-          {/* Player Account Avatar (kept separate from RPG Character Avatar) / Auth CTA */}
+          {/* Player Account Avatar + Live Presence Selector */}
           {user ? (
-            <button
-              onClick={() => setActiveTab('character')}
-              className="flex items-center gap-2 pl-1 group focus:outline-none"
-              title="View Character Profile"
-            >
-              <div className="relative">
-                <img
-                  src={resolveAssetUrl(user.googleAvatar || user.avatar, characterWarriorAvatarImg)}
-                  alt={user.username}
-                  referrerPolicy="no-referrer"
-                  className="w-9 h-9 rounded-full object-cover border-2 border-purple-500/80 group-hover:border-purple-400 transition-colors shadow-md"
-                />
-                <span className="absolute -bottom-1 -right-1 text-[9px] bg-purple-900 text-purple-200 border border-purple-600 rounded px-1 font-mono font-bold">
-                  {user.characterClass.slice(0, 1)}
-                </span>
-              </div>
-            </button>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPresenceMenu(v => !v);
+                  setShowNotifMenu(false);
+                }}
+                className="flex items-center gap-2 pl-1.5 pr-2 py-1 rounded-xl bg-[#151022]/90 border border-[#C5A15A]/25 hover:border-[#C5A15A]/55 transition-colors focus:outline-none"
+                title="Champion Status & Profile"
+              >
+                <div className="relative">
+                  <img
+                    src={resolveAssetUrl(user.googleAvatar || user.avatar, characterWarriorAvatarImg)}
+                    alt={user.username}
+                    referrerPolicy="no-referrer"
+                    className="w-8 h-8 rounded-lg object-cover border border-[#C5A15A]/50"
+                  />
+                  <PresenceBadge
+                    status={myEffectivePresence}
+                    size="xs"
+                    className="absolute -bottom-0.5 -right-0.5"
+                  />
+                </div>
+                <ChevronDown className="w-3.5 h-3.5 text-[#C5A15A]/80 hidden sm:block" />
+              </button>
+
+              {showPresenceMenu && (
+                <div className="absolute right-0 mt-2 w-64 bg-[#120d22] border border-[#C5A15A]/30 rounded-2xl shadow-2xl p-3.5 z-50 space-y-3">
+                  <div className="flex items-center justify-between border-b border-[#C5A15A]/15 pb-2.5">
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-[#F5EFE6] truncate">{user.username}</p>
+                      <PresenceBadge status={myEffectivePresence} showLabel size="xs" className="mt-0.5" />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowPresenceMenu(false)}
+                      className="text-slate-400 hover:text-white p-1"
+                      aria-label="Close presence menu"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-['Cinzel'] font-bold uppercase tracking-widest text-[#C5A15A]/80 px-1">
+                      Presence Status
+                    </p>
+                    {MANUAL_PRESENCE_OPTIONS.map(option => {
+                      const meta = PRESENCE_STATUS_META[option];
+                      const active = myManualPresence === option;
+                      return (
+                        <button
+                          key={option}
+                          type="button"
+                          onClick={() => {
+                            void setManualPresenceStatus(option);
+                            setShowPresenceMenu(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-colors ${
+                            active
+                              ? 'bg-[#251638] text-[#F5EFE6] border border-[#C5A15A]/45'
+                              : 'text-[#D9D2C5]/80 hover:bg-[#1b122c] border border-transparent'
+                          }`}
+                        >
+                          <PresenceBadge status={option} showLabel size="sm" />
+                          {active && <Check className="w-3.5 h-3.5 text-[#C5A15A]" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="border-t border-[#C5A15A]/15 pt-2 space-y-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveTab('character');
+                        setShowPresenceMenu(false);
+                      }}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#D9D2C5] hover:bg-[#1b122c] hover:text-[#C5A15A] transition-colors"
+                    >
+                      <User className="w-3.5 h-3.5 text-[#C5A15A]" />
+                      Character Sheet
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveTab('settings');
+                        setShowPresenceMenu(false);
+                      }}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#D9D2C5] hover:bg-[#1b122c] hover:text-[#C5A15A] transition-colors"
+                    >
+                      <Settings className="w-3.5 h-3.5 text-[#C5A15A]" />
+                      Presence &amp; Privacy Settings
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           ) : (
             <button
               onClick={() => setShowAuthModal(true, 'login')}
-              className="px-4 py-2 text-xs font-semibold text-white bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 rounded-lg shadow-md transition-colors whitespace-nowrap"
+              className="px-4 py-2 text-xs font-semibold text-white bg-gradient-to-r from-[#583385] to-[#7046A5] hover:from-[#683e9c] hover:to-[#8255bd] rounded-lg shadow-md transition-colors whitespace-nowrap"
             >
               Enter Realm
             </button>

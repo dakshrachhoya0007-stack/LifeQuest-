@@ -35,12 +35,19 @@ import {
   AlertTriangle,
   RefreshCw,
   Globe,
+  Swords,
+  Sparkles,
+  Compass,
 } from 'lucide-react';
 import { getUserTimezone } from '../../services/unifiedBackendService';
 
-const makeCrestAvatar = (bg1: string, bg2: string, glyph: string, ring: string) =>
+const makeCrestAvatar = (bg1: string, bg2: string, kind: 'solar' | 'arcane', ring: string) =>
   `data:image/svg+xml;utf8,${encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${bg1}"/><stop offset="100%" stop-color="${bg2}"/></linearGradient></defs><rect width="120" height="120" rx="24" fill="url(#g)"/><circle cx="60" cy="60" r="46" fill="none" stroke="${ring}" stroke-width="3" opacity="0.75"/><text x="60" y="72" text-anchor="middle" font-size="44" fill="#f8fafc">${glyph}</text></svg>`
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${bg1}"/><stop offset="100%" stop-color="${bg2}"/></linearGradient></defs><rect width="120" height="120" rx="24" fill="url(#g)"/><circle cx="60" cy="60" r="44" fill="none" stroke="${ring}" stroke-width="3" opacity="0.75"/>${
+      kind === 'solar'
+        ? `<path d="M60 24 L74 52 L92 60 L74 68 L60 96 L46 68 L28 60 L46 52 Z" fill="none" stroke="${ring}" stroke-width="3"/>`
+        : `<polygon points="60,26 88,60 60,94 32,60" fill="none" stroke="${ring}" stroke-width="3"/><circle cx="60" cy="60" r="10" fill="${ring}" opacity="0.7"/>`
+    }</svg>`
   )}`;
 
 const PRESET_AVATARS = [
@@ -48,8 +55,8 @@ const PRESET_AVATARS = [
   { id: 'mage-portrait', label: 'Astral Mage', src: rpgAvatarMageImg },
   { id: 'ranger-portrait', label: 'Verdant Ranger', src: rpgAvatarRangerImg },
   { id: 'guardian-portrait', label: 'Iron Guardian', src: rpgAvatarGuardianImg },
-  { id: 'warrior-crest', label: 'Solar Crest', src: makeCrestAvatar('#4c1d95', '#1e1b4b', '⚔', '#f59e0b') },
-  { id: 'mage-crest', label: 'Arcane Crest', src: makeCrestAvatar('#312e81', '#0f172a', '✦', '#38bdf8') },
+  { id: 'warrior-crest', label: 'Solar Crest', src: makeCrestAvatar('#4c1d95', '#1e1b4b', 'solar', '#f59e0b') },
+  { id: 'mage-crest', label: 'Arcane Crest', src: makeCrestAvatar('#312e81', '#0f172a', 'arcane', '#38bdf8') },
 ];
 
 const COMMON_ALLERGIES = ['Peanuts', 'Tree Nuts', 'Dairy', 'Gluten', 'Soy', 'Eggs', 'Shellfish', 'Sesame'];
@@ -131,33 +138,33 @@ export const OnboardingWizard: React.FC = () => {
     }
   );
 
-  const classes: { id: CharacterClass; title: string; desc: string; icon: string; perk: string }[] = [
+  const classes: { id: CharacterClass; title: string; desc: string; Icon: React.FC<{ className?: string }>; perk: string }[] = [
     {
       id: 'Warrior',
       title: 'Warrior',
       desc: 'Steadfast champions of physical conditioning, functional strength, and stamina.',
-      icon: '⚔',
+      Icon: Swords,
       perk: 'Suited for calisthenics, gym sets, and steady strength progression.',
     },
     {
       id: 'Mage',
       title: 'Mage',
       desc: 'Scholars of mindfulness, hydration rituals, mobility, and mental focus.',
-      icon: '✨',
+      Icon: Sparkles,
       perk: 'Suited for yoga, restorative habits, reading, and clarity quests.',
     },
     {
       id: 'Ranger',
       title: 'Ranger',
       desc: 'Swift pathfinders skilled in walking, running, cycling, and outdoor movement.',
-      icon: '🏹',
+      Icon: Compass,
       perk: 'Suited for active steps, cardio endurance, and sports routines.',
     },
     {
       id: 'Guardian',
       title: 'Guardian',
       desc: 'Protectors devoted to restful sleep, balanced fueling, and long-term resilience.',
-      icon: '🛡',
+      Icon: Shield,
       perk: 'Suited for recovery routines, consistent habits, and steady pacing.',
     },
   ];
@@ -427,7 +434,7 @@ export const OnboardingWizard: React.FC = () => {
                       }`}
                     >
                       <div className="flex items-center gap-2.5 mb-1.5">
-                        <span className="text-xl">{c.icon}</span>
+                        <c.Icon className="w-5 h-5 text-[#C5A15A]" />
                         <h4 className="font-['Cinzel'] font-bold text-slate-100 text-base">{c.title}</h4>
                       </div>
                       <p className="text-xs text-slate-400 mb-1.5">{c.desc}</p>

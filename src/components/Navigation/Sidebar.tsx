@@ -20,13 +20,13 @@ import {
   ShoppingBag,
   Crown,
   Lock,
-  Compass,
   Landmark,
   Brain,
   Calendar,
   Bell,
 } from 'lucide-react';
 import { LegendTitleBadge } from '../Social/LegendTitleBadge';
+import { PresenceBadge } from '../Brand/PresenceBadge';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -61,12 +61,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     equippedLegendMap,
     rivalsState,
     unreadNotificationsCount,
+    myEffectivePresence,
   } = useGame();
   const heroDef = getHeroById(selectedHeroId);
 
-  const incomingFriendCount =
-    friends.filter(f => f.status === 'pending' && f.direction === 'incoming').length +
-    (rivalsState?.stats?.pendingIncomingCount || 0);
+  const incomingFriendCount = friends.filter(
+    f => f.status === 'pending' && f.direction === 'incoming'
+  ).length;
+  const pendingRivalsCount = rivalsState?.stats?.pendingIncomingCount || 0;
 
   const claimableQuestsCount = quests.filter(q => q.completed && !q.claimed).length;
   const claimableAiQuestsCount = dynamicDailyQuests.filter(q => q.completed && !q.claimed).length;
@@ -90,7 +92,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   // Mobile-only quick access for routes shown in TopBar on md+ screens (avoids desktop duplication)
   const mobileTopBarItems: NavItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'world', label: 'Explore 3D World', icon: Compass, highlight: true },
+    { id: 'rivals', label: 'Rivals Arena', icon: Swords, badge: pendingRivalsCount, highlight: true },
     { id: 'aether-vision', label: 'Aether Vision AI', icon: Camera, highlight: true },
     { id: 'armory', label: 'The Armory', icon: Hammer },
     { id: 'store', label: 'Store', icon: ShoppingBag },
@@ -101,13 +103,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     {
       title: 'Adventure & Wellness',
       items: [
-        {
-          id: 'world',
-          label: 'THE HEARTLANDS',
-          subtitle: '3D Open World (Phase 1)',
-          icon: Compass,
-          highlight: true,
-        },
         {
           id: 'progression',
           label: 'PROGRESSION',
@@ -120,6 +115,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         { id: 'nutrition', label: 'Nutrition & Meals', icon: Apple },
         { id: 'mentor', label: 'AI Fitness Mentor', icon: Brain },
         { id: 'museum', label: 'Records Museum', icon: Landmark },
+        { id: 'store', label: 'Royal Treasury Store', icon: ShoppingBag },
         { id: 'buffs', label: 'Active Buffs', icon: Sparkles, badge: activeBuffs.length },
         { id: 'storyline', label: 'World of Aetheria', icon: Map },
       ],
@@ -128,9 +124,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       title: 'Fellowship',
       items: [
         {
+          id: 'rivals',
+          label: 'RIVALS ARENA',
+          subtitle: '1v1 Elo Matchmaking & Duels',
+          icon: Swords,
+          badge: pendingRivalsCount,
+          highlight: true,
+        },
+        {
           id: 'social',
           label: 'SOCIAL',
-          subtitle: 'Leaderboard, Friends, Rivals & Chat',
+          subtitle: 'Leaderboard, Friends & Chat',
           icon: Users,
           badge: incomingFriendCount,
         },
@@ -204,13 +208,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
-          {item.highlight && (
-            <span className="text-[10px] uppercase font-bold tracking-wider text-[#C5A15A]">
-              Vision
-            </span>
-          )}
           {item.badge !== undefined && item.badge > 0 && (
-            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-[#7046A5] text-[#D9D2C5] font-bold tabular-nums">
+            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#7046A5] text-[#D9D2C5] font-bold tabular-nums">
               {item.badge}
             </span>
           )}
@@ -253,14 +252,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         {user && (
           <div className="p-3.5 mx-3 my-3 rounded-xl bg-gradient-to-br from-[#251638]/70 via-[#151022] to-[#100D19] border border-[#C5A15A]/22 space-y-2">
             <div className="flex items-center gap-3">
-              <img
-                src={getHeroArtwork(selectedHeroId, user.characterClass)}
-                alt={`${heroDef.name}`}
-                referrerPolicy="no-referrer"
-                className="w-11 h-11 rounded-lg object-cover object-top border border-[#C5A15A]/55 shadow"
-              />
+              <div className="relative shrink-0">
+                <img
+                  src={getHeroArtwork(selectedHeroId, user.characterClass)}
+                  alt={`${heroDef.name}`}
+                  referrerPolicy="no-referrer"
+                  className="w-11 h-11 rounded-lg object-cover object-top border border-[#C5A15A]/55 shadow"
+                />
+                <PresenceBadge
+                  status={myEffectivePresence}
+                  size="xs"
+                  className="absolute -bottom-0.5 -right-0.5"
+                />
+              </div>
               <div className="min-w-0 flex-1 space-y-0.5">
-                <p className="text-sm font-bold text-[#D9D2C5] truncate">{user.username}</p>
+                <div className="flex items-center justify-between gap-1.5">
+                  <p className="text-sm font-bold text-[#F5EFE6] truncate">{user.username}</p>
+                </div>
                 {equippedLegend && (
                   <LegendTitleBadge
                     title={equippedLegend.titleTag}

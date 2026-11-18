@@ -254,7 +254,7 @@ export const BossBattleView: React.FC = () => {
       // 5. Phase Transition Notification
       if (result.newPhase) {
         sound.playVictory();
-        setPhaseAnnouncement(`⚡ PHASE ${result.newPhase} ACTIVATED: ${boss.phases?.[result.newPhase - 1]?.name || 'ENRAGE'}!`);
+        setPhaseAnnouncement(`PHASE ${result.newPhase} ACTIVATED: ${boss.phases?.[result.newPhase - 1]?.name || 'ENRAGE'}!`);
         setTimeout(() => setPhaseAnnouncement(null), 3000);
       }
 

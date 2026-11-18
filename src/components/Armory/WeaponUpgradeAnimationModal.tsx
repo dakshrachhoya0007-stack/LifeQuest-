@@ -250,7 +250,7 @@ export const WeaponUpgradeAnimationModal: React.FC<WeaponUpgradeAnimationModalPr
 
           {phase === 'revealed' && (
             <div
-              className="absolute inset-4 rounded-full animate-ping opacity-30 pointer-events-none"
+              className="absolute inset-4 rounded-full opacity-20 blur-md pointer-events-none transition-opacity duration-500"
               style={{ backgroundColor: rarityStyle.accentHex }}
             />
           )}

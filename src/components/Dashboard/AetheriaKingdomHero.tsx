@@ -14,7 +14,7 @@ import {
 import { Buff, Kingdom, PlayableHeroId, PlayerStats, UserAccount } from '../../types/game';
 import { getHeroById } from '../../data/heroesData';
 import { aetheriaCitadelKingdomImg, getHeroArtwork } from '../../assets/images';
-import { AtmosphereParticlesCanvas } from './world3d/AtmosphereParticlesCanvas';
+import { AtmosphereParticlesCanvas } from './AtmosphereParticlesCanvas';
 
 interface AetheriaKingdomHeroProps {
   user: UserAccount | null;

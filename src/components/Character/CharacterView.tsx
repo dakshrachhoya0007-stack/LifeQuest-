@@ -45,11 +45,24 @@ export const CharacterView: React.FC = () => {
     equippedLegendMap,
     equipGlobalLegendTitle,
     identityState,
+    museumData,
+    rivalsState,
     selectIdentityTitle,
     featureIdentityBadges,
     claimGlobalRareBadge,
     syncVerifiedIdentitySnapshot,
   } = useGame();
+
+  const authoritativePrCount =
+    museumData?.personalBestCount ??
+    museumData?.personalBests.length ??
+    identityState?.lifetimeStats.totalPersonalRecords ??
+    0;
+  const authoritativeRivalWins =
+    rivalsState?.profile?.wins ??
+    rivalsState?.stats?.wins ??
+    identityState?.lifetimeStats.rivalryWins ??
+    0;
 
   const [identityBusy, setIdentityBusy] = React.useState(false);
   const [identityNotice, setIdentityNotice] = React.useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -563,13 +576,22 @@ export const CharacterView: React.FC = () => {
             <div className="p-3.5 rounded-xl bg-[#130f24] border border-purple-950 flex items-center justify-between gap-2">
               <span className="text-slate-400">Rivalry Wins &amp; Records</span>
               <span className="font-mono font-bold text-amber-300 text-sm tabular-nums">
-                {lifetime?.rivalryWins ?? 0}W · {lifetime?.totalPersonalRecords ?? 0} PRs
+                {authoritativeRivalWins}W · {authoritativePrCount} PRs
               </span>
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-purple-950/30 border border-purple-900/50 text-xs text-slate-400">
-            Wellness Profile: <strong className="text-slate-200">{user?.activityLevel || 'Moderate'} activity</strong> · <strong className="text-slate-200">{user?.dietaryPreference || 'Vegetarian'} nutrition</strong> · Units: {user?.preferredUnits || 'Metric'}
+          <div className="p-3 rounded-xl bg-purple-950/30 border border-purple-900/50 text-xs text-slate-400 flex flex-wrap items-center justify-between gap-2">
+            <span>
+              Wellness Profile: <strong className="text-slate-200">{user?.activityLevel || 'Moderate'} activity</strong> · <strong className="text-slate-200">{user?.dietaryPreference || 'Vegetarian'} nutrition</strong> · Units: {user?.preferredUnits || 'Metric'}
+            </span>
+            <button
+              type="button"
+              onClick={() => setActiveTab('museum')}
+              className="text-[#C5A15A] hover:underline font-semibold whitespace-nowrap"
+            >
+              Inspect {authoritativePrCount} Personal Bests →
+            </button>
           </div>
         </div>
       </div>

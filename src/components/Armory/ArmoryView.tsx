@@ -212,7 +212,7 @@ export const ArmoryView: React.FC = () => {
     try {
       const res = await upgradeWeapon(activeWeapon.id);
       if (res.success && res.updatedWeapon) {
-        setForgeSuccessMsg(`⚔ ${res.updatedWeapon.name} successfully tempered to Level ${res.updatedWeapon.level}!`);
+        setForgeSuccessMsg(`${res.updatedWeapon.name} successfully tempered to Level ${res.updatedWeapon.level}!`);
         setUpgradeModalState({
           isOpen: true,
           mode: 'upgrade',
@@ -247,7 +247,7 @@ export const ArmoryView: React.FC = () => {
       if (result.abilityUnlocked) {
         setMasteryFeedback({
           type: 'success',
-          text: `✨ UNLOCKED ABILITY: [${result.abilityUnlocked}]! (-15 Gold)`,
+          text: `UNLOCKED ABILITY: [${result.abilityUnlocked}]! (-15 Gold)`,
         });
       } else {
         setMasteryFeedback({

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useGame } from '../../context/GameContext';
-import { GoldenWorldTreeEmblem } from '../Welcome/WelcomeLanding';
+import { GoldenWorldTreeEmblem } from '../Brand/GoldenWorldTreeEmblem';
 import {
   AlertTriangle,
   CheckCircle2,

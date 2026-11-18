@@ -3,8 +3,7 @@ import { useGame } from '../../context/GameContext';
 import { LeaderboardView } from '../Leaderboard/LeaderboardView';
 import { DiscoverPlayersView } from './DiscoverPlayersView';
 import { ChatView } from '../Chat/ChatView';
-import { RivalsView } from './RivalsView';
-import { Trophy, UserPlus, MessageSquare, Swords } from 'lucide-react';
+import { Trophy, UserPlus, MessageSquare } from 'lucide-react';
 
 export const SocialHubView: React.FC = () => {
   const {
@@ -12,24 +11,21 @@ export const SocialHubView: React.FC = () => {
     setSocialSubTab,
     friends,
     chatMessages,
-    rivalsState,
   } = useGame();
 
   const acceptedFriendsCount = friends.filter(f => f.status === 'accepted').length;
   const incomingRequestsCount = friends.filter(
     f => f.status === 'pending' && f.direction === 'incoming'
   ).length;
-  const pendingRivalCount = rivalsState?.stats?.pendingIncomingCount || 0;
 
   const tabs: Array<{
-    id: 'leaderboard' | 'friends' | 'chat' | 'rivals';
+    id: 'leaderboard' | 'friends' | 'chat';
     label: string;
     icon: React.ComponentType<{ className?: string }>;
     badge?: number;
   }> = [
     { id: 'leaderboard', label: 'Leaderboard', icon: Trophy },
     { id: 'friends', label: 'Friends', icon: UserPlus, badge: incomingRequestsCount },
-    { id: 'rivals', label: 'Rivals', icon: Swords, badge: pendingRivalCount },
     { id: 'chat', label: 'Chat', icon: MessageSquare },
   ];
 
@@ -56,7 +52,7 @@ export const SocialHubView: React.FC = () => {
               SOCIAL
             </h1>
             <p className="text-xs sm:text-sm text-[#D9D2C5]/75 max-w-2xl mt-1">
-              Track realm standings, connect with companions, challenge friends to 7-day rivalries, and converse across realm channels.
+              Track realm XP standings, connect with companions, and converse across realm channels. Competitive 1v1 matchmaking now lives in its own Rivals Arena.
             </p>
           </div>
 
@@ -100,7 +96,6 @@ export const SocialHubView: React.FC = () => {
       <div role="tabpanel">
         {socialSubTab === 'leaderboard' && <LeaderboardView embedded />}
         {socialSubTab === 'friends' && <DiscoverPlayersView embedded />}
-        {socialSubTab === 'rivals' && <RivalsView />}
         {socialSubTab === 'chat' && <ChatView embedded />}
       </div>
     </div>

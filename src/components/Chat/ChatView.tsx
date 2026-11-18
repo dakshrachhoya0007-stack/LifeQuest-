@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { getRpgAvatarForClass } from '../../assets/images';
+import { PresenceBadge } from '../Brand/PresenceBadge';
 import {
   MessageSquare,
   Send,
@@ -21,6 +22,8 @@ export const ChatView: React.FC<{ embedded?: boolean }> = ({ embedded = false })
     setProgressionSubTab,
     equippedLegendMap,
     legendAnnouncements,
+    getPlayerPresence,
+    queryPresencesBatch,
   } = useGame();
   const [selectedChannel, setSelectedChannel] = useState<'guild' | 'general' | 'whisper'>('general');
   const [inputText, setInputText] = useState('');
@@ -30,6 +33,15 @@ export const ChatView: React.FC<{ embedded?: boolean }> = ({ embedded = false })
   const myGuild = guilds.find(g => g.isMember);
   const acceptedFriends = friends.filter(f => f.status === 'accepted');
   const filteredMessages = chatMessages.filter(m => m.channel === selectedChannel);
+
+  useEffect(() => {
+    const ids = new Set<string>();
+    filteredMessages.forEach(m => m.senderId && ids.add(m.senderId));
+    acceptedFriends.forEach(f => ids.add(f.champion.id));
+    if (ids.size > 0) {
+      void queryPresencesBatch(Array.from(ids));
+    }
+  }, [filteredMessages.length, acceptedFriends.length]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -262,6 +274,12 @@ export const ChatView: React.FC<{ embedded?: boolean }> = ({ embedded = false })
                         msg.isCurrentUser ? 'justify-end' : 'justify-start'
                       }`}
                     >
+                      {msg.senderId && !getPlayerPresence(msg.senderId).hidden && (
+                        <PresenceBadge
+                          status={msg.senderPresenceStatus || getPlayerPresence(msg.senderId).status}
+                          size="xs"
+                        />
+                      )}
                       <button
                         type="button"
                         disabled={!canInspect}

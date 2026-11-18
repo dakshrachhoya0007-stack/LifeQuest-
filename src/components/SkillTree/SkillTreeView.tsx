@@ -9,10 +9,11 @@ import {
   getSkillAttributeById,
 } from '../../data/skillTreeData';
 import { SkillAttributeId, SkillNodeDefinition } from '../../types/game';
-import { GoldenWorldTreeEmblem } from '../Welcome/WelcomeLanding';
+import { GoldenWorldTreeEmblem } from '../Brand/GoldenWorldTreeEmblem';
 import {
   Activity,
   Award,
+  BarChart3,
   BookOpen,
   Check,
   CheckCircle2,
@@ -21,6 +22,7 @@ import {
   Flame,
   HeartPulse,
   Lock,
+  RefreshCw,
   Shield,
   Sparkles,
   Target,
@@ -49,11 +51,15 @@ export const SkillTreeView: React.FC = () => {
     unlockSkillNode,
     claimSkillMilestone,
     logVerifiedStudySession,
+    reconcileSkillTree,
     setActiveTab,
   } = useGame();
 
   const [selectedAttributeId, setSelectedAttributeId] = useState<SkillAttributeId>('strength');
   const [selectedNodeId, setSelectedNodeId] = useState<string>('str-1a');
+  const [chartWindow, setChartWindow] = useState<'7d' | '30d'>('7d');
+  const [reconciling, setReconciling] = useState(false);
+  const [reconcileNotice, setReconcileNotice] = useState<string | null>(null);
   const [unlockFeedback, setUnlockFeedback] = useState<{
     type: 'success' | 'error';
     message: string;
@@ -205,6 +211,56 @@ export const SkillTreeView: React.FC = () => {
       ? SKILL_LEVEL_XP_THRESHOLDS[MAX_SKILL_ATTRIBUTE_LEVEL - 1]
       : SKILL_LEVEL_XP_THRESHOLDS[activeAttrProgress.level];
 
+  const computedTotalXp = useMemo(
+    () =>
+      SKILL_TREE_ATTRIBUTES.reduce(
+        (sum, attr) => sum + (skillTreeState.attributes[attr.id]?.xp || 0),
+        0
+      ),
+    [skillTreeState.attributes]
+  );
+
+  const computedTotalActivities = useMemo(
+    () =>
+      SKILL_TREE_ATTRIBUTES.reduce(
+        (sum, attr) => sum + (skillTreeState.attributes[attr.id]?.totalActivities || 0),
+        0
+      ),
+    [skillTreeState.attributes]
+  );
+
+  const totalXpDisplay = skillTreeState.analytics?.totalSkillXp ?? computedTotalXp;
+  const totalActivitiesDisplay =
+    skillTreeState.analytics?.totalActivities ?? computedTotalActivities;
+
+  const dailySeries = useMemo(() => {
+    const raw =
+      chartWindow === '7d'
+        ? skillTreeState.analytics?.dailySeries7d
+        : skillTreeState.analytics?.dailySeries30d;
+    return raw && raw.length > 0 ? raw : [];
+  }, [chartWindow, skillTreeState.analytics]);
+
+  const handleSyncHistory = async () => {
+    if (reconciling) return;
+    setReconciling(true);
+    setReconcileNotice(null);
+    try {
+      const res = await reconcileSkillTree();
+      if (res.ok) {
+        setReconcileNotice(
+          res.reconciledCount && res.reconciledCount > 0
+            ? `Synced ${res.reconciledCount} newly reconciled activities into your Skill Tree.`
+            : 'All verified workouts, meals, habits, and reflections are 100% synced.'
+        );
+      } else {
+        setReconcileNotice('Could not complete skill tree synchronization right now.');
+      }
+    } finally {
+      setReconciling(false);
+    }
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in pb-10">
       {/* Banner Header with Golden World Tree Emblem */}
@@ -217,7 +273,15 @@ export const SkillTreeView: React.FC = () => {
             <div>
               <div className="flex flex-wrap items-center gap-2 text-[11px] font-medium text-[#D9D2C5]/75">
                 <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#C5A15A]">
-                  Phase 1 · Real-Life Skill Tree
+                  Real-Life Skill Tree
+                </span>
+                <span className="text-[#D9D2C5]/35" aria-hidden="true">·</span>
+                <span className="tabular-nums font-mono">
+                  {totalXpDisplay.toLocaleString()} Attribute XP
+                </span>
+                <span className="text-[#D9D2C5]/35" aria-hidden="true">·</span>
+                <span className="tabular-nums font-mono">
+                  {totalActivitiesDisplay} Verified Activities
                 </span>
                 <span className="text-[#D9D2C5]/35" aria-hidden="true">·</span>
                 <span className="tabular-nums">
@@ -225,7 +289,7 @@ export const SkillTreeView: React.FC = () => {
                 </span>
                 <span className="text-[#D9D2C5]/35" aria-hidden="true">·</span>
                 <span className="tabular-nums text-[#C5A15A]">
-                  {totalAvailableNodes} Ready to Unlock
+                  {totalAvailableNodes} Ready
                 </span>
               </div>
               <h1 className="text-xl sm:text-2xl font-black font-['Cinzel'] tracking-wide text-[#F5EFE6] mt-1">
@@ -238,6 +302,15 @@ export const SkillTreeView: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <button
+              type="button"
+              disabled={reconciling || skillTreeLoading}
+              onClick={() => void handleSyncHistory()}
+              className="px-3.5 py-2 rounded-xl bg-[#161124] hover:bg-[#251638] border border-[#C5A15A]/30 text-xs font-semibold text-[#D9D2C5] flex items-center gap-2 transition-colors whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-[#C5A15A] ${reconciling ? 'animate-spin' : ''}`} />
+              {reconciling ? 'Syncing...' : 'Sync Verified History'}
+            </button>
             <button
               type="button"
               onClick={() => {
@@ -257,6 +330,190 @@ export const SkillTreeView: React.FC = () => {
               <Compass className="w-3.5 h-3.5" />
               Log Training
             </button>
+          </div>
+        </div>
+        {reconcileNotice && (
+          <div className="mt-4 pt-3 border-t border-[#C5A15A]/15 text-xs text-emerald-300 flex items-center justify-between gap-2">
+            <span>{reconcileNotice}</span>
+            <button
+              type="button"
+              onClick={() => setReconcileNotice(null)}
+              className="text-emerald-200/70 hover:text-white"
+              aria-label="Dismiss sync notice"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Synchronized Skill Tree Analytics (Daily Activity + 6-Attribute Balance) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <div className="lg:col-span-7 rounded-2xl bg-[#100D19] border border-[#C5A15A]/22 p-5 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 className="font-['Cinzel'] font-bold text-sm uppercase tracking-wider text-[#F5EFE6] flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-[#C5A15A]" />
+                Verified Attribute XP History
+              </h2>
+              <p className="text-[11px] text-[#D9D2C5]/60 mt-0.5 tabular-nums">
+                1:1 Ledger Output · {totalXpDisplay.toLocaleString()} Total XP across {totalActivitiesDisplay} verified activities
+              </p>
+            </div>
+            <div className="flex items-center gap-1 p-1 bg-[#08060f] rounded-lg border border-[#C5A15A]/20">
+              {(['7d', '30d'] as const).map(win => (
+                <button
+                  key={win}
+                  type="button"
+                  onClick={() => setChartWindow(win)}
+                  className={`px-2.5 py-1 rounded text-[11px] font-mono font-semibold uppercase transition-colors ${
+                    chartWindow === win
+                      ? 'bg-[#251638] text-[#C5A15A]'
+                      : 'text-[#D9D2C5]/60 hover:text-white'
+                  }`}
+                >
+                  {win}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {dailySeries.length === 0 ? (
+            <div className="h-36 flex items-center justify-center text-xs text-[#D9D2C5]/55">
+              Complete workouts, habits, hydration, or verified study to plot daily progression.
+            </div>
+          ) : (
+            (() => {
+              const maxDayXp = Math.max(10, ...dailySeries.map(d => d.totalXp));
+              return (
+                <div className="space-y-2">
+                  <div className="h-36 flex items-end gap-1 pt-2">
+                    {dailySeries.map(pt => {
+                      const heightPct = Math.max(4, Math.round((pt.totalXp / maxDayXp) * 100));
+                      return (
+                        <div
+                          key={pt.date}
+                          className="flex-1 flex flex-col items-center justify-end h-full group relative"
+                          title={`${pt.date}: ${pt.totalXp} XP (${pt.activitiesCount} activities)`}
+                        >
+                          <div
+                            className={`w-full rounded-t transition-all ${
+                              pt.totalXp > 0
+                                ? 'bg-gradient-to-t from-[#7046A5] to-[#C5A15A] group-hover:brightness-110'
+                                : 'bg-white/10'
+                            }`}
+                            style={{ height: `${pt.totalXp > 0 ? heightPct : 3}%` }}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="flex items-center justify-between text-[10px] font-mono text-[#D9D2C5]/50 tabular-nums">
+                    <span>{dailySeries[0]?.date.slice(5)}</span>
+                    <span>
+                      Period Total:{' '}
+                      {dailySeries.reduce((s, d) => s + d.totalXp, 0).toLocaleString()} XP ·{' '}
+                      {dailySeries.reduce((s, d) => s + d.activitiesCount, 0)} Activities
+                    </span>
+                    <span>{dailySeries[dailySeries.length - 1]?.date.slice(5)}</span>
+                  </div>
+                </div>
+              );
+            })()
+          )}
+        </div>
+
+        {/* 6-Attribute SVG Balance Radar */}
+        <div className="lg:col-span-5 rounded-2xl bg-[#100D19] border border-[#C5A15A]/22 p-5 flex flex-col justify-between gap-3">
+          <div>
+            <h2 className="font-['Cinzel'] font-bold text-sm uppercase tracking-wider text-[#F5EFE6]">
+              Virtue Balance Radar
+            </h2>
+            <p className="text-[11px] text-[#D9D2C5]/60 mt-0.5">
+              Proportional attribute levels (1–10 scale) synchronized directly from attribute state.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {(() => {
+              const cx = 85;
+              const cy = 85;
+              const radius = 60;
+              const attrs = SKILL_TREE_ATTRIBUTES;
+              const pointsForLevel = (valRatio: number, idx: number) => {
+                const angle = (Math.PI * 2 * idx) / attrs.length - Math.PI / 2;
+                return {
+                  x: cx + Math.cos(angle) * radius * valRatio,
+                  y: cy + Math.sin(angle) * radius * valRatio,
+                };
+              };
+              const polygonPoints = attrs
+                .map((attr, idx) => {
+                  const prog = skillTreeState.attributes[attr.id];
+                  const ratio = Math.max(0.15, Math.min(1, prog.level / MAX_SKILL_ATTRIBUTE_LEVEL));
+                  const pt = pointsForLevel(ratio, idx);
+                  return `${pt.x.toFixed(1)},${pt.y.toFixed(1)}`;
+                })
+                .join(' ');
+
+              return (
+                <svg viewBox="0 0 170 170" className="w-36 h-36 shrink-0" aria-label="Six attributes radar chart">
+                  {[0.33, 0.66, 1].map(ring => (
+                    <polygon
+                      key={ring}
+                      points={attrs
+                        .map((_, idx) => {
+                          const pt = pointsForLevel(ring, idx);
+                          return `${pt.x.toFixed(1)},${pt.y.toFixed(1)}`;
+                        })
+                        .join(' ')}
+                      fill="none"
+                      stroke="rgba(197, 161, 90, 0.18)"
+                      strokeWidth="1"
+                    />
+                  ))}
+                  {attrs.map((_, idx) => {
+                    const pt = pointsForLevel(1, idx);
+                    return (
+                      <line
+                        key={idx}
+                        x1={cx}
+                        y1={cy}
+                        x2={pt.x}
+                        y2={pt.y}
+                        stroke="rgba(217, 210, 197, 0.12)"
+                        strokeWidth="1"
+                      />
+                    );
+                  })}
+                  <polygon
+                    points={polygonPoints}
+                    fill="rgba(112, 70, 165, 0.45)"
+                    stroke="#C5A15A"
+                    strokeWidth="1.8"
+                  />
+                </svg>
+              );
+            })()}
+
+            <div className="flex-1 space-y-1.5 text-xs">
+              {SKILL_TREE_ATTRIBUTES.map(attr => {
+                const prog = skillTreeState.attributes[attr.id];
+                const share =
+                  skillTreeState.analytics?.attributeDistribution?.[attr.id]?.percent ??
+                  (computedTotalXp > 0 ? Math.round((prog.xp / computedTotalXp) * 100) : 0);
+                return (
+                  <div key={attr.id} className="flex items-center justify-between gap-2 tabular-nums">
+                    <span className="font-semibold text-[#D9D2C5] truncate" style={{ color: attr.accentHex }}>
+                      {attr.name}
+                    </span>
+                    <span className="font-mono text-[#F5EFE6]">
+                      Lv.{prog.level} · {prog.xp} XP ({share}%)
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
