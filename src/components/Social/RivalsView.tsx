@@ -1,8 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import {
-  COMPETITIVE_RIVAL_MODES,
   COMPETITIVE_TIERS,
+  DEFAULT_DUEL_DURATION_SECONDS,
+  DUEL_EXERCISES_CATALOG,
+  DUEL_EXERCISE_IDS,
+  MAX_DUEL_DURATION_SECONDS,
 } from '../../data/ecosystemData';
 import {
   PLACEMENT_MATCHES_REQUIRED,
@@ -15,15 +18,20 @@ import type {
   CompetitiveRivalMatch,
   CompetitiveRivalMode,
   CompetitiveTier,
+  DuelExerciseId,
   RankedDivisionName,
 } from '../../types/game';
+import { DuelPoseTracker, type DuelCameraStatus } from './DuelPoseTracker';
+import type { VerifiedRepProof } from '../../utils/aetherMotionEngine';
 import { PresenceBadge } from '../Brand/PresenceBadge';
 import { GoldenWorldTreeEmblem } from '../Brand/GoldenWorldTreeEmblem';
 import {
   AlertTriangle,
   Award,
   Ban,
+  Camera,
   Check,
+  CheckCircle2,
   ChevronDown,
   ChevronUp,
   Clock,
@@ -47,7 +55,14 @@ import {
   X,
 } from 'lucide-react';
 
-type ArenaTab = 'queue' | 'challenge' | 'matches' | 'tournaments' | 'spectate' | 'history' | 'rankings';
+type ArenaSubView = 'duel' | 'history' | 'rankings' | 'spectate' | 'tournaments';
+type DuelStage = 1 | 2 | 3 | 4;
+
+const DURATION_PRESETS: Array<{ seconds: number; label: string; caption: string }> = [
+  { seconds: 120, label: '2 Min Sprint', caption: 'Fast burst endurance' },
+  { seconds: DEFAULT_DUEL_DURATION_SECONDS, label: '3 Min Standard', caption: 'Recommended duel' },
+  { seconds: MAX_DUEL_DURATION_SECONDS, label: '5 Min Max', caption: 'Maximum duel cap' },
+];
 
 const TIER_ACCENT_MAP: Record<CompetitiveTier, string> = COMPETITIVE_TIERS.reduce(
   (acc, item) => {
@@ -57,12 +72,18 @@ const TIER_ACCENT_MAP: Record<CompetitiveTier, string> = COMPETITIVE_TIERS.reduc
   {} as Record<CompetitiveTier, string>
 );
 
-const formatRemainingTime = (endsAt: string): string => {
-  const diff = Math.max(0, Date.parse(endsAt) - Date.now());
-  if (diff === 0) return 'Settling';
-  const days = Math.floor(diff / 86400000);
-  const hours = Math.floor((diff % 86400000) / 3600000);
-  return `${days}d ${hours}h left`;
+const formatClockMmSs = (ms: number): string => {
+  const totalSec = Math.max(0, Math.ceil(ms / 1000));
+  const mins = Math.floor(totalSec / 60);
+  const secs = totalSec % 60;
+  return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+};
+
+const getExerciseDef = (exerciseId?: DuelExerciseId | string) => {
+  if (exerciseId && exerciseId in DUEL_EXERCISES_CATALOG) {
+    return DUEL_EXERCISES_CATALOG[exerciseId as DuelExerciseId];
+  }
+  return DUEL_EXERCISES_CATALOG.squat;
 };
 
 export const RivalsView: React.FC = () => {
@@ -71,13 +92,16 @@ export const RivalsView: React.FC = () => {
     friends,
     rivalsState,
     rivalsLoading,
+    rivalsServerClockOffsetMs,
     refreshRivalsState,
     joinRivalsQueue,
     cancelRivalsQueue,
+    readyRivalDuel,
+    submitVerifiedDuelRep,
+    concedeRivalDuel,
     sendDirectRivalChallenge,
     respondRivalInvite,
     cancelRivalInvite,
-    endActiveRivalry,
     rematchRival,
     disputeRivalMatch,
     updateRivalsPrivacy,
@@ -98,1311 +122,1571 @@ export const RivalsView: React.FC = () => {
     toggleFollowCompetitor,
   } = useGame();
 
-  const [arenaTab, setArenaTab] = useState<ArenaTab>('queue');
-  const [queueMode, setQueueMode] = useState<CompetitiveRivalMode>('overall_fitness');
+  const [subView, setSubView] = useState<ArenaSubView>('duel');
+  const [selectedDurationSec, setSelectedDurationSec] = useState<number>(
+    DEFAULT_DUEL_DURATION_SECONDS
+  );
   const [showDivisionRoadmap, setShowDivisionRoadmap] = useState(false);
 
-  // Tournament creation form state
-  const [newTourneyTitle, setNewTourneyTitle] = useState('');
-  const [newTourneySubtitle, setNewTourneySubtitle] = useState('');
-  const [newTourneyMode, setNewTourneyMode] = useState<CompetitiveRivalMode>('overall_fitness');
-
-  // Direct Challenge form state
+  // Direct Challenge form state (server auto-selects 1 verified exercise)
   const [selectedOpponentId, setSelectedOpponentId] = useState<string>('');
-  const [challengeMode, setChallengeMode] = useState<CompetitiveRivalMode>('overall_fitness');
-  const [durationDays, setDurationDays] = useState<number>(7);
-  const [targetScore, setTargetScore] = useState<number>(500);
-  const [allowRestDays, setAllowRestDays] = useState<boolean>(true);
+  const [directDurationSec, setDirectDurationSec] = useState<number>(DEFAULT_DUEL_DURATION_SECONDS);
   const [isRanked, setIsRanked] = useState<boolean>(true);
   const [visibility, setVisibility] = useState<CompetitiveMatchVisibility>('friends');
-  const [customNote, setCustomNote] = useState<string>('');
   const [candidateSearch, setCandidateSearch] = useState<string>('');
+  const [showDirectPanel, setShowDirectPanel] = useState<boolean>(false);
 
-  // Rankings filter state
-  const [lbScope, setLbScope] = useState<'global' | 'friends' | 'seasonal' | 'weekly'>('global');
-  const [lbMode, setLbMode] = useState<CompetitiveRivalMode | 'all'>('all');
-  const [lbDivision, setLbDivision] = useState<RankedDivisionName | 'all'>('all');
-  const [filteredLeaderboard, setFilteredLeaderboard] = useState<CompetitiveLeaderboardEntry[] | null>(
-    null
-  );
-  const [lbLoading, setLbLoading] = useState(false);
+  // Live duel & stage tracking
+  const [resultMatchId, setResultMatchId] = useState<string | null>(null);
+  const [nowTickMs, setNowTickMs] = useState<number>(() => Date.now());
+  const [cameraStatus, setCameraStatus] = useState<DuelCameraStatus>({
+    cameraReady: false,
+    isLoading: false,
+    landmarksVisible: false,
+    cameraStable: true,
+    confidence: 0,
+    protocolMismatch: false,
+    feedback: '',
+    error: null,
+  });
+  const [repFeedbackNotice, setRepFeedbackNotice] = useState<string | null>(null);
+  const [confirmSafeStop, setConfirmSafeStop] = useState<boolean>(false);
+  const [busyAction, setBusyAction] = useState<string | null>(null);
+  const [feedbackBanner, setFeedbackBanner] = useState<{
+    type: 'ok' | 'err';
+    text: string;
+  } | null>(null);
 
-  // Dispute modal state
-  const [disputeTarget, setDisputeTarget] = useState<CompetitiveRivalMatch | null>(null);
+  // Dispute modal
+  const [disputeMatchId, setDisputeMatchId] = useState<string | null>(null);
   const [disputeReason, setDisputeReason] = useState<string>('');
 
-  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [busyId, setBusyId] = useState<string | null>(null);
+  // History / Rankings / Tournaments state
+  const [historyFilter, setHistoryFilter] = useState<'all' | 'completed' | 'cancelled'>('all');
+  const [lbScope, setLbScope] = useState<'global' | 'friends' | 'seasonal' | 'weekly'>('global');
+  const [lbMode, setLbMode] = useState<CompetitiveRivalMode | 'all'>('all');
+  const [lbDivision, setLbDivision] = useState<string>('all');
+  const [leaderboardRows, setLeaderboardRows] = useState<CompetitiveLeaderboardEntry[]>([]);
+  const [lbLoading, setLbLoading] = useState(false);
+
+  const [newTourneyTitle, setNewTourneyTitle] = useState('');
+  const [newTourneySubtitle, setNewTourneySubtitle] = useState('');
+  const [newTourneyMode, setNewTourneyMode] = useState<DuelExerciseId>('squat');
+
+  const trackedDuelIdRef = useRef<string | null>(null);
+  const settleRefreshFiredForRef = useRef<string | null>(null);
 
   useEffect(() => {
     void refreshRivalsState();
+    void refreshTournaments();
+    void refreshSpectatorMatches();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const profile = rivalsState?.profile;
-  const queueEntry = rivalsState?.queueEntry || null;
-  const matches: CompetitiveRivalMatch[] = rivalsState?.matches || [];
-  const h2hRecords = rivalsState?.h2hRecords || [];
-  const candidates = rivalsState?.candidates || [];
-  const events = rivalsState?.events || rivalsState?.recentScores || [];
-  const defaultLeaderboard = rivalsState?.leaderboard || [];
-  const blockedSet = new Set(rivalsState?.blockedIds || []);
-
-  const acceptedFriends = useMemo(
-    () => friends.filter(f => f.status === 'accepted' && !blockedSet.has(f.champion.id)),
-    [friends, rivalsState?.blockedIds]
-  );
-
-  // Combine accepted friends and open non-friend candidates safely
-  const selectableOpponents = useMemo(() => {
-    const byId = new Map<
-      string,
-      {
-        id: string;
-        username: string;
-        characterClass: string;
-        level: number;
-        rating: number;
-        tier: CompetitiveTier;
-        isFriend: boolean;
-        allowNonFriendChallenges: boolean;
-      }
-    >();
-
-    for (const f of acceptedFriends) {
-      const cand = candidates.find(c => c.userId === f.champion.id);
-      byId.set(f.champion.id, {
-        id: f.champion.id,
-        username: f.champion.username,
-        characterClass: f.champion.characterClass,
-        level: f.champion.level,
-        rating: cand?.rating ?? 1200,
-        tier: cand?.tier ?? 'Silver',
-        isFriend: true,
-        allowNonFriendChallenges: true,
-      });
-    }
-
-    for (const c of candidates) {
-      if (c.userId === user?.id || blockedSet.has(c.userId)) continue;
-      if (!byId.has(c.userId) && c.allowNonFriendChallenges) {
-        byId.set(c.userId, {
-          id: c.userId,
-          username: c.username,
-          characterClass: c.characterClass,
-          level: c.level,
-          rating: c.rating,
-          tier: c.tier,
-          isFriend: false,
-          allowNonFriendChallenges: c.allowNonFriendChallenges,
-        });
-      }
-    }
-
-    const q = candidateSearch.trim().toLowerCase();
-    return Array.from(byId.values()).filter(o =>
-      q ? o.username.toLowerCase().includes(q) || o.characterClass.toLowerCase().includes(q) : true
-    );
-  }, [acceptedFriends, candidates, user?.id, rivalsState?.blockedIds, candidateSearch]);
-
+  // Poll leaderboard when Rankings tab active
   useEffect(() => {
-    if (!selectedOpponentId && selectableOpponents.length > 0) {
-      setSelectedOpponentId(selectableOpponents[0].id);
-    }
-  }, [selectableOpponents, selectedOpponentId]);
-
-  // Query live presences for visible opponents and leaderboard entries
-  useEffect(() => {
-    const ids = new Set<string>();
-    selectableOpponents.forEach(o => ids.add(o.id));
-    matches.forEach(m => {
-      ids.add(m.challengerId);
-      ids.add(m.opponentId);
-    });
-    defaultLeaderboard.forEach(e => ids.add(e.userId));
-    filteredLeaderboard?.forEach(e => ids.add(e.userId));
-    if (ids.size > 0) {
-      void queryPresencesBatch(Array.from(ids));
-    }
-  }, [selectableOpponents.length, matches.length, defaultLeaderboard.length]);
-
-  useEffect(() => {
-    if (arenaTab === 'tournaments') {
-      void refreshTournaments();
-    } else if (arenaTab === 'spectate') {
-      void refreshSpectatorMatches();
-    }
-  }, [arenaTab]);
-
-  useEffect(() => {
-    if (arenaTab !== 'rankings') return;
+    if (subView !== 'rankings') return;
     let active = true;
     setLbLoading(true);
-    fetchRivalsLeaderboard({
-      scope: lbScope,
-      mode: lbMode,
-      division: lbDivision === 'all' ? undefined : lbDivision,
-    }).then(res => {
+    void fetchRivalsLeaderboard({ scope: lbScope, mode: lbMode, division: lbDivision }).then(res => {
       if (!active) return;
-      if (res.ok && res.leaderboard) {
-        setFilteredLeaderboard(res.leaderboard);
-      }
+      if (res.ok && res.leaderboard) setLeaderboardRows(res.leaderboard);
       setLbLoading(false);
     });
     return () => {
       active = false;
     };
-  }, [arenaTab, lbScope, lbMode, lbDivision]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subView, lbScope, lbMode, lbDivision]);
 
-  const incomingInvites = matches.filter(
-    m => m.status === 'pending' && m.opponentId === user?.id
+  // Batch presence lookup
+  useEffect(() => {
+    if (!rivalsState) return;
+    const ids = new Set<string>();
+    friends.filter(f => f.status === 'accepted').forEach(f => ids.add(f.champion.id));
+    rivalsState.candidates?.forEach(c => ids.add(c.userId));
+    rivalsState.matches?.forEach(m => {
+      ids.add(m.challengerId);
+      ids.add(m.opponentId);
+    });
+    const arr = Array.from(ids).filter(Boolean);
+    if (arr.length > 0) void queryPresencesBatch(arr);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rivalsState?.candidates?.length, rivalsState?.matches?.length, friends.length]);
+
+  const myUserId = user?.id || '';
+  const profile = rivalsState?.profile;
+  const queueEntry = rivalsState?.queueEntry;
+  const matches = rivalsState?.matches || [];
+  const events = rivalsState?.events || [];
+  const h2hRecords = rivalsState?.h2hRecords || [];
+  const candidates = rivalsState?.candidates || [];
+  const blockedIds = rivalsState?.blockedIds || [];
+
+  const activeLiveMatch = useMemo(
+    () => matches.find(m => m.status === 'active') || null,
+    [matches]
   );
-  const outgoingInvites = matches.filter(
-    m => m.status === 'pending' && m.challengerId === user?.id
+  const setupMatch = useMemo(
+    () => matches.find(m => m.status === 'accepted') || null,
+    [matches]
   );
-  const activeDuels = matches.filter(
-    m => m.status === 'active' || m.status === 'accepted'
+  const currentDuelMatch = activeLiveMatch || setupMatch;
+
+  const incomingInvites = useMemo(
+    () => matches.filter(m => m.status === 'pending' && m.opponentId === myUserId),
+    [matches, myUserId]
   );
-  const historyDuels = matches.filter(
-    m =>
-      m.status === 'completed' ||
-      m.status === 'cancelled' ||
-      m.status === 'expired' ||
-      m.status === 'disputed'
+  const sentInvites = useMemo(
+    () => matches.filter(m => m.status === 'pending' && m.challengerId === myUserId),
+    [matches, myUserId]
+  );
+  const resultMatch = useMemo(
+    () => (resultMatchId ? matches.find(m => m.id === resultMatchId) || null : null),
+    [matches, resultMatchId]
   );
 
-  const handleJoinQueue = async () => {
-    setBusyId('queue');
-    setFeedback(null);
-    try {
-      const res = await joinRivalsQueue(queueMode);
-      if (!res.success) {
-        setFeedback({ type: 'error', text: res.error || 'Could not enter matchmaking queue.' });
-      } else if (res.matched && res.match) {
-        setFeedback({
-          type: 'success',
-          text: `Opponent found! ${res.match.challengerName} vs ${res.match.opponentName} match started.`,
-        });
-        setArenaTab('matches');
-      } else {
-        setFeedback({
-          type: 'success',
-          text: 'Entered live matchmaking queue. Waiting for a verified real champion in your rating bracket.',
+  // Track active/accepted duel ID so when it transitions to completed we automatically display Stage 4 Results
+  useEffect(() => {
+    if (currentDuelMatch) {
+      trackedDuelIdRef.current = currentDuelMatch.id;
+      settleRefreshFiredForRef.current = null;
+      if (resultMatchId === currentDuelMatch.id) {
+        setResultMatchId(null);
+      }
+      return;
+    }
+
+    const prevId = trackedDuelIdRef.current;
+    if (prevId) {
+      const prevMatch = matches.find(m => m.id === prevId);
+      if (prevMatch && (prevMatch.status === 'completed' || prevMatch.status === 'disputed')) {
+        setResultMatchId(prevMatch.id);
+        setSubView('duel');
+      } else if (prevMatch && prevMatch.status === 'cancelled') {
+        setFeedbackBanner({
+          type: 'ok',
+          text: `${prevMatch.exerciseName} duel ended safely with no rating change.`,
         });
       }
-    } finally {
-      setBusyId(null);
+      trackedDuelIdRef.current = null;
+      setConfirmSafeStop(false);
+    }
+  }, [currentDuelMatch, matches, resultMatchId]);
+
+  // Light fallback sync poll while searching in matchmaking queue
+  useEffect(() => {
+    if (queueEntry?.status !== 'searching') return;
+    const t = window.setInterval(() => {
+      void refreshRivalsState();
+    }, 4500);
+    return () => clearInterval(t);
+  }, [queueEntry?.status, refreshRivalsState]);
+
+  // Live 200ms timer tick during Stage 2/3 or active queue search
+  useEffect(() => {
+    if (!currentDuelMatch && queueEntry?.status !== 'searching') return;
+    const interval = window.setInterval(() => {
+      setNowTickMs(Date.now());
+    }, 200);
+    return () => clearInterval(interval);
+  }, [currentDuelMatch, queueEntry?.status]);
+
+  // Synchronized server clock calculation
+  const serverNowMs = nowTickMs + rivalsServerClockOffsetMs;
+  const countdownRemainingMs = useMemo(() => {
+    if (!activeLiveMatch?.countdownEndsAt) return 0;
+    return Math.max(0, Date.parse(activeLiveMatch.countdownEndsAt) - serverNowMs);
+  }, [activeLiveMatch?.countdownEndsAt, serverNowMs]);
+
+  const duelTimeRemainingMs = useMemo(() => {
+    if (!activeLiveMatch?.endsAt) return 0;
+    return Math.max(0, Date.parse(activeLiveMatch.endsAt) - serverNowMs);
+  }, [activeLiveMatch?.endsAt, serverNowMs]);
+
+  // When server timer hits 00:00, fetch settled match state once if WS hasn't delivered yet
+  useEffect(() => {
+    if (!activeLiveMatch) return;
+    if (
+      duelTimeRemainingMs <= 0 &&
+      serverNowMs >= Date.parse(activeLiveMatch.endsAt) + 1500 &&
+      settleRefreshFiredForRef.current !== activeLiveMatch.id
+    ) {
+      settleRefreshFiredForRef.current = activeLiveMatch.id;
+      void refreshRivalsState();
+    }
+  }, [activeLiveMatch, duelTimeRemainingMs, serverNowMs, refreshRivalsState]);
+
+  const currentStage: DuelStage = activeLiveMatch
+    ? 3
+    : setupMatch
+    ? 2
+    : resultMatch
+    ? 4
+    : 1;
+
+  // Division info
+  const divisionName = useMemo(
+    () => computeRankedDivision(profile?.rating || 1200),
+    [profile?.rating]
+  );
+
+  const placementGames = Math.min(
+    PLACEMENT_MATCHES_REQUIRED,
+    profile?.placementMatchesPlayed ?? profile?.matchesPlayed ?? 0
+  );
+  const placementDone =
+    profile?.placementCompleted ?? (profile?.matchesPlayed || 0) >= PLACEMENT_MATCHES_REQUIRED;
+
+  // Challengeable players list
+  const acceptedFriends = useMemo(
+    () =>
+      friends
+        .filter(f => f.status === 'accepted')
+        .map(f => ({
+          userId: f.champion.id,
+          username: f.champion.username,
+          characterClass: f.champion.characterClass,
+          level: f.champion.level,
+          rating: candidates.find(c => c.userId === f.champion.id)?.rating || 1200,
+          tier: (candidates.find(c => c.userId === f.champion.id)?.tier || 'Silver') as CompetitiveTier,
+          isFriend: true,
+        })),
+    [friends, candidates]
+  );
+
+  const filteredCandidates = useMemo(() => {
+    const q = candidateSearch.trim().toLowerCase();
+    const map = new Map<
+      string,
+      {
+        userId: string;
+        username: string;
+        rating: number;
+        tier: CompetitiveTier;
+        isFriend: boolean;
+      }
+    >();
+    acceptedFriends.forEach(f => map.set(f.userId, f));
+    candidates.forEach(c => {
+      if (c.userId === myUserId) return;
+      if (!map.has(c.userId)) {
+        map.set(c.userId, {
+          userId: c.userId,
+          username: c.username,
+          rating: c.rating,
+          tier: c.tier,
+          isFriend: false,
+        });
+      }
+    });
+    return Array.from(map.values()).filter(
+      c => !blockedIds.includes(c.userId) && (!q || c.username.toLowerCase().includes(q))
+    );
+  }, [acceptedFriends, candidates, blockedIds, myUserId, candidateSearch]);
+
+  const historyMatches = useMemo(() => {
+    return matches.filter(m => {
+      if (m.status === 'pending' || m.status === 'accepted' || m.status === 'active') return false;
+      if (historyFilter === 'completed') return m.status === 'completed' || m.status === 'disputed';
+      if (historyFilter === 'cancelled') return m.status === 'cancelled' || m.status === 'expired';
+      return true;
+    });
+  }, [matches, historyFilter]);
+
+  const handleActionResult = (
+    res: { success?: boolean; ok?: boolean; error?: string },
+    okMsg?: string
+  ) => {
+    const succeeded = Boolean(res.success ?? res.ok);
+    if (succeeded) {
+      if (okMsg) setFeedbackBanner({ type: 'ok', text: okMsg });
+    } else {
+      setFeedbackBanner({ type: 'err', text: res.error || 'Action failed.' });
+    }
+  };
+
+  // --- Handlers ---
+  const handleFindRival = async () => {
+    setBusyAction('queue');
+    setFeedbackBanner(null);
+    setResultMatchId(null);
+    const res = await joinRivalsQueue({ durationSeconds: selectedDurationSec });
+    setBusyAction(null);
+    if (!res.success) {
+      handleActionResult(res);
+      return;
+    }
+    if (res.matched && res.match) {
+      setFeedbackBanner({
+        type: 'ok',
+        text: `Rival matched! Get your camera ready for ${res.match.exerciseName}.`,
+      });
+    } else {
+      setFeedbackBanner({
+        type: 'ok',
+        text: 'Searching for a real player near your Elo rating...',
+      });
     }
   };
 
   const handleCancelQueue = async () => {
-    setBusyId('queue-cancel');
-    setFeedback(null);
-    try {
-      const res = await cancelRivalsQueue();
-      setFeedback({
-        type: res.success ? 'success' : 'error',
-        text: res.success ? 'Left matchmaking queue.' : res.error || 'Could not cancel queue.',
-      });
-    } finally {
-      setBusyId(null);
-    }
+    setBusyAction('cancel-queue');
+    const res = await cancelRivalsQueue();
+    setBusyAction(null);
+    handleActionResult(res, 'Left matchmaking queue.');
   };
 
-  const handleSendDirectChallenge = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const target = selectableOpponents.find(o => o.id === selectedOpponentId);
-    if (!target) {
-      setFeedback({ type: 'error', text: 'Select an eligible opponent to challenge.' });
+  const handleDirectChallenge = async () => {
+    const opponent = filteredCandidates.find(c => c.userId === selectedOpponentId);
+    if (!opponent) {
+      setFeedbackBanner({ type: 'err', text: 'Select a real player to challenge.' });
       return;
     }
-    setBusyId('challenge-send');
-    setFeedback(null);
-    try {
-      const modeMeta =
-        COMPETITIVE_RIVAL_MODES.find(m => m.id === challengeMode) || COMPETITIVE_RIVAL_MODES[0];
-      const res = await sendDirectRivalChallenge({
-        opponentId: target.id,
-        opponentName: target.username,
-        mode: challengeMode,
-        challengeType: modeMeta.legacyChallengeType,
-        visibility,
-        rules: {
-          durationDays,
-          targetScore,
-          allowRestDays,
-          ranked: isRanked,
-          customFocusNote: customNote.trim() || undefined,
-        },
+    setBusyAction('challenge');
+    setFeedbackBanner(null);
+    const res = await sendDirectRivalChallenge({
+      opponentId: opponent.userId,
+      opponentName: opponent.username,
+      visibility,
+      rules: {
+        durationSeconds: directDurationSec,
+        ranked: isRanked,
+      },
+    });
+    setBusyAction(null);
+    if (res.success) {
+      setShowDirectPanel(false);
+    }
+    handleActionResult(
+      res,
+      `Live duel invite sent to ${opponent.username}. A single verified exercise was auto-selected.`
+    );
+  };
+
+  const handleReadyToggle = async (ready: boolean) => {
+    if (!currentDuelMatch) return;
+    if (ready && !cameraStatus.cameraReady) {
+      setFeedbackBanner({
+        type: 'err',
+        text: 'Enable and verify your live Aether Vision camera feed before marking Ready.',
       });
-      if (res.success) {
-        setFeedback({
-          type: 'success',
-          text: `Sent ${isRanked ? 'Ranked' : 'Unranked'} ${modeMeta.title} challenge to ${target.username}.`,
-        });
-        setArenaTab('matches');
-      } else {
-        setFeedback({ type: 'error', text: res.error || 'Could not send challenge.' });
-      }
-    } finally {
-      setBusyId(null);
+      return;
+    }
+    setBusyAction('ready');
+    setFeedbackBanner(null);
+    const res = await readyRivalDuel({
+      matchId: currentDuelMatch.id,
+      ready,
+      cameraReady: cameraStatus.cameraReady,
+    });
+    setBusyAction(null);
+    if (!res.success) {
+      handleActionResult(res);
+      return;
+    }
+    if (res.launchedNow) {
+      setFeedbackBanner({
+        type: 'ok',
+        text: 'Both players ready! Synchronized 5-second countdown started.',
+      });
     }
   };
 
-  const handleRespond = async (matchId: string, decision: 'accept' | 'decline') => {
-    setBusyId(matchId);
-    setFeedback(null);
-    try {
-      const res = await respondRivalInvite(matchId, decision);
-      setFeedback({
-        type: res.success ? 'success' : 'error',
-        text: res.success
-          ? decision === 'accept'
-            ? 'Competitive match accepted. Verified activities now tally head-to-head match points.'
-            : 'Match invitation declined.'
-          : res.error || 'Action failed.',
+  const handleVerifiedRepFromTracker = useCallback(
+    async (proof: VerifiedRepProof & { landmarksVisible: boolean; cameraStable: boolean }) => {
+      if (!activeLiveMatch) return;
+      const eventId = `rep-${activeLiveMatch.id}-${proof.repSeq}-${Date.now()}`;
+      const res = await submitVerifiedDuelRep({
+        matchId: activeLiveMatch.id,
+        eventId,
+        repSeq: proof.repSeq,
+        exercise: activeLiveMatch.duelExercise,
+        peakAngleDeg: proof.peakAngleDeg,
+        resetAngleDeg: proof.resetAngleDeg,
+        durationMs: proof.durationMs,
+        confidence: proof.confidence,
+        landmarksVisible: proof.landmarksVisible,
+        cameraStable: proof.cameraStable,
       });
-    } finally {
-      setBusyId(null);
+      if (res.success) {
+        setRepFeedbackNotice(
+          `Rep #${proof.repSeq} verified (+${res.pointsAwarded ?? activeLiveMatch.pointsPerRep} pts)`
+        );
+      } else if (res.error) {
+        setRepFeedbackNotice(`Not counted: ${res.error}`);
+      }
+    },
+    [activeLiveMatch, submitVerifiedDuelRep]
+  );
+
+  const handleConcedeOrSafeStop = async () => {
+    if (!currentDuelMatch) return;
+    setBusyAction('concede');
+    setFeedbackBanner(null);
+    const res = await concedeRivalDuel(currentDuelMatch.id);
+    setBusyAction(null);
+    setConfirmSafeStop(false);
+    if (!res.success) {
+      handleActionResult(res);
+      return;
+    }
+    if (res.match && (res.match.status === 'completed' || res.match.status === 'disputed')) {
+      setResultMatchId(res.match.id);
+    } else {
+      setFeedbackBanner({
+        type: 'ok',
+        text: 'Stopped safely before scoring started (no Elo rating change).',
+      });
     }
   };
 
   const handleRematch = async (matchId: string) => {
-    setBusyId(`rematch-${matchId}`);
-    setFeedback(null);
-    try {
-      const res = await rematchRival(matchId);
-      setFeedback({
-        type: res.success ? 'success' : 'error',
-        text: res.success ? 'Rematch challenge sent!' : res.error || 'Could not send rematch.',
-      });
-    } finally {
-      setBusyId(null);
+    setBusyAction(`rematch-${matchId}`);
+    const res = await rematchRival(matchId);
+    setBusyAction(null);
+    if (res.success) {
+      setResultMatchId(null);
+      setSubView('duel');
     }
+    handleActionResult(res, 'Rematch challenge sent!');
   };
 
-  const handleSubmitDispute = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!disputeTarget || disputeReason.trim().length < 6) {
-      setFeedback({ type: 'error', text: 'Enter a clear dispute reason (at least 6 characters).' });
-      return;
-    }
-    setBusyId(`dispute-${disputeTarget.id}`);
-    try {
-      const res = await disputeRivalMatch(disputeTarget.id, disputeReason.trim());
-      if (res.success) {
-        setFeedback({
-          type: 'success',
-          text: 'Match marked disputed and Elo ratings safely reverted pending review.',
-        });
-        setDisputeTarget(null);
-        setDisputeReason('');
-      } else {
-        setFeedback({ type: 'error', text: res.error || 'Could not file match dispute.' });
-      }
-    } finally {
-      setBusyId(null);
-    }
-  };
+  const isCountingLive =
+    Boolean(activeLiveMatch) &&
+    countdownRemainingMs <= 0 &&
+    duelTimeRemainingMs > 0;
 
-  const handleTogglePrivacy = async () => {
-    if (!profile) return;
-    setBusyId('privacy');
-    try {
-      const next = !profile.allowNonFriendChallenges;
-      const res = await updateRivalsPrivacy(next);
-      setFeedback({
-        type: res.success ? 'success' : 'error',
-        text: res.success
-          ? next
-            ? 'Open Arena Challenges enabled: non-friends can now send direct ranked challenges.'
-            : 'Friends-Only Challenges enabled: only accepted friends may challenge you directly.'
-          : res.error || 'Could not update arena privacy.',
-      });
-    } finally {
-      setBusyId(null);
-    }
-  };
+  // Derived stage match perspectives
+  const activePerspective = useMemo(() => {
+    const m = currentDuelMatch;
+    if (!m) return null;
+    const amChallenger = m.challengerId === myUserId;
+    return {
+      match: m,
+      amChallenger,
+      myName: amChallenger ? m.challengerName : m.opponentName,
+      myRating: amChallenger ? m.challengerRatingSnapshot : m.opponentRatingSnapshot,
+      myTier: amChallenger ? m.challengerTierSnapshot : m.opponentTierSnapshot,
+      myScore: amChallenger ? m.challengerScore : m.opponentScore,
+      myReps: amChallenger ? m.challengerReps : m.opponentReps,
+      myReady: amChallenger ? m.challengerReady : m.opponentReady,
+      opId: amChallenger ? m.opponentId : m.challengerId,
+      opName: amChallenger ? m.opponentName : m.challengerName,
+      opRating: amChallenger ? m.opponentRatingSnapshot : m.challengerRatingSnapshot,
+      opTier: amChallenger ? m.opponentTierSnapshot : m.challengerTierSnapshot,
+      opScore: amChallenger ? m.opponentScore : m.challengerScore,
+      opReps: amChallenger ? m.opponentReps : m.challengerReps,
+      opReady: amChallenger ? m.opponentReady : m.challengerReady,
+      opCameraReady: amChallenger ? m.opponentCameraReady : m.challengerCameraReady,
+      exDef: getExerciseDef(m.duelExercise),
+    };
+  }, [currentDuelMatch, myUserId]);
 
-  const handleClaimDivisionReward = async (division: RankedDivisionName) => {
-    setBusyId(`div-${division}`);
-    setFeedback(null);
-    try {
-      const res = await claimRankedDivisionReward(division);
-      setFeedback({
-        type: res.success ? 'success' : 'error',
-        text: res.success
-          ? `Claimed ${division} Division reward${res.rewardTitleName ? `: ${res.rewardTitleName}` : ''}!`
-          : res.error || 'Could not claim division reward.',
-      });
-    } finally {
-      setBusyId(null);
-    }
-  };
-
-  const handleCreateTournament = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newTourneyTitle.trim().length < 3) {
-      setFeedback({ type: 'error', text: 'Tournament title must be at least 3 characters.' });
-      return;
-    }
-    setBusyId('create-tourney');
-    setFeedback(null);
-    try {
-      const res = await createTournament({
-        title: newTourneyTitle.trim(),
-        subtitle: newTourneySubtitle.trim() || undefined,
-        mode: newTourneyMode,
-      });
-      if (res.success) {
-        setFeedback({ type: 'success', text: 'Community tournament opened for real competitors.' });
-        setNewTourneyTitle('');
-        setNewTourneySubtitle('');
-      } else {
-        setFeedback({ type: 'error', text: res.error || 'Could not create tournament.' });
-      }
-    } finally {
-      setBusyId(null);
-    }
-  };
-
-  const handleJoinTournament = async (tournamentId: string) => {
-    setBusyId(`join-tourney-${tournamentId}`);
-    setFeedback(null);
-    try {
-      const res = await joinTournament(tournamentId);
-      setFeedback({
-        type: res.success ? 'success' : 'error',
-        text: res.success ? 'Entered tournament bracket!' : res.error || 'Could not join tournament.',
-      });
-    } finally {
-      setBusyId(null);
-    }
-  };
-
-  const handleCheer = async (matchId: string, targetUserId: string, emoji: string) => {
-    setBusyId(`cheer-${matchId}-${targetUserId}-${emoji}`);
-    setFeedback(null);
-    try {
-      const res = await sendSpectatorCheer({ matchId, targetUserId, emoji });
-      if (!res.success) {
-        setFeedback({ type: 'error', text: res.error || 'Could not send spectator cheer.' });
-      }
-    } finally {
-      setBusyId(null);
-    }
-  };
-
-  const handleToggleFollow = async (targetUserId: string) => {
-    setBusyId(`follow-${targetUserId}`);
-    try {
-      const res = await toggleFollowCompetitor(targetUserId);
-      if (!res.success && res.error) {
-        setFeedback({ type: 'error', text: res.error });
-      }
-    } finally {
-      setBusyId(null);
-    }
-  };
-
-  const playerRating = profile?.rating ?? 1200;
-  const playerTier: CompetitiveTier = profile?.tier ?? 'Silver';
-  const playerDivision = computeRankedDivision(playerRating);
-  const playerDivisionMeta =
-    RANKED_DIVISIONS_CATALOG.find(d => d.division === playerDivision) || RANKED_DIVISIONS_CATALOG[1];
-  const placementPlayed = profile?.placementMatchesPlayed ?? profile?.matchesPlayed ?? 0;
-  const placementDone = Boolean(profile?.placementCompleted || placementPlayed >= PLACEMENT_MATCHES_REQUIRED);
-  const demotionShieldRemaining = profile?.demotionShieldRemaining ?? 0;
-  const tierHex = TIER_ACCENT_MAP[playerTier] || playerDivisionMeta.accentHex || '#FB7185';
-  const wins = profile?.wins ?? rivalsState?.stats.wins ?? 0;
-  const losses = profile?.losses ?? rivalsState?.stats.losses ?? 0;
-  const ties = profile?.ties ?? rivalsState?.stats.ties ?? 0;
-  const winRate = profile?.winRate ?? 0;
-  const currentStreak = profile?.currentStreak ?? 0;
-  const peakRating = profile?.peakRating ?? playerRating;
-
-  const displayedLeaderboard = filteredLeaderboard ?? defaultLeaderboard;
+  const activeMatchEvents = useMemo(() => {
+    if (!currentDuelMatch) return [];
+    return events.filter(e => e.rivalryId === currentDuelMatch.id).slice(0, 6);
+  }, [events, currentDuelMatch]);
 
   return (
-    <div className="space-y-6 animate-in fade-in pb-12">
-      {/* Arena Hero Header — Isolated Competitive Domain */}
-      <div className="rounded-2xl bg-[#141420]/95 backdrop-blur-md border border-[#FB7185]/25 p-6 shadow-[0_12px_32px_rgba(0,0,0,0.6)] space-y-5">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <div className="space-y-6 max-w-6xl mx-auto">
+      {/* Header & Compact Elo Summary */}
+      <div className="bg-[#141420] border border-white/10 rounded-2xl p-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-[#0E0E17] border border-[#FB7185]/40 flex items-center justify-center shrink-0 shadow-[0_0_16px_rgba(251,113,133,0.18)]">
-              <GoldenWorldTreeEmblem className="w-9 h-9" />
+            <div className="w-12 h-12 rounded-xl bg-[#8B5CF6]/15 border border-[#8B5CF6]/30 flex items-center justify-center shrink-0">
+              <GoldenWorldTreeEmblem className="w-7 h-7" />
             </div>
             <div>
-              <div className="flex flex-wrap items-center gap-2 text-xs text-[#FB7185] font-semibold">
-                <span className="font-['Cinzel'] uppercase tracking-widest">
-                  Competitive Arena
-                </span>
-                <span className="text-[#A1A1B8]/40" aria-hidden="true">·</span>
-                <span className="text-[#A1A1B8]">
-                  Isolated 1v1 Elo Ladder · Rating &amp; H2H Only (Zero XP/Gold)
-                </span>
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-white mt-0.5">
-                RIVALS ARENA
+              <p className="text-xs font-medium text-[#D6A84B]">
+                Live Camera-Verified 1v1 Exercise Arena
+              </p>
+              <h1 className="text-2xl font-bold text-white tracking-tight mt-0.5">
+                Real-Life PvP Rivalry
               </h1>
-              <p className="text-xs sm:text-sm text-[#A1A1B8] max-w-2xl mt-1">
-                Compete head-to-head against real champions using server-verified fitness telemetry. Matches award Elo Rating, Competitive Tiers, and Head-to-Head Prestige—never Boss damage, Player XP, or Gold.
+              <p className="text-sm text-slate-400 mt-1 max-w-2xl">
+                Compete head-to-head with real players in a single auto-selected bodyweight exercise.
+                Aether Vision verifies every repetition live—no manual scoring or AI opponents.
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          {/* Compact Competitive Rating & Privacy */}
+          <div className="flex flex-wrap items-center gap-6 lg:border-l lg:border-white/10 lg:pl-6">
+            <div>
+              <p className="text-xs text-slate-400">Elo Rating</p>
+              <p className="text-2xl font-bold text-white tabular-nums">
+                {profile?.rating ?? 1200}
+              </p>
+              <p className="text-xs text-[#D6A84B] font-medium">
+                {divisionName} Division
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-400">Record</p>
+              <p className="text-lg font-semibold text-white tabular-nums">
+                {profile?.wins ?? 0}W - {profile?.losses ?? 0}L - {profile?.ties ?? 0}T
+              </p>
+              <p className="text-xs text-slate-400 tabular-nums">
+                Streak: {profile?.currentStreak ?? 0} ·{' '}
+                {placementDone
+                  ? 'Ranked Active'
+                  : `Placements ${placementGames}/${PLACEMENT_MATCHES_REQUIRED}`}
+              </p>
+            </div>
             <button
               type="button"
-              disabled={busyId === 'privacy' || !profile}
-              onClick={() => void handleTogglePrivacy()}
-              className="px-3.5 py-2 rounded-xl bg-[#0E0E17] hover:bg-[#1B1B2B] border border-white/15 hover:border-[#FB7185]/50 text-xs font-semibold text-white flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0"
-              title="Toggle whether non-friends can challenge you directly"
+              onClick={async () => {
+                const next = !(profile?.allowNonFriendChallenges ?? true);
+                const res = await updateRivalsPrivacy(next);
+                handleActionResult(
+                  res,
+                  next
+                    ? 'Open to public and arena rival invites.'
+                    : 'Direct invites restricted to accepted friends.'
+                );
+              }}
+              className="px-3.5 py-2 rounded-xl border border-white/10 bg-[#0D0D18] hover:bg-white/5 text-xs font-medium text-slate-200 inline-flex items-center gap-2 transition-colors cursor-pointer whitespace-nowrap"
             >
-              {profile?.allowNonFriendChallenges !== false ? (
+              {profile?.allowNonFriendChallenges === false ? (
                 <>
-                  <Unlock className="w-3.5 h-3.5 text-[#34D399]" />
-                  Open Challenges On
+                  <Lock className="w-3.5 h-3.5 text-[#FBBF24]" />
+                  Friends-Only Invites
                 </>
               ) : (
                 <>
-                  <Lock className="w-3.5 h-3.5 text-[#FB7185]" />
-                  Friends-Only Challenges
+                  <Unlock className="w-3.5 h-3.5 text-[#34D399]" />
+                  Public Invites Open
                 </>
               )}
             </button>
-            <button
-              type="button"
-              disabled={rivalsLoading}
-              onClick={() => void refreshRivalsState()}
-              className="px-3.5 py-2 rounded-xl bg-[#0E0E17] hover:bg-[#1B1B2B] border border-white/15 hover:border-[#FB7185]/50 text-xs font-semibold text-[#FB7185] flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${rivalsLoading ? 'animate-spin' : ''}`} />
-              Sync Arena
-            </button>
           </div>
         </div>
 
-        {/* Rating & Competitive Metrics Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-4 border-t border-white/10">
-          <div className="rounded-xl bg-[#090910] border border-white/10 p-3.5">
-            <span className="text-[11px] text-[#A1A1B8] block">Arena Elo &amp; Division</span>
-            <div className="flex items-baseline gap-2 mt-0.5">
-              <span className="text-xl font-black font-mono text-white tabular-nums">
-                {playerRating}
-              </span>
-              <span className="text-xs font-bold uppercase" style={{ color: tierHex }}>
-                {playerDivision}
-              </span>
-            </div>
-            <span className="text-[10px] text-[#A1A1B8]/75 tabular-nums block mt-0.5">
-              {placementDone
-                ? demotionShieldRemaining > 0
-                  ? `Shield: ${demotionShieldRemaining} games`
-                  : `${playerTier} Bracket`
-                : `Placement ${Math.min(placementPlayed, PLACEMENT_MATCHES_REQUIRED)}/${PLACEMENT_MATCHES_REQUIRED}`}
-            </span>
+        {/* Sub-view Switcher */}
+        <div className="mt-6 pt-5 border-t border-white/10 flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-1.5 bg-[#0D0D18] p-1 rounded-xl border border-white/10">
+            {(
+              [
+                { id: 'duel', label: 'Duel Arena', icon: Dumbbell },
+                { id: 'history', label: 'History & H2H', icon: History },
+                { id: 'rankings', label: 'Rankings', icon: Trophy },
+                { id: 'spectate', label: 'Spectate', icon: Eye },
+                { id: 'tournaments', label: 'Tournaments', icon: Crown },
+              ] as Array<{ id: ArenaSubView; label: string; icon: React.ComponentType<any> }>
+            ).map(tab => {
+              const Icon = tab.icon;
+              const isActive = subView === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setSubView(tab.id)}
+                  className={`px-3.5 py-2 rounded-lg text-xs font-semibold inline-flex items-center gap-2 transition-colors cursor-pointer whitespace-nowrap ${
+                    isActive
+                      ? 'bg-[#8B5CF6] text-white'
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
           </div>
-          <div className="rounded-xl bg-[#090910] border border-white/10 p-3.5">
-            <span className="text-[11px] text-[#A1A1B8] block">Match Record</span>
-            <span className="text-xl font-bold font-mono text-[#FB7185] tabular-nums mt-0.5 block">
-              {wins}-{losses}-{ties}
-            </span>
-          </div>
-          <div className="rounded-xl bg-[#090910] border border-white/10 p-3.5">
-            <span className="text-[11px] text-[#A1A1B8] block">Win Rate</span>
-            <span className="text-xl font-bold font-mono text-white tabular-nums mt-0.5 block">
-              {winRate}%
-            </span>
-          </div>
-          <div className="rounded-xl bg-[#090910] border border-white/10 p-3.5">
-            <span className="text-[11px] text-[#A1A1B8] block">Win Streak</span>
-            <span className="text-xl font-bold font-mono text-[#34D399] tabular-nums mt-0.5 flex items-center gap-1.5">
-              <Flame className="w-4 h-4 text-[#FBBF24]" />
-              {currentStreak}
-            </span>
-          </div>
-          <div className="rounded-xl bg-[#090910] border border-white/10 p-3.5">
-            <span className="text-[11px] text-[#A1A1B8] block">Peak Rating</span>
-            <span className="text-xl font-bold font-mono text-[#D6A84B] tabular-nums mt-0.5 block">
-              {peakRating}
-            </span>
-          </div>
-          <div className="rounded-xl bg-[#090910] border border-white/10 p-3.5">
-            <span className="text-[11px] text-[#A1A1B8] block">Active Matches</span>
-            <span className="text-xl font-bold font-mono text-white tabular-nums mt-0.5 block">
-              {activeDuels.length}
-              {incomingInvites.length > 0 ? ` (${incomingInvites.length} pending)` : ''}
-            </span>
-          </div>
-        </div>
 
-        {/* Collapsible 7-Division Ranked Roadmap */}
-        <div className="pt-2 border-t border-white/10">
           <button
             type="button"
             onClick={() => setShowDivisionRoadmap(v => !v)}
-            className="text-xs font-semibold text-white hover:text-[#FB7185] flex items-center gap-1.5 transition-colors"
+            className="text-xs font-medium text-slate-400 hover:text-[#E8CF96] inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
           >
-            <Shield className="w-3.5 h-3.5 text-[#D6A84B]" />
-            <span>Ranked Divisions &amp; Milestone Rewards (7 Tiers)</span>
+            <Award className="w-3.5 h-3.5 text-[#D6A84B]" />
+            <span>Ranked Divisions</span>
             {showDivisionRoadmap ? (
               <ChevronUp className="w-3.5 h-3.5" />
             ) : (
               <ChevronDown className="w-3.5 h-3.5" />
             )}
           </button>
+        </div>
 
-          {showDivisionRoadmap && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-2.5 mt-3">
-              {RANKED_DIVISIONS_CATALOG.map(div => {
-                const isCurrent = div.division === playerDivision;
-                const unlocked = Math.max(playerRating, peakRating) >= div.minRating;
-                return (
-                  <div
-                    key={div.division}
-                    className={`rounded-xl p-3 border space-y-2 transition-all ${
-                      isCurrent
-                        ? 'bg-[#0E0E17] border-[#FB7185] shadow-[0_0_16px_rgba(251,113,133,0.2)]'
-                        : unlocked
-                        ? 'bg-[#0E0E17]/80 border-[#D6A84B]/35'
-                        : 'bg-[#090910] border-white/10 opacity-75'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-1">
-                      <span
-                        className="font-['Cinzel'] font-bold text-xs"
-                        style={{ color: div.accentHex }}
-                      >
-                        {div.division}
-                      </span>
-                      <span className="text-[10px] font-mono text-[#A1A1B8]/80 tabular-nums">
-                        {div.maxRating ? `${div.minRating}–${div.maxRating}` : `${div.minRating}+`}
-                      </span>
-                    </div>
-                    <p className="text-[11px] font-semibold text-white truncate">
-                      {div.rewardTitleName}
-                    </p>
+        {/* Collapsible Ranked Division Progress */}
+        {showDivisionRoadmap && (
+          <div className="mt-4 pt-4 border-t border-white/10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {RANKED_DIVISIONS_CATALOG.map(div => {
+              const unlocked = (profile?.rating ?? 1200) >= div.minRating;
+              const claimed = (rivalsState as any)?.claimedDivisionRewards?.includes(div.division);
+              return (
+                <div
+                  key={div.division}
+                  className={`p-3.5 rounded-xl border ${
+                    unlocked
+                      ? 'bg-[#0D0D18] border-[#D6A84B]/30'
+                      : 'bg-[#090910] border-white/5 opacity-70'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-semibold text-white">{div.division}</span>
+                    <span className="text-[11px] text-slate-400 tabular-nums">
+                      {div.minRating}+ Elo
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">{div.rewardTitleName}</p>
+                  {unlocked && !claimed && (
                     <button
                       type="button"
-                      disabled={!unlocked || busyId === `div-${div.division}`}
-                      onClick={() => void handleClaimDivisionReward(div.division)}
-                      className={`w-full py-1.5 rounded-lg text-[10px] font-bold transition-all whitespace-nowrap ${
-                        unlocked
-                          ? 'bg-gradient-to-r from-[#B45309] to-[#D6A84B] hover:from-[#D97706] hover:to-[#FBBF24] text-[#090910] shadow-[0_0_12px_rgba(214,168,75,0.3)]'
-                          : 'bg-[#0E0E17] text-[#A1A1B8]/45 border border-white/10 cursor-not-allowed'
-                      }`}
+                      onClick={async () => {
+                        const res = await claimRankedDivisionReward(
+                          div.division as RankedDivisionName
+                        );
+                        handleActionResult(res, `${div.division} milestone claimed!`);
+                      }}
+                      className="mt-2 px-2.5 py-1 rounded-lg bg-[#D6A84B]/20 hover:bg-[#D6A84B]/30 text-[#E8CF96] text-[11px] font-semibold cursor-pointer"
                     >
-                      {unlocked
-                        ? busyId === `div-${div.division}`
-                          ? 'Claiming...'
-                          : 'Claim Title'
-                        : 'Locked'}
+                      Claim Title Milestone
                     </button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      {/* Arena Navigation Tabs */}
-      <div className="flex flex-wrap items-center gap-1.5 p-1 bg-[#0E0E17] border border-white/10 rounded-xl w-fit">
-        {(
-          [
-            { id: 'queue', label: 'Arena & Queue', icon: Dumbbell },
-            { id: 'challenge', label: 'Direct Challenge', icon: Target },
-            {
-              id: 'matches',
-              label: `Matches (${activeDuels.length + incomingInvites.length})`,
-              icon: Trophy,
-            },
-            { id: 'tournaments', label: 'Tournaments', icon: Award },
-            { id: 'spectate', label: 'Spectate', icon: Eye },
-            { id: 'history', label: 'Archive & H2H', icon: History },
-            { id: 'rankings', label: 'Rankings', icon: Crown },
-          ] as const
-        ).map(tab => {
-          const Icon = tab.icon;
-          const active = arenaTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setArenaTab(tab.id)}
-              className={`px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0 tabular-nums ${
-                active
-                  ? 'bg-gradient-to-r from-[#BE123C] to-[#FB7185] text-white shadow-[0_0_12px_rgba(251,113,133,0.3)]'
-                  : 'text-[#A1A1B8] hover:text-white hover:bg-[#1B1B2B] border border-transparent'
-              }`}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {feedback && (
+      {/* Feedback Banner */}
+      {feedbackBanner && (
         <div
-          className={`rounded-xl px-4 py-3 text-xs border flex items-center justify-between gap-2 ${
-            feedback.type === 'success'
-              ? 'bg-[#34D399]/10 border-[#34D399]/40 text-[#34D399]'
-              : 'bg-[#FB7185]/10 border-[#FB7185]/40 text-[#FB7185]'
+          className={`px-4 py-3 rounded-xl border text-xs font-medium flex items-center justify-between gap-3 ${
+            feedbackBanner.type === 'ok'
+              ? 'bg-[#34D399]/10 border-[#34D399]/30 text-[#34D399]'
+              : 'bg-[#FB7185]/10 border-[#FB7185]/30 text-[#FB7185]'
           }`}
         >
-          <span>{feedback.text}</span>
+          <span>{feedbackBanner.text}</span>
           <button
             type="button"
-            onClick={() => setFeedback(null)}
-            className="text-current/70 hover:text-current"
-            aria-label="Dismiss notice"
+            onClick={() => setFeedbackBanner(null)}
+            className="p-1 rounded hover:bg-white/10 cursor-pointer"
+            aria-label="Dismiss notification"
           >
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
 
-      {/* TAB 1: ARENA & MATCHMAKING QUEUE */}
-      {arenaTab === 'queue' && (
-        <div className="space-y-5">
-          {queueEntry && queueEntry.status === 'searching' && (
-            <div className="rounded-2xl bg-[#141420]/95 backdrop-blur-md border border-[#FB7185]/50 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-[0_0_24px_rgba(251,113,133,0.14)]">
-              <div className="space-y-1">
-                <div className="text-xs font-['Cinzel'] font-bold uppercase tracking-wider text-[#FB7185]">
-                  Live Matchmaking Queue · Real Players Only
-                </div>
-                <p className="text-sm font-bold text-white">
-                  Searching for {COMPETITIVE_RIVAL_MODES.find(m => m.id === queueEntry.mode)?.title || queueEntry.mode} opponent
-                </p>
-                <p className="text-xs text-[#A1A1B8] font-mono tabular-nums">
-                  Your Rating: {queueEntry.ratingSnapshot} · Bracket: {queueEntry.minRating} – {queueEntry.maxRating} · Expanding +75 every 10s
-                </p>
-              </div>
-              <button
-                type="button"
-                disabled={busyId === 'queue-cancel'}
-                onClick={() => void handleCancelQueue()}
-                className="px-4 py-2 rounded-xl bg-[#FB7185]/15 hover:bg-[#FB7185]/25 border border-[#FB7185]/40 text-[#FB7185] text-xs font-bold whitespace-nowrap shrink-0 transition-colors"
-              >
-                Leave Queue
-              </button>
-            </div>
-          )}
-
-          <div className="rounded-2xl bg-[#141420]/95 backdrop-blur-md border border-white/10 p-5 space-y-4 shadow-[0_12px_32px_rgba(0,0,0,0.6)]">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h2 className="font-['Cinzel'] font-bold text-base text-white">
-                  Select Competitive Match Format
-                </h2>
-                <p className="text-xs text-[#A1A1B8] mt-0.5">
-                  Pairs you with a real player inside your Elo window (zero AI bots or simulated opponents).
-                </p>
-              </div>
-              <button
-                type="button"
-                disabled={busyId === 'queue' || queueEntry?.status === 'searching'}
-                onClick={() => void handleJoinQueue()}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#BE123C] to-[#FB7185] hover:from-[#E11D48] hover:to-[#FDA4AF] disabled:opacity-50 text-white shadow-[0_0_16px_rgba(251,113,133,0.35)] font-['Cinzel'] font-bold text-xs tracking-wider uppercase whitespace-nowrap shrink-0 transition-all"
-              >
-                {queueEntry?.status === 'searching'
-                  ? 'Searching Queue...'
-                  : busyId === 'queue'
-                  ? 'Entering...'
-                  : 'Find Ranked Match'}
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-              {COMPETITIVE_RIVAL_MODES.map(mode => {
-                const selected = queueMode === mode.id;
+      {/* ===================================================================== */}
+      {/* DUEL ARENA: 4-STAGE FOCUSED FLOW                                      */}
+      {/* ===================================================================== */}
+      {subView === 'duel' && (
+        <div className="space-y-6">
+          {/* 4-Stage Stepper */}
+          <div className="bg-[#141420] border border-white/10 rounded-2xl px-5 py-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {(
+                [
+                  { step: 1, title: '1. Find a Rival', sub: 'Elo matchmaking' },
+                  { step: 2, title: '2. Exercise', sub: 'Rules & camera check' },
+                  { step: 3, title: '3. Live Duel', sub: 'Real-time verified reps' },
+                  { step: 4, title: '4. Results', sub: 'Score & Elo update' },
+                ] as Array<{ step: DuelStage; title: string; sub: string }>
+              ).map(s => {
+                const isCurrent = currentStage === s.step;
+                const isDone = currentStage > s.step;
                 return (
-                  <button
-                    key={mode.id}
-                    type="button"
-                    onClick={() => setQueueMode(mode.id)}
-                    className={`text-left rounded-xl p-4 border transition-all space-y-1.5 ${
-                      selected
-                        ? 'bg-[#0E0E17] border-[#FB7185] shadow-[0_0_16px_rgba(251,113,133,0.2)]'
-                        : 'bg-[#090910] border-white/10 hover:border-[#FB7185]/45'
+                  <div
+                    key={s.step}
+                    className={`px-3.5 py-2.5 rounded-xl border transition-colors ${
+                      isCurrent
+                        ? 'bg-[#8B5CF6]/15 border-[#8B5CF6]/60'
+                        : isDone
+                        ? 'bg-[#34D399]/10 border-[#34D399]/30'
+                        : 'bg-[#0D0D18] border-white/5 opacity-60'
                     }`}
                   >
-                    <div className="flex items-center justify-between gap-2 text-xs">
-                      <span className="font-['Cinzel'] font-bold text-white">
-                        {mode.title}
-                      </span>
-                      <span className="font-mono text-[11px] text-[#D6A84B] tabular-nums">
-                        {mode.defaultDurationDays}d
-                      </span>
-                    </div>
-                    <p className="text-[11px] font-medium text-[#FB7185]">{mode.subtitle}</p>
-                    <p className="text-xs text-[#A1A1B8] leading-relaxed">
-                      {mode.description}
+                    <p
+                      className={`text-xs font-bold ${
+                        isCurrent
+                          ? 'text-white'
+                          : isDone
+                          ? 'text-[#34D399]'
+                          : 'text-slate-400'
+                      }`}
+                    >
+                      {s.title}
                     </p>
-                  </button>
+                    <p className="text-[11px] text-slate-400 mt-0.5">{s.sub}</p>
+                  </div>
                 );
               })}
             </div>
           </div>
-        </div>
-      )}
 
-      {/* TAB 2: DIRECT CHALLENGE */}
-      {arenaTab === 'challenge' && (
-        <div className="rounded-2xl bg-[#141420]/95 backdrop-blur-md border border-white/10 p-5 space-y-5 shadow-[0_12px_32px_rgba(0,0,0,0.6)]">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h2 className="font-['Cinzel'] font-bold text-base text-white">
-                Direct Rival Challenge
-              </h2>
-              <p className="text-xs text-[#A1A1B8] mt-0.5">
-                Issue a customized head-to-head challenge to an accepted friend or open-challenge player.
-              </p>
-            </div>
-            <div className="relative w-full sm:w-64">
-              <Search className="w-3.5 h-3.5 text-[#A1A1B8]/60 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={candidateSearch}
-                onChange={e => setCandidateSearch(e.target.value)}
-                placeholder="Filter opponents..."
-                className="w-full rounded-xl bg-[#090910] border border-white/15 pl-8 pr-3 py-2 text-xs text-white placeholder-[#A1A1B8]/50 focus:outline-none focus:border-[#FB7185]"
-              />
-            </div>
-          </div>
+          {/* ----------------------------------------------------------------- */}
+          {/* STAGE 1: FIND A RIVAL                                             */}
+          {/* ----------------------------------------------------------------- */}
+          {currentStage === 1 && (
+            <div className="space-y-6">
+              {/* Primary Find a Rival Card */}
+              <div className="bg-[#141420] border border-white/10 rounded-2xl p-6 lg:p-8">
+                <div className="max-w-3xl space-y-6">
+                  <div>
+                    <p className="text-xs font-medium text-[#D6A84B]">
+                      Real-Player Matchmaking · Single Auto-Selected Exercise
+                    </p>
+                    <h2 className="text-xl font-bold text-white mt-1">
+                      Step Into a Live 1v1 Exercise Duel
+                    </h2>
+                    <p className="text-sm text-slate-400 mt-1.5 leading-relaxed">
+                      You will be paired with a real player near your Elo rating. Once matched, both
+                      competitors perform the exact same verified bodyweight exercise under identical
+                      rules and live camera tracking.
+                    </p>
+                  </div>
 
-          {selectableOpponents.length === 0 ? (
-            <div className="rounded-xl bg-[#090910] border border-white/10 p-5 text-xs text-[#A1A1B8] flex items-center gap-3">
-              <Users className="w-4 h-4 text-[#FB7185] shrink-0" />
-              No eligible opponents matched right now. Add friends in the Friends tab or discover open-challenge champions as more players enter the Arena.
-            </div>
-          ) : (
-            <form onSubmit={handleSendDirectChallenge} className="space-y-4">
-              {/* Opponent Selector Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-60 overflow-y-auto pr-1">
-                {selectableOpponents.map(opp => {
-                  const presence = getPlayerPresence(opp.id);
-                  const chosen = selectedOpponentId === opp.id;
-                  return (
-                    <button
-                      key={opp.id}
-                      type="button"
-                      onClick={() => setSelectedOpponentId(opp.id)}
-                      className={`text-left rounded-xl p-3 border flex items-center justify-between gap-2 transition-all ${
-                        chosen
-                          ? 'bg-[#0E0E17] border-[#FB7185] shadow-[0_0_12px_rgba(251,113,133,0.2)]'
-                          : 'bg-[#090910] border-white/10 hover:border-[#FB7185]/45'
-                      }`}
-                    >
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <PresenceBadge status={presence.status} size="xs" />
-                          <span className="text-xs font-bold text-white truncate">
-                            {opp.username}
+                  {/* Duration Selector (Default 3 min, Absolute Max 5 min) */}
+                  <div className="space-y-2.5">
+                    <label className="block text-xs font-semibold text-slate-300">
+                      Duel Duration (3 Min Default · 5 Min Max)
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {DURATION_PRESETS.map(preset => {
+                        const selected = selectedDurationSec === preset.seconds;
+                        return (
+                          <button
+                            key={preset.seconds}
+                            type="button"
+                            disabled={queueEntry?.status === 'searching'}
+                            onClick={() => setSelectedDurationSec(preset.seconds)}
+                            className={`px-4 py-3 rounded-xl border text-left transition-colors cursor-pointer disabled:opacity-60 ${
+                              selected
+                                ? 'bg-[#8B5CF6]/15 border-[#8B5CF6] text-white'
+                                : 'bg-[#0D0D18] border-white/10 text-slate-300 hover:border-white/25'
+                            }`}
+                          >
+                            <div className="text-sm font-semibold">{preset.label}</div>
+                            <div className="text-xs text-slate-400 mt-0.5">{preset.caption}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Supported Exercise Pool (Clean Unboxed Metadata) */}
+                  <div className="pt-2 border-t border-white/10 text-xs text-slate-400 flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="text-slate-300 font-medium">Supported Duel Exercises:</span>
+                    {DUEL_EXERCISE_IDS.map((exId, idx) => (
+                      <React.Fragment key={exId}>
+                        <span>{DUEL_EXERCISES_CATALOG[exId].name}</span>
+                        {idx < DUEL_EXERCISE_IDS.length - 1 && (
+                          <span aria-hidden="true" className="text-slate-600">
+                            ·
                           </span>
-                        </div>
-                        <p className="text-[11px] text-[#A1A1B8] tabular-nums mt-0.5">
-                          Lv.{opp.level} · {opp.characterClass} · {opp.isFriend ? 'Friend' : 'Open Arena'}
-                        </p>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <span className="text-xs font-mono font-bold text-[#D6A84B] tabular-nums block">
-                          {opp.rating}
-                        </span>
-                        <span className="text-[10px] text-[#A1A1B8]/75">{opp.tier}</span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Match Rule Configuration */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2 border-t border-white/10">
-                <div>
-                  <label className="text-[11px] text-[#A1A1B8] font-semibold block mb-1">
-                    Duel Mode
-                  </label>
-                  <select
-                    value={challengeMode}
-                    onChange={e => {
-                      const nextMode = e.target.value as CompetitiveRivalMode;
-                      setChallengeMode(nextMode);
-                      const def = COMPETITIVE_RIVAL_MODES.find(m => m.id === nextMode);
-                      if (def) {
-                        setDurationDays(def.defaultDurationDays);
-                        setTargetScore(def.defaultTargetScore);
-                      }
-                    }}
-                    className="w-full rounded-xl bg-[#090910] border border-white/15 px-3 py-2 text-xs text-white focus:outline-none focus:border-[#FB7185]"
-                  >
-                    {COMPETITIVE_RIVAL_MODES.map(m => (
-                      <option key={m.id} value={m.id}>
-                        {m.title}
-                      </option>
+                        )}
+                      </React.Fragment>
                     ))}
-                  </select>
-                </div>
+                  </div>
 
-                <div>
-                  <label className="text-[11px] text-[#A1A1B8] font-semibold block mb-1">
-                    Duration (3–14 Days)
-                  </label>
-                  <input
-                    type="number"
-                    min={3}
-                    max={14}
-                    value={durationDays}
-                    onChange={e => setDurationDays(Math.max(3, Math.min(14, Number(e.target.value) || 7)))}
-                    className="w-full rounded-xl bg-[#090910] border border-white/15 px-3 py-2 text-xs text-white font-mono tabular-nums focus:outline-none focus:border-[#FB7185]"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[11px] text-[#A1A1B8] font-semibold block mb-1">
-                    Target Score Cap (100–2000)
-                  </label>
-                  <input
-                    type="number"
-                    min={100}
-                    max={2000}
-                    step={25}
-                    value={targetScore}
-                    onChange={e => setTargetScore(Math.max(100, Math.min(2000, Number(e.target.value) || 500)))}
-                    className="w-full rounded-xl bg-[#090910] border border-white/15 px-3 py-2 text-xs text-white font-mono tabular-nums focus:outline-none focus:border-[#FB7185]"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[11px] text-[#A1A1B8] font-semibold block mb-1">
-                    Visibility
-                  </label>
-                  <select
-                    value={visibility}
-                    onChange={e => setVisibility(e.target.value as CompetitiveMatchVisibility)}
-                    className="w-full rounded-xl bg-[#090910] border border-white/15 px-3 py-2 text-xs text-white focus:outline-none focus:border-[#FB7185]"
-                  >
-                    <option value="friends">Friends Visible</option>
-                    <option value="public">Public Arena Log</option>
-                    <option value="private">Private (Participants Only)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex flex-wrap items-center gap-4 text-xs text-[#A1A1B8]">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={isRanked}
-                      onChange={e => setIsRanked(e.target.checked)}
-                      className="accent-[#FB7185]"
-                    />
-                    <span>Ranked Elo Match</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={allowRestDays}
-                      onChange={e => setAllowRestDays(e.target.checked)}
-                      className="accent-[#34D399]"
-                    />
-                    <span>Healthy Recovery Rest Days Allowed</span>
-                  </label>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={busyId === 'challenge-send' || !selectedOpponentId}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#BE123C] to-[#FB7185] hover:from-[#E11D48] hover:to-[#FDA4AF] disabled:opacity-50 text-white shadow-[0_0_16px_rgba(251,113,133,0.35)] font-['Cinzel'] font-bold text-xs tracking-wider uppercase whitespace-nowrap shrink-0 transition-all"
-                >
-                  {busyId === 'challenge-send' ? 'Sending...' : 'Send Direct Challenge'}
-                </button>
-              </div>
-
-              {challengeMode === 'custom' && (
-                <div>
-                  <label className="text-[11px] text-[#A1A1B8] font-semibold block mb-1">
-                    Custom Match Stipulation (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    maxLength={120}
-                    value={customNote}
-                    onChange={e => setCustomNote(e.target.value)}
-                    placeholder="e.g. Clean form workouts & minimum 1 recovery stretch"
-                    className="w-full rounded-xl bg-[#090910] border border-white/15 px-3 py-2 text-xs text-white placeholder-[#A1A1B8]/50 focus:outline-none focus:border-[#FB7185]"
-                  />
-                </div>
-              )}
-            </form>
-          )}
-        </div>
-      )}
-
-      {/* TAB 3: ACTIVE & PENDING MATCHES */}
-      {arenaTab === 'matches' && (
-        <div className="space-y-5">
-          {(incomingInvites.length > 0 || outgoingInvites.length > 0) && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {incomingInvites.length > 0 && (
-                <div className="rounded-2xl bg-[#141420]/95 backdrop-blur-md border border-[#FB7185]/30 p-5 space-y-3 shadow-[0_12px_32px_rgba(0,0,0,0.6)]">
-                  <h3 className="font-['Cinzel'] font-bold text-sm text-[#FB7185]">
-                    Incoming Challenges ({incomingInvites.length})
-                  </h3>
-                  {incomingInvites.map(inv => {
-                    const presence = getPlayerPresence(inv.challengerId);
-                    return (
-                      <div
-                        key={inv.id}
-                        className="rounded-xl bg-[#090910] border border-white/10 p-3.5 flex items-center justify-between gap-3"
-                      >
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <PresenceBadge status={presence.status} size="xs" />
-                            <button
-                              type="button"
-                              onClick={() => openPublicProfile(inv.challengerId)}
-                              className="text-xs font-bold text-white hover:text-[#D6A84B] truncate transition-colors"
-                            >
-                              {inv.challengerName}
-                            </button>
-                            <span className="text-xs text-[#A1A1B8]">
-                              · {inv.challengeTitle}
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-[#A1A1B8]/80 font-mono tabular-nums mt-0.5">
-                            {inv.isRanked ? 'Ranked Elo' : 'Casual'} · {inv.rules.durationDays}d · Target {inv.rules.targetScore} pts
-                            {inv.challengerRatingSnapshot ? ` · ${inv.challengerRatingSnapshot} Elo` : ''}
-                          </p>
+                  {/* Queue Status or Primary CTA */}
+                  {queueEntry?.status === 'searching' ? (
+                    <div className="p-5 rounded-xl bg-[#0D0D18] border border-[#8B5CF6]/40 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                          <RefreshCw className="w-4 h-4 text-[#A78BFA] animate-spin" />
+                          <span>Searching for a Real Rival...</span>
                         </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <button
-                            type="button"
-                            disabled={busyId === inv.id}
-                            onClick={() => void handleRespond(inv.id, 'accept')}
-                            className="px-2.5 py-1.5 rounded-lg bg-[#34D399] hover:bg-[#6EE7B7] text-[#090910] text-xs font-bold flex items-center gap-1 transition-colors"
-                          >
-                            <Check className="w-3.5 h-3.5" /> Accept
-                          </button>
-                          <button
-                            type="button"
-                            disabled={busyId === inv.id}
-                            onClick={() => void handleRespond(inv.id, 'decline')}
-                            className="px-2.5 py-1.5 rounded-lg bg-[#0E0E17] hover:bg-[#FB7185]/15 border border-white/15 hover:border-[#FB7185]/45 text-[#FB7185] text-xs font-semibold flex items-center gap-1 transition-colors"
-                          >
-                            <X className="w-3.5 h-3.5" /> Decline
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {outgoingInvites.length > 0 && (
-                <div className="rounded-2xl bg-[#141420]/95 backdrop-blur-md border border-white/10 p-5 space-y-3 shadow-[0_12px_32px_rgba(0,0,0,0.6)]">
-                  <h3 className="font-['Cinzel'] font-bold text-sm text-white">
-                    Sent Challenges ({outgoingInvites.length})
-                  </h3>
-                  {outgoingInvites.map(inv => (
-                    <div
-                      key={inv.id}
-                      className="rounded-xl bg-[#090910] border border-white/10 p-3.5 flex items-center justify-between gap-3"
-                    >
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold text-white truncate">
-                          To {inv.opponentName} · {inv.challengeTitle}
-                        </p>
-                        <p className="text-[11px] text-[#A1A1B8]/80 font-mono tabular-nums mt-0.5">
-                          {inv.isRanked ? 'Ranked' : 'Casual'} · {inv.rules.durationDays}d · Awaiting response
+                        <p className="text-xs text-slate-400 tabular-nums">
+                          Rating range {queueEntry.minRating} – {queueEntry.maxRating} Elo · Elapsed{' '}
+                          {formatClockMmSs(
+                            Math.max(0, Date.now() - Date.parse(queueEntry.createdAt))
+                          )}
                         </p>
                       </div>
                       <button
                         type="button"
-                        onClick={() => void cancelRivalInvite(inv.id)}
-                        className="px-3 py-1.5 rounded-lg bg-[#0E0E17] hover:bg-[#FB7185]/15 border border-white/15 hover:border-[#FB7185]/45 text-xs text-[#FB7185] font-semibold shrink-0 transition-colors"
+                        onClick={() => void handleCancelQueue()}
+                        disabled={busyAction === 'cancel-queue'}
+                        className="px-4 py-2.5 rounded-xl border border-[#FB7185]/40 bg-[#FB7185]/10 hover:bg-[#FB7185]/20 text-[#FB7185] text-xs font-semibold cursor-pointer whitespace-nowrap"
                       >
-                        Cancel
+                        Cancel Search
                       </button>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+                  ) : (
+                    <div className="flex flex-wrap items-center gap-4">
+                      <button
+                        type="button"
+                        onClick={() => void handleFindRival()}
+                        disabled={busyAction === 'queue' || rivalsLoading}
+                        className="px-7 py-3.5 rounded-xl bg-gradient-to-r from-[#8B5CF6] to-[#6D28D9] hover:from-[#7C3AED] hover:to-[#5B21B6] text-white text-sm font-bold shadow-lg shadow-[#8B5CF6]/20 inline-flex items-center gap-2.5 transition-all cursor-pointer disabled:opacity-60 whitespace-nowrap"
+                      >
+                        <Target className="w-4 h-4 text-[#E8CF96]" />
+                        <span>{busyAction === 'queue' ? 'Matching...' : 'Find a Rival'}</span>
+                      </button>
 
-          {/* Active Head-to-Head Duels */}
-          <div className="rounded-2xl bg-[#141420]/95 backdrop-blur-md border border-white/10 p-5 space-y-4 shadow-[0_12px_32px_rgba(0,0,0,0.6)]">
-            <h2 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-              <Dumbbell className="w-4 h-4 text-[#FB7185]" />
-              Active Competitive Matches
-            </h2>
-
-            {activeDuels.length === 0 ? (
-              <div className="py-8 text-center space-y-3">
-                <p className="text-xs text-[#A1A1B8]">
-                  No active matches right now. Enter the matchmaking queue or challenge a rival directly.
-                </p>
-                <div className="flex items-center justify-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setArenaTab('queue')}
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#BE123C] to-[#FB7185] hover:from-[#E11D48] hover:to-[#FDA4AF] text-white shadow-[0_0_16px_rgba(251,113,133,0.35)] text-xs font-bold transition-all"
-                  >
-                    Matchmaking Queue
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setArenaTab('challenge')}
-                    className="px-4 py-2 rounded-xl bg-[#0E0E17] hover:bg-[#1B1B2B] border border-white/15 hover:border-[#FB7185]/50 text-white text-xs font-semibold transition-all"
-                  >
-                    Direct Challenge
-                  </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowDirectPanel(v => !v)}
+                        className="px-4 py-3 rounded-xl border border-white/10 bg-[#0D0D18] hover:bg-white/5 text-xs font-semibold text-slate-200 inline-flex items-center gap-2 cursor-pointer whitespace-nowrap"
+                      >
+                        <Users className="w-3.5 h-3.5 text-[#38BDF8]" />
+                        <span>Challenge a Specific Player</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {activeDuels.map(m => {
-                  const amChallenger = m.challengerId === user?.id;
-                  const myScore = amChallenger ? m.challengerScore : m.opponentScore;
-                  const theirScore = amChallenger ? m.opponentScore : m.challengerScore;
-                  const theirName = amChallenger ? m.opponentName : m.challengerName;
-                  const theirId = amChallenger ? m.opponentId : m.challengerId;
-                  const theirRating = amChallenger
-                    ? m.opponentRatingSnapshot
-                    : m.challengerRatingSnapshot;
-                  const total = Math.max(1, myScore + theirScore);
-                  const myShare = Math.round((myScore / total) * 100);
-                  const theirPresence = getPlayerPresence(theirId);
 
-                  return (
-                    <div
-                      key={m.id}
-                      className="rounded-xl bg-[#090910] border border-[#FB7185]/25 p-4 space-y-3"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="text-[11px] font-['Cinzel'] font-bold text-[#D6A84B]">
-                            {m.challengeTitle} · {m.isRanked ? 'Ranked' : 'Unranked'}
-                          </p>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-sm font-bold text-white">You vs</span>
-                            <PresenceBadge status={theirPresence.status} size="xs" />
-                            <button
-                              type="button"
-                              onClick={() => openPublicProfile(theirId)}
-                              className="text-sm font-bold text-[#FB7185] hover:underline truncate"
-                            >
-                              {theirName}
-                            </button>
-                            {theirRating && (
-                              <span className="text-[11px] font-mono text-[#A1A1B8] tabular-nums">
-                                ({theirRating})
-                              </span>
-                            )}
+              {/* Incoming & Pending Invites */}
+              {(incomingInvites.length > 0 || sentInvites.length > 0) && (
+                <div className="bg-[#141420] border border-white/10 rounded-2xl p-6 space-y-4">
+                  <h3 className="text-sm font-bold text-white">Pending Duel Invitations</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {incomingInvites.map(inv => (
+                      <div
+                        key={inv.id}
+                        className="p-4 rounded-xl bg-[#0D0D18] border border-[#D6A84B]/30 flex flex-col justify-between gap-3"
+                      >
+                        <div>
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-sm font-bold text-white">
+                              {inv.challengerName}
+                            </span>
+                            <span className="text-xs text-[#D6A84B] tabular-nums">
+                              {inv.challengerRatingSnapshot ?? 1200} Elo
+                            </span>
                           </div>
+                          <p className="text-xs text-slate-400 mt-1">
+                            {inv.exerciseName} · {Math.round(inv.durationSeconds / 60)} min ·{' '}
+                            {inv.isRanked ? 'Ranked' : 'Friendly'}
+                          </p>
                         </div>
-                        <span className="text-[11px] font-mono text-[#A1A1B8] flex items-center gap-1 tabular-nums shrink-0">
-                          <Clock className="w-3 h-3" /> {formatRemainingTime(m.endsAt)}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between text-sm font-mono font-bold tabular-nums">
-                        <span className="text-[#34D399]">
-                          {myScore} pts <span className="text-[10px] font-sans font-normal text-[#A1A1B8]">(You)</span>
-                        </span>
-                        <span className="text-[11px] text-[#A1A1B8]/70 font-sans">
-                          Goal {m.rules.targetScore} pts
-                        </span>
-                        <span className="text-[#FB7185]">
-                          {theirScore} pts <span className="text-[10px] font-sans font-normal text-[#A1A1B8]">({theirName})</span>
-                        </span>
-                      </div>
-
-                      <div className="h-2 w-full rounded-full bg-[#1B1B2B] overflow-hidden flex">
-                        <div className="bg-[#34D399] h-full transition-all" style={{ width: `${myShare}%` }} />
-                      </div>
-
-                      <div className="flex items-center justify-between gap-2 pt-1 text-[11px] text-[#A1A1B8]/80">
-                        <span>
-                          {m.rules.allowRestDays ? 'Rest-day safe scoring' : 'Full active output'}
-                        </span>
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
-                            onClick={() => void endActiveRivalry(m.id)}
-                            className="px-2.5 py-1 rounded-lg bg-[#0E0E17] hover:bg-[#1B1B2B] border border-white/15 text-white font-semibold transition-colors"
+                            onClick={async () => {
+                              setBusyAction(`accept-${inv.id}`);
+                              const res = await respondRivalInvite(inv.id, 'accept');
+                              setBusyAction(null);
+                              handleActionResult(res, 'Invite accepted! Calibrate your camera.');
+                            }}
+                            disabled={busyAction === `accept-${inv.id}`}
+                            className="flex-1 px-3 py-2 rounded-lg bg-[#34D399] hover:bg-[#10B981] text-[#090910] text-xs font-bold cursor-pointer whitespace-nowrap"
                           >
-                            Settle Match
+                            Accept Duel
                           </button>
                           <button
                             type="button"
-                            onClick={() => void blockRivalUser(theirId)}
-                            className="px-2.5 py-1 rounded-lg bg-[#FB7185]/15 hover:bg-[#FB7185]/25 text-[#FB7185] font-semibold flex items-center gap-1 transition-colors"
+                            onClick={async () => {
+                              const res = await respondRivalInvite(inv.id, 'decline');
+                              handleActionResult(res, 'Invitation declined.');
+                            }}
+                            className="px-3 py-2 rounded-lg border border-white/10 hover:bg-white/5 text-xs font-medium text-slate-300 cursor-pointer whitespace-nowrap"
                           >
-                            <Ban className="w-3 h-3" /> Block
+                            Decline
                           </button>
                         </div>
                       </div>
+                    ))}
+
+                    {sentInvites.map(inv => (
+                      <div
+                        key={inv.id}
+                        className="p-4 rounded-xl bg-[#0D0D18] border border-white/10 flex items-center justify-between gap-3"
+                      >
+                        <div>
+                          <p className="text-sm font-semibold text-white">
+                            Sent to {inv.opponentName}
+                          </p>
+                          <p className="text-xs text-slate-400 mt-0.5">
+                            {inv.exerciseName} · {Math.round(inv.durationSeconds / 60)} min · Awaiting
+                            acceptance
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const res = await cancelRivalInvite(inv.id);
+                            handleActionResult(res, 'Challenge cancelled.');
+                          }}
+                          className="px-3 py-1.5 rounded-lg border border-white/10 hover:bg-white/5 text-xs text-slate-300 cursor-pointer whitespace-nowrap"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Direct Friend / Arena Player Challenge Drawer */}
+              {showDirectPanel && (
+                <div className="bg-[#141420] border border-white/10 rounded-2xl p-6 space-y-5">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <h3 className="text-base font-bold text-white">Direct Friend / Player Invite</h3>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        A single verified exercise is automatically assigned once invited.
+                      </p>
                     </div>
-                  );
-                })}
+                    <div className="relative w-full sm:w-64">
+                      <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        value={candidateSearch}
+                        onChange={e => setCandidateSearch(e.target.value)}
+                        placeholder="Search players..."
+                        className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#0D0D18] border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#8B5CF6]"
+                      />
+                    </div>
+                  </div>
+
+                  {filteredCandidates.length === 0 ? (
+                    <p className="text-xs text-slate-400 py-4">
+                      No available players found right now. Use Find a Rival above to match with
+                      real players in queue!
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-60 overflow-y-auto pr-1">
+                      {filteredCandidates.map(c => {
+                        const pres = getPlayerPresence(c.userId);
+                        const selected = selectedOpponentId === c.userId;
+                        return (
+                          <button
+                            key={c.userId}
+                            type="button"
+                            onClick={() => setSelectedOpponentId(c.userId)}
+                            className={`p-3.5 rounded-xl border text-left transition-colors cursor-pointer ${
+                              selected
+                                ? 'bg-[#8B5CF6]/15 border-[#8B5CF6]'
+                                : 'bg-[#0D0D18] border-white/10 hover:border-white/25'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-xs font-bold text-white truncate">
+                                {c.username}
+                              </span>
+                              <PresenceBadge status={pres.status} size="sm" />
+                            </div>
+                            <p className="text-[11px] text-slate-400 mt-1 tabular-nums">
+                              {c.rating} Elo · {c.isFriend ? 'Friend' : 'Arena Player'}
+                            </p>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap items-center gap-4 pt-3 border-t border-white/10">
+                    <select
+                      value={directDurationSec}
+                      onChange={e => setDirectDurationSec(Number(e.target.value))}
+                      className="px-3 py-2 rounded-xl bg-[#0D0D18] border border-white/10 text-xs text-white"
+                    >
+                      {DURATION_PRESETS.map(p => (
+                        <option key={p.seconds} value={p.seconds}>
+                          {p.label}
+                        </option>
+                      ))}
+                    </select>
+
+                    <select
+                      value={visibility}
+                      onChange={e => setVisibility(e.target.value as CompetitiveMatchVisibility)}
+                      className="px-3 py-2 rounded-xl bg-[#0D0D18] border border-white/10 text-xs text-white"
+                    >
+                      <option value="friends">Friends Spectate</option>
+                      <option value="public">Public Spectate</option>
+                      <option value="private">Private</option>
+                    </select>
+
+                    <button
+                      type="button"
+                      onClick={() => setIsRanked(v => !v)}
+                      className={`px-3 py-2 rounded-xl border text-xs font-medium cursor-pointer ${
+                        isRanked
+                          ? 'bg-[#D6A84B]/15 border-[#D6A84B]/40 text-[#E8CF96]'
+                          : 'bg-[#0D0D18] border-white/10 text-slate-300'
+                      }`}
+                    >
+                      {isRanked ? 'Ranked Elo Match' : 'Unranked Practice'}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => void handleDirectChallenge()}
+                      disabled={!selectedOpponentId || busyAction === 'challenge'}
+                      className="ml-auto px-5 py-2.5 rounded-xl bg-[#8B5CF6] hover:bg-[#7C3AED] disabled:opacity-50 text-white text-xs font-bold cursor-pointer whitespace-nowrap"
+                    >
+                      {busyAction === 'challenge' ? 'Sending...' : 'Send Live Invite'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ----------------------------------------------------------------- */}
+          {/* STAGE 2 & STAGE 3 SHARED ARENA (Continuous Camera & Transition)   */}
+          {/* ----------------------------------------------------------------- */}
+          {(currentStage === 2 || currentStage === 3) && activePerspective && (
+            <div className="space-y-6">
+              {/* Synchronized Match Header & Scoreboard */}
+              <div className="bg-[#141420] border border-white/10 rounded-2xl p-6 space-y-5">
+                <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
+                  <div>
+                    <p className="text-xs font-medium text-[#D6A84B]">
+                      {currentStage === 2
+                        ? 'Stage 2 · Prepare & Calibrate Camera'
+                        : countdownRemainingMs > 0
+                        ? 'Starting Countdown · Get In Position'
+                        : 'Stage 3 · Live Real-Life Duel'}
+                    </p>
+                    <h2 className="text-2xl font-bold text-white mt-0.5">
+                      {activePerspective.exDef.name} 1v1 Duel
+                    </h2>
+                    <p className="text-xs text-slate-400 mt-1 tabular-nums">
+                      +{activePerspective.match.pointsPerRep} pts per verified rep ·{' '}
+                      {Math.round(activePerspective.match.durationSeconds / 60)} min duration ·{' '}
+                      {activePerspective.match.isRanked ? 'Ranked Elo' : 'Friendly'}
+                    </p>
+                  </div>
+
+                  {/* Synchronized Timer Display */}
+                  <div className="text-right">
+                    {currentStage === 2 ? (
+                      <div className="px-4 py-2.5 rounded-xl bg-[#0D0D18] border border-white/10">
+                        <p className="text-[11px] text-slate-400">Match Duration</p>
+                        <p className="text-xl font-bold text-white tabular-nums">
+                          {formatClockMmSs(activePerspective.match.durationSeconds * 1000)}
+                        </p>
+                      </div>
+                    ) : countdownRemainingMs > 0 ? (
+                      <div className="px-5 py-2.5 rounded-xl bg-[#FBBF24]/15 border border-[#FBBF24]/50">
+                        <p className="text-[11px] text-[#FBBF24] font-semibold">Starting In</p>
+                        <p className="text-3xl font-black text-[#FBBF24] tabular-nums">
+                          {Math.ceil(countdownRemainingMs / 1000)}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="px-5 py-2.5 rounded-xl bg-[#0D0D18] border border-[#34D399]/40">
+                        <p className="text-[11px] text-slate-400">Time Remaining</p>
+                        <p
+                          className={`text-3xl font-black tabular-nums ${
+                            duelTimeRemainingMs <= 15_000 ? 'text-[#FB7185]' : 'text-[#34D399]'
+                          }`}
+                        >
+                          {formatClockMmSs(duelTimeRemainingMs)}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Live Versus Scoreboard */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* You */}
+                  <div className="p-5 rounded-xl bg-[#0D0D18] border border-[#8B5CF6]/40 flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs text-[#A78BFA] font-semibold">You</p>
+                      <p className="text-lg font-bold text-white">
+                        {activePerspective.myName}
+                      </p>
+                      <p className="text-xs text-slate-400 tabular-nums mt-0.5">
+                        {activePerspective.myRating ?? 1200} Elo ·{' '}
+                        {currentStage === 2
+                          ? activePerspective.myReady
+                            ? 'Ready'
+                            : cameraStatus.cameraReady
+                            ? 'Camera Ready'
+                            : 'Calibrating'
+                          : 'Live'}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-3xl font-black text-white tabular-nums">
+                        {activePerspective.myScore}
+                        <span className="text-xs font-medium text-slate-400 ml-1">pts</span>
+                      </p>
+                      <p className="text-xs text-[#34D399] font-semibold tabular-nums mt-0.5">
+                        {activePerspective.myReps} verified reps
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Opponent */}
+                  <div className="p-5 rounded-xl bg-[#0D0D18] border border-white/10 flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs text-[#FB7185] font-semibold">Opponent</p>
+                      <p className="text-lg font-bold text-white">
+                        {activePerspective.opName}
+                      </p>
+                      <p className="text-xs text-slate-400 tabular-nums mt-0.5">
+                        {activePerspective.opRating ?? 1200} Elo ·{' '}
+                        {currentStage === 2
+                          ? activePerspective.opReady
+                            ? 'Ready'
+                            : activePerspective.opCameraReady
+                            ? 'Camera Active'
+                            : 'Preparing Camera...'
+                          : 'Synced Live'}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-3xl font-black text-white tabular-nums">
+                        {activePerspective.opScore}
+                        <span className="text-xs font-medium text-slate-400 ml-1">pts</span>
+                      </p>
+                      <p className="text-xs text-slate-300 font-semibold tabular-nums mt-0.5">
+                        {activePerspective.opReps} verified reps
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
-            )}
-          </div>
+
+              {/* Camera Tracker + Guidance / Live Feed Split */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                <div className="lg:col-span-7 space-y-3">
+                  <DuelPoseTracker
+                    exercise={activePerspective.match.duelExercise}
+                    exerciseName={activePerspective.exDef.name}
+                    trackingEnabled={true}
+                    countingActive={isCountingLive}
+                    onStatusChange={setCameraStatus}
+                    onVerifiedRep={handleVerifiedRepFromTracker}
+                  />
+
+                  {repFeedbackNotice && currentStage === 3 && (
+                    <div className="px-4 py-2.5 rounded-xl bg-[#141420] border border-white/10 text-xs text-slate-200 flex items-center justify-between">
+                      <span>{repFeedbackNotice}</span>
+                      <span className="text-[11px] text-[#D6A84B]">Server Verified</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right Column: Stage 2 Controls & Guidance OR Stage 3 Live Log & Safe Stop */}
+                <div className="lg:col-span-5 space-y-4">
+                  {currentStage === 2 ? (
+                    <div className="bg-[#141420] border border-white/10 rounded-2xl p-6 space-y-5">
+                      <div>
+                        <h3 className="text-base font-bold text-white">
+                          {activePerspective.exDef.name} Standards & Safety
+                        </h3>
+                        <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                          {activePerspective.exDef.description}
+                        </p>
+                      </div>
+
+                      <div className="space-y-2 text-xs text-slate-300">
+                        <p className="font-semibold text-white">Form & Camera Checklist</p>
+                        <ul className="space-y-1.5 text-slate-400">
+                          {activePerspective.exDef.formCues.map((cue, idx) => (
+                            <li key={idx} className="flex items-start gap-2">
+                              <Check className="w-3.5 h-3.5 text-[#34D399] shrink-0 mt-0.5" />
+                              <span>{cue}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="pt-3 border-t border-white/10 space-y-2 text-xs text-slate-400">
+                        <p>
+                          <span className="text-slate-200 font-medium">Camera Placement:</span>{' '}
+                          {activePerspective.exDef.cameraSetupTip}
+                        </p>
+                        <p>
+                          <span className="text-slate-200 font-medium">Warm-Up:</span>{' '}
+                          {activePerspective.exDef.warmupGuidance}
+                        </p>
+                        <p>
+                          <span className="text-slate-200 font-medium">Accessible Option:</span>{' '}
+                          {activePerspective.exDef.accessibleModification}
+                        </p>
+                      </div>
+
+                      <div className="pt-3 border-t border-white/10 space-y-3">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            void handleReadyToggle(!activePerspective.myReady)
+                          }
+                          disabled={
+                            busyAction === 'ready' ||
+                            (!activePerspective.myReady && !cameraStatus.cameraReady)
+                          }
+                          className={`w-full py-3.5 px-5 rounded-xl text-sm font-bold transition-colors cursor-pointer disabled:opacity-50 ${
+                            activePerspective.myReady
+                              ? 'bg-[#34D399]/15 border border-[#34D399]/50 text-[#34D399]'
+                              : 'bg-gradient-to-r from-[#8B5CF6] to-[#6D28D9] hover:from-[#7C3AED] hover:to-[#5B21B6] text-white'
+                          }`}
+                        >
+                          {busyAction === 'ready'
+                            ? 'Syncing Readiness...'
+                            : activePerspective.myReady
+                            ? `Ready — Waiting for ${activePerspective.opName}...`
+                            : cameraStatus.cameraReady
+                            ? 'Mark Ready to Duel'
+                            : 'Enable Camera First'}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => void handleConcedeOrSafeStop()}
+                          disabled={busyAction === 'concede'}
+                          className="w-full py-2.5 px-4 rounded-xl border border-white/10 hover:bg-white/5 text-xs font-medium text-slate-300 cursor-pointer"
+                        >
+                          Step Out Safely (No Elo Penalty)
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-[#141420] border border-white/10 rounded-2xl p-6 space-y-5">
+                      <div>
+                        <h3 className="text-base font-bold text-white">Live Verification Log</h3>
+                        <p className="text-xs text-slate-400 mt-1">
+                          Every repetition is validated for full range of motion, landmark
+                          visibility, and natural cadence before points are credited.
+                        </p>
+                      </div>
+
+                      <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                        {activeMatchEvents.length === 0 ? (
+                          <p className="text-xs text-slate-500 py-4 text-center">
+                            {countdownRemainingMs > 0
+                              ? 'Get ready—scoring unlocks on GO.'
+                              : 'Perform full repetitions in view to score verified points.'}
+                          </p>
+                        ) : (
+                          activeMatchEvents.map(ev => {
+                            const isMe = ev.userId === myUserId;
+                            return (
+                              <div
+                                key={ev.id}
+                                className="px-3.5 py-2.5 rounded-xl bg-[#0D0D18] border border-white/5 flex items-center justify-between text-xs"
+                              >
+                                <span className={isMe ? 'text-[#A78BFA] font-semibold' : 'text-slate-300'}>
+                                  {isMe ? 'You' : activePerspective.opName} · {ev.label}
+                                </span>
+                                <span className="text-[#34D399] font-bold tabular-nums">
+                                  +{ev.pointsAwarded} pts
+                                </span>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+
+                      <div className="pt-4 border-t border-white/10 space-y-3">
+                        <p className="text-xs text-slate-400 leading-relaxed">
+                          Safety First: Maintain controlled form and breathe steadily. Stop
+                          immediately if you feel sharp pain, dizziness, or unsafe fatigue.
+                        </p>
+
+                        {!confirmSafeStop ? (
+                          <button
+                            type="button"
+                            onClick={() => setConfirmSafeStop(true)}
+                            className="w-full py-2.5 px-4 rounded-xl border border-[#FB7185]/40 bg-[#FB7185]/10 hover:bg-[#FB7185]/20 text-[#FB7185] text-xs font-semibold cursor-pointer"
+                          >
+                            Stop Safely / Concede Duel
+                          </button>
+                        ) : (
+                          <div className="p-3.5 rounded-xl bg-[#0D0D18] border border-[#FB7185]/40 space-y-2.5">
+                            <p className="text-xs text-slate-300">
+                              {activePerspective.myReps + activePerspective.opReps === 0
+                                ? 'No reps scored yet—stopping now cancels cleanly with no Elo shift.'
+                                : 'Reps are already recorded—stopping early awards a forfeit win to your opponent.'}
+                            </p>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => void handleConcedeOrSafeStop()}
+                                disabled={busyAction === 'concede'}
+                                className="flex-1 py-2 px-3 rounded-lg bg-[#FB7185] hover:bg-[#F43F5E] text-[#090910] text-xs font-bold cursor-pointer"
+                              >
+                                Confirm Stop
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setConfirmSafeStop(false)}
+                                className="py-2 px-3 rounded-lg border border-white/10 text-xs text-slate-300 cursor-pointer"
+                              >
+                                Keep Going
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ----------------------------------------------------------------- */}
+          {/* STAGE 4: RESULTS                                                  */}
+          {/* ----------------------------------------------------------------- */}
+          {currentStage === 4 && resultMatch && (
+            <div className="bg-[#141420] border border-white/10 rounded-2xl p-6 lg:p-8 space-y-6">
+              {(() => {
+                const amChallenger = resultMatch.challengerId === myUserId;
+                const won = resultMatch.winnerId === myUserId;
+                const myScore = amChallenger ? resultMatch.challengerScore : resultMatch.opponentScore;
+                const myReps = amChallenger ? resultMatch.challengerReps : resultMatch.opponentReps;
+                const opScore = amChallenger ? resultMatch.opponentScore : resultMatch.challengerScore;
+                const opReps = amChallenger ? resultMatch.opponentReps : resultMatch.challengerReps;
+                const opName = amChallenger ? resultMatch.opponentName : resultMatch.challengerName;
+                const myRatingBefore = amChallenger
+                  ? resultMatch.challengerRatingBefore
+                  : resultMatch.opponentRatingBefore;
+                const myRatingAfter = amChallenger
+                  ? resultMatch.challengerRatingAfter
+                  : resultMatch.opponentRatingAfter;
+                const myDelta = amChallenger
+                  ? resultMatch.challengerRatingDelta
+                  : resultMatch.opponentRatingDelta;
+
+                return (
+                  <>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/10 pb-5">
+                      <div>
+                        <p
+                          className={`text-xs font-semibold ${
+                            resultMatch.isTie
+                              ? 'text-[#FBBF24]'
+                              : won
+                              ? 'text-[#34D399]'
+                              : 'text-[#FB7185]'
+                          }`}
+                        >
+                          {resultMatch.isTie
+                            ? 'Draw · Even Effort'
+                            : won
+                            ? 'Victory · Verified Winner'
+                            : 'Defeat · Duel Concluded'}
+                        </p>
+                        <h2 className="text-2xl font-bold text-white mt-1">
+                          {resultMatch.exerciseName} 1v1 Results
+                        </h2>
+                        <p className="text-xs text-slate-400 mt-1">
+                          {resultMatch.forfeitByUserId
+                            ? resultMatch.forfeitByUserId === myUserId
+                              ? 'Ended via safe early stop.'
+                              : `${opName} stopped early (forfeit victory).`
+                            : 'Full duel clock completed · All points verified server-side.'}
+                        </p>
+                      </div>
+
+                      {typeof myDelta === 'number' && (
+                        <div className="px-5 py-3 rounded-xl bg-[#0D0D18] border border-white/10 text-right">
+                          <p className="text-[11px] text-slate-400">Elo Rating Update</p>
+                          <p className="text-xl font-bold text-white tabular-nums">
+                            {myRatingBefore ?? profile?.rating ?? 1200} →{' '}
+                            {myRatingAfter ?? profile?.rating ?? 1200}
+                            <span
+                              className={`ml-2 text-sm ${
+                                myDelta >= 0 ? 'text-[#34D399]' : 'text-[#FB7185]'
+                              }`}
+                            >
+                              ({myDelta >= 0 ? `+${myDelta}` : myDelta})
+                            </span>
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div
+                        className={`p-5 rounded-xl bg-[#0D0D18] border ${
+                          won ? 'border-[#34D399]/50' : 'border-white/10'
+                        }`}
+                      >
+                        <p className="text-xs text-[#A78BFA] font-semibold">You</p>
+                        <p className="text-lg font-bold text-white mt-0.5">
+                          {amChallenger ? resultMatch.challengerName : resultMatch.opponentName}
+                        </p>
+                        <div className="mt-4 flex items-baseline gap-4">
+                          <span className="text-3xl font-black text-white tabular-nums">
+                            {myScore} pts
+                          </span>
+                          <span className="text-sm text-slate-400 tabular-nums">
+                            {myReps} verified reps
+                          </span>
+                        </div>
+                      </div>
+
+                      <div
+                        className={`p-5 rounded-xl bg-[#0D0D18] border ${
+                          !won && !resultMatch.isTie ? 'border-[#34D399]/50' : 'border-white/10'
+                        }`}
+                      >
+                        <p className="text-xs text-[#FB7185] font-semibold">Opponent</p>
+                        <p className="text-lg font-bold text-white mt-0.5">{opName}</p>
+                        <div className="mt-4 flex items-baseline gap-4">
+                          <span className="text-3xl font-black text-white tabular-nums">
+                            {opScore} pts
+                          </span>
+                          <span className="text-sm text-slate-400 tabular-nums">
+                            {opReps} verified reps
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setResultMatchId(null);
+                          }}
+                          className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#8B5CF6] to-[#6D28D9] hover:from-[#7C3AED] hover:to-[#5B21B6] text-white text-sm font-bold cursor-pointer whitespace-nowrap"
+                        >
+                          Find Another Rival
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void handleRematch(resultMatch.id)}
+                          disabled={busyAction === `rematch-${resultMatch.id}`}
+                          className="px-5 py-3 rounded-xl border border-[#D6A84B]/40 bg-[#D6A84B]/10 hover:bg-[#D6A84B]/20 text-[#E8CF96] text-sm font-semibold inline-flex items-center gap-2 cursor-pointer whitespace-nowrap"
+                        >
+                          <RotateCcw className="w-4 h-4" />
+                          <span>Rematch Opponent</span>
+                        </button>
+                      </div>
+
+                      {resultMatch.status === 'completed' && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDisputeMatchId(resultMatch.id);
+                            setDisputeReason('');
+                          }}
+                          className="text-xs text-slate-400 hover:text-[#FB7185] inline-flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <Scale className="w-3.5 h-3.5" />
+                          <span>Report Fair-Play Issue</span>
+                        </button>
+                      )}
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+          )}
         </div>
       )}
 
-      {/* TAB 4: MATCH ARCHIVE & HEAD-TO-HEAD MATRIX */}
-      {arenaTab === 'history' && (
-        <div className="space-y-5">
-          {/* Head-to-Head Matrix */}
-          <div className="rounded-2xl bg-[#141420]/95 backdrop-blur-md border border-white/10 p-5 space-y-3 shadow-[0_12px_32px_rgba(0,0,0,0.6)]">
-            <h2 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-              <Scale className="w-4 h-4 text-[#D6A84B]" />
-              Head-to-Head Rivalries ({h2hRecords.length})
-            </h2>
-            {h2hRecords.length === 0 ? (
-              <p className="text-xs text-[#A1A1B8]">
-                Complete matches against rivals to build your lifetime Head-to-Head ledger.
-              </p>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {h2hRecords.map(h => (
-                  <div
-                    key={h.opponentId}
-                    className="rounded-xl bg-[#090910] border border-white/10 p-3.5 flex items-center justify-between gap-2"
+      {/* ===================================================================== */}
+      {/* HISTORY & HEAD-TO-HEAD TAB                                            */}
+      {/* ===================================================================== */}
+      {subView === 'history' && (
+        <div className="space-y-6">
+          <div className="bg-[#141420] border border-white/10 rounded-2xl p-6 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-lg font-bold text-white">Past Exercise Duels</h2>
+              <div className="flex items-center gap-1.5 bg-[#0D0D18] p-1 rounded-xl border border-white/10">
+                {(['all', 'completed', 'cancelled'] as const).map(f => (
+                  <button
+                    key={f}
+                    type="button"
+                    onClick={() => setHistoryFilter(f)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize cursor-pointer ${
+                      historyFilter === f
+                        ? 'bg-[#8B5CF6] text-white'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
                   >
-                    <div className="min-w-0">
-                      <button
-                        type="button"
-                        onClick={() => openPublicProfile(h.opponentId)}
-                        className="text-xs font-bold text-white hover:text-[#D6A84B] truncate block transition-colors"
-                      >
-                        {h.opponentName}
-                      </button>
-                      <span className="text-[11px] text-[#A1A1B8] font-mono tabular-nums">
-                        {h.opponentRating} Elo · {h.opponentTier}
-                      </span>
-                    </div>
-                    <div className="text-right font-mono tabular-nums shrink-0">
-                      <span className="text-sm font-bold text-[#D6A84B]">
-                        {h.wins}W - {h.losses}L - {h.ties}T
-                      </span>
-                      <span className="text-[10px] text-[#A1A1B8]/70 block">
-                        {h.totalMatches} matches
-                      </span>
-                    </div>
-                  </div>
+                    {f}
+                  </button>
                 ))}
               </div>
-            )}
-          </div>
+            </div>
 
-          {/* Match History Archive */}
-          <div className="rounded-2xl bg-[#141420]/95 backdrop-blur-md border border-white/10 p-5 space-y-3 shadow-[0_12px_32px_rgba(0,0,0,0.6)]">
-            <h2 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-              <Award className="w-4 h-4 text-[#FB7185]" />
-              Completed &amp; Archived Matches ({historyDuels.length})
-            </h2>
-            {historyDuels.length === 0 ? (
-              <p className="text-xs text-[#A1A1B8]">No finished matches archived yet.</p>
+            {historyMatches.length === 0 ? (
+              <p className="text-sm text-slate-400 py-8 text-center">
+                No concluded duels recorded yet. Complete a live 1v1 exercise duel to build your
+                history.
+              </p>
             ) : (
-              <div className="space-y-2">
-                {historyDuels.slice(0, 20).map(m => {
-                  const amChallenger = m.challengerId === user?.id;
-                  const myScore = amChallenger ? m.challengerScore : m.opponentScore;
-                  const theirScore = amChallenger ? m.opponentScore : m.challengerScore;
-                  const theirName = amChallenger ? m.opponentName : m.challengerName;
-                  const theirId = amChallenger ? m.opponentId : m.challengerId;
-                  const myDelta = amChallenger
-                    ? m.challengerRatingDelta
-                    : m.opponentRatingDelta;
-                  const verdict =
-                    m.status === 'completed'
-                      ? m.isTie
-                        ? 'Draw'
-                        : m.winnerId === user?.id
-                        ? 'Victory'
-                        : 'Defeat'
-                      : m.status.toUpperCase();
+              <div className="space-y-3">
+                {historyMatches.map(m => {
+                  const amCh = m.challengerId === myUserId;
+                  const won = m.winnerId === myUserId;
+                  const myScore = amCh ? m.challengerScore : m.opponentScore;
+                  const opScore = amCh ? m.opponentScore : m.challengerScore;
+                  const myReps = amCh ? m.challengerReps : m.opponentReps;
+                  const opReps = amCh ? m.opponentReps : m.challengerReps;
+                  const opName = amCh ? m.opponentName : m.challengerName;
+                  const opId = amCh ? m.opponentId : m.challengerId;
+                  const delta = amCh ? m.challengerRatingDelta : m.opponentRatingDelta;
 
                   return (
                     <div
                       key={m.id}
-                      className="rounded-xl bg-[#090910] border border-white/10 px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                      className="p-4 rounded-xl bg-[#0D0D18] border border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
                     >
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-bold text-white">{m.challengeTitle}</span>
-                          <span className="text-[#A1A1B8]">vs</span>
-                          <button
-                            type="button"
-                            onClick={() => openPublicProfile(theirId)}
-                            className="font-semibold text-[#D6A84B] hover:underline"
+                      <div>
+                        <div className="flex items-center gap-2 text-sm font-bold text-white">
+                          <span>{m.exerciseName} vs {opName}</span>
+                          <span
+                            className={`text-xs font-semibold ${
+                              m.status !== 'completed'
+                                ? 'text-slate-400'
+                                : m.isTie
+                                ? 'text-[#FBBF24]'
+                                : won
+                                ? 'text-[#34D399]'
+                                : 'text-[#FB7185]'
+                            }`}
                           >
-                            {theirName}
-                          </button>
-                          <span className="text-[11px] font-mono text-[#A1A1B8]/70">
-                            {m.isRanked ? 'Ranked' : 'Unranked'}
+                            {m.status === 'completed'
+                              ? m.isTie
+                                ? 'Draw'
+                                : won
+                                ? 'Victory'
+                                : 'Defeat'
+                              : m.status}
                           </span>
                         </div>
-                        {m.disputeReason && (
-                          <p className="text-[11px] text-[#FBBF24] mt-0.5">
-                            Dispute note: {m.disputeReason}
-                          </p>
-                        )}
+                        <p className="text-xs text-slate-400 mt-1 tabular-nums">
+                          Score {myScore} – {opScore} pts · Reps {myReps} – {opReps}
+                          {typeof delta === 'number' &&
+                            ` · Elo ${delta >= 0 ? `+${delta}` : delta}`}
+                        </p>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-3 font-mono tabular-nums shrink-0">
-                        <span className="text-white">
-                          {myScore} – {theirScore}
-                        </span>
-                        {typeof myDelta === 'number' && m.isRanked && m.status === 'completed' && (
-                          <span
-                            className={
-                              myDelta >= 0 ? 'text-[#34D399] font-bold' : 'text-[#FB7185] font-bold'
-                            }
-                          >
-                            {myDelta >= 0 ? `+${myDelta}` : myDelta} Elo
-                          </span>
-                        )}
-                        <span
-                          className={`font-bold ${
-                            verdict === 'Victory'
-                              ? 'text-[#34D399]'
-                              : verdict === 'Defeat'
-                              ? 'text-[#FB7185]'
-                              : verdict === 'DISPUTED'
-                              ? 'text-[#FBBF24]'
-                              : 'text-[#D6A84B]'
-                          }`}
-                        >
-                          {verdict}
-                        </span>
+                      <div className="flex items-center gap-2">
                         {m.status === 'completed' && (
-                          <div className="flex items-center gap-1.5 font-sans">
-                            <button
-                              type="button"
-                              disabled={busyId === `rematch-${m.id}`}
-                              onClick={() => void handleRematch(m.id)}
-                              className="px-2.5 py-1 rounded-lg bg-[#0E0E17] hover:bg-[#1B1B2B] border border-white/15 hover:border-[#FB7185]/45 text-[#FB7185] text-[11px] font-semibold flex items-center gap-1 transition-colors"
-                            >
-                              <RotateCcw className="w-3 h-3" /> Rematch
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setDisputeTarget(m);
-                                setDisputeReason('');
-                              }}
-                              className="px-2 py-1 rounded-lg bg-[#0E0E17] hover:bg-[#FBBF24]/15 border border-white/10 text-[#A1A1B8] hover:text-[#FBBF24] text-[11px] transition-colors"
-                            >
-                              Dispute
-                            </button>
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setResultMatchId(m.id);
+                              setSubView('duel');
+                            }}
+                            className="px-3 py-1.5 rounded-lg border border-white/10 hover:bg-white/5 text-xs text-slate-300 cursor-pointer whitespace-nowrap"
+                          >
+                            View Breakdown
+                          </button>
                         )}
+                        <button
+                          type="button"
+                          onClick={() => void handleRematch(m.id)}
+                          className="px-3 py-1.5 rounded-lg bg-[#8B5CF6]/15 hover:bg-[#8B5CF6]/25 text-[#A78BFA] text-xs font-semibold cursor-pointer whitespace-nowrap"
+                        >
+                          Rematch
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const res = await blockRivalUser(opId, false);
+                            handleActionResult(res, `Blocked ${opName}.`);
+                          }}
+                          className="p-1.5 rounded-lg border border-white/10 hover:bg-[#FB7185]/15 text-slate-400 hover:text-[#FB7185] cursor-pointer"
+                          title="Block player"
+                        >
+                          <Ban className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </div>
                   );
@@ -1411,21 +1695,33 @@ export const RivalsView: React.FC = () => {
             )}
           </div>
 
-          {/* Verified Match Activity Events */}
-          {events.length > 0 && (
-            <div className="rounded-2xl bg-[#141420]/95 backdrop-blur-md border border-white/10 p-5 space-y-2.5 shadow-[0_12px_32px_rgba(0,0,0,0.6)]">
-              <h3 className="font-['Cinzel'] font-bold text-sm text-[#D6A84B]">
-                Recent Server-Verified Match Telemetry
-              </h3>
-              <div className="divide-y divide-white/10">
-                {events.slice(0, 10).map(ev => (
-                  <div key={ev.id} className="py-2 flex items-center justify-between text-xs">
-                    <span className="text-[#A1A1B8]">
-                      {ev.label} · {ev.activityType.replace(/_/g, ' ')}
-                    </span>
-                    <span className="font-mono font-bold text-[#34D399] tabular-nums">
-                      +{ev.pointsAwarded} match pts
-                    </span>
+          {h2hRecords.length > 0 && (
+            <div className="bg-[#141420] border border-white/10 rounded-2xl p-6 space-y-4">
+              <h3 className="text-base font-bold text-white">Head-to-Head Rivalries</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {h2hRecords.map(rec => (
+                  <div
+                    key={rec.opponentId}
+                    className="p-4 rounded-xl bg-[#0D0D18] border border-white/10 flex items-center justify-between gap-3"
+                  >
+                    <div>
+                      <button
+                        type="button"
+                        onClick={() => openPublicProfile(rec.opponentId)}
+                        className="text-sm font-bold text-white hover:text-[#E8CF96] cursor-pointer"
+                      >
+                        {rec.opponentName}
+                      </button>
+                      <p className="text-xs text-slate-400 tabular-nums mt-0.5">
+                        {rec.opponentRating} {rec.opponentTier}
+                      </p>
+                    </div>
+                    <div className="text-right tabular-nums">
+                      <p className="text-sm font-bold text-white">
+                        {rec.wins}W - {rec.losses}L - {rec.ties}T
+                      </p>
+                      <p className="text-[11px] text-slate-400">{rec.totalMatches} duels</p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1434,358 +1730,42 @@ export const RivalsView: React.FC = () => {
         </div>
       )}
 
-      {/* TAB: COMMUNITY TOURNAMENTS (REAL COMPETITORS ONLY) */}
-      {arenaTab === 'tournaments' && (
-        <div className="space-y-5">
-          <div className="rounded-2xl bg-[#141420]/95 backdrop-blur-md border border-white/10 p-5 space-y-4 shadow-[0_12px_32px_rgba(0,0,0,0.6)]">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <h2 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-                  <Award className="w-4 h-4 text-[#D6A84B]" />
-                  Community Tournaments
-                </h2>
-                <p className="text-xs text-[#A1A1B8] mt-0.5">
-                  Multi-round brackets composed strictly of real verified LIFEQUEST competitors (zero AI bots or simulated opponents).
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => void refreshTournaments()}
-                className="px-3 py-1.5 rounded-xl bg-[#0E0E17] hover:bg-[#1B1B2B] border border-white/15 hover:border-[#8B5CF6]/50 text-xs font-semibold text-[#8B5CF6] whitespace-nowrap shrink-0 transition-all"
-              >
-                Refresh Brackets
-              </button>
-            </div>
-
-            <form
-              onSubmit={handleCreateTournament}
-              className="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-3 border-t border-white/10"
-            >
-              <input
-                type="text"
-                maxLength={60}
-                value={newTourneyTitle}
-                onChange={e => setNewTourneyTitle(e.target.value)}
-                placeholder="Host Tournament Title..."
-                className="rounded-xl bg-[#090910] border border-white/15 px-3 py-2 text-xs text-white placeholder-[#A1A1B8]/50 focus:outline-none focus:border-[#FB7185]"
-              />
-              <input
-                type="text"
-                maxLength={80}
-                value={newTourneySubtitle}
-                onChange={e => setNewTourneySubtitle(e.target.value)}
-                placeholder="Theme or stipulation (optional)"
-                className="rounded-xl bg-[#090910] border border-white/15 px-3 py-2 text-xs text-white placeholder-[#A1A1B8]/50 focus:outline-none focus:border-[#FB7185]"
-              />
+      {/* ===================================================================== */}
+      {/* RANKINGS TAB                                                          */}
+      {/* ===================================================================== */}
+      {subView === 'rankings' && (
+        <div className="bg-[#141420] border border-white/10 rounded-2xl p-6 space-y-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-lg font-bold text-white">Competitive Elo Standings</h2>
+            <div className="flex flex-wrap items-center gap-2">
               <select
-                value={newTourneyMode}
-                onChange={e => setNewTourneyMode(e.target.value as CompetitiveRivalMode)}
-                className="rounded-xl bg-[#090910] border border-white/15 px-3 py-2 text-xs text-white focus:outline-none focus:border-[#FB7185]"
+                value={lbScope}
+                onChange={e => setLbScope(e.target.value as any)}
+                className="px-3 py-2 rounded-xl bg-[#0D0D18] border border-white/10 text-xs text-white"
               >
-                {COMPETITIVE_RIVAL_MODES.map(m => (
-                  <option key={m.id} value={m.id}>
-                    {m.title}
+                <option value="global">Global</option>
+                <option value="friends">Friends</option>
+                <option value="seasonal">Seasonal</option>
+                <option value="weekly">Weekly</option>
+              </select>
+
+              <select
+                value={lbMode}
+                onChange={e => setLbMode(e.target.value as any)}
+                className="px-3 py-2 rounded-xl bg-[#0D0D18] border border-white/10 text-xs text-white"
+              >
+                <option value="all">All Duel Exercises</option>
+                {DUEL_EXERCISE_IDS.map(exId => (
+                  <option key={exId} value={exId}>
+                    {DUEL_EXERCISES_CATALOG[exId].name}
                   </option>
                 ))}
               </select>
-              <button
-                type="submit"
-                disabled={busyId === 'create-tourney'}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] hover:from-[#7C3AED] hover:to-[#A78BFA] disabled:opacity-50 text-white shadow-[0_0_16px_rgba(139,92,246,0.35)] font-['Cinzel'] font-bold text-xs flex items-center justify-center gap-1.5 whitespace-nowrap transition-all"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                {busyId === 'create-tourney' ? 'Opening...' : 'Host Bracket'}
-              </button>
-            </form>
-          </div>
-
-          {tournaments.length === 0 ? (
-            <div className="rounded-2xl bg-[#141420]/95 backdrop-blur-md border border-white/10 p-8 text-center text-xs text-[#A1A1B8]">
-              No active community brackets yet. Host the first verified tournament above!
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {tournaments.map(t => {
-                const isJoined = t.participants.some(p => p.userId === user?.id);
-                return (
-                  <div
-                    key={t.id}
-                    className="rounded-2xl bg-[#141420]/95 backdrop-blur-md border border-white/10 p-5 space-y-4 shadow-[0_12px_32px_rgba(0,0,0,0.6)]"
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div>
-                        <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider font-semibold text-[#D6A84B]">
-                          <span>{t.status}</span>
-                          <span>·</span>
-                          <span>{t.mode.replace('_', ' ')}</span>
-                          <span>·</span>
-                          <span className="tabular-nums">{t.participants.length} Real Competitors</span>
-                        </div>
-                        <h3 className="font-['Cinzel'] font-bold text-base text-white mt-0.5">
-                          {t.title}
-                        </h3>
-                        {t.subtitle && (
-                          <p className="text-xs text-[#A1A1B8] mt-0.5">{t.subtitle}</p>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        disabled={isJoined || busyId === `join-tourney-${t.id}`}
-                        onClick={() => void handleJoinTournament(t.id)}
-                        className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
-                          isJoined
-                            ? 'bg-[#34D399]/10 border border-[#34D399]/40 text-[#34D399]'
-                            : 'bg-gradient-to-r from-[#BE123C] to-[#FB7185] hover:from-[#E11D48] hover:to-[#FDA4AF] text-white shadow-[0_0_16px_rgba(251,113,133,0.35)]'
-                        }`}
-                      >
-                        {isJoined
-                          ? 'Registered'
-                          : busyId === `join-tourney-${t.id}`
-                          ? 'Joining...'
-                          : 'Join Tournament'}
-                      </button>
-                    </div>
-
-                    {t.matches.length > 0 && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3 border-t border-white/10">
-                        {t.matches.map(bm => (
-                          <div
-                            key={bm.id}
-                            className="rounded-xl bg-[#090910] border border-white/10 p-3 text-xs space-y-1.5"
-                          >
-                            <div className="flex items-center justify-between text-[10px] text-[#D6A84B] uppercase font-semibold">
-                              <span>{bm.roundLabel}</span>
-                              <span>{bm.status}</span>
-                            </div>
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="font-bold text-white truncate">
-                                {bm.playerAName}{' '}
-                                <span className="text-[10px] font-mono text-[#A1A1B8]/70">
-                                  ({bm.playerARating})
-                                </span>
-                              </span>
-                              <span className="font-mono font-bold text-[#34D399] tabular-nums">
-                                {bm.playerAScore}
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="font-bold text-[#A1A1B8] truncate">
-                                {bm.playerBId ? bm.playerBName : 'Awaiting Opponent'}
-                                {bm.playerBRating ? (
-                                  <span className="text-[10px] font-mono text-[#A1A1B8]/70 ml-1">
-                                    ({bm.playerBRating})
-                                  </span>
-                                ) : null}
-                              </span>
-                              <span className="font-mono font-bold text-[#FB7185] tabular-nums">
-                                {bm.playerBScore}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* TAB: READ-ONLY SPECTATOR MODE & CHEERING */}
-      {arenaTab === 'spectate' && (
-        <div className="space-y-4">
-          <div className="rounded-2xl bg-[#141420]/95 backdrop-blur-md border border-white/10 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-[0_12px_32px_rgba(0,0,0,0.6)]">
-            <div>
-              <h2 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-                <Eye className="w-4 h-4 text-[#8B5CF6]" />
-                Arena Spectator Gallery
-              </h2>
-              <p className="text-xs text-[#A1A1B8] mt-0.5">
-                Follow top competitors and watch live public/friends Rivals matches in read-only mode. Send encouraging cheers without influencing match scores.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => void refreshSpectatorMatches()}
-              className="px-3.5 py-2 rounded-xl bg-[#0E0E17] hover:bg-[#1B1B2B] border border-white/15 hover:border-[#8B5CF6]/50 text-xs font-semibold text-[#8B5CF6] whitespace-nowrap shrink-0 transition-all"
-            >
-              Refresh Live Matches
-            </button>
-          </div>
-
-          {spectatorMatches.length === 0 ? (
-            <div className="rounded-2xl bg-[#141420]/95 backdrop-blur-md border border-white/10 p-8 text-center text-xs text-[#A1A1B8]">
-              No public or friends-visible matches are currently live to spectate.
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {spectatorMatches.map(m => {
-                const total = Math.max(1, m.challengerScore + m.opponentScore);
-                const cShare = Math.round((m.challengerScore / total) * 100);
-                const followingChallenger = followedCompetitorIds.includes(m.challengerId);
-                const followingOpponent = followedCompetitorIds.includes(m.opponentId);
-                return (
-                  <div
-                    key={m.matchId}
-                    className="rounded-2xl bg-[#141420]/95 backdrop-blur-md border border-white/10 p-5 space-y-4 shadow-[0_12px_32px_rgba(0,0,0,0.6)]"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <span className="text-[11px] font-['Cinzel'] font-bold text-[#D6A84B]">
-                          {m.challengeTitle} · {m.isRanked ? 'Ranked' : 'Casual'} · Read-Only
-                        </span>
-                        <p className="text-xs text-[#A1A1B8] mt-0.5 tabular-nums">
-                          Target {m.targetScore} pts · {formatRemainingTime(m.endsAt)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 text-xs">
-                      <div className="rounded-xl bg-[#090910] border border-white/10 p-3 space-y-2">
-                        <div className="flex items-center justify-between gap-1">
-                          <button
-                            type="button"
-                            onClick={() => openPublicProfile(m.challengerId)}
-                            className="font-bold text-white hover:text-[#D6A84B] truncate transition-colors"
-                          >
-                            {m.challengerName}
-                          </button>
-                          {m.challengerId !== user?.id && (
-                            <button
-                              type="button"
-                              disabled={busyId === `follow-${m.challengerId}`}
-                              onClick={() => void handleToggleFollow(m.challengerId)}
-                              className={`text-[10px] px-2 py-0.5 rounded border whitespace-nowrap transition-colors ${
-                                followingChallenger
-                                  ? 'border-[#34D399]/50 text-[#34D399] bg-[#34D399]/10'
-                                  : 'border-white/15 text-[#8B5CF6] hover:border-[#8B5CF6]/60'
-                              }`}
-                            >
-                              {followingChallenger ? 'Following' : 'Follow'}
-                            </button>
-                          )}
-                        </div>
-                        <p className="text-[11px] text-[#A1A1B8] font-mono tabular-nums">
-                          {m.challengerDivision} ({m.challengerRating}) · {m.challengerScore} pts
-                        </p>
-                        <div className="flex flex-wrap gap-1">
-                          {(['🔥', '⚔️', '🏆', '💪'] as const).map(emoji => (
-                            <button
-                              key={emoji}
-                              type="button"
-                              onClick={() => void handleCheer(m.matchId, m.challengerId, emoji)}
-                              className="px-2 py-1 rounded-lg bg-[#0E0E17] hover:bg-[#1B1B2B] border border-white/10 text-xs transition-colors"
-                              title={`Cheer ${m.challengerName}`}
-                            >
-                              {emoji}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="rounded-xl bg-[#090910] border border-white/10 p-3 space-y-2">
-                        <div className="flex items-center justify-between gap-1">
-                          <button
-                            type="button"
-                            onClick={() => openPublicProfile(m.opponentId)}
-                            className="font-bold text-[#FB7185] hover:text-white truncate transition-colors"
-                          >
-                            {m.opponentName}
-                          </button>
-                          {m.opponentId !== user?.id && (
-                            <button
-                              type="button"
-                              disabled={busyId === `follow-${m.opponentId}`}
-                              onClick={() => void handleToggleFollow(m.opponentId)}
-                              className={`text-[10px] px-2 py-0.5 rounded border whitespace-nowrap transition-colors ${
-                                followingOpponent
-                                  ? 'border-[#34D399]/50 text-[#34D399] bg-[#34D399]/10'
-                                  : 'border-white/15 text-[#8B5CF6] hover:border-[#8B5CF6]/60'
-                              }`}
-                            >
-                              {followingOpponent ? 'Following' : 'Follow'}
-                            </button>
-                          )}
-                        </div>
-                        <p className="text-[11px] text-[#A1A1B8] font-mono tabular-nums">
-                          {m.opponentDivision} ({m.opponentRating}) · {m.opponentScore} pts
-                        </p>
-                        <div className="flex flex-wrap gap-1">
-                          {(['🔥', '⚔️', '🏆', '💪'] as const).map(emoji => (
-                            <button
-                              key={emoji}
-                              type="button"
-                              onClick={() => void handleCheer(m.matchId, m.opponentId, emoji)}
-                              className="px-2 py-1 rounded-lg bg-[#0E0E17] hover:bg-[#1B1B2B] border border-white/10 text-xs transition-colors"
-                              title={`Cheer ${m.opponentName}`}
-                            >
-                              {emoji}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="h-2 w-full rounded-full bg-[#1B1B2B] overflow-hidden flex">
-                      <div className="bg-[#34D399] h-full transition-all" style={{ width: `${cShare}%` }} />
-                    </div>
-
-                    {m.recentCheers && m.recentCheers.length > 0 && (
-                      <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#A1A1B8]">
-                        <Heart className="w-3 h-3 text-[#FB7185] shrink-0" />
-                        {m.recentCheers.slice(0, 4).map(ch => (
-                          <span key={ch.id} className="px-2 py-0.5 rounded bg-[#090910] border border-white/10">
-                            {ch.emoji} {ch.spectatorName}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* TAB 5: COMPETITIVE ELO RANKINGS (ISOLATED FROM XP LEADERBOARDS) */}
-      {arenaTab === 'rankings' && (
-        <div className="rounded-2xl bg-[#141420]/95 backdrop-blur-md border border-white/10 overflow-hidden shadow-[0_12px_32px_rgba(0,0,0,0.6)]">
-          <div className="p-5 border-b border-white/10 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-            <div>
-              <h2 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-                <Crown className="w-4 h-4 text-[#D6A84B]" />
-                Competitive Arena Rankings
-              </h2>
-              <p className="text-xs text-[#A1A1B8] mt-0.5">
-                Ranked strictly by Arena Elo and Seasonal Match Performance—separate from Realm XP standings.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center gap-1 p-1 bg-[#090910] rounded-lg border border-white/10">
-                {(['global', 'friends', 'seasonal', 'weekly'] as const).map(s => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => setLbScope(s)}
-                    className={`px-2.5 py-1 rounded text-[11px] font-semibold capitalize transition-all ${
-                      lbScope === s
-                        ? 'bg-gradient-to-r from-[#BE123C] to-[#FB7185] text-white shadow-[0_0_10px_rgba(251,113,133,0.3)]'
-                        : 'text-[#A1A1B8] hover:text-white'
-                    }`}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
 
               <select
                 value={lbDivision}
-                onChange={e => setLbDivision(e.target.value as RankedDivisionName | 'all')}
-                className="rounded-lg bg-[#090910] border border-white/15 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-[#FB7185]"
+                onChange={e => setLbDivision(e.target.value)}
+                className="px-3 py-2 rounded-xl bg-[#0D0D18] border border-white/10 text-xs text-white"
               >
                 <option value="all">All Divisions</option>
                 {RANKED_DIVISIONS_CATALOG.map(d => (
@@ -1794,164 +1774,336 @@ export const RivalsView: React.FC = () => {
                   </option>
                 ))}
               </select>
-
-              <select
-                value={lbMode}
-                onChange={e => setLbMode(e.target.value as CompetitiveRivalMode | 'all')}
-                className="rounded-lg bg-[#090910] border border-white/15 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-[#FB7185]"
-              >
-                <option value="all">All Modes</option>
-                {COMPETITIVE_RIVAL_MODES.map(m => (
-                  <option key={m.id} value={m.id}>
-                    {m.title}
-                  </option>
-                ))}
-              </select>
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="bg-[#0E0E17] border-b border-white/10 text-[11px] uppercase tracking-wider text-[#D6A84B]">
-                  <th className="py-3 px-4 w-20 text-center">Rank</th>
-                  <th className="py-3 px-4">Competitor</th>
-                  <th className="py-3 px-4">Tier</th>
-                  <th className="py-3 px-4 text-center">Record</th>
-                  <th className="py-3 px-4 text-center">Win %</th>
-                  <th className="py-3 px-4 text-right">Elo</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {lbLoading ? (
-                  <tr>
-                    <td colSpan={6} className="py-8 text-center text-[#A1A1B8]">
-                      Loading competitive standings...
-                    </td>
+          {lbLoading ? (
+            <p className="text-xs text-slate-400 py-8 text-center">Loading competitive standings...</p>
+          ) : leaderboardRows.length === 0 ? (
+            <p className="text-xs text-slate-400 py-8 text-center">
+              No ranked competitors found for this filter yet.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-white/10 text-slate-400">
+                    <th className="py-2.5 px-3 font-semibold">#</th>
+                    <th className="py-2.5 px-3 font-semibold">Champion</th>
+                    <th className="py-2.5 px-3 font-semibold">Tier</th>
+                    <th className="py-2.5 px-3 font-semibold text-right">Rating</th>
+                    <th className="py-2.5 px-3 font-semibold text-right">W-L-T</th>
+                    <th className="py-2.5 px-3 font-semibold text-right">Win %</th>
                   </tr>
-                ) : displayedLeaderboard.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="py-8 text-center text-[#A1A1B8]">
-                      No ranked competitors in this bracket yet.
-                    </td>
-                  </tr>
-                ) : (
-                  displayedLeaderboard.map(row => {
-                    const pStatus = getPlayerPresence(row.userId).status;
-                    const rowTierHex = TIER_ACCENT_MAP[row.tier] || '#D6A84B';
-                    return (
-                      <tr
-                        key={row.userId}
-                        onClick={() => openPublicProfile(row.userId)}
-                        className={`cursor-pointer transition-colors ${
-                          row.isCurrent
-                            ? 'bg-[#FB7185]/15 hover:bg-[#FB7185]/25'
-                            : 'hover:bg-[#1B1B2B]/80'
-                        }`}
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {leaderboardRows.map(row => (
+                    <tr
+                      key={row.userId}
+                      className={row.isCurrent ? 'bg-[#8B5CF6]/10' : 'hover:bg-white/[0.02]'}
+                    >
+                      <td className="py-3 px-3 font-bold text-slate-300 tabular-nums">
+                        {row.rank}
+                      </td>
+                      <td className="py-3 px-3">
+                        <button
+                          type="button"
+                          onClick={() => openPublicProfile(row.userId)}
+                          className="font-semibold text-white hover:text-[#E8CF96] cursor-pointer"
+                        >
+                          {row.username}
+                          {row.isCurrent && (
+                            <span className="ml-2 text-[11px] text-[#A78BFA]">(You)</span>
+                          )}
+                        </button>
+                      </td>
+                      <td
+                        className="py-3 px-3 font-medium"
+                        style={{ color: TIER_ACCENT_MAP[row.tier] || '#E8CF96' }}
                       >
-                        <td className="py-3 px-4 text-center font-mono font-bold tabular-nums">
-                          <span
-                            className={
-                              row.rank === 1
-                                ? 'text-[#FBBF24]'
-                                : row.rank === 2
-                                ? 'text-[#E2E8F0]'
-                                : row.rank === 3
-                                ? 'text-[#D6A84B]'
-                                : 'text-[#A1A1B8]'
+                        {row.tier}
+                      </td>
+                      <td className="py-3 px-3 text-right font-bold text-white tabular-nums">
+                        {row.rating}
+                      </td>
+                      <td className="py-3 px-3 text-right text-slate-300 tabular-nums">
+                        {row.wins}-{row.losses}-{row.ties}
+                      </td>
+                      <td className="py-3 px-3 text-right text-slate-300 tabular-nums">
+                        {row.winRate}%
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ===================================================================== */}
+      {/* SPECTATE TAB                                                          */}
+      {/* ===================================================================== */}
+      {subView === 'spectate' && (
+        <div className="bg-[#141420] border border-white/10 rounded-2xl p-6 space-y-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-bold text-white">Live Spectate Arena</h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Watch public and friend 1v1 exercise duels in real time and send cheers.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => void refreshSpectatorMatches()}
+              className="px-3.5 py-2 rounded-xl border border-white/10 bg-[#0D0D18] hover:bg-white/5 text-xs font-medium text-slate-200 inline-flex items-center gap-1.5 cursor-pointer"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Refresh</span>
+            </button>
+          </div>
+
+          {spectatorMatches.length === 0 ? (
+            <p className="text-sm text-slate-400 py-8 text-center">
+              No public or friend live duels are active right now.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {spectatorMatches.map(sm => {
+                const exDef = getExerciseDef(sm.mode as DuelExerciseId);
+                return (
+                  <div
+                    key={sm.matchId}
+                    className="p-5 rounded-xl bg-[#0D0D18] border border-white/10 space-y-4"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-bold text-white">{sm.challengeTitle}</p>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                          {exDef.name} · {sm.isRanked ? 'Ranked' : 'Friendly'}
+                        </p>
+                      </div>
+                      <span className="text-xs text-[#34D399] font-semibold">Live</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div className="p-3 rounded-lg bg-[#141420] border border-white/5">
+                        <p className="font-semibold text-white truncate">{sm.challengerName}</p>
+                        <p className="text-lg font-bold text-white tabular-nums mt-1">
+                          {sm.challengerScore} pts
+                        </p>
+                        <div className="mt-2 flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              void sendSpectatorCheer({
+                                matchId: sm.matchId,
+                                targetUserId: sm.challengerId,
+                                emoji: '🔥',
+                              })
                             }
+                            className="px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-[11px] cursor-pointer"
                           >
-                            #{row.rank}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-2">
-                            <PresenceBadge status={pStatus} size="xs" />
-                            <span className="font-bold text-white">{row.username}</span>
-                            <span className="text-[11px] text-[#A1A1B8]">
-                              · {row.characterClass}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4 font-semibold" style={{ color: rowTierHex }}>
-                          {row.tier}
-                        </td>
-                        <td className="py-3 px-4 text-center font-mono tabular-nums text-[#A1A1B8]">
-                          {row.wins}-{row.losses}-{row.ties}
-                        </td>
-                        <td className="py-3 px-4 text-center font-mono tabular-nums text-[#A1A1B8]">
-                          {row.winRate}%
-                        </td>
-                        <td className="py-3 px-4 text-right font-mono font-bold text-[#D6A84B] tabular-nums">
-                          {row.rating}
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+                            Cheer 🔥 {sm.cheerCounts?.[sm.challengerId] || 0}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void toggleFollowCompetitor(sm.challengerId)}
+                            className="p-1 rounded bg-white/5 hover:bg-white/10 text-slate-300 cursor-pointer"
+                            title="Follow competitor"
+                          >
+                            <Heart
+                              className={`w-3 h-3 ${
+                                followedCompetitorIds.includes(sm.challengerId)
+                                  ? 'text-[#FB7185] fill-[#FB7185]'
+                                  : ''
+                              }`}
+                            />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="p-3 rounded-lg bg-[#141420] border border-white/5">
+                        <p className="font-semibold text-white truncate">{sm.opponentName}</p>
+                        <p className="text-lg font-bold text-white tabular-nums mt-1">
+                          {sm.opponentScore} pts
+                        </p>
+                        <div className="mt-2 flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              void sendSpectatorCheer({
+                                matchId: sm.matchId,
+                                targetUserId: sm.opponentId,
+                                emoji: '🔥',
+                              })
+                            }
+                            className="px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-[11px] cursor-pointer"
+                          >
+                            Cheer 🔥 {sm.cheerCounts?.[sm.opponentId] || 0}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void toggleFollowCompetitor(sm.opponentId)}
+                            className="p-1 rounded bg-white/5 hover:bg-white/10 text-slate-300 cursor-pointer"
+                            title="Follow competitor"
+                          >
+                            <Heart
+                              className={`w-3 h-3 ${
+                                followedCompetitorIds.includes(sm.opponentId)
+                                  ? 'text-[#FB7185] fill-[#FB7185]'
+                                  : ''
+                              }`}
+                            />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ===================================================================== */}
+      {/* TOURNAMENTS TAB                                                       */}
+      {/* ===================================================================== */}
+      {subView === 'tournaments' && (
+        <div className="bg-[#141420] border border-white/10 rounded-2xl p-6 space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-5 p-5 rounded-xl bg-[#0D0D18] border border-white/10 space-y-4">
+              <h3 className="text-sm font-bold text-white">Create Single-Exercise Bracket</h3>
+              <input
+                type="text"
+                value={newTourneyTitle}
+                onChange={e => setNewTourneyTitle(e.target.value)}
+                placeholder="Tournament title..."
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#141420] border border-white/10 text-xs text-white placeholder-slate-500"
+              />
+              <input
+                type="text"
+                value={newTourneySubtitle}
+                onChange={e => setNewTourneySubtitle(e.target.value)}
+                placeholder="Subtitle (optional)"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#141420] border border-white/10 text-xs text-white placeholder-slate-500"
+              />
+              <select
+                value={newTourneyMode}
+                onChange={e => setNewTourneyMode(e.target.value as DuelExerciseId)}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#141420] border border-white/10 text-xs text-white"
+              >
+                {DUEL_EXERCISE_IDS.map(exId => (
+                  <option key={exId} value={exId}>
+                    {DUEL_EXERCISES_CATALOG[exId].name}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={async () => {
+                  const res = await createTournament({
+                    title: newTourneyTitle,
+                    subtitle: newTourneySubtitle || 'Single-Exercise Bracket',
+                    mode: newTourneyMode,
+                  });
+                  if (res.success) {
+                    setNewTourneyTitle('');
+                    setNewTourneySubtitle('');
+                  }
+                  handleActionResult(res, 'Bracket created!');
+                }}
+                disabled={newTourneyTitle.trim().length < 3}
+                className="w-full py-2.5 px-4 rounded-xl bg-[#8B5CF6] hover:bg-[#7C3AED] disabled:opacity-50 text-white text-xs font-bold inline-flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Launch Bracket</span>
+              </button>
+            </div>
+
+            <div className="lg:col-span-7 space-y-3">
+              <h3 className="text-sm font-bold text-white">Community Brackets</h3>
+              {tournaments.length === 0 ? (
+                <p className="text-xs text-slate-400 py-8 text-center">
+                  No community brackets active yet.
+                </p>
+              ) : (
+                tournaments.map(t => {
+                  const joined = t.participants.some(p => p.userId === myUserId);
+                  const exDef = getExerciseDef(t.mode as DuelExerciseId);
+                  return (
+                    <div
+                      key={t.id}
+                      className="p-4 rounded-xl bg-[#0D0D18] border border-white/10 flex flex-wrap items-center justify-between gap-3"
+                    >
+                      <div>
+                        <p className="text-sm font-bold text-white">{t.title}</p>
+                        <p className="text-xs text-slate-400 mt-0.5 tabular-nums">
+                          {exDef.name} · {t.participants.length} players · {t.status}
+                        </p>
+                      </div>
+                      {!joined && t.status !== 'completed' ? (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const res = await joinTournament(t.id);
+                            handleActionResult(res, 'Joined tournament bracket!');
+                          }}
+                          className="px-4 py-2 rounded-lg bg-[#D6A84B]/20 hover:bg-[#D6A84B]/30 text-[#E8CF96] text-xs font-bold cursor-pointer whitespace-nowrap"
+                        >
+                          Join Bracket
+                        </button>
+                      ) : (
+                        <span className="text-xs text-[#34D399] font-semibold">
+                          {joined ? 'Registered' : 'Concluded'}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </div>
         </div>
       )}
 
-      {/* Dispute Modal */}
-      {disputeTarget && (
-        <div
-          className="fixed inset-0 z-50 bg-[#090910]/85 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setDisputeTarget(null)}
-        >
-          <div
-            className="w-full max-w-md rounded-2xl bg-[#141420] border border-[#FBBF24]/40 p-6 space-y-4 shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-[#FBBF24]">
-                <AlertTriangle className="w-5 h-5" />
-                <h3 className="font-['Cinzel'] font-bold text-base text-white">
-                  File Match Integrity Dispute
-                </h3>
-              </div>
+      {/* Fair-Play Dispute Modal */}
+      {disputeMatchId && (
+        <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4">
+          <div className="bg-[#141420] border border-white/15 rounded-2xl max-w-md w-full p-6 space-y-4">
+            <h3 className="text-base font-bold text-white">Submit Fair-Play Dispute</h3>
+            <p className="text-xs text-slate-400">
+              Describe any tracking or verification issue observed in this duel.
+            </p>
+            <textarea
+              value={disputeReason}
+              onChange={e => setDisputeReason(e.target.value)}
+              rows={3}
+              placeholder="Explain what happened..."
+              className="w-full p-3 rounded-xl bg-[#0D0D18] border border-white/10 text-xs text-white placeholder-slate-500"
+            />
+            <div className="flex items-center justify-end gap-2">
               <button
                 type="button"
-                onClick={() => setDisputeTarget(null)}
-                className="text-[#A1A1B8] hover:text-white"
-                aria-label="Close dispute dialog"
+                onClick={() => setDisputeMatchId(null)}
+                className="px-4 py-2 rounded-xl border border-white/10 text-xs text-slate-300 cursor-pointer"
               >
-                <X className="w-4 h-4" />
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  const res = await disputeRivalMatch(disputeMatchId, disputeReason);
+                  if (res.success) setDisputeMatchId(null);
+                  handleActionResult(res, 'Match marked disputed for review.');
+                }}
+                disabled={disputeReason.trim().length < 8}
+                className="px-4 py-2 rounded-xl bg-[#FB7185] disabled:opacity-50 text-[#090910] text-xs font-bold cursor-pointer"
+              >
+                Submit Dispute
               </button>
             </div>
-            <p className="text-xs text-[#A1A1B8]">
-              Filing a dispute for{' '}
-              <strong className="text-white">{disputeTarget.challengeTitle}</strong> safely freezes
-              and reverts any Elo rating shift pending verification.
-            </p>
-            <form onSubmit={handleSubmitDispute} className="space-y-3">
-              <textarea
-                rows={3}
-                required
-                value={disputeReason}
-                onChange={e => setDisputeReason(e.target.value)}
-                placeholder="Describe the synchronization discrepancy or scoring concern..."
-                className="w-full rounded-xl bg-[#090910] border border-white/15 px-3 py-2 text-xs text-white placeholder-[#A1A1B8]/50 focus:outline-none focus:border-[#FBBF24]"
-              />
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setDisputeTarget(null)}
-                  className="px-4 py-2 rounded-xl bg-[#0E0E17] hover:bg-[#1B1B2B] border border-white/15 text-xs text-[#A1A1B8] hover:text-white transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={busyId === `dispute-${disputeTarget.id}`}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#B45309] to-[#FBBF24] hover:from-[#D97706] hover:to-[#FDE047] text-[#090910] font-bold text-xs shadow-[0_0_16px_rgba(251,191,36,0.3)] transition-all"
-                >
-                  Submit Dispute
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}

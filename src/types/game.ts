@@ -368,6 +368,7 @@ export interface Buff {
 export type CameraTrackableExercise =
   | 'squat'
   | 'pushup'
+  | 'situp'
   | 'lunge'
   | 'jumping_jack'
   | 'plank'
@@ -1623,7 +1624,16 @@ export interface WeeklyBossStatePayload {
 
 // --- PHASE 2 (COMPETITIVE ARENA): INDEPENDENT RIVALS PLATFORM ---
 
+export type DuelExerciseId =
+  | 'pushup'
+  | 'squat'
+  | 'situp'
+  | 'jumping_jack'
+  | 'lunge'
+  | 'knee_raise';
+
 export type CompetitiveRivalMode =
+  | DuelExerciseId
   | 'strength'
   | 'endurance'
   | 'consistency'
@@ -1652,11 +1662,29 @@ export type CompetitiveMatchStatus =
 
 export type CompetitiveMatchVisibility = 'friends' | 'public' | 'private';
 
+export interface DuelExerciseDefinition {
+  id: DuelExerciseId;
+  name: string;
+  shortTag: string;
+  pointsPerRep: number;
+  minRepIntervalMs: number;
+  maxRepsPerMinute: number;
+  description: string;
+  cameraSetupTip: string;
+  warmupGuidance: string;
+  accessibleModification: string;
+  formCues: string[];
+}
+
 export interface CompetitiveMatchRules {
-  durationDays: number;
-  targetScore: number;
-  allowRestDays: boolean;
+  exerciseId: DuelExerciseId;
+  pointsPerRep: number;
+  durationSeconds: number;
   ranked: boolean;
+  // Legacy optional archive fields
+  durationDays?: number;
+  targetScore?: number;
+  allowRestDays?: boolean;
   customFocusNote?: string;
 }
 
@@ -1699,6 +1727,10 @@ export interface CompetitiveRivalMatch {
   opponentRatingSnapshot?: number;
   opponentTierSnapshot?: CompetitiveTier;
   mode: CompetitiveRivalMode;
+  duelExercise: DuelExerciseId;
+  exerciseName: string;
+  pointsPerRep: number;
+  durationSeconds: number;
   challengeType: RivalChallengeType; // legacy compatibility mapping
   challengeTitle: string;
   rules: CompetitiveMatchRules;
@@ -1707,6 +1739,14 @@ export interface CompetitiveRivalMatch {
   isRanked: boolean;
   challengerScore: number;
   opponentScore: number;
+  challengerReps: number;
+  opponentReps: number;
+  challengerReady: boolean;
+  opponentReady: boolean;
+  challengerCameraReady: boolean;
+  opponentCameraReady: boolean;
+  countdownEndsAt?: string | null;
+  forfeitByUserId?: string | null;
   winnerId: string | null;
   isTie: boolean;
   challengerRatingBefore?: number | null;
@@ -1781,6 +1821,9 @@ export interface RivalryScoreEntry {
   userId: string;
   idempotencyKey: string;
   activityType: SkillActivityType;
+  exercise?: DuelExerciseId;
+  repSeq?: number;
+  confidence?: number;
   label: string;
   pointsAwarded: number;
   safetyCapped: boolean;
@@ -1817,6 +1860,7 @@ export interface RivalryStatsSummary {
 }
 
 export interface RivalsArenaStateResponse {
+  serverNow?: string;
   profile: CompetitiveRivalProfile;
   queueEntry: MatchmakingQueueEntry | null;
   matches: CompetitiveRivalMatch[];

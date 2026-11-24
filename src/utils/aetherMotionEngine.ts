@@ -25,6 +25,16 @@ export interface MotionJointAngles {
   rightArmAbductionDeg: number | null;
 }
 
+export interface VerifiedRepProof {
+  repSeq: number;
+  exercise: SupportedMotionExercise;
+  peakAngleDeg: number;
+  resetAngleDeg: number;
+  durationMs: number;
+  confidence: number;
+  timestampMs: number;
+}
+
 export interface MotionEngineOutput {
   classifiedExercise: SupportedMotionExercise | null;
   candidateExercise: SupportedMotionExercise | null;
@@ -44,11 +54,13 @@ export interface MotionEngineOutput {
   motionIntensity: number;
   feedback: string;
   smoothedLandmarks: PoseLandmark[] | null;
+  lastRepProof: VerifiedRepProof | null;
 }
 
 export const MOTION_EXERCISE_LABELS: Record<SupportedMotionExercise, string> = {
   squat: 'Squats',
   pushup: 'Push-ups',
+  situp: 'Sit-ups',
   lunge: 'Lunges',
   jumping_jack: 'Jumping Jacks',
   plank: 'Planks',
@@ -140,6 +152,43 @@ function angleDeg(
   return Math.round((Math.acos(cos) * 180) / Math.PI);
 }
 
+function isPostureCompatible(
+  exercise: SupportedMotionExercise,
+  angles: MotionJointAngles
+): { ok: boolean; hint?: string } {
+  const tilt = angles.torsoTiltDeg;
+  if (tilt === null) return { ok: true };
+
+  if (exercise === 'pushup' || exercise === 'plank') {
+    if (tilt < 32) {
+      return {
+        ok: false,
+        hint: `Assume a horizontal ${exercise === 'pushup' ? 'push-up' : 'plank'} position so torso & arms align.`,
+      };
+    }
+  } else if (
+    exercise === 'squat' ||
+    exercise === 'lunge' ||
+    exercise === 'jumping_jack' ||
+    exercise === 'knee_raise'
+  ) {
+    if (tilt > 62) {
+      return {
+        ok: false,
+        hint: `Stand upright facing or angled toward the camera for ${MOTION_EXERCISE_LABELS[exercise]}.`,
+      };
+    }
+  } else if (exercise === 'situp') {
+    if (angles.hipAlignmentDeg === null) {
+      return {
+        ok: false,
+        hint: 'Position yourself sideways so shoulder, hip, and bent knee landmarks are visible.',
+      };
+    }
+  }
+  return { ok: true };
+}
+
 export class AetherMotionEngine {
   private targetExercise: SupportedMotionExercise | 'auto';
   private smoothed: PoseLandmark[] | null = null;
@@ -150,9 +199,12 @@ export class AetherMotionEngine {
   private reachedPeak = false;
   private lastRepAt = 0;
   private lastFrameAt = 0;
+  private cycleStartedAt = 0;
+  private peakAngleObserved: number | null = null;
   private plankAccumMs = 0;
   private prevKneeDeg: number | null = null;
   private prevElbowDeg: number | null = null;
+  private lastRepProof: VerifiedRepProof | null = null;
   private lastSnapshot: MotionEngineOutput;
 
   constructor(opts?: { targetExercise?: SupportedMotionExercise | 'auto' }) {
@@ -191,6 +243,7 @@ export class AetherMotionEngine {
       motionIntensity: 0,
       feedback: 'Step into frame so your shoulders, hips, and legs are clearly visible.',
       smoothedLandmarks: this.smoothed,
+      lastRepProof: this.lastRepProof,
     };
   }
 
@@ -198,6 +251,8 @@ export class AetherMotionEngine {
     this.targetExercise = ex;
     this.phase = 'WAIT_START';
     this.reachedPeak = false;
+    this.peakAngleObserved = null;
+    this.cycleStartedAt = 0;
   }
 
   public reset() {
@@ -209,14 +264,44 @@ export class AetherMotionEngine {
     this.reachedPeak = false;
     this.lastRepAt = 0;
     this.lastFrameAt = 0;
+    this.cycleStartedAt = 0;
+    this.peakAngleObserved = null;
     this.plankAccumMs = 0;
     this.prevKneeDeg = null;
     this.prevElbowDeg = null;
+    this.lastRepProof = null;
     this.lastSnapshot = this.buildEmptySnapshot();
   }
 
   public getSnapshot(): MotionEngineOutput {
     return this.lastSnapshot;
+  }
+
+  private recordVerifiedRep(
+    exercise: SupportedMotionExercise,
+    nowMs: number,
+    peakAngleDeg: number,
+    resetAngleDeg: number,
+    confidence: number
+  ) {
+    this.repCount += 1;
+    const durationMs =
+      this.cycleStartedAt > 0
+        ? Math.max(250, Math.round(nowMs - this.cycleStartedAt))
+        : Math.max(350, Math.round(nowMs - this.lastRepAt));
+    this.lastRepAt = nowMs;
+    this.reachedPeak = false;
+    this.peakAngleObserved = null;
+    this.cycleStartedAt = nowMs;
+    this.lastRepProof = {
+      repSeq: this.repCount,
+      exercise,
+      peakAngleDeg: Math.round(peakAngleDeg),
+      resetAngleDeg: Math.round(resetAngleDeg),
+      durationMs,
+      confidence,
+      timestampMs: nowMs,
+    };
   }
 
   public processPoseFrame(
@@ -287,12 +372,19 @@ export class AetherMotionEngine {
 
     const leftArmAbductionDeg = angleDeg(lh, ls, le);
     const rightArmAbductionDeg = angleDeg(rh, rs, re);
-    const hipAlignmentDeg = angleDeg(ls, lh, lk) ?? angleDeg(rs, rh, rk);
+    const leftHipDeg = angleDeg(ls, lh, lk);
+    const rightHipDeg = angleDeg(rs, rh, rk);
+    const hipAlignmentDeg =
+      leftHipDeg !== null && rightHipDeg !== null
+        ? Math.round((leftHipDeg + rightHipDeg) / 2)
+        : leftHipDeg ?? rightHipDeg;
 
     let torsoTiltDeg: number | null = null;
-    if (isVis(ls) && isVis(lh)) {
-      const dx = Math.abs(ls.x - lh.x);
-      const dy = Math.abs(ls.y - lh.y);
+    const refShoulder = isVis(ls) ? ls : rs;
+    const refHip = isVis(lh) ? lh : rh;
+    if (isVis(refShoulder) && isVis(refHip)) {
+      const dx = Math.abs(refShoulder.x - refHip.x);
+      const dy = Math.abs(refShoulder.y - refHip.y);
       torsoTiltDeg = Math.round((Math.atan2(dx, Math.max(1e-4, dy)) * 180) / Math.PI);
     }
 
@@ -332,7 +424,10 @@ export class AetherMotionEngine {
         ? primaryElbowDeg !== null && primaryElbowDeg < 135
           ? 'pushup'
           : 'plank'
-        : leftArmAbductionDeg !== null && rightArmAbductionDeg !== null && leftArmAbductionDeg > 110 && rightArmAbductionDeg > 110
+        : leftArmAbductionDeg !== null &&
+          rightArmAbductionDeg !== null &&
+          leftArmAbductionDeg > 110 &&
+          rightArmAbductionDeg > 110
         ? 'jumping_jack'
         : primaryKneeDeg !== null && primaryKneeDeg < 145
         ? 'squat'
@@ -340,15 +435,30 @@ export class AetherMotionEngine {
         ? 'bicep_curl'
         : 'squat';
 
-    const confidence = landmarksVisible ? (cameraUnstable ? 42 : 86) : 32;
+    const postureCheck =
+      this.targetExercise !== 'auto' && landmarksVisible
+        ? isPostureCompatible(this.targetExercise, angles)
+        : { ok: true };
+    const protocolMismatch = this.targetExercise !== 'auto' && landmarksVisible && !postureCheck.ok;
+
+    const avgJointVis =
+      [ls, rs, lh, rh, lk, rk].reduce((acc, p) => acc + (p?.visibility ?? 0.5), 0) / 6;
+    const baseConfidence = landmarksVisible
+      ? Math.min(96, Math.max(70, Math.round(68 + avgJointVis * 28)))
+      : 32;
+    const confidence = cameraUnstable ? 42 : protocolMismatch ? 48 : baseConfidence;
     const confidenceLevel: MotionConfidenceTier =
       confidence >= 72 ? 'high' : confidence >= 45 ? 'medium' : 'low';
 
-    let feedback = `${MOTION_EXERCISE_LABELS[inferred]} tracking active.`;
+    let feedback = postureCheck.hint || `${MOTION_EXERCISE_LABELS[inferred]} tracking active.`;
 
-    if (!cameraUnstable && landmarksVisible) {
+    if (!cameraUnstable && landmarksVisible && !protocolMismatch) {
       if (inferred === 'plank') {
-        const goodLine = hipAlignmentDeg !== null && hipAlignmentDeg >= 152 && torsoTiltDeg !== null && torsoTiltDeg > 45;
+        const goodLine =
+          hipAlignmentDeg !== null &&
+          hipAlignmentDeg >= 152 &&
+          torsoTiltDeg !== null &&
+          torsoTiltDeg > 45;
         if (goodLine) {
           this.phase = 'PEAK';
           this.plankAccumMs += dtMs;
@@ -360,93 +470,158 @@ export class AetherMotionEngine {
         }
       } else if (inferred === 'squat' || inferred === 'lunge') {
         const knee = primaryKneeDeg ?? 170;
-        if (knee <= 108) {
+        const peakTarget = inferred === 'squat' ? 112 : 116;
+        if (knee <= peakTarget) {
+          if (this.cycleStartedAt === 0) this.cycleStartedAt = nowMs;
           this.phase = 'PEAK';
           this.reachedPeak = true;
+          this.peakAngleObserved =
+            this.peakAngleObserved === null ? knee : Math.min(this.peakAngleObserved, knee);
           feedback = 'Depth reached — drive back up cleanly!';
-        } else if (knee < 145 && this.phase !== 'PEAK') {
+        } else if (knee < 146 && this.phase !== 'PEAK') {
+          if (this.cycleStartedAt === 0) this.cycleStartedAt = nowMs;
           this.phase = 'ACTIVE_PHASE';
           feedback = 'Lower slightly deeper for full repetition credit.';
-        } else if (knee >= 155) {
-          if (this.reachedPeak && nowMs - this.lastRepAt > 550) {
-            this.repCount += 1;
-            this.lastRepAt = nowMs;
-            this.reachedPeak = false;
+        } else if (knee >= 152) {
+          if (this.reachedPeak && nowMs - this.lastRepAt > 650) {
+            this.recordVerifiedRep(
+              inferred,
+              nowMs,
+              this.peakAngleObserved ?? peakTarget,
+              knee,
+              confidence
+            );
             feedback = `Rep #${this.repCount} verified!`;
           } else if (this.phase === 'ACTIVE_PHASE' && !this.reachedPeak) {
             this.incompleteRepCount += 1;
             feedback = 'Partial depth detected — bend knees further on the next rep.';
           }
           this.phase = 'READY';
+          this.cycleStartedAt = 0;
         }
       } else if (inferred === 'pushup' || inferred === 'bicep_curl' || inferred === 'shoulder_press') {
         const elbow = primaryElbowDeg ?? 165;
-        const peakLow = inferred === 'shoulder_press' ? elbow >= 152 : elbow <= 92;
-        const resetPos = inferred === 'shoulder_press' ? elbow <= 105 : elbow >= 148;
-        if (peakLow) {
+        const peakReached = inferred === 'shoulder_press' ? elbow >= 152 : elbow <= 98;
+        const resetPos = inferred === 'shoulder_press' ? elbow <= 105 : elbow >= 145;
+        if (peakReached) {
+          if (this.cycleStartedAt === 0) this.cycleStartedAt = nowMs;
           this.phase = 'PEAK';
           this.reachedPeak = true;
+          this.peakAngleObserved =
+            this.peakAngleObserved === null
+              ? elbow
+              : inferred === 'shoulder_press'
+              ? Math.max(this.peakAngleObserved, elbow)
+              : Math.min(this.peakAngleObserved, elbow);
           feedback = 'Full range achieved — return smoothly!';
         } else if (!resetPos && this.phase !== 'PEAK') {
+          if (this.cycleStartedAt === 0) this.cycleStartedAt = nowMs;
           this.phase = 'ACTIVE_PHASE';
         } else if (resetPos) {
-          if (this.reachedPeak && nowMs - this.lastRepAt > 450) {
-            this.repCount += 1;
-            this.lastRepAt = nowMs;
-            this.reachedPeak = false;
+          if (this.reachedPeak && nowMs - this.lastRepAt > 550) {
+            this.recordVerifiedRep(
+              inferred,
+              nowMs,
+              this.peakAngleObserved ?? (inferred === 'shoulder_press' ? 155 : 92),
+              elbow,
+              confidence
+            );
             feedback = `Rep #${this.repCount} verified!`;
           }
           this.phase = 'READY';
+          this.cycleStartedAt = 0;
         }
-      } else if (inferred === 'jumping_jack') {
-        const armUp = (leftArmAbductionDeg ?? 0) > 120 && (rightArmAbductionDeg ?? 0) > 120;
-        const armDown = (leftArmAbductionDeg ?? 90) < 48 && (rightArmAbductionDeg ?? 90) < 48;
-        if (armUp) {
+      } else if (inferred === 'situp') {
+        const hip = hipAlignmentDeg ?? 135;
+        if (hip <= 82) {
+          if (this.cycleStartedAt === 0) this.cycleStartedAt = nowMs;
           this.phase = 'PEAK';
           this.reachedPeak = true;
+          this.peakAngleObserved =
+            this.peakAngleObserved === null ? hip : Math.min(this.peakAngleObserved, hip);
+          feedback = 'Top curl reached — lower shoulder blades with control.';
+        } else if (hip < 114 && this.phase !== 'PEAK') {
+          if (this.cycleStartedAt === 0) this.cycleStartedAt = nowMs;
+          this.phase = 'ACTIVE_PHASE';
+          feedback = 'Curl torso up smoothly toward knees.';
+        } else if (hip >= 118) {
+          if (this.reachedPeak && nowMs - this.lastRepAt > 700) {
+            this.recordVerifiedRep(inferred, nowMs, this.peakAngleObserved ?? 78, hip, confidence);
+            feedback = `Sit-up #${this.repCount} verified!`;
+          }
+          this.phase = 'READY';
+          this.cycleStartedAt = 0;
+        }
+      } else if (inferred === 'jumping_jack') {
+        const leftAbd = leftArmAbductionDeg ?? 40;
+        const rightAbd = rightArmAbductionDeg ?? 40;
+        const maxAbd = Math.max(leftAbd, rightAbd);
+        const minAbd = Math.min(leftAbd, rightAbd);
+        const armUp = leftAbd > 118 && rightAbd > 118;
+        const armDown = leftAbd < 52 && rightAbd < 52;
+        if (armUp) {
+          if (this.cycleStartedAt === 0) this.cycleStartedAt = nowMs;
+          this.phase = 'PEAK';
+          this.reachedPeak = true;
+          this.peakAngleObserved =
+            this.peakAngleObserved === null ? maxAbd : Math.max(this.peakAngleObserved, maxAbd);
           feedback = 'Peak overhead reach — bring arms down cleanly.';
         } else if (armDown) {
-          if (this.reachedPeak && nowMs - this.lastRepAt > 350) {
-            this.repCount += 1;
-            this.lastRepAt = nowMs;
-            this.reachedPeak = false;
+          if (this.reachedPeak && nowMs - this.lastRepAt > 380) {
+            this.recordVerifiedRep(inferred, nowMs, this.peakAngleObserved ?? 130, minAbd, confidence);
             feedback = `Jumping Jack #${this.repCount} verified!`;
           }
           this.phase = 'READY';
+          this.cycleStartedAt = 0;
         } else {
+          if (this.cycleStartedAt === 0) this.cycleStartedAt = nowMs;
           this.phase = 'ACTIVE_PHASE';
         }
       } else if (inferred === 'knee_raise') {
-        const kneeUp = (leftKneeDeg ?? 180) < 105 || (rightKneeDeg ?? 180) < 105;
-        const standing = (leftKneeDeg ?? 0) > 152 && (rightKneeDeg ?? 0) > 152;
+        const lKnee = leftKneeDeg ?? 175;
+        const rKnee = rightKneeDeg ?? 175;
+        const minKnee = Math.min(lKnee, rKnee);
+        const kneeUp = minKnee < 108;
+        const standing = lKnee > 150 && rKnee > 150;
         if (kneeUp) {
+          if (this.cycleStartedAt === 0) this.cycleStartedAt = nowMs;
           this.phase = 'PEAK';
           this.reachedPeak = true;
+          this.peakAngleObserved =
+            this.peakAngleObserved === null ? minKnee : Math.min(this.peakAngleObserved, minKnee);
           feedback = 'High knee drive verified!';
         } else if (standing) {
-          if (this.reachedPeak && nowMs - this.lastRepAt > 300) {
-            this.repCount += 1;
-            this.lastRepAt = nowMs;
-            this.reachedPeak = false;
+          if (this.reachedPeak && nowMs - this.lastRepAt > 320) {
+            this.recordVerifiedRep(
+              inferred,
+              nowMs,
+              this.peakAngleObserved ?? 98,
+              Math.round((lKnee + rKnee) / 2),
+              confidence
+            );
+            feedback = `High Knee #${this.repCount} verified!`;
           }
           this.phase = 'READY';
+          this.cycleStartedAt = 0;
         }
       }
     } else if (cameraUnstable) {
       feedback = 'Stabilize camera — background movement paused rep counting.';
+    } else if (protocolMismatch && postureCheck.hint) {
+      feedback = postureCheck.hint;
     }
 
     this.lastSnapshot = {
-      classifiedExercise: confidenceLevel === 'high' ? inferred : null,
+      classifiedExercise: !protocolMismatch && confidenceLevel === 'high' ? inferred : null,
       candidateExercise: inferred,
       confidence,
       confidenceLevel,
-      classificationStatus: cameraUnstable
+      classificationStatus: cameraUnstable || protocolMismatch
         ? 'unreliable'
         : confidenceLevel === 'high'
         ? 'identified'
         : 'analyzing',
-      protocolMismatch: false,
+      protocolMismatch,
       activeProtocol: this.targetExercise,
       repCount: this.repCount,
       incompleteRepCount: this.incompleteRepCount,
@@ -459,6 +634,7 @@ export class AetherMotionEngine {
       motionIntensity,
       feedback,
       smoothedLandmarks: this.smoothed,
+      lastRepProof: this.lastRepProof,
     };
     return this.lastSnapshot;
   }

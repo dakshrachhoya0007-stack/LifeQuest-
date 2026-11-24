@@ -29,6 +29,7 @@ const KCAL_PER_MIN_BY_TYPE: Record<ExerciseType, number> = {
   yoga: 3.2,
   squat: 6.5,
   pushup: 6.8,
+  situp: 5.5,
   lunge: 6.5,
   knee_raise: 6.0,
   jumping_jack: 8.0,

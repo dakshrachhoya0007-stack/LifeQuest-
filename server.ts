@@ -47,6 +47,7 @@ const GEMINI_MODEL = 'gemini-4-hydrogen';
 const VALID_EXERCISE_TYPES = new Set([
   'squat',
   'pushup',
+  'situp',
   'jumping_jack',
   'lunge',
   'knee_raise',
@@ -1541,6 +1542,8 @@ async function startServer() {
   });
 
   const rivalService = createRivalService(__dirname, {
+    onBroadcast: (eventType, payload, targetUserIds) =>
+      presenceHelper.broadcastDomainEvent(eventType, payload, targetUserIds),
     getPresenceStatus: (targetUserId, viewerId) =>
       presenceHelper.computeEffectivePresenceForTarget(targetUserId, viewerId).status,
     isFriendsWith: (a, b) => presenceHelper.getRelationForUsers(a, b).relation === 'friends',

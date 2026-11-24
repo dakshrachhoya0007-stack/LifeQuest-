@@ -54,6 +54,8 @@ import {
   CompetitiveMatchVisibility,
   CompetitiveLeaderboardEntry,
   CompetitiveRivalMatch,
+  DuelExerciseId,
+  RivalryScoreEntry,
   PlayerSkillTreeState,
   SkillActivityAwardResult,
   SkillActivityType,
@@ -118,6 +120,7 @@ import {
   cancelRivalsQueueServer,
   claimCommunityMilestoneServer,
   claimWeeklyBossRewardServer,
+  concedeRivalDuelServer,
   dispatchVerifiedEcosystemActivityServer,
   disputeRivalMatchServer,
   endActiveRivalryServer,
@@ -130,6 +133,7 @@ import {
   fetchWeeklyBossStateServer,
   inviteRivalServer,
   joinRivalsQueueServer,
+  readyRivalDuelServer,
   reconcileMuseumServer,
   reconcileSkillTreeServer,
   rematchRivalServer,
@@ -137,6 +141,7 @@ import {
   respondRivalInviteServer,
   sendAiMentorMessageServer,
   sendDirectRivalChallengeServer,
+  submitVerifiedDuelRepServer,
   syncMuseumPrivacyServer,
   updateRivalsPrivacyServer,
   type MuseumQueryResponse,
@@ -602,11 +607,37 @@ interface GameContextType {
   // Phase 2 (Competitive Arena): Independent Rivals Platform
   rivalsState: RivalsStateResponse | null;
   rivalsLoading: boolean;
+  rivalsServerClockOffsetMs: number;
   refreshRivalsState: () => Promise<void>;
   joinRivalsQueue: (
-    mode: CompetitiveRivalMode
+    opts?: CompetitiveRivalMode | { durationSeconds?: number; mode?: CompetitiveRivalMode }
   ) => Promise<{ success: boolean; matched?: boolean; match?: CompetitiveRivalMatch | null; error?: string }>;
   cancelRivalsQueue: () => Promise<{ success: boolean; error?: string }>;
+  readyRivalDuel: (params: {
+    matchId: string;
+    ready: boolean;
+    cameraReady: boolean;
+  }) => Promise<{ success: boolean; match?: CompetitiveRivalMatch; launchedNow?: boolean; error?: string }>;
+  submitVerifiedDuelRep: (params: {
+    matchId: string;
+    eventId: string;
+    repSeq: number;
+    exercise: DuelExerciseId;
+    peakAngleDeg: number;
+    resetAngleDeg: number;
+    durationMs: number;
+    confidence: number;
+    landmarksVisible: boolean;
+    cameraStable: boolean;
+  }) => Promise<{
+    success: boolean;
+    status?: number;
+    pointsAwarded?: number;
+    duplicate?: boolean;
+    match?: CompetitiveRivalMatch;
+    error?: string;
+  }>;
+  concedeRivalDuel: (matchId: string) => Promise<{ success: boolean; match?: CompetitiveRivalMatch; error?: string }>;
   sendDirectRivalChallenge: (params: {
     opponentId: string;
     opponentName: string;
@@ -1279,6 +1310,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [weeklyBossLoading, setWeeklyBossLoading] = useState<boolean>(false);
   const [rivalsState, setRivalsState] = useState<RivalsStateResponse | null>(null);
   const [rivalsLoading, setRivalsLoading] = useState<boolean>(false);
+  const [rivalsServerClockOffsetMs, setRivalsServerClockOffsetMs] = useState<number>(0);
   const [mentorMessages, setMentorMessages] = useState<MentorChatMessage[]>([]);
   const [mentorQuests, setMentorQuests] = useState<MentorRecommendedQuest[]>([]);
   const [mentorWeeklyAnalysis, setMentorWeeklyAnalysis] = useState<MentorWeeklyAnalysis | null>(null);
@@ -2395,6 +2427,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setWeeklyBossState(bossRes.data);
         }
         if (rivalRes.ok && rivalRes.data) {
+          if (rivalRes.data.serverNow) {
+            const parsedNow = Date.parse(rivalRes.data.serverNow);
+            if (Number.isFinite(parsedNow)) setRivalsServerClockOffsetMs(parsedNow - Date.now());
+          }
           setRivalsState(rivalRes.data);
         }
         if (mentorRes.ok && mentorRes.data) {
@@ -6590,6 +6626,43 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
               void refreshTerritoryWars();
             } else if (msg.type === 'community_moment:update') {
               void refreshCommunityEventState();
+            } else if (
+              (msg.type === 'rivals:match_found' ||
+                msg.type === 'rivals:match_updated' ||
+                msg.type === 'rivals:match_settled') &&
+              msg.payload?.match
+            ) {
+              const incomingMatch = msg.payload.match as CompetitiveRivalMatch;
+              const lastEntry = msg.payload.lastScoreEntry as RivalryScoreEntry | undefined;
+              if (typeof msg.payload.serverNow === 'string') {
+                const parsedNow = Date.parse(msg.payload.serverNow);
+                if (Number.isFinite(parsedNow)) setRivalsServerClockOffsetMs(parsedNow - Date.now());
+              }
+              setRivalsState(prev => {
+                if (!prev) return prev;
+                const existingMatches = Array.isArray(prev.matches) ? prev.matches : [];
+                const exists = existingMatches.some(m => m.id === incomingMatch.id);
+                const nextMatches = exists
+                  ? existingMatches.map(m => (m.id === incomingMatch.id ? incomingMatch : m))
+                  : [incomingMatch, ...existingMatches];
+                const existingEvents = Array.isArray(prev.events) ? prev.events : [];
+                const nextEvents =
+                  lastEntry && !existingEvents.some(e => e.id === lastEntry.id)
+                    ? [lastEntry, ...existingEvents].slice(0, 120)
+                    : existingEvents;
+                return {
+                  ...prev,
+                  matches: nextMatches,
+                  events: nextEvents,
+                  queueEntry: msg.type === 'rivals:match_found' ? null : prev.queueEntry,
+                };
+              });
+              if (msg.type === 'rivals:match_found') {
+                sound.playQuestComplete();
+              } else if (msg.type === 'rivals:match_settled') {
+                sound.playQuestComplete();
+                void refreshRivalsState();
+              }
             }
           } catch {
             // ignore malformed frame
@@ -7176,6 +7249,41 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // --- PHASE 2 (COMPETITIVE ARENA): INDEPENDENT RIVALS PLATFORM ---
+  const applyRivalsStatePayload = (data: RivalsStateResponse | undefined) => {
+    if (!data) return;
+    if (data.serverNow) {
+      const parsedNow = Date.parse(data.serverNow);
+      if (Number.isFinite(parsedNow)) setRivalsServerClockOffsetMs(parsedNow - Date.now());
+    }
+    setRivalsState(data);
+  };
+
+  const applySingleDuelMatchUpdate = (updatedMatch?: CompetitiveRivalMatch, serverNow?: string, scoreEntry?: RivalryScoreEntry) => {
+    if (serverNow) {
+      const parsedNow = Date.parse(serverNow);
+      if (Number.isFinite(parsedNow)) setRivalsServerClockOffsetMs(parsedNow - Date.now());
+    }
+    if (!updatedMatch) return;
+    setRivalsState(prev => {
+      if (!prev) return prev;
+      const existing = Array.isArray(prev.matches) ? prev.matches : [];
+      const exists = existing.some(m => m.id === updatedMatch.id);
+      const nextMatches = exists
+        ? existing.map(m => (m.id === updatedMatch.id ? updatedMatch : m))
+        : [updatedMatch, ...existing];
+      const existingEvents = Array.isArray(prev.events) ? prev.events : [];
+      const nextEvents =
+        scoreEntry && !existingEvents.some(e => e.id === scoreEntry.id)
+          ? [scoreEntry, ...existingEvents].slice(0, 120)
+          : existingEvents;
+      return {
+        ...prev,
+        matches: nextMatches,
+        events: nextEvents,
+      };
+    });
+  };
+
   const refreshRivalsState = async () => {
     const uid = activeSessionUserIdRef.current || user?.id;
     if (!uid) return;
@@ -7188,25 +7296,30 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         level: stats.level,
       });
       if (res.ok && res.data) {
-        setRivalsState(res.data);
+        applyRivalsStatePayload(res.data);
       }
     } finally {
       setRivalsLoading(false);
     }
   };
 
-  const joinRivalsQueue = async (mode: CompetitiveRivalMode) => {
+  const joinRivalsQueue = async (
+    opts?: CompetitiveRivalMode | { durationSeconds?: number; mode?: CompetitiveRivalMode }
+  ) => {
     const uid = activeSessionUserIdRef.current || user?.id;
     if (!uid || !user) return { success: false, error: 'Authentication required.' };
+    const durationSeconds = typeof opts === 'object' ? opts?.durationSeconds : undefined;
+    const mode = typeof opts === 'string' ? opts : opts?.mode;
     const res = await joinRivalsQueueServer({
       userId: uid,
+      durationSeconds,
       mode,
       username: user.username,
       characterClass: user.characterClass,
       level: stats.level,
     });
     if (res.ok) {
-      if (res.data) setRivalsState(res.data);
+      applyRivalsStatePayload(res.data);
       if (res.matched) sound.playQuestComplete();
       else sound.playClick();
       return { success: true, matched: res.matched, match: res.match || null };
@@ -7219,9 +7332,79 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!uid) return { success: false, error: 'Authentication required.' };
     const res = await cancelRivalsQueueServer(uid);
     if (res.ok) {
-      if (res.data) setRivalsState(res.data);
+      applyRivalsStatePayload(res.data);
       sound.playClick();
       return { success: true };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const readyRivalDuel = async (params: {
+    matchId: string;
+    ready: boolean;
+    cameraReady: boolean;
+  }) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await readyRivalDuelServer({
+      userId: uid,
+      matchId: params.matchId,
+      ready: params.ready,
+      cameraReady: params.cameraReady,
+    });
+    if (res.ok) {
+      applyRivalsStatePayload(res.data);
+      if (res.launchedNow) sound.playQuestComplete();
+      else sound.playClick();
+      return { success: true, match: res.match, launchedNow: res.launchedNow };
+    }
+    return { success: false, error: res.error };
+  };
+
+  const submitVerifiedDuelRep = async (params: {
+    matchId: string;
+    eventId: string;
+    repSeq: number;
+    exercise: DuelExerciseId;
+    peakAngleDeg: number;
+    resetAngleDeg: number;
+    durationMs: number;
+    confidence: number;
+    landmarksVisible: boolean;
+    cameraStable: boolean;
+  }) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await submitVerifiedDuelRepServer({
+      userId: uid,
+      ...params,
+    });
+    if (res.ok) {
+      applySingleDuelMatchUpdate(res.match, res.serverNow, res.scoreEntry);
+      if (!res.duplicate) sound.playRepCount();
+      return {
+        success: true,
+        status: res.status,
+        pointsAwarded: res.pointsAwarded,
+        duplicate: res.duplicate,
+        match: res.match,
+      };
+    }
+    if (res.serverNow) {
+      const parsedNow = Date.parse(res.serverNow);
+      if (Number.isFinite(parsedNow)) setRivalsServerClockOffsetMs(parsedNow - Date.now());
+    }
+    return { success: false, status: res.status, error: res.error };
+  };
+
+  const concedeRivalDuel = async (matchId: string) => {
+    const uid = activeSessionUserIdRef.current || user?.id;
+    if (!uid) return { success: false, error: 'Authentication required.' };
+    const res = await concedeRivalDuelServer({ userId: uid, matchId });
+    if (res.ok) {
+      applyRivalsStatePayload(res.data);
+      sound.playClick();
+      return { success: true, match: res.match };
     }
     return { success: false, error: res.error };
   };
@@ -8812,9 +8995,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         claimWeeklyBossReward,
         rivalsState,
         rivalsLoading,
+        rivalsServerClockOffsetMs,
         refreshRivalsState,
         joinRivalsQueue,
         cancelRivalsQueue,
+        readyRivalDuel,
+        submitVerifiedDuelRep,
+        concedeRivalDuel,
         sendDirectRivalChallenge,
         sendRivalInvite,
         respondRivalInvite,

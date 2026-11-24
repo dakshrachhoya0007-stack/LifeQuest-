@@ -84,6 +84,12 @@ const EXERCISE_OPTIONS: {
     instructions: 'Keep torso braced in a straight plank line. Lower chest steadily until elbows bend below 108° and press back to lockout.',
   },
   {
+    id: 'situp',
+    name: 'Sit-ups',
+    targetMuscles: 'Abdominals, Hip Flexors, Core',
+    instructions: 'Lie back with knees bent and feet anchored. Curl torso smoothly upward toward your knees and lower back with control.',
+  },
+  {
     id: 'lunge',
     name: 'Lunges',
     targetMuscles: 'Hamstrings, Glutes, Balance',
@@ -151,7 +157,7 @@ const EXERCISE_OPTIONS: {
   },
 ];
 
-const CAMERA_EXERCISES = EXERCISE_OPTIONS.slice(0, 8) as Array<{
+const CAMERA_EXERCISES = EXERCISE_OPTIONS.slice(0, 9) as Array<{
   id: CameraTrackableExercise;
   name: string;
   targetMuscles: string;
