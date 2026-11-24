@@ -1194,6 +1194,7 @@ export type GlobalAchievementCategory =
   | 'special_hidden_achievements';
 
 export type GlobalAchievementRarity =
+  | 'Epic'
   | 'Legendary'
   | 'Mythic'
   | 'Ascendant'
@@ -2369,6 +2370,7 @@ export interface WorkoutParty {
 export interface WorkoutPartyHistoryEntry {
   id: string;
   partyId: string;
+  userId?: string;
   challengeId: string;
   challengeName: string;
   targetValue: number;
@@ -2428,6 +2430,7 @@ export interface PlayerCosmeticState {
   activeLoadoutId?: string | null;
   competitionLoadoutId?: string | null;
   unlockedLoadoutSlots?: number;
+  maxLoadoutSlots?: number;
 }
 
 // --- 4. COMMUNITY DECISIONS ---
@@ -2501,6 +2504,24 @@ export interface TrophyShowcaseState {
   totalAvailableCount: number;
   unlockedCount: number;
   completionPercent: number;
+}
+
+export interface HiddenAchievementClientView {
+  id: string;
+  discovered: boolean;
+  revealed?: boolean;
+  unlockedByCaller?: boolean;
+  name: string;
+  maskedTitle: string;
+  maskedHint: string;
+  hint?: string;
+  rarity: GlobalAchievementRarity;
+  emblemIcon?: string;
+  story?: string;
+  titleTag?: string;
+  requirementSummary?: string;
+  globalFirstOwnerName?: string | null;
+  unlockedAt?: string | null;
 }
 
 // --- 6. TERRITORY WARS (GUILD VS GUILD, 2D FICTIONAL MAP) ---

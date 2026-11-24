@@ -73,9 +73,9 @@ export const AdventurersFeedView: React.FC = () => {
     setBusyId('share-note');
     const res = await shareFeedWorkoutNote({
       verifiedRef: selectedSessionId,
-      title: noteTitle.trim() || `${sess?.type || 'Training'} Session Completed`,
+      title: noteTitle.trim() || `${sess?.exerciseName || 'Training'} Session Completed`,
       summary: noteSummary.trim(),
-      highlightValue: sess ? `${sess.duration}m` : undefined,
+      highlightValue: sess ? `${sess.durationMinutes}m` : undefined,
       commentPermission: commentPerm,
     });
     setBusyId(null);
@@ -174,7 +174,7 @@ export const AdventurersFeedView: React.FC = () => {
             >
               {fitnessSessions.slice(0, 12).map(s => (
                 <option key={s.id} value={s.id}>
-                  {s.type} · {s.duration}m ({new Date(s.timestamp).toLocaleDateString()})
+                  {s.exerciseName} · {s.durationMinutes}m ({new Date(s.timestamp).toLocaleDateString()})
                 </option>
               ))}
             </select>

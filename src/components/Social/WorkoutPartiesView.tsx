@@ -99,9 +99,9 @@ export const WorkoutPartiesView: React.FC = () => {
     }
     setBusyId(`submit-${partyId}`);
     const res = await submitWorkoutPartyProgress(partyId, sess.id, {
-      durationMinutes: sess.duration,
-      repetitions: sess.reps || Math.max(10, sess.duration * 2),
-      verifiedWithAetherVision: Boolean(sess.verifiedWithVision),
+      durationMinutes: sess.durationMinutes,
+      repetitions: sess.repetitions || Math.max(10, sess.durationMinutes * 2),
+      verifiedWithAetherVision: Boolean(sess.verifiedWithAetherVision),
     });
     setBusyId(null);
     if (res.success) flash('success', 'Verified workout recorded toward shared party goal!');
@@ -389,7 +389,7 @@ export const WorkoutPartiesView: React.FC = () => {
                           >
                             {fitnessSessions.slice(0, 8).map(s => (
                               <option key={s.id} value={s.id}>
-                                {s.type} · {s.duration}m
+                                {s.exerciseName} · {s.durationMinutes}m
                               </option>
                             ))}
                           </select>

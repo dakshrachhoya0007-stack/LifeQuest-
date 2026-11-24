@@ -18,6 +18,7 @@ import {
 import { useGame } from '../../../context/GameContext';
 import { getHeroById } from '../../../data/heroesData';
 import {
+  DEFAULT_WORLD_STATE,
   GOLDEN_TREE_STAGES,
   HEARTLANDS_LANDMARKS,
   LANDMARK_RESTORATION_STAGES,
@@ -30,6 +31,7 @@ import {
   GoldenTreeStage,
   LandmarkId,
   LandmarkRestorationStage,
+  WorldPersistenceState,
   WorldRegionId,
 } from '../../../types/game';
 import {
@@ -48,14 +50,34 @@ export const WorldExplorationView: React.FC = () => {
   const {
     user,
     selectedHeroId,
-    worldState,
-    markWorldEntered,
-    setWorldGoldenTreeStage,
-    setWorldLandmarkStage,
-    setWorldGraphicsQuality,
-    saveWorldPlayerPosition,
     setActiveTab,
   } = useGame();
+
+  const [worldState, setWorldState] = useState<WorldPersistenceState>(DEFAULT_WORLD_STATE);
+  const markWorldEntered = useCallback(() => {
+    setWorldState(prev => (prev.hasEnteredWorld ? prev : { ...prev, hasEnteredWorld: true }));
+  }, []);
+  const setWorldGoldenTreeStage = useCallback((stage: GoldenTreeStage) => {
+    setWorldState(prev => ({ ...prev, goldenTreeStage: stage }));
+  }, []);
+  const setWorldLandmarkStage = useCallback(
+    (id: LandmarkId, stage: LandmarkRestorationStage, restorationPercent: number) => {
+      setWorldState(prev => ({
+        ...prev,
+        landmarks: {
+          ...prev.landmarks,
+          [id]: { id, stage, restorationPercent },
+        },
+      }));
+    },
+    []
+  );
+  const setWorldGraphicsQuality = useCallback((graphicsQuality: 'high' | 'low') => {
+    setWorldState(prev => ({ ...prev, graphicsQuality }));
+  }, []);
+  const saveWorldPlayerPosition = useCallback((pos: { x: number; y: number; z: number }) => {
+    setWorldState(prev => ({ ...prev, lastPlayerPosition: pos }));
+  }, []);
 
   const canvasHandleRef = useRef<HeartlandsWorldHandle | null>(null);
   const [isLoading, setIsLoading] = useState(true);

@@ -24,7 +24,6 @@ import {
   COLLECTIBLE_CARDS_CATALOG,
   ENDORSEMENT_CATEGORIES_META,
 } from '../../data/aaaGamingData';
-import { TROPHY_SHOWCASE_CATALOG } from '../../data/expansionData';
 import {
   Character2DAvatar,
   CollectibleCardArtwork,
@@ -960,22 +959,22 @@ export const PublicProfileModal: React.FC = () => {
                   {/* Pinned Trophies Showcase */}
                   {player.showAchievements !== false &&
                     publicTrophyState &&
-                    publicTrophyState.pinnedTrophyIds.length > 0 && (
+                    publicTrophyState.pinnedIds.length > 0 && (
                       <div className="p-4 rounded-xl bg-[#130f24] border border-purple-950/80 space-y-3">
                         <span className="text-xs font-semibold text-[#E8CF96] flex items-center gap-1.5 font-['Cinzel']">
                           <Trophy className="w-3.5 h-3.5 text-[#C5A15A]" />
                           Pinned Trophy Case
                         </span>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                          {publicTrophyState.pinnedTrophyIds.slice(0, 4).map(tid => {
-                            const tDef = TROPHY_SHOWCASE_CATALOG.find(t => t.id === tid);
+                          {publicTrophyState.pinnedIds.slice(0, 4).map(tid => {
+                            const tDef = publicTrophyState.trophies.find(t => t.id === tid);
                             if (!tDef) return null;
                             return (
                               <div
                                 key={tid}
                                 className="p-2.5 rounded-lg bg-[#0a0714] border border-[#C5A15A]/20"
                               >
-                                <p className="text-xs font-bold text-white truncate">{tDef.name}</p>
+                                <p className="text-xs font-bold text-white truncate">{tDef.title}</p>
                                 <p className="text-[11px] text-slate-400 truncate">
                                   {tDef.rarity} · {tDef.description}
                                 </p>

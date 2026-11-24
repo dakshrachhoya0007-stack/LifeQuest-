@@ -1444,18 +1444,14 @@ async function startServer() {
     creditFragments: (userId, amount, source, idempotencyKey) =>
       aaaEconomyCardsService.creditFragments(userId, amount, source, idempotencyKey),
     grantDirectCosmetic: params => customizationService.grantDirectCosmetic(params),
-    getUniqueCardCount: userId => aaaEconomyCardsService.getUniqueCardCountSync(userId),
     getCollectionPercent: userId => aaaEconomyCardsService.getCollectionPercentSync(userId),
     getMaxFriendshipLevel: userId => socialEngagementService.getMaxFriendshipLevelSync(userId),
-    getMarketplaceUnlockCount: userId => aaaEconomyCardsService.getMarketplaceUnlockCountSync(userId),
     isPairBlocked: (a, b) => presenceHelper.getRelationForUsers(a, b).relation === 'blocked',
   });
 
   aaaEconomyCardsService = createAaaEconomyCardsService(__dirname, {
     grantDirectCosmetic: params => customizationService.grantDirectCosmetic(params),
-    grantDirectTitle: async params => {
-      await identityService.grantDirectTitle(params);
-    },
+    grantDirectTitle: params => identityService.grantDirectTitle(params),
     evaluateIdentity: async ({ userId }) => {
       await identityService.evaluateAndRecordActivity({ userId });
     },
@@ -1477,8 +1473,19 @@ async function startServer() {
   socialEngagementService = createSocialEngagementService(__dirname, {
     privacyHelper: presenceHelper,
     economyCards: aaaEconomyCardsService,
-    identity: identityService,
-    getCosmeticAppearance: userId => customizationService.getAppearanceSync(userId),
+    grantDirectTitle: params => identityService.grantDirectTitle(params),
+    onNotifyUser: async ({ userId, eventKey, title, body, actionTab }) => {
+      await notificationService.emitNotification({
+        userId,
+        category: 'social',
+        preferenceKey: 'social',
+        eventKey,
+        type: 'social_engagement',
+        title,
+        body,
+        actionTab: actionTab || 'social',
+      });
+    },
   });
 
   const seasonService = createSeasonService(__dirname, {
@@ -1497,24 +1504,15 @@ async function startServer() {
     onUnlockCosmetic: async ({ userId, cosmeticId, sourceRef }) => {
       await customizationService.grantDirectCosmetic({ userId, cosmeticId, sourceRef });
     },
-    onGrantGold: async p => {
-      await aaaEconomyCardsService.creditGold(p.userId, p.amount, p.source, p.idempotencyKey);
-    },
-    onGrantFragments: async p => {
-      await aaaEconomyCardsService.creditFragments(p.userId, p.amount, p.source, p.idempotencyKey);
-    },
-    onGrantCard: async p => {
-      await aaaEconomyCardsService.grantCollectibleCard(p);
-    },
-    onGrantCardPack: async p => {
-      await aaaEconomyCardsService.grantCardPack(p);
-    },
-    onGrantTitle: async p => {
-      await identityService.grantDirectTitle(p);
-    },
-    onGrantRelic: async p => {
-      await aaaEconomyCardsService.grantRelic(p);
-    },
+    onGrantGold: (userId, amount, source, key) =>
+      aaaEconomyCardsService.creditGold(userId, amount, source, key),
+    onGrantFragments: (userId, amount, source, key) =>
+      aaaEconomyCardsService.creditFragments(userId, amount, source, key),
+    onGrantCard: (userId, cardId, sourceRef) =>
+      aaaEconomyCardsService.grantCollectibleCard(userId, cardId, sourceRef),
+    onGrantTitle: params => identityService.grantDirectTitle(params),
+    onGrantRelic: (userId, relicId) =>
+      aaaEconomyCardsService.grantRelic(userId, relicId),
   });
   const leaderboardService = createLeaderboardService(__dirname);
 
@@ -1545,7 +1543,7 @@ async function startServer() {
     isFriendsWith: (a, b) => presenceHelper.getRelationForUsers(a, b).relation === 'friends',
     getCompetitorLoadoutSummary: userId => {
       const app = customizationService.getAppearanceSync(userId);
-      const pieces = [app?.outfitColorId, app?.frameId, app?.auraId].filter(Boolean);
+      const pieces = [app?.colorId, app?.frameId, app?.auraId].filter(Boolean);
       return pieces.length > 0 ? pieces.slice(0, 2).join(' · ') : 'Citadel Vanguard';
     },
     onGrantTitle: async p => {
@@ -1611,9 +1609,8 @@ async function startServer() {
   const communityEventsService = createCommunityEventsService(__dirname, {
     onBroadcast: (eventType, payload) => presenceHelper.broadcastDomainEvent(eventType, payload),
     getKnownUserIds: () => presenceHelper.getKnownUserIds(),
-    onGrantCard: async p => {
-      await aaaEconomyCardsService.grantCollectibleCard(p);
-    },
+    onGrantCard: (userId, cardId, sourceRef) =>
+      aaaEconomyCardsService.grantCollectibleCard(userId, cardId, sourceRef),
     onGrantTitle: async p => {
       await identityService.grantDirectTitle(p);
     },

@@ -42,7 +42,7 @@ export const TerritoryWarsView: React.FC = () => {
     setTimeout(() => setNotice(null), 3500);
   };
 
-  const myGuild = user?.guildId ? guilds.find(g => g.id === user.guildId) || null : null;
+  const myGuild = guilds.find(g => g.isMember) || null;
   const territories = territoryWarsState?.territories || [];
   const activeTerritory =
     territories.find(t => t.id === selectedTerritoryId) || territories[0] || null;

@@ -115,6 +115,11 @@ export const RARITY_FRAME_META: Record<
     cardGlow: string;
   }
 > = {
+  Epic: {
+    textClass: 'text-purple-300',
+    borderClass: 'border-purple-500/45',
+    cardGlow: 'shadow-purple-950/30',
+  },
   Legendary: {
     textClass: 'text-amber-300',
     borderClass: 'border-amber-500/45',

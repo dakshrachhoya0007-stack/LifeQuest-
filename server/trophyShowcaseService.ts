@@ -319,15 +319,21 @@ export function createTrophyShowcaseService(rootDir: string, deps: TrophyShowcas
       const ownerClaim = claims[def.id] || null;
       const revealedToCaller = Boolean(ownerClaim && ownerClaim.ownerId === userId);
       const claimedGlobally = Boolean(ownerClaim);
+      const discovered = revealedToCaller || claimedGlobally;
+      const maskedHint = def.hint || 'Walk steadily across balanced fitness, recovery, and fellowship.';
       return {
         id: def.id,
-        revealed: revealedToCaller || claimedGlobally,
+        discovered,
+        revealed: discovered,
         unlockedByCaller: revealedToCaller,
-        name: revealedToCaller || claimedGlobally ? def.name : 'Sealed Realm Mystery',
+        name: discovered ? def.name : 'Sealed Realm Mystery',
+        maskedTitle: 'Sealed Realm Mystery',
+        maskedHint,
+        hint: maskedHint,
         rarity: def.rarity,
         emblemIcon: def.emblemIcon,
-        hint: def.hint || 'Walk steadily across balanced fitness, recovery, and fellowship.',
-        story: revealedToCaller || claimedGlobally ? def.story : undefined,
+        story: discovered ? def.story : undefined,
+        titleTag: discovered ? def.titleTag : undefined,
         requirementSummary: revealedToCaller ? def.requirementSummary : undefined,
         globalFirstOwnerName: ownerClaim?.ownerUsername || null,
         unlockedAt: revealedToCaller ? ownerClaim?.claimedAt : null,
@@ -411,8 +417,10 @@ export function createTrophyShowcaseService(rootDir: string, deps: TrophyShowcas
         return;
       }
 
-      const rawIds = Array.isArray(req.body?.pinnedIds) ? req.body.pinnedIds.map(String) : [];
-      const uniqueIds = Array.from(new Set(rawIds.map(id => id.trim()).filter(Boolean)));
+      const rawIds: string[] = Array.isArray(req.body?.pinnedIds)
+        ? req.body.pinnedIds.map((x: unknown) => String(x))
+        : [];
+      const uniqueIds: string[] = Array.from(new Set(rawIds.map(id => id.trim()).filter(Boolean)));
 
       if (uniqueIds.length > 6) {
         res.status(400).json({ success: false, error: 'You can pin up to 6 trophies in your showcase.' });

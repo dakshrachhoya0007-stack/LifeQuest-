@@ -435,7 +435,7 @@ export function createAaaEconomyCardsService(
           : ('unowned' as const),
         hint: b.unlockRequirement,
       })),
-      ...GLOBAL_EXCLUSIVE_ACHIEVEMENTS.filter(g => !g.hidden).map(g => ({
+      ...GLOBAL_EXCLUSIVE_ACHIEVEMENTS.filter(g => !g.isHidden).map(g => ({
         id: g.id,
         name: g.name,
         rarity: g.rarity,
@@ -445,7 +445,7 @@ export function createAaaEconomyCardsService(
             : legendClaims[g.id]
             ? ('unowned' as const)
             : ('undiscovered' as const),
-        hint: g.requirement,
+        hint: g.requirementSummary,
       })),
     ];
 

@@ -203,13 +203,18 @@ export const Character2DAvatar: React.FC<Character2DAvatarProps> = ({
 interface CollectibleCardArtworkProps {
   card: CollectibleCardDef;
   size?: 'sm' | 'md' | 'lg';
+  compact?: boolean;
+  className?: string;
 }
 
 export const CollectibleCardArtwork: React.FC<CollectibleCardArtworkProps> = ({
   card,
   size = 'md',
+  compact = false,
+  className = '',
 }) => {
-  const h = size === 'sm' ? 'h-20' : size === 'lg' ? 'h-44' : 'h-32';
+  const effectiveSize = compact ? 'sm' : size;
+  const h = effectiveSize === 'sm' ? 'h-20' : effectiveSize === 'lg' ? 'h-44' : 'h-32';
   const renderMotif = () => {
     switch (card.motif) {
       case 'crown':
@@ -287,7 +292,7 @@ export const CollectibleCardArtwork: React.FC<CollectibleCardArtworkProps> = ({
 
   return (
     <div
-      className={`relative w-full ${h} rounded-xl overflow-hidden flex items-center justify-center border`}
+      className={`relative w-full ${h} rounded-xl overflow-hidden flex items-center justify-center border ${className}`.trim()}
       style={{
         borderColor: `${card.accentHex}55`,
         background: `radial-gradient(circle at 50% 35%, ${card.accentHex}26, transparent 62%), linear-gradient(160deg, ${card.primaryHex}, ${card.secondaryHex})`,

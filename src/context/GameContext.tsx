@@ -941,7 +941,6 @@ const ROUTE_TO_TAB: Record<string, string> = {
   '/nutrition': 'nutrition',
   '/aether-vision': 'aether-vision',
   '/armory': 'armory',
-  '/buffs': 'buffs',
   '/boss-battles': 'boss-battles',
   '/weekly-boss': 'boss-battles',
   '/storyline': 'storyline',
@@ -7894,7 +7893,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateFeedCommentPermission = async (postId: string, permission: FeedCommentPermission) => {
     const uid = activeSessionUserIdRef.current || user?.id;
     if (!uid) return { success: false, error: 'Authentication required.' };
-    const res = await updateFeedCommentPermissionServer(uid, postId, permission);
+    const res = await updateFeedCommentPermissionServer({
+      userId: uid,
+      postId,
+      commentPermission: permission,
+    });
     if (res.ok && res.post) {
       setFeedData(prev =>
         prev ? { ...prev, posts: prev.posts.map(p => (p.id === postId ? res.post! : p)) } : prev

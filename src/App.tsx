@@ -15,7 +15,6 @@ import { NutritionView } from './components/Nutrition/NutritionView';
 import { AetherVisionView } from './components/AetherVision/AetherVisionView';
 import { ArmoryView } from './components/Armory/ArmoryView';
 import { StoreView } from './components/Store/StoreView';
-import { BuffsView } from './components/ActiveBuffs/BuffsView';
 import { BossBattleView } from './components/BossBattle/BossBattleView';
 import { StorylineView } from './components/Storyline/StorylineView';
 import { SocialHubView } from './components/Social/SocialHubView';
@@ -152,7 +151,6 @@ const MainAppContent: React.FC = () => {
       case 'store':
       case 'marketplace':
         return <StoreView />;
-      case 'buffs': return <BuffsView />;
       case 'boss-battles': return <BossBattleView />;
       case 'storyline': return <StorylineView />;
       case 'social':
