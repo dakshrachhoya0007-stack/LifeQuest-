@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision';
 import { useGame } from '../../context/GameContext';
 import {
+  CameraTrackableExercise,
   DietaryPreference,
   ExerciseType,
   FoodVisionAnalysis,
@@ -13,6 +15,16 @@ import {
   isMinorUser,
   resolveAgeGroupFromUser,
 } from '../../utils/nutritionGuidance';
+import {
+  AetherMotionEngine,
+  computeBackgroundMotionStability,
+  MOTION_EXERCISE_LABELS,
+  MotionEngineOutput,
+  POSE_IDX,
+  POSE_SKELETON_CONNECTIONS,
+  PoseLandmark,
+  SupportedMotionExercise,
+} from '../../utils/aetherMotionEngine';
 import { sound } from '../../utils/audio';
 import confetti from 'canvas-confetti';
 import {
@@ -63,31 +75,49 @@ const EXERCISE_OPTIONS: {
     id: 'squat',
     name: 'Squats',
     targetMuscles: 'Quadriceps, Glutes, Core',
-    instructions: 'Stand shoulder-width apart. Lower hips with chest lifted, then press back up smoothly.',
+    instructions: 'Stand shoulder-width apart. Lower hips with chest lifted until knees bend past 112°, then press back up smoothly.',
   },
   {
     id: 'pushup',
     name: 'Push-ups',
     targetMuscles: 'Chest, Triceps, Shoulders',
-    instructions: 'Keep torso braced in a straight line. Lower chest steadily and press back to extension.',
-  },
-  {
-    id: 'jumping_jack',
-    name: 'Jumping Jacks',
-    targetMuscles: 'Cardio, Calves, Deltoids',
-    instructions: 'Jump while spreading feet and raising arms overhead, then return cleanly.',
+    instructions: 'Keep torso braced in a straight plank line. Lower chest steadily until elbows bend below 108° and press back to lockout.',
   },
   {
     id: 'lunge',
     name: 'Lunges',
     targetMuscles: 'Hamstrings, Glutes, Balance',
-    instructions: 'Step forward smoothly, lower back knee with control, and drive back to standing.',
+    instructions: 'Step into a split stance, lower back knee with control until front/back knee bends below 116°, and drive back to standing.',
+  },
+  {
+    id: 'jumping_jack',
+    name: 'Jumping Jacks',
+    targetMuscles: 'Cardio, Calves, Deltoids',
+    instructions: 'Jump while spreading feet wide and sweeping arms cleanly overhead, then return to standing.',
+  },
+  {
+    id: 'plank',
+    name: 'Planks',
+    targetMuscles: 'Core, Deep Abdominals, Spine Stability',
+    instructions: 'Hold a straight horizontal body line from shoulders through hips to ankles. Every 5 verified seconds earns an endurance point.',
   },
   {
     id: 'knee_raise',
-    name: 'Standing Knee Raises',
-    targetMuscles: 'Hip Flexors, Core, Balance',
-    instructions: 'Stand tall and lift alternating knees toward hip height at a controlled tempo.',
+    name: 'High Knees',
+    targetMuscles: 'Hip Flexors, Core, Cardio',
+    instructions: 'Stand tall and drive alternating knees sharply toward hip height at a brisk, controlled tempo.',
+  },
+  {
+    id: 'bicep_curl',
+    name: 'Bicep Curls',
+    targetMuscles: 'Biceps, Forearms, Elbow Control',
+    instructions: 'Pin elbows gently beside your torso and curl forearms up smoothly without swinging your shoulders.',
+  },
+  {
+    id: 'shoulder_press',
+    name: 'Shoulder Presses',
+    targetMuscles: 'Deltoids, Triceps, Upper Back',
+    instructions: 'Start with hands racked at shoulder height and press smoothly overhead to full elbow extension, then lower with control.',
   },
   {
     id: 'walking',
@@ -121,7 +151,12 @@ const EXERCISE_OPTIONS: {
   },
 ];
 
-const CAMERA_EXERCISES = EXERCISE_OPTIONS.slice(0, 5);
+const CAMERA_EXERCISES = EXERCISE_OPTIONS.slice(0, 8) as Array<{
+  id: CameraTrackableExercise;
+  name: string;
+  targetMuscles: string;
+  instructions: string;
+}>;
 
 const readFileAsDataUrl = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -179,20 +214,27 @@ export const AetherVisionView: React.FC = () => {
   const [workoutSaveError, setWorkoutSaveError] = useState<string | null>(null);
 
   // ---------------------------------------------------------------------------
-  // 2. LIVE CAMERA OPTICAL MOTION TRACKING STATE
+  // 2. LIVE CAMERA BIOMECHANICAL POSE TRACKING (MediaPipe + AetherMotionEngine)
   // ---------------------------------------------------------------------------
-  const [selectedCameraExercise, setSelectedCameraExercise] = useState<ExerciseType>('squat');
+  const [selectedCameraProtocol, setSelectedCameraProtocol] = useState<
+    SupportedMotionExercise | 'auto'
+  >('auto');
   const [isCameraActive, setIsCameraActive] = useState(false);
+  const [isModelLoading, setIsModelLoading] = useState(false);
   const [isSandboxDemo, setIsSandboxDemo] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [repCount, setRepCount] = useState(0);
+  const [holdSeconds, setHoldSeconds] = useState(0);
+  const [incompleteRepCount, setIncompleteRepCount] = useState(0);
   const [motionScore, setMotionScore] = useState(0);
-  const [exerciseState, setExerciseState] = useState<'READY' | 'ACTIVE_PHASE' | 'PEAK'>('READY');
+  const [motionOutput, setMotionOutput] = useState<MotionEngineOutput | null>(null);
   const [feedback, setFeedback] = useState(
-    'Frame your upper and lower body clearly. Repetitions are counted from real optical movement cycles.'
+    'Step into frame so your full shoulders, hips, and legs are clearly visible. Pose landmarks verify every repetition.'
   );
   const [workoutDurationSec, setWorkoutDurationSec] = useState(0);
   const [cameraReviewOpen, setCameraReviewOpen] = useState(false);
+  const [confirmCameraExercise, setConfirmCameraExercise] =
+    useState<CameraTrackableExercise>('squat');
   const [cameraIdempotencyKey, setCameraIdempotencyKey] = useState<string>('');
   const [cameraSaveError, setCameraSaveError] = useState<string | null>(null);
   const [isSavingCamera, setIsSavingCamera] = useState(false);
@@ -201,8 +243,17 @@ export const AetherVisionView: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const motionCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const prevLumaRef = useRef<Uint8Array | null>(null);
-  const smoothedMotionRef = useRef<number>(0);
-  const motionStageRef = useRef<'IDLE' | 'MOVING_PEAK'>('IDLE');
+  const poseLandmarkerRef = useRef<PoseLandmarker | null>(null);
+  const poseModelPromiseRef = useRef<Promise<PoseLandmarker> | null>(null);
+  const motionEngineRef = useRef<AetherMotionEngine>(
+    new AetherMotionEngine({ targetExercise: 'auto' })
+  );
+  const lastVideoTimeRef = useRef<number>(-1);
+  const lastTimestampRef = useRef<number>(0);
+  const lastUiSyncRef = useRef<number>(0);
+  const prevRepCountRef = useRef<number>(0);
+  const lastDetectedExerciseRef = useRef<SupportedMotionExercise | null>(null);
+  const demoStageRef = useRef<'READY' | 'PEAK'>('READY');
   const streamRef = useRef<MediaStream | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const lastRepTimeRef = useRef<number>(0);
@@ -210,6 +261,7 @@ export const AetherVisionView: React.FC = () => {
   const phaseRef = useRef<number>(0);
   const directionRef = useRef<number>(1);
   const isTrackingRef = useRef<boolean>(false);
+  const isMountedRef = useRef<boolean>(true);
 
   // ---------------------------------------------------------------------------
   // 3. FOOD & MEAL AI VISION STATE
@@ -236,8 +288,15 @@ export const AetherVisionView: React.FC = () => {
   const userAgeGroup = resolveAgeGroupFromUser(user);
   const minorUser = isMinorUser(user);
   const activityGuide = getAgeAppropriateActivityGuidance(user);
+  const activeDisplayExerciseId: CameraTrackableExercise =
+    selectedCameraProtocol !== 'auto'
+      ? selectedCameraProtocol
+      : motionOutput?.classifiedExercise ||
+        motionOutput?.candidateExercise ||
+        lastDetectedExerciseRef.current ||
+        'squat';
   const currentCameraExercise =
-    CAMERA_EXERCISES.find(e => e.id === selectedCameraExercise) || CAMERA_EXERCISES[0];
+    CAMERA_EXERCISES.find(e => e.id === activeDisplayExerciseId) || CAMERA_EXERCISES[0];
 
   // ===========================================================================
   // WORKOUT MEDIA UPLOAD & GEMINI VISION HANDLERS
@@ -395,8 +454,57 @@ export const AetherVisionView: React.FC = () => {
   };
 
   // ===========================================================================
-  // LIVE CAMERA REAL OPTICAL MOTION TRACKING
+  // LIVE CAMERA REAL BIOMECHANICAL POSE TRACKING (MediaPipe PoseLandmarker)
   // ===========================================================================
+  const ensurePoseLandmarker = useCallback(async (): Promise<PoseLandmarker> => {
+    if (poseLandmarkerRef.current) return poseLandmarkerRef.current;
+    if (poseModelPromiseRef.current) return poseModelPromiseRef.current;
+
+    const loadPromise = (async () => {
+      const vision = await FilesetResolver.forVisionTasks('/mediapipe/wasm');
+      let landmarker: PoseLandmarker;
+      try {
+        landmarker = await PoseLandmarker.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath: '/mediapipe/pose_landmarker_lite.task',
+            delegate: 'GPU',
+          },
+          runningMode: 'VIDEO',
+          numPoses: 1,
+          minPoseDetectionConfidence: 0.5,
+          minPosePresenceConfidence: 0.5,
+          minTrackingConfidence: 0.5,
+        });
+      } catch {
+        landmarker = await PoseLandmarker.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath: '/mediapipe/pose_landmarker_lite.task',
+            delegate: 'CPU',
+          },
+          runningMode: 'VIDEO',
+          numPoses: 1,
+          minPoseDetectionConfidence: 0.5,
+          minPosePresenceConfidence: 0.5,
+          minTrackingConfidence: 0.5,
+        });
+      }
+      if (!isMountedRef.current) {
+        landmarker.close();
+        throw new Error('Component unmounted before pose model finished loading.');
+      }
+      poseLandmarkerRef.current = landmarker;
+      return landmarker;
+    })();
+
+    poseModelPromiseRef.current = loadPromise;
+    try {
+      return await loadPromise;
+    } catch (err) {
+      poseModelPromiseRef.current = null;
+      throw err;
+    }
+  }, []);
+
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
@@ -411,8 +519,7 @@ export const AetherVisionView: React.FC = () => {
       timerIntervalRef.current = null;
     }
     prevLumaRef.current = null;
-    smoothedMotionRef.current = 0;
-    motionStageRef.current = 'IDLE';
+    lastVideoTimeRef.current = -1;
     isTrackingRef.current = false;
     setIsCameraActive(false);
   }, []);
@@ -424,12 +531,86 @@ export const AetherVisionView: React.FC = () => {
     }, 1000);
   };
 
+  const drawPoseOverlay = (
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    output: MotionEngineOutput
+  ) => {
+    const lms = output.smoothedLandmarks;
+    if (!lms || lms.length < 29) return;
+
+    const strokeColor = output.cameraUnstable
+      ? '#f43f5e'
+      : output.phase === 'PEAK'
+      ? '#34d399'
+      : output.confidenceLevel === 'high'
+      ? '#22d3ee'
+      : output.confidenceLevel === 'medium'
+      ? '#fbbf24'
+      : '#a855f7';
+
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = strokeColor;
+    ctx.lineWidth = Math.max(2.5, Math.round(width / 180));
+
+    for (const [idxA, idxB] of POSE_SKELETON_CONNECTIONS) {
+      const a = lms[idxA];
+      const b = lms[idxB];
+      if (!a || !b || (a.visibility ?? 1) < 0.35 || (b.visibility ?? 1) < 0.35) continue;
+      // Video canvas is drawn horizontally mirrored
+      const ax = (1 - a.x) * width;
+      const ay = a.y * height;
+      const bx = (1 - b.x) * width;
+      const by = b.y * height;
+      ctx.beginPath();
+      ctx.moveTo(ax, ay);
+      ctx.lineTo(bx, by);
+      ctx.stroke();
+    }
+
+    const keyJoints = [
+      POSE_IDX.NOSE,
+      POSE_IDX.LEFT_SHOULDER,
+      POSE_IDX.RIGHT_SHOULDER,
+      POSE_IDX.LEFT_ELBOW,
+      POSE_IDX.RIGHT_ELBOW,
+      POSE_IDX.LEFT_WRIST,
+      POSE_IDX.RIGHT_WRIST,
+      POSE_IDX.LEFT_HIP,
+      POSE_IDX.RIGHT_HIP,
+      POSE_IDX.LEFT_KNEE,
+      POSE_IDX.RIGHT_KNEE,
+      POSE_IDX.LEFT_ANKLE,
+      POSE_IDX.RIGHT_ANKLE,
+    ];
+    const jointRadius = Math.max(3.5, Math.round(width / 145));
+    for (const idx of keyJoints) {
+      const lm = lms[idx];
+      if (!lm || (lm.visibility ?? 1) < 0.35) continue;
+      const x = (1 - lm.x) * width;
+      const y = lm.y * height;
+      ctx.beginPath();
+      ctx.arc(x, y, jointRadius, 0, Math.PI * 2);
+      ctx.fillStyle = '#090714';
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = strokeColor;
+      ctx.stroke();
+    }
+    ctx.restore();
+  };
+
   const startOpticalMotionLoop = (sandbox: boolean) => {
     if (!motionCanvasRef.current) {
       motionCanvasRef.current = document.createElement('canvas');
       motionCanvasRef.current.width = 64;
       motionCanvasRef.current.height = 48;
     }
+
+    let lastOutput: MotionEngineOutput = motionEngineRef.current.getSnapshot();
 
     const renderFrame = () => {
       if (!isTrackingRef.current) return;
@@ -441,9 +622,11 @@ export const AetherVisionView: React.FC = () => {
       if (canvas) {
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          if (!sandbox && video && video.readyState >= 2) {
-            canvas.width = video.videoWidth || 640;
-            canvas.height = video.videoHeight || 480;
+          if (!sandbox && video && video.readyState >= 2 && video.videoWidth > 0) {
+            if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+              canvas.width = video.videoWidth || 640;
+              canvas.height = video.videoHeight || 480;
+            }
 
             // Mirror video feed
             ctx.save();
@@ -451,73 +634,95 @@ export const AetherVisionView: React.FC = () => {
             ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
             ctx.restore();
 
-            ctx.fillStyle = 'rgba(12, 8, 24, 0.2)';
+            ctx.fillStyle = 'rgba(12, 8, 24, 0.18)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Real frame-to-frame optical motion analysis on 64x48 grid
-            if (mCanvas) {
-              const mCtx = mCanvas.getContext('2d', { willReadFrequently: true });
-              if (mCtx) {
-                mCtx.drawImage(video, 0, 0, 64, 48);
-                const imgData = mCtx.getImageData(0, 0, 64, 48).data;
-                const totalPixels = 64 * 48;
-                const currLuma = new Uint8Array(totalPixels);
-                let changedPixels = 0;
-                let motionYWeighted = 0;
+            // Process new video frames through MediaPipe PoseLandmarker + AetherMotionEngine
+            if (video.currentTime !== lastVideoTimeRef.current && poseLandmarkerRef.current) {
+              lastVideoTimeRef.current = video.currentTime;
+              const nowMs = Math.max(lastTimestampRef.current + 1, performance.now());
+              lastTimestampRef.current = nowMs;
 
-                for (let i = 0; i < totalPixels; i++) {
-                  const idx = i * 4;
-                  const luma = (imgData[idx] * 3 + imgData[idx + 1] * 6 + imgData[idx + 2]) / 10;
-                  currLuma[i] = luma;
-                  if (prevLumaRef.current) {
-                    const diff = Math.abs(luma - prevLumaRef.current[i]);
-                    if (diff > 22) {
-                      changedPixels++;
-                      const yRow = Math.floor(i / 64);
-                      motionYWeighted += yRow;
-                    }
+              let cameraUnstable = false;
+              if (mCanvas) {
+                const mCtx = mCanvas.getContext('2d', { willReadFrequently: true });
+                if (mCtx) {
+                  mCtx.drawImage(video, 0, 0, 64, 48);
+                  const imgData = mCtx.getImageData(0, 0, 64, 48).data;
+                  const totalPixels = 64 * 48;
+                  const currLuma = new Uint8Array(totalPixels);
+                  for (let i = 0; i < totalPixels; i++) {
+                    const idx = i * 4;
+                    currLuma[i] = (imgData[idx] * 3 + imgData[idx + 1] * 6 + imgData[idx + 2]) / 10;
                   }
-                }
-                prevLumaRef.current = currLuma;
-
-                const motionRatio = changedPixels / totalPixels;
-                const pct = Math.min(100, Math.round(motionRatio * 420));
-                smoothedMotionRef.current = smoothedMotionRef.current * 0.7 + pct * 0.3;
-                const smooth = Math.round(smoothedMotionRef.current);
-                setMotionScore(smooth);
-
-                // Visual motion reticle bar
-                const barW = Math.min(canvas.width - 32, Math.round((smooth / 100) * (canvas.width - 32)));
-                ctx.fillStyle = smooth > 20 ? 'rgba(52, 211, 153, 0.8)' : 'rgba(168, 85, 247, 0.5)';
-                ctx.fillRect(16, canvas.height - 14, barW, 6);
-
-                const now = Date.now();
-                const avgY = changedPixels > 0 ? motionYWeighted / changedPixels / 48 : 0.5;
-                if (smooth >= 26 && motionStageRef.current === 'IDLE') {
-                  motionStageRef.current = 'MOVING_PEAK';
-                  setExerciseState('PEAK');
-                  setFeedback(
-                    avgY > 0.5
-                      ? 'Active movement detected in lower frame — complete full return!'
-                      : 'Strong movement impulse detected — maintain controlled form!'
+                  const stability = computeBackgroundMotionStability(
+                    currLuma,
+                    prevLumaRef.current,
+                    64,
+                    48
                   );
-                } else if (smooth <= 12 && motionStageRef.current === 'MOVING_PEAK') {
-                  motionStageRef.current = 'IDLE';
-                  setExerciseState('READY');
-                  if (now - lastRepTimeRef.current > 1100) {
-                    lastRepTimeRef.current = now;
-                    setRepCount(prev => {
-                      const next = prev + 1;
-                      sound.playRepCount();
-                      setFeedback(`Repetition ${next} counted from real camera motion cycle!`);
-                      return next;
-                    });
-                  }
-                } else if (smooth > 12 && smooth < 26 && motionStageRef.current === 'IDLE') {
-                  setExerciseState('ACTIVE_PHASE');
+                  cameraUnstable = stability.cameraUnstable;
+                  prevLumaRef.current = currLuma;
                 }
               }
+
+              let rawLandmarks: PoseLandmark[] | undefined;
+              try {
+                const poseRes = poseLandmarkerRef.current.detectForVideo(video, nowMs);
+                rawLandmarks = poseRes.landmarks?.[0] as PoseLandmark[] | undefined;
+              } catch (detectErr) {
+                console.warn('PoseLandmarker frame detection error:', detectErr);
+              }
+
+              const output = motionEngineRef.current.processPoseFrame(rawLandmarks, nowMs, {
+                cameraUnstable,
+              });
+
+              const repChanged = output.repCount > prevRepCountRef.current;
+              const criticalChanged =
+                repChanged ||
+                output.holdSeconds !== lastOutput.holdSeconds ||
+                output.phase !== lastOutput.phase ||
+                output.confidenceLevel !== lastOutput.confidenceLevel ||
+                output.classifiedExercise !== lastOutput.classifiedExercise ||
+                output.protocolMismatch !== lastOutput.protocolMismatch ||
+                output.cameraUnstable !== lastOutput.cameraUnstable ||
+                output.landmarksVisible !== lastOutput.landmarksVisible;
+
+              if (repChanged) {
+                prevRepCountRef.current = output.repCount;
+                sound.playRepCount();
+              }
+              if (output.classifiedExercise) {
+                lastDetectedExerciseRef.current = output.classifiedExercise;
+              }
+              lastOutput = output;
+
+              if (criticalChanged || nowMs - lastUiSyncRef.current >= 100) {
+                lastUiSyncRef.current = nowMs;
+                setMotionOutput(output);
+                setRepCount(output.repCount);
+                setHoldSeconds(output.holdSeconds);
+                setIncompleteRepCount(output.incompleteRepCount);
+                setMotionScore(output.motionIntensity);
+                setFeedback(output.feedback);
+              }
             }
+
+            // Draw real-time smoothed BlazePose skeleton overlay
+            drawPoseOverlay(ctx, canvas.width, canvas.height, lastOutput);
+
+            // Visual motion intensity bar
+            const barW = Math.min(
+              canvas.width - 32,
+              Math.round((lastOutput.motionIntensity / 100) * (canvas.width - 32))
+            );
+            ctx.fillStyle = lastOutput.cameraUnstable
+              ? 'rgba(244, 63, 94, 0.85)'
+              : lastOutput.confidenceLevel === 'high'
+              ? 'rgba(52, 211, 153, 0.85)'
+              : 'rgba(168, 85, 247, 0.6)';
+            ctx.fillRect(16, canvas.height - 14, Math.max(8, barW), 6);
           } else if (sandbox) {
             // Explicit Sandbox Demonstration Mode (clearly labeled, never counts as AI verified)
             canvas.width = 640;
@@ -536,7 +741,7 @@ export const AetherVisionView: React.FC = () => {
             const t = phaseRef.current;
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
-            const dip = selectedCameraExercise === 'squat' ? t * 48 : 0;
+            const dip = activeDisplayExerciseId === 'squat' || activeDisplayExerciseId === 'lunge' ? t * 48 : 0;
 
             ctx.strokeStyle = '#38bdf8';
             ctx.lineWidth = 3;
@@ -562,12 +767,12 @@ export const AetherVisionView: React.FC = () => {
             );
 
             const now = Date.now();
-            if (t >= 0.88 && exerciseState !== 'PEAK') {
-              setExerciseState('PEAK');
-            } else if (t <= 0.12 && exerciseState === 'PEAK') {
+            if (t >= 0.88 && demoStageRef.current !== 'PEAK') {
+              demoStageRef.current = 'PEAK';
+            } else if (t <= 0.12 && demoStageRef.current === 'PEAK') {
               if (now - lastRepTimeRef.current > 1200) {
                 lastRepTimeRef.current = now;
-                setExerciseState('READY');
+                demoStageRef.current = 'READY';
                 setRepCount(prev => prev + 1);
               }
             }
@@ -586,38 +791,97 @@ export const AetherVisionView: React.FC = () => {
     setCameraReviewOpen(false);
     setCameraSaveError(null);
     setIsSandboxDemo(false);
+    setIsModelLoading(true);
+
+    motionEngineRef.current.setTargetExercise(selectedCameraProtocol);
+    motionEngineRef.current.reset();
+    prevRepCountRef.current = 0;
+    lastDetectedExerciseRef.current = null;
+    lastVideoTimeRef.current = -1;
+    prevLumaRef.current = null;
+    setRepCount(0);
+    setHoldSeconds(0);
+    setIncompleteRepCount(0);
+    setMotionScore(0);
+    setMotionOutput(motionEngineRef.current.getSnapshot());
+    setFeedback('Loading on-device pose landmark model...');
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'user',
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-        },
-        audio: false,
-      });
+      const [stream] = await Promise.all([
+        navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: 'user',
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+          },
+          audio: false,
+        }),
+        ensurePoseLandmarker(),
+      ]);
+
+      if (!isMountedRef.current) {
+        stream.getTracks().forEach(t => t.stop());
+        return;
+      }
 
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current?.play();
+        videoRef.current.onloadedmetadata = async () => {
+          try {
+            await videoRef.current?.play();
+          } catch {
+            // ignore autoplay rejection if muted inline handles it
+          }
+          if (!isMountedRef.current) return;
+          setIsModelLoading(false);
           setIsCameraActive(true);
           isTrackingRef.current = true;
+          setFeedback(
+            selectedCameraProtocol === 'auto'
+              ? 'Pose tracker active (Auto-Detect). Perform clear full-range repetitions in view.'
+              : `Pose tracker active (${MOTION_EXERCISE_LABELS[selectedCameraProtocol]}). Assume starting position in view.`
+          );
           startOpticalMotionLoop(false);
           startTimer();
           sound.playClick();
         };
+      } else {
+        setIsModelLoading(false);
       }
-    } catch (err) {
-      console.warn('Camera permission or device error:', err);
-      setCameraError(
-        'Camera permission denied or no camera detected. You can upload a workout photo or video on the first tab instead, or practice with the Demo Preview below.'
-      );
+    } catch (err: any) {
+      console.warn('Camera or pose model initialization error:', err);
+      setIsModelLoading(false);
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(t => t.stop());
+        streamRef.current = null;
+      }
+      const msg = String(err?.message || '');
+      if (msg.toLowerCase().includes('wasm') || msg.toLowerCase().includes('fetch') || msg.toLowerCase().includes('model')) {
+        setCameraError(
+          'Could not initialize the local pose tracking model. Please refresh and try again, or upload a workout clip on the first tab.'
+        );
+      } else {
+        setCameraError(
+          'Camera permission denied or no camera detected. You can upload a workout photo or video on the first tab instead, or practice with the Demo Preview below.'
+        );
+      }
     }
   };
 
   const handleFinishCameraWorkout = () => {
+    const snap = motionEngineRef.current.getSnapshot();
+    const resolvedExercise: CameraTrackableExercise =
+      selectedCameraProtocol !== 'auto'
+        ? selectedCameraProtocol
+        : lastDetectedExerciseRef.current ||
+          snap.classifiedExercise ||
+          snap.candidateExercise ||
+          'squat';
     stopCamera();
+    setConfirmCameraExercise(resolvedExercise);
+    setRepCount(snap.repCount);
+    setHoldSeconds(snap.holdSeconds);
     setCameraIdempotencyKey(createIdempotencyKey());
     setCameraSaveError(null);
     setCameraReviewOpen(true);
@@ -627,20 +891,30 @@ export const AetherVisionView: React.FC = () => {
     setIsSavingCamera(true);
     setCameraSaveError(null);
 
-    const verifiedLive = !isSandboxDemo && repCount > 0;
+    const verifiedLive =
+      !isSandboxDemo &&
+      (repCount > 0 || (confirmCameraExercise === 'plank' && holdSeconds >= 5));
     const durMin = Math.max(1, Math.round(workoutDurationSec / 60));
     const idemKey = cameraIdempotencyKey || createIdempotencyKey();
     if (!cameraIdempotencyKey) setCameraIdempotencyKey(idemKey);
 
+    const resolvedName =
+      CAMERA_EXERCISES.find(e => e.id === confirmCameraExercise)?.name ||
+      MOTION_EXERCISE_LABELS[confirmCameraExercise] ||
+      'Workout';
+
     const result = await logFitnessSession({
-      exerciseType: selectedCameraExercise,
-      exerciseName: currentCameraExercise.name,
+      exerciseType: confirmCameraExercise,
+      exerciseName: resolvedName,
       repetitions: repCount > 0 ? repCount : undefined,
       durationMinutes: durMin,
       verifiedWithAetherVision: verifiedLive,
+      confidence: motionOutput?.confidence,
       notes: isSandboxDemo
         ? 'Practice workout logged manually after Demo Preview.'
-        : `Live Camera Optical Motion Tracking (${repCount} movement cycles).`,
+        : confirmCameraExercise === 'plank' && holdSeconds > 0
+        ? `Live Pose Landmark Tracking (${holdSeconds}s verified plank hold, ${repCount} endurance points).`
+        : `Live Pose Landmark Tracking (${repCount} verified repetitions).`,
       idempotencyKey: idemKey,
     });
 
@@ -652,11 +926,14 @@ export const AetherVisionView: React.FC = () => {
 
     setCameraReviewOpen(false);
     setRepCount(0);
+    setHoldSeconds(0);
+    setIncompleteRepCount(0);
     setWorkoutDurationSec(0);
+    setMotionOutput(null);
 
     setConfirmedReward({
       kind: 'workout',
-      title: currentCameraExercise.name,
+      title: resolvedName,
       playerXp: result.rewards?.playerXp ?? 0,
       gold: result.rewards?.gold ?? 0,
       aetherPoints: result.rewards?.aetherPoints ?? 0,
@@ -670,8 +947,18 @@ export const AetherVisionView: React.FC = () => {
   };
 
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
+      isMountedRef.current = false;
       stopCamera();
+      if (poseLandmarkerRef.current) {
+        try {
+          poseLandmarkerRef.current.close();
+        } catch {
+          // ignore
+        }
+        poseLandmarkerRef.current = null;
+      }
     };
   }, [stopCamera]);
 
@@ -1206,36 +1493,62 @@ export const AetherVisionView: React.FC = () => {
       )}
 
       {/* ===================================================================== */}
-      {/* TAB 2: LIVE CAMERA REAL OPTICAL TRACKING                              */}
+      {/* TAB 2: LIVE CAMERA REAL BIOMECHANICAL POSE TRACKING                   */}
       {/* ===================================================================== */}
       {visionTab === 'live_camera' && (
         <div className="space-y-6">
           <div className="bg-[#0e0a1b] border border-purple-950 rounded-2xl p-4 shadow-sm">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-purple-300 mb-3">
-              Select Exercise Protocol
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <label className="text-xs font-semibold uppercase tracking-wider text-purple-300">
+                Select Exercise Protocol
+              </label>
+              <span className="text-[11px] text-slate-400">
+                33-point BlazePose Landmark Tracking · Strict Form Thresholds
+              </span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedCameraProtocol('auto');
+                  motionEngineRef.current.setTargetExercise('auto');
+                }}
+                disabled={isCameraActive || isModelLoading}
+                className={`p-3 rounded-xl border text-left transition-all ${
+                  selectedCameraProtocol === 'auto'
+                    ? 'bg-cyan-950/70 border-cyan-400 shadow-md ring-1 ring-cyan-400'
+                    : 'bg-[#130f24] border-purple-950/80 hover:border-purple-800 text-slate-300'
+                } ${isCameraActive || isModelLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+              >
+                <p className="text-xs font-bold text-cyan-200 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                  Auto-Detect
+                </p>
+                <p className="text-[10px] text-cyan-300/80 font-mono mt-0.5">
+                  Multi-Exercise Classifier
+                </p>
+              </button>
+
               {CAMERA_EXERCISES.map(ex => {
-                const isSelected = selectedCameraExercise === ex.id;
+                const isSelected = selectedCameraProtocol === ex.id;
                 return (
                   <button
                     key={ex.id}
                     type="button"
                     onClick={() => {
-                      setSelectedCameraExercise(ex.id);
-                      setExerciseState('READY');
-                      phaseRef.current = 0;
+                      setSelectedCameraProtocol(ex.id);
+                      motionEngineRef.current.setTargetExercise(ex.id);
                     }}
-                    disabled={isCameraActive}
+                    disabled={isCameraActive || isModelLoading}
                     className={`p-3 rounded-xl border text-left transition-all ${
                       isSelected
                         ? 'bg-purple-900/50 border-purple-500 shadow-md ring-1 ring-purple-400'
                         : 'bg-[#130f24] border-purple-950/80 hover:border-purple-800 text-slate-300'
-                    } ${isCameraActive ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    } ${isCameraActive || isModelLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
                     <p className="text-xs font-bold text-slate-100">{ex.name}</p>
                     <p className="text-[10px] text-amber-300 font-mono mt-0.5">
-                      Real-Time Motion Tracking
+                      {ex.id === 'plank' ? 'Isometric Hold Timer' : 'Pose Rep Verification'}
                     </p>
                   </button>
                 );
@@ -1256,46 +1569,86 @@ export const AetherVisionView: React.FC = () => {
                       <Camera className="w-8 h-8 text-amber-400" />
                     </div>
                     <h3 className="font-['Cinzel'] font-bold text-lg text-slate-100 mb-2">
-                      OPTICAL CAMERA TRACKER READY
+                      POSE LANDMARK TRACKER READY
                     </h3>
                     <p className="text-xs text-slate-400 leading-relaxed mb-6">
-                      {currentCameraExercise.instructions}
+                      {selectedCameraProtocol === 'auto'
+                        ? 'Auto-Detect classifies Squats, Push-ups, Lunges, Jumping Jacks, Planks, High Knees, Bicep Curls, and Shoulder Presses from live joint kinematics.'
+                        : currentCameraExercise.instructions}
                     </p>
                     <button
                       type="button"
                       onClick={startCamera}
-                      className="px-6 py-3 rounded-xl font-['Cinzel'] font-bold text-xs tracking-wider text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-violet-700 hover:from-purple-500 hover:to-indigo-500 shadow-xl transition-all"
+                      disabled={isModelLoading}
+                      className="px-6 py-3 rounded-xl font-['Cinzel'] font-bold text-xs tracking-wider text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-violet-700 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-60 shadow-xl transition-all"
                     >
-                      START CAMERA TRACKING
+                      {isModelLoading ? 'INITIALIZING POSE MODEL...' : 'START CAMERA TRACKING'}
                     </button>
                   </div>
                 )}
 
                 {isCameraActive && (
                   <>
-                    <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none">
+                    <div className="absolute top-4 left-4 right-4 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
                       <div className="flex items-center gap-2 bg-[#090714]/85 backdrop-blur-md px-3 py-1.5 rounded-lg border border-purple-800/60 text-xs font-semibold text-purple-200">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
+                        <span
+                          className={`w-2 h-2 rounded-full ${
+                            motionOutput?.cameraUnstable
+                              ? 'bg-rose-400'
+                              : motionOutput?.landmarksVisible
+                              ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]'
+                              : 'bg-amber-400'
+                          }`}
+                        />
                         <span>
                           {isSandboxDemo
                             ? `DEMO PREVIEW: ${currentCameraExercise.name.toUpperCase()}`
-                            : `TRACKING: ${currentCameraExercise.name.toUpperCase()} (${motionScore}% motion)`}
+                            : selectedCameraProtocol === 'auto'
+                            ? motionOutput?.classifiedExercise
+                              ? `DETECTED: ${MOTION_EXERCISE_LABELS[motionOutput.classifiedExercise].toUpperCase()} (${motionOutput.confidence}%)`
+                              : `ANALYZING MOVEMENT (${motionOutput?.confidence ?? 0}%)`
+                            : `TRACKING: ${MOTION_EXERCISE_LABELS[selectedCameraProtocol].toUpperCase()} (${motionOutput?.confidence ?? 0}%)`}
                         </span>
                       </div>
 
-                      <div className="bg-[#090714]/85 backdrop-blur-md px-3 py-1.5 rounded-lg border border-purple-800/60 text-xs font-mono font-bold text-amber-300">
-                        {Math.floor(workoutDurationSec / 60)}:
-                        {(workoutDurationSec % 60).toString().padStart(2, '0')}
+                      <div className="flex items-center gap-2">
+                        {!isSandboxDemo && motionOutput && (
+                          <ConfidenceBadge
+                            confidence={motionOutput.confidence}
+                            level={motionOutput.confidenceLevel}
+                          />
+                        )}
+                        <div className="bg-[#090714]/85 backdrop-blur-md px-3 py-1.5 rounded-lg border border-purple-800/60 text-xs font-mono font-bold text-amber-300">
+                          {Math.floor(workoutDurationSec / 60)}:
+                          {(workoutDurationSec % 60).toString().padStart(2, '0')}
+                        </div>
                       </div>
                     </div>
 
-                    <div className="absolute bottom-5 left-4 bg-[#090714]/90 backdrop-blur-md px-4 py-2 rounded-xl border border-purple-700 shadow-lg">
-                      <span className="text-[10px] text-purple-300 uppercase tracking-widest font-bold block">
-                        {isSandboxDemo ? 'Demo Cycles' : 'Optical Reps Counted'}
-                      </span>
-                      <span className="font-mono text-3xl font-black text-amber-400 tabular-nums">
-                        {repCount}
-                      </span>
+                    <div className="absolute bottom-5 left-4 flex items-end gap-2">
+                      <div className="bg-[#090714]/90 backdrop-blur-md px-4 py-2 rounded-xl border border-purple-700 shadow-lg">
+                        <span className="text-[10px] text-purple-300 uppercase tracking-widest font-bold block">
+                          {isSandboxDemo
+                            ? 'Demo Cycles'
+                            : activeDisplayExerciseId === 'plank'
+                            ? 'Endurance Units (5s)'
+                            : 'Verified Reps'}
+                        </span>
+                        <span className="font-mono text-3xl font-black text-amber-400 tabular-nums">
+                          {repCount}
+                        </span>
+                      </div>
+
+                      {!isSandboxDemo && activeDisplayExerciseId === 'plank' && (
+                        <div className="bg-[#090714]/90 backdrop-blur-md px-3 py-2 rounded-xl border border-cyan-700 shadow-lg">
+                          <span className="text-[10px] text-cyan-300 uppercase tracking-widest font-bold block">
+                            Aligned Hold
+                          </span>
+                          <span className="font-mono text-2xl font-black text-cyan-300 tabular-nums">
+                            {holdSeconds}s
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="absolute bottom-5 right-4">
@@ -1311,6 +1664,42 @@ export const AetherVisionView: React.FC = () => {
                   </>
                 )}
               </div>
+
+              {isCameraActive && !isSandboxDemo && motionOutput && (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                  <div className="bg-[#0e0a1b] border border-purple-950 rounded-xl px-3 py-2">
+                    <span className="text-[10px] uppercase text-slate-400 block">Rep Phase</span>
+                    <span className="font-mono font-bold text-purple-200">{motionOutput.phase}</span>
+                  </div>
+                  <div className="bg-[#0e0a1b] border border-purple-950 rounded-xl px-3 py-2">
+                    <span className="text-[10px] uppercase text-slate-400 block">Knee / Elbow</span>
+                    <span className="font-mono font-bold text-cyan-300">
+                      {motionOutput.angles.primaryKneeDeg != null
+                        ? `${motionOutput.angles.primaryKneeDeg}°`
+                        : '—'}{' '}
+                      /{' '}
+                      {motionOutput.angles.primaryElbowDeg != null
+                        ? `${motionOutput.angles.primaryElbowDeg}°`
+                        : '—'}
+                    </span>
+                  </div>
+                  <div className="bg-[#0e0a1b] border border-purple-950 rounded-xl px-3 py-2">
+                    <span className="text-[10px] uppercase text-slate-400 block">Motion Intensity</span>
+                    <span className="font-mono font-bold text-emerald-300">{motionScore}%</span>
+                  </div>
+                  <div className="bg-[#0e0a1b] border border-purple-950 rounded-xl px-3 py-2">
+                    <span className="text-[10px] uppercase text-slate-400 block">Partial Reps Ignored</span>
+                    <span className="font-mono font-bold text-amber-300">{incompleteRepCount}</span>
+                  </div>
+                </div>
+              )}
+
+              {motionOutput?.protocolMismatch && isCameraActive && !isSandboxDemo && (
+                <div className="p-3.5 rounded-xl bg-amber-950/60 border border-amber-700 text-xs text-amber-200 flex items-center gap-2.5">
+                  <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span>{motionOutput.feedback}</span>
+                </div>
+              )}
 
               {cameraError && (
                 <div className="p-4 rounded-xl bg-rose-950/60 border border-rose-800 text-xs text-rose-200 flex items-start gap-3">
@@ -1341,7 +1730,7 @@ export const AetherVisionView: React.FC = () => {
                 </div>
                 <div>
                   <span className="text-[10px] uppercase tracking-widest text-purple-400 font-bold block">
-                    Live Movement Feedback
+                    Live Biomechanical Feedback
                   </span>
                   <p className="text-xs text-slate-200 font-medium">{feedback}</p>
                 </div>
@@ -1367,7 +1756,7 @@ export const AetherVisionView: React.FC = () => {
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Daily cap: up to 6 rewarded workout sessions per day.
+                  Daily cap: up to 6 rewarded workout sessions per day. Only full range-of-motion reps verified at high pose confidence count.
                 </p>
               </div>
 
@@ -1815,12 +2204,31 @@ export const AetherVisionView: React.FC = () => {
             <p className="text-xs text-slate-300 leading-relaxed">
               {isSandboxDemo
                 ? 'Demo Preview does not qualify for Vision-verified bonus XP. Adjust your actual workout duration below to save a standard workout log.'
-                : `Optical tracking detected ${repCount} movement cycle${repCount === 1 ? '' : 's'} over ${Math.max(1, Math.round(workoutDurationSec / 60))} minute(s). Review before claiming server rewards.`}
+                : confirmCameraExercise === 'plank'
+                ? `Pose tracking recorded ${holdSeconds}s aligned plank hold (${repCount} endurance unit${repCount === 1 ? '' : 's'}) over ${Math.max(1, Math.round(workoutDurationSec / 60))} minute(s).`
+                : `Pose landmark tracking verified ${repCount} repetition${repCount === 1 ? '' : 's'} over ${Math.max(1, Math.round(workoutDurationSec / 60))} minute(s). Review before claiming server rewards.`}
             </p>
+
+            <div className="text-xs">
+              <label className="block text-slate-300 mb-1">Verified Exercise</label>
+              <select
+                value={confirmCameraExercise}
+                onChange={e => setConfirmCameraExercise(e.target.value as CameraTrackableExercise)}
+                className="w-full bg-[#130f24] border border-purple-800 rounded-xl px-3 py-2 text-white"
+              >
+                {CAMERA_EXERCISES.map(ex => (
+                  <option key={ex.id} value={ex.id}>
+                    {ex.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div>
-                <label className="block text-slate-300 mb-1">Repetitions</label>
+                <label className="block text-slate-300 mb-1">
+                  {confirmCameraExercise === 'plank' ? 'Endurance Units (5s)' : 'Repetitions'}
+                </label>
                 <input
                   type="number"
                   min={0}
@@ -1855,6 +2263,8 @@ export const AetherVisionView: React.FC = () => {
                 onClick={() => {
                   setCameraReviewOpen(false);
                   setRepCount(0);
+                  setHoldSeconds(0);
+                  setIncompleteRepCount(0);
                   setWorkoutDurationSec(0);
                 }}
                 className="flex-1 py-2.5 rounded-xl border border-purple-800 text-xs text-slate-300 hover:text-white"

@@ -50,6 +50,9 @@ const VALID_EXERCISE_TYPES = new Set([
   'jumping_jack',
   'lunge',
   'knee_raise',
+  'plank',
+  'bicep_curl',
+  'shoulder_press',
   'walking',
   'running',
   'cycling',
@@ -211,7 +214,7 @@ async function startServer() {
         selectedExerciseHint ? `User selected hint (do NOT blindly agree if visual evidence differs): ${selectedExerciseHint}.` : '',
         userContext?.ageGroup ? `User age group: ${userContext.ageGroup}.` : '',
         userContext?.activityLevel ? `User activity level: ${userContext.activityLevel}.` : '',
-        'Analyze the uploaded media carefully. Map exerciseType to one of: squat, pushup, jumping_jack, lunge, knee_raise, walking, running, cycling, gym, yoga, unknown.',
+        'Analyze the uploaded media carefully. Map exerciseType to one of: squat, pushup, jumping_jack, lunge, knee_raise, plank, bicep_curl, shoulder_press, walking, running, cycling, gym, yoga, unknown.',
       ]
         .filter(Boolean)
         .join(' ');

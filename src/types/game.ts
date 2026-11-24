@@ -234,16 +234,22 @@ export interface Buff {
   iconName: string;
 }
 
-export type ExerciseType = 
-  | 'squat' 
-  | 'pushup' 
-  | 'jumping_jack' 
-  | 'lunge' 
-  | 'knee_raise' 
-  | 'walking' 
-  | 'running' 
-  | 'cycling' 
-  | 'gym' 
+export type CameraTrackableExercise =
+  | 'squat'
+  | 'pushup'
+  | 'lunge'
+  | 'jumping_jack'
+  | 'plank'
+  | 'knee_raise'
+  | 'bicep_curl'
+  | 'shoulder_press';
+
+export type ExerciseType =
+  | CameraTrackableExercise
+  | 'walking'
+  | 'running'
+  | 'cycling'
+  | 'gym'
   | 'yoga';
 
 export interface NutrientRange {
