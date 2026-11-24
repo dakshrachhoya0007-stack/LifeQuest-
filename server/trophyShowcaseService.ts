@@ -52,6 +52,14 @@ const KNOWN_STANDARD_ACHIEVEMENTS: Array<{
     requirement: 'Maintain a 3-day habit streak',
   },
   {
+    id: 'ach-3',
+    name: 'First Forge',
+    description: 'Upgraded a weapon at the Blacksmith Armory.',
+    category: 'achievements',
+    rarity: 'Common',
+    requirement: 'Upgrade 1 weapon in Armory',
+  },
+  {
     id: 'ach-4',
     name: 'Boss Slayer',
     description: 'Defeated your first Kingdom boss in turn-based combat.',
@@ -311,21 +319,15 @@ export function createTrophyShowcaseService(rootDir: string, deps: TrophyShowcas
       const ownerClaim = claims[def.id] || null;
       const revealedToCaller = Boolean(ownerClaim && ownerClaim.ownerId === userId);
       const claimedGlobally = Boolean(ownerClaim);
-      const discovered = revealedToCaller || claimedGlobally;
-      const maskedHint = def.hint || 'Walk steadily across balanced fitness, recovery, and fellowship.';
       return {
         id: def.id,
-        discovered,
-        revealed: discovered,
+        revealed: revealedToCaller || claimedGlobally,
         unlockedByCaller: revealedToCaller,
-        name: discovered ? def.name : 'Sealed Realm Mystery',
-        maskedTitle: 'Sealed Realm Mystery',
-        maskedHint,
-        hint: maskedHint,
+        name: revealedToCaller || claimedGlobally ? def.name : 'Sealed Realm Mystery',
         rarity: def.rarity,
         emblemIcon: def.emblemIcon,
-        story: discovered ? def.story : undefined,
-        titleTag: discovered ? def.titleTag : undefined,
+        hint: def.hint || 'Walk steadily across balanced fitness, recovery, and fellowship.',
+        story: revealedToCaller || claimedGlobally ? def.story : undefined,
         requirementSummary: revealedToCaller ? def.requirementSummary : undefined,
         globalFirstOwnerName: ownerClaim?.ownerUsername || null,
         unlockedAt: revealedToCaller ? ownerClaim?.claimedAt : null,
@@ -410,9 +412,9 @@ export function createTrophyShowcaseService(rootDir: string, deps: TrophyShowcas
       }
 
       const rawIds: string[] = Array.isArray(req.body?.pinnedIds)
-        ? req.body.pinnedIds.map((x: unknown) => String(x))
+        ? (req.body.pinnedIds as unknown[]).map(x => String(x || '').trim()).filter(Boolean)
         : [];
-      const uniqueIds: string[] = Array.from(new Set(rawIds.map(id => id.trim()).filter(Boolean)));
+      const uniqueIds: string[] = Array.from(new Set(rawIds));
 
       if (uniqueIds.length > 6) {
         res.status(400).json({ success: false, error: 'You can pin up to 6 trophies in your showcase.' });

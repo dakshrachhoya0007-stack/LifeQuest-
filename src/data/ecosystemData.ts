@@ -53,7 +53,7 @@ export const createDefaultWeeklyBossEvent = (now: Date = new Date()): WeeklyBoss
     bossName: 'Malakor, Titan of the Obsidian Gate',
     bossTitle: 'Weekly Community Raid Boss',
     bossDescription:
-      'A towering colossus born from stagnation and missed promises. Every verified workout, study session, consistency habit, and mindful recovery effort weakens its obsidian plating.',
+      'An armored colossus forged from stagnation and missed promises. Every verified workout, study session, consistency habit, and mindful recovery strike weakens its obsidian plating.',
     artworkKey: 'weekly_boss_titan',
     difficulty: 'Mythic',
     totalHealth: 10000,
@@ -130,6 +130,7 @@ export const createDefaultWeeklyBossEvent = (now: Date = new Date()): WeeklyBoss
       participationXp: 45,
       participationGold: 35,
       defeatXp: 150,
+      defeatForgeXp: 110,
       defeatGold: 120,
       topContributorBonusXp: 90,
       topContributorBonusGold: 80,
@@ -199,12 +200,12 @@ export const calculateSafeBossDamage = (
       break;
     case 'comeback_activity':
       rawDamage = 75;
-      actionLabel = 'Phoenix Comeback Surge';
+      actionLabel = 'Phoenix Comeback Cleave';
       break;
     case 'recovery_habit':
-      // Balanced recovery & rest never penalized; grants supportive barrier-piercing impact
+      // Balanced recovery & rest never penalized; grants supportive shield-piercing strike
       rawDamage = 55;
-      actionLabel = 'Sanctuary Restoration Surge';
+      actionLabel = 'Sanctuary Restoration Ward';
       break;
   }
 
@@ -529,7 +530,7 @@ export const createDefaultCommunityEvent = (now: Date = new Date()): CommunityEv
     subtitle: 'Realm-Wide Wellness & Restoration Chronicle',
     description:
       'Every champion across Aetheria contributes verified workouts, mindful study, balanced meals, and daily habits to rekindle the Golden World Tree.',
-    themeColor: '#1677FF',
+    themeColor: '#D6A84B',
     status: 'active',
     startsAt,
     endsAt,
@@ -651,6 +652,7 @@ export const validateMentorRecommendedQuest = (
 
   // Server-bounded central rewards (AI can NEVER dictate arbitrary/unbounded rewards)
   const playerXpReward = difficulty === 'challenging' ? 55 : difficulty === 'medium' ? 40 : 25;
+  const forgeXpReward = difficulty === 'challenging' ? 40 : difficulty === 'medium' ? 28 : 18;
   const goldReward = difficulty === 'challenging' ? 45 : difficulty === 'medium' ? 30 : 20;
 
   return {
@@ -666,6 +668,7 @@ export const validateMentorRecommendedQuest = (
       maxProgress,
       unitLabel,
       playerXpReward,
+      forgeXpReward,
       goldReward,
       rationale: rationale || 'Tailored safely to your recent progression and recovery rhythm.',
     },

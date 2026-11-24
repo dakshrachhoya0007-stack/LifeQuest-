@@ -7,7 +7,7 @@ import {
   Shield,
   Flame,
   Crown,
-  Dumbbell,
+  Swords,
   Sparkles,
   Compass,
   Sun,
@@ -37,14 +37,13 @@ const EMBLEM_OPTIONS = [
   { id: 'Shield', label: 'Shield', Icon: Shield },
   { id: 'Flame', label: 'Flame', Icon: Flame },
   { id: 'Crown', label: 'Crown', Icon: Crown },
-  { id: 'Dumbbell', label: 'Strength', Icon: Dumbbell },
+  { id: 'Swords', label: 'Swords', Icon: Swords },
   { id: 'Sparkles', label: 'Sparkles', Icon: Sparkles },
   { id: 'Compass', label: 'Compass', Icon: Compass },
   { id: 'Sun', label: 'Sun', Icon: Sun },
 ] as const;
 
 const renderGuildEmblem = (emblem: string, className = 'w-5 h-5 text-amber-400') => {
-  if (emblem === 'Swords') return <Dumbbell className={className} />;
   const found = EMBLEM_OPTIONS.find(e => e.id === emblem);
   const Icon = found ? found.Icon : Shield;
   return <Icon className={className} />;
@@ -386,29 +385,29 @@ export const GuildsView: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in pb-12">
       {/* Header Banner */}
-      <div className="rounded-2xl bg-gradient-to-r from-[#0A1930] via-[#102440] to-[#0A1930] border border-[#1677FF]/35 shadow-[0_12px_32px_rgba(2,8,20,0.6)] p-6">
+      <div className="rounded-2xl bg-gradient-to-r from-[#0E0E17] via-[#141420] to-[#0E0E17] border border-white/10 shadow-[0_12px_32px_rgba(0,0,0,0.6)] p-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold text-[#00D9FF] mb-1">
+            <p className="text-xs font-semibold text-[#D6A84B] mb-1">
               Player-Founded Brotherhoods · Real Member Progress Only
             </p>
             <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-white">
-              GUILDS & COOPERATIVE RAIDS
+              GUILDS &amp; COOPERATIVE RAIDS
             </h1>
-            <p className="text-xs sm:text-sm text-[#A9B8CC] max-w-2xl mt-1">
+            <p className="text-xs sm:text-sm text-[#A1A1B8] max-w-2xl mt-1">
               Found a guild or join an active fellowship. Guild XP and challenge progress advance strictly from verified member workouts, habits, and boss victories.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-            <div className="flex items-center gap-1 p-1 bg-[#061225] border border-[#1677FF]/30 rounded-xl">
+            <div className="flex items-center gap-1 p-1 bg-[#090910] border border-white/10 rounded-xl">
               <button
                 type="button"
                 onClick={() => setGuildsSubTab('directory')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 ${
                   guildsSubTab === 'directory'
-                    ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white border border-[#00D9FF]/45 shadow-[0_0_12px_rgba(22,119,255,0.3)]'
-                    : 'text-[#A9B8CC] hover:text-white border border-transparent'
+                    ? 'bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] text-white border border-[#8B5CF6]/45 shadow-[0_0_12px_rgba(139,92,246,0.35)]'
+                    : 'text-[#A1A1B8] hover:text-white border border-transparent'
                 }`}
               >
                 <Shield className="w-3.5 h-3.5" />
@@ -419,8 +418,8 @@ export const GuildsView: React.FC = () => {
                 onClick={() => setGuildsSubTab('territory-wars')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 ${
                   guildsSubTab === 'territory-wars'
-                    ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white border border-[#00D9FF]/45 shadow-[0_0_12px_rgba(22,119,255,0.3)]'
-                    : 'text-[#A9B8CC] hover:text-white border border-transparent'
+                    ? 'bg-gradient-to-r from-[#BE123C] to-[#FB7185] text-white border border-[#FB7185]/45 shadow-[0_0_12px_rgba(251,113,133,0.35)]'
+                    : 'text-[#A1A1B8] hover:text-white border border-transparent'
                 }`}
               >
                 <MapPin className="w-3.5 h-3.5" />
@@ -430,7 +429,7 @@ export const GuildsView: React.FC = () => {
             {guildsSubTab === 'directory' && myGuild && selectedGuildId !== myGuild.id && (
               <button
                 onClick={() => setSelectedGuildId(myGuild.id)}
-                className="px-4 py-2.5 rounded-xl border border-[#1677FF]/45 bg-[#0A1930] hover:bg-[#16325C] hover:border-[#00D9FF]/60 text-white text-xs font-semibold whitespace-nowrap transition-colors"
+                className="px-4 py-2.5 rounded-xl border border-[#D6A84B]/45 bg-[#0E0E17] hover:bg-[#1B1B2B] hover:border-[#D6A84B]/75 text-white text-xs font-semibold whitespace-nowrap transition-colors"
               >
                 Open My Guild ([{myGuild.tag}])
               </button>
@@ -438,7 +437,7 @@ export const GuildsView: React.FC = () => {
             {guildsSubTab === 'directory' && !myGuild && (
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="px-5 py-2.5 rounded-xl font-bold font-['Cinzel'] text-xs tracking-wider bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white shadow-[0_0_16px_rgba(22,119,255,0.35)] flex items-center gap-2 transition-all whitespace-nowrap"
+                className="px-5 py-2.5 rounded-xl font-bold font-['Cinzel'] text-xs tracking-wider bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] hover:from-[#7C3AED] hover:to-[#A78BFA] text-white shadow-[0_0_16px_rgba(139,92,246,0.35)] flex items-center gap-2 transition-all whitespace-nowrap"
               >
                 <Plus className="w-4 h-4" />
                 Create Guild
@@ -456,8 +455,8 @@ export const GuildsView: React.FC = () => {
         <div
           className={`p-3 rounded-xl border text-xs animate-in fade-in ${
             feedback.type === 'error'
-              ? 'bg-rose-950/70 border-rose-700 text-rose-200'
-              : 'bg-emerald-950/70 border-emerald-700 text-emerald-200'
+              ? 'bg-[#FB7185]/10 border-[#FB7185]/40 text-[#FB7185]'
+              : 'bg-[#34D399]/10 border-[#34D399]/40 text-[#34D399]'
           }`}
         >
           {feedback.text}
@@ -466,21 +465,21 @@ export const GuildsView: React.FC = () => {
 
       {/* Pending Incoming Guild Invites */}
       {guildInvites.length > 0 && (
-        <div className="p-4 rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#00D9FF]/40 space-y-3 shadow-[0_12px_32px_rgba(2,8,20,0.6)]">
-          <span className="text-xs font-bold text-[#00D9FF] uppercase tracking-wider block">
+        <div className="p-4 rounded-2xl bg-[#141420]/95 backdrop-blur-md border border-[#D6A84B]/40 space-y-3 shadow-[0_12px_32px_rgba(0,0,0,0.6)]">
+          <span className="text-xs font-bold text-[#D6A84B] uppercase tracking-wider block">
             Pending Guild Invitations ({guildInvites.length})
           </span>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {guildInvites.map(inv => (
               <div
                 key={inv.inviteId}
-                className="p-3.5 rounded-xl bg-[#0A1930] border border-[#1677FF]/30 flex items-center justify-between gap-3"
+                className="p-3.5 rounded-xl bg-[#0E0E17] border border-white/10 flex items-center justify-between gap-3"
               >
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-white truncate">
                     [{inv.guildTag}] {inv.guildName}
                   </p>
-                  <p className="text-xs text-[#A9B8CC] tabular-nums">
+                  <p className="text-xs text-[#A1A1B8] tabular-nums">
                     Lv.{inv.guildLevel} · Invited by {inv.inviterName}
                   </p>
                 </div>
@@ -489,7 +488,7 @@ export const GuildsView: React.FC = () => {
                     disabled={isSubmitting || Boolean(myGuild)}
                     onClick={() => handleRespondInvite(inv.inviteId, true, inv.guildName)}
                     title={myGuild ? 'Leave your current guild first' : 'Accept invite'}
-                    className="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 disabled:opacity-40 text-white text-xs font-semibold flex items-center gap-1 whitespace-nowrap"
+                    className="px-3 py-1.5 rounded-lg bg-[#34D399] hover:bg-[#6EE7B7] disabled:opacity-40 text-[#090910] text-xs font-bold flex items-center gap-1 whitespace-nowrap transition-colors"
                   >
                     <Check className="w-3.5 h-3.5" />
                     Accept
@@ -497,7 +496,7 @@ export const GuildsView: React.FC = () => {
                   <button
                     disabled={isSubmitting}
                     onClick={() => handleRespondInvite(inv.inviteId, false, inv.guildName)}
-                    className="px-3 py-1.5 rounded-lg bg-[#102440] border border-[#1677FF]/30 hover:bg-[#16325C] text-[#A9B8CC] hover:text-white text-xs font-semibold flex items-center gap-1 whitespace-nowrap"
+                    className="px-3 py-1.5 rounded-lg bg-[#141420] border border-white/15 hover:bg-[#1B1B2B] text-[#A1A1B8] hover:text-white text-xs font-semibold flex items-center gap-1 whitespace-nowrap transition-colors"
                   >
                     <X className="w-3.5 h-3.5" />
                     Decline
@@ -515,9 +514,9 @@ export const GuildsView: React.FC = () => {
           <div className="flex items-center justify-between gap-4">
             <button
               onClick={() => setSelectedGuildId(null)}
-              className="px-3.5 py-2 rounded-xl bg-[#0A1930] border border-[#1677FF]/35 hover:border-[#00D9FF]/50 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors"
+              className="px-3.5 py-2 rounded-xl bg-[#0E0E17] border border-white/15 hover:border-[#8B5CF6]/50 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors"
             >
-              <ArrowLeft className="w-4 h-4 text-[#00D9FF]" />
+              <ArrowLeft className="w-4 h-4 text-[#8B5CF6]" />
               All Guilds
             </button>
 
@@ -527,16 +526,16 @@ export const GuildsView: React.FC = () => {
                   <>
                     <button
                       onClick={() => setShowChallengeModal(true)}
-                      className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white shadow-[0_0_14px_rgba(22,119,255,0.3)] text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap transition-all"
+                      className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] hover:from-[#7C3AED] hover:to-[#A78BFA] text-white shadow-[0_0_14px_rgba(139,92,246,0.3)] text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap transition-all"
                     >
                       <Target className="w-3.5 h-3.5" />
                       New Challenge
                     </button>
                     <button
                       onClick={openEditSettings}
-                      className="px-3.5 py-2 rounded-xl bg-[#0A1930] border border-[#1677FF]/40 hover:bg-[#16325C] hover:border-[#00D9FF]/50 text-white text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap transition-colors"
+                      className="px-3.5 py-2 rounded-xl bg-[#0E0E17] border border-white/15 hover:bg-[#1B1B2B] hover:border-[#D6A84B]/50 text-white text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap transition-colors"
                     >
-                      <Settings className="w-3.5 h-3.5 text-[#00D9FF]" />
+                      <Settings className="w-3.5 h-3.5 text-[#D6A84B]" />
                       Settings
                     </button>
                   </>
@@ -550,7 +549,7 @@ export const GuildsView: React.FC = () => {
                       guildName: guildDetails.guild.name,
                     })
                   }
-                  className="px-3.5 py-2 rounded-xl bg-[#0A1930] border border-rose-900/70 hover:bg-rose-950/60 text-rose-300 text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap transition-colors"
+                  className="px-3.5 py-2 rounded-xl bg-[#0E0E17] border border-[#FB7185]/35 hover:bg-[#FB7185]/15 text-[#FB7185] text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap transition-colors"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   Leave Guild
@@ -565,7 +564,7 @@ export const GuildsView: React.FC = () => {
                         guildName: guildDetails.guild.name,
                       })
                     }
-                    className="px-3.5 py-2 rounded-xl bg-rose-900/80 hover:bg-rose-800 text-white text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap"
+                    className="px-3.5 py-2 rounded-xl bg-[#BE123C] hover:bg-[#E11D48] text-white text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap transition-colors"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     Disband
@@ -576,46 +575,46 @@ export const GuildsView: React.FC = () => {
           </div>
 
           {loadingDetails || !guildDetails ? (
-            <div className="py-16 flex flex-col items-center justify-center gap-3 bg-[#102440]/90 border border-[#1677FF]/30 rounded-2xl text-xs text-[#A9B8CC]">
-              <Loader2 className="w-6 h-6 animate-spin text-[#00D9FF]" />
+            <div className="py-16 flex flex-col items-center justify-center gap-3 bg-[#141420]/95 border border-white/10 rounded-2xl text-xs text-[#A1A1B8]">
+              <Loader2 className="w-6 h-6 animate-spin text-[#8B5CF6]" />
               <span>Loading guild roster and challenges...</span>
             </div>
           ) : (
             <div className="space-y-6">
               {/* Guild Summary Header */}
-              <div className="p-6 rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/35 shadow-[0_12px_32px_rgba(2,8,20,0.6)] space-y-5">
+              <div className="p-6 rounded-2xl bg-[#141420]/95 backdrop-blur-md border border-white/15 shadow-[0_12px_32px_rgba(0,0,0,0.6)] space-y-5">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="flex items-start gap-4">
-                    <div className="w-14 h-14 rounded-xl bg-[#0A1930] border border-[#00D9FF]/45 flex items-center justify-center shrink-0 shadow-[0_0_16px_rgba(0,217,255,0.2)]">
-                      {renderGuildEmblem(guildDetails.guild.emblem, 'w-7 h-7 text-[#00D9FF]')}
+                    <div className="w-14 h-14 rounded-xl bg-[#0E0E17] border border-[#D6A84B]/45 flex items-center justify-center shrink-0 shadow-[0_0_16px_rgba(214,168,75,0.2)]">
+                      {renderGuildEmblem(guildDetails.guild.emblem, 'w-7 h-7 text-[#D6A84B]')}
                     </div>
                     <div>
                       <h2 className="font-['Cinzel'] font-bold text-xl text-white">
                         {guildDetails.guild.name}
                       </h2>
-                      <p className="text-xs text-[#00D9FF] mt-0.5 tabular-nums flex items-center gap-2 flex-wrap">
+                      <p className="text-xs text-[#D6A84B] mt-0.5 tabular-nums flex items-center gap-2 flex-wrap">
                         <span className="font-mono font-bold">[{guildDetails.guild.tag}]</span>
-                        <span aria-hidden="true" className="text-[#A9B8CC]/45">·</span>
+                        <span aria-hidden="true" className="text-[#A1A1B8]/45">·</span>
                         <span>Guild Lv.{guildDetails.guild.level}</span>
-                        <span aria-hidden="true" className="text-[#A9B8CC]/45">·</span>
+                        <span aria-hidden="true" className="text-[#A1A1B8]/45">·</span>
                         <span>{(guildDetails.guild.guildXp || 0).toLocaleString()} Guild XP</span>
-                        <span aria-hidden="true" className="text-[#A9B8CC]/45">·</span>
-                        <span className="inline-flex items-center gap-1 text-[#A9B8CC]">
+                        <span aria-hidden="true" className="text-[#A1A1B8]/45">·</span>
+                        <span className="inline-flex items-center gap-1 text-[#A1A1B8]">
                           {guildDetails.guild.isPublic !== false ? (
                             <>
-                              <Globe className="w-3 h-3 text-[#00D9FF]" /> Public
+                              <Globe className="w-3 h-3 text-[#8B5CF6]" /> Public
                             </>
                           ) : (
                             <>
-                              <Lock className="w-3 h-3 text-[#00D9FF]" /> Private
+                              <Lock className="w-3 h-3 text-[#D6A84B]" /> Private
                             </>
                           )}
                         </span>
-                        <span aria-hidden="true" className="text-[#A9B8CC]/45">·</span>
-                        <span className="text-[#A9B8CC]">Min Lv.{guildDetails.guild.minLevel || 1}</span>
+                        <span aria-hidden="true" className="text-[#A1A1B8]/45">·</span>
+                        <span className="text-[#A1A1B8]">Min Lv.{guildDetails.guild.minLevel || 1}</span>
                       </p>
                       {guildDetails.guild.description && (
-                        <p className="text-xs text-[#A9B8CC] mt-2 max-w-2xl leading-relaxed">
+                        <p className="text-xs text-[#A1A1B8] mt-2 max-w-2xl leading-relaxed">
                           {guildDetails.guild.description}
                         </p>
                       )}
@@ -623,7 +622,7 @@ export const GuildsView: React.FC = () => {
                   </div>
 
                   <div className="text-right shrink-0 tabular-nums">
-                    <span className="text-[11px] text-[#A9B8CC] block">Roster Capacity</span>
+                    <span className="text-[11px] text-[#A1A1B8] block">Roster Capacity</span>
                     <span className="text-lg font-mono font-bold text-white">
                       {guildDetails.guild.membersCount} / {guildDetails.guild.maxMembers}
                     </span>
@@ -637,13 +636,13 @@ export const GuildsView: React.FC = () => {
                   const levelPct = Math.min(100, Math.round(((totalGxp - levelFloor) / 1000) * 100));
                   return (
                     <div className="space-y-1.5">
-                      <div className="flex justify-between text-[11px] text-[#A9B8CC] tabular-nums">
+                      <div className="flex justify-between text-[11px] text-[#A1A1B8] tabular-nums">
                         <span>Guild Level Progression</span>
                         <span>{Math.max(0, totalGxp - levelFloor)} / 1,000 XP to next level</span>
                       </div>
-                      <div className="w-full h-2 bg-[#061225] rounded-full overflow-hidden border border-[#1677FF]/25">
+                      <div className="w-full h-2 bg-[#090910] rounded-full overflow-hidden border border-white/10">
                         <div
-                          className="h-full bg-gradient-to-r from-[#1677FF] to-[#00D9FF] transition-all duration-300"
+                          className="h-full bg-gradient-to-r from-[#6D28D9] via-[#8B5CF6] to-[#D6A84B] transition-all duration-300"
                           style={{ width: `${Math.max(0, levelPct)}%` }}
                         />
                       </div>
@@ -655,18 +654,18 @@ export const GuildsView: React.FC = () => {
               {/* Challenges + Roster Split */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Roster (2 cols) */}
-                <div className="lg:col-span-2 bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 shadow-[0_12px_32px_rgba(2,8,20,0.6)] rounded-2xl p-5 space-y-4">
+                <div className="lg:col-span-2 bg-[#141420]/95 backdrop-blur-md border border-white/10 shadow-[0_12px_32px_rgba(0,0,0,0.6)] rounded-2xl p-5 space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="font-['Cinzel'] font-bold text-sm text-white flex items-center gap-2">
-                      <Users className="w-4 h-4 text-[#00D9FF]" />
+                      <Users className="w-4 h-4 text-[#8B5CF6]" />
                       Guild Roster ({guildDetails.members.length})
                     </h3>
                   </div>
 
                   {guildDetails.members.length === 0 ? (
-                    <p className="text-xs text-[#A9B8CC] py-6 text-center">No members in this guild.</p>
+                    <p className="text-xs text-[#A1A1B8] py-6 text-center">No members in this guild.</p>
                   ) : (
-                    <div className="divide-y divide-[#1677FF]/20">
+                    <div className="divide-y divide-white/10">
                       {guildDetails.members.map(member => {
                         const isSelf = member.userId === user?.id;
                         const myRole = guildDetails.guild.myRole;
@@ -688,7 +687,7 @@ export const GuildsView: React.FC = () => {
                                 <img
                                   src={getRpgAvatarForClass(member.characterClass)}
                                   alt={member.username}
-                                  className="w-10 h-10 rounded-xl object-cover object-top border border-[#1677FF]/55"
+                                  className="w-10 h-10 rounded-xl object-cover object-top border border-[#8B5CF6]/55"
                                 />
                                 <PresenceBadge
                                   status={getPlayerPresence(member.userId)?.status}
@@ -701,7 +700,7 @@ export const GuildsView: React.FC = () => {
                                   <button
                                     type="button"
                                     onClick={() => openPublicProfile(member.userId)}
-                                    className="text-sm font-bold text-white hover:text-[#00D9FF] truncate transition-colors"
+                                    className="text-sm font-bold text-white hover:text-[#D6A84B] truncate transition-colors"
                                   >
                                     {member.username}
                                   </button>
@@ -714,16 +713,16 @@ export const GuildsView: React.FC = () => {
                                   <span
                                     className={`text-[11px] capitalize font-semibold ${
                                       member.role === 'leader'
-                                        ? 'text-amber-400'
+                                        ? 'text-[#D6A84B]'
                                         : member.role === 'officer'
-                                        ? 'text-[#00D9FF]'
-                                        : 'text-[#A9B8CC]'
+                                        ? 'text-[#8B5CF6]'
+                                        : 'text-[#A1A1B8]'
                                     }`}
                                   >
                                     {member.role}
                                   </span>
                                 </div>
-                                <p className="text-xs text-[#A9B8CC] tabular-nums">
+                                <p className="text-xs text-[#A1A1B8] tabular-nums">
                                   Lv.{member.level} · {member.characterClass} ·{' '}
                                   <span className="text-white font-mono">
                                     {member.weeklyContribution} contribution
@@ -738,7 +737,7 @@ export const GuildsView: React.FC = () => {
                                   <button
                                     disabled={isSubmitting}
                                     onClick={() => handleMemberRoleChange(member.userId, 'promote')}
-                                    className="px-2.5 py-1 rounded-lg bg-[#0A1930] border border-[#1677FF]/35 hover:bg-[#16325C] hover:border-[#00D9FF]/50 text-[#00D9FF] text-[11px] font-medium flex items-center gap-1 transition-colors"
+                                    className="px-2.5 py-1 rounded-lg bg-[#0E0E17] border border-[#8B5CF6]/40 hover:bg-[#1B1B2B] hover:border-[#8B5CF6]/70 text-[#8B5CF6] text-[11px] font-medium flex items-center gap-1 transition-colors"
                                     title="Promote to Officer"
                                   >
                                     <ChevronUp className="w-3 h-3" />
@@ -749,7 +748,7 @@ export const GuildsView: React.FC = () => {
                                   <button
                                     disabled={isSubmitting}
                                     onClick={() => handleMemberRoleChange(member.userId, 'demote')}
-                                    className="px-2.5 py-1 rounded-lg bg-[#0A1930] border border-[#1677FF]/30 hover:bg-[#16325C] text-[#A9B8CC] hover:text-white text-[11px] font-medium flex items-center gap-1 transition-colors"
+                                    className="px-2.5 py-1 rounded-lg bg-[#0E0E17] border border-white/15 hover:bg-[#1B1B2B] text-[#A1A1B8] hover:text-white text-[11px] font-medium flex items-center gap-1 transition-colors"
                                   >
                                     <ChevronDown className="w-3 h-3" />
                                     Demote
@@ -767,7 +766,7 @@ export const GuildsView: React.FC = () => {
                                         targetUsername: member.username,
                                       })
                                     }
-                                    className="px-2.5 py-1 rounded-lg bg-[#0A1930] border border-amber-500/35 hover:bg-amber-950/50 text-amber-300 text-[11px] font-medium whitespace-nowrap transition-colors"
+                                    className="px-2.5 py-1 rounded-lg bg-[#0E0E17] border border-[#D6A84B]/35 hover:bg-[#D6A84B]/15 text-[#D6A84B] text-[11px] font-medium whitespace-nowrap transition-colors"
                                   >
                                     Make Leader
                                   </button>
@@ -783,7 +782,7 @@ export const GuildsView: React.FC = () => {
                                       targetUsername: member.username,
                                     })
                                   }
-                                  className="px-2.5 py-1 rounded-lg text-rose-400 hover:bg-rose-950/50 text-[11px] font-medium"
+                                  className="px-2.5 py-1 rounded-lg text-[#FB7185] hover:bg-[#FB7185]/15 text-[11px] font-medium transition-colors"
                                 >
                                   Kick
                                 </button>
@@ -799,14 +798,14 @@ export const GuildsView: React.FC = () => {
                 {/* Right Column: Challenges, Join Requests, Invites */}
                 <div className="space-y-6">
                   {/* Weekly Challenges */}
-                  <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 shadow-[0_12px_32px_rgba(2,8,20,0.6)] rounded-2xl p-5 space-y-4">
+                  <div className="bg-[#141420]/95 backdrop-blur-md border border-white/10 shadow-[0_12px_32px_rgba(0,0,0,0.6)] rounded-2xl p-5 space-y-4">
                     <h3 className="font-['Cinzel'] font-bold text-sm text-white flex items-center gap-2">
-                      <Target className="w-4 h-4 text-[#00D9FF]" />
+                      <Target className="w-4 h-4 text-[#34D399]" />
                       Guild Challenges
                     </h3>
 
                     {guildDetails.challenges.length === 0 ? (
-                      <p className="text-xs text-[#A9B8CC]">
+                      <p className="text-xs text-[#A1A1B8]">
                         No challenges recorded yet. Complete workouts, habits, or boss battles to contribute.
                       </p>
                     ) : (
@@ -814,24 +813,24 @@ export const GuildsView: React.FC = () => {
                         {guildDetails.challenges.map(ch => {
                           const pct = Math.min(100, Math.round((ch.currentValue / Math.max(1, ch.targetValue)) * 100));
                           return (
-                            <div key={ch.id} className="p-3 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 space-y-2">
+                            <div key={ch.id} className="p-3 rounded-xl bg-[#0E0E17] border border-white/10 space-y-2">
                               <div className="flex items-start justify-between gap-2">
                                 <span className="text-xs font-semibold text-white">{ch.title}</span>
-                                <span className="text-[11px] font-mono text-[#00D9FF] tabular-nums shrink-0">
+                                <span className="text-[11px] font-mono text-[#34D399] tabular-nums shrink-0">
                                   {pct}%
                                 </span>
                               </div>
-                              <div className="w-full h-1.5 bg-[#061225] rounded-full overflow-hidden">
+                              <div className="w-full h-1.5 bg-[#090910] rounded-full overflow-hidden">
                                 <div
-                                  className="h-full bg-gradient-to-r from-[#1677FF] to-[#00D9FF]"
+                                  className="h-full bg-gradient-to-r from-[#059669] to-[#34D399]"
                                   style={{ width: `${pct}%` }}
                                 />
                               </div>
-                              <div className="flex items-center justify-between text-[11px] text-[#A9B8CC] tabular-nums">
+                              <div className="flex items-center justify-between text-[11px] text-[#A1A1B8] tabular-nums">
                                 <span className="font-mono">
                                   {ch.currentValue.toLocaleString()} / {ch.targetValue.toLocaleString()}
                                 </span>
-                                <span>
+                                <span className="text-[#D6A84B]">
                                   +{ch.rewardGold}G · +{ch.rewardPlayerXp}XP
                                 </span>
                               </div>
@@ -844,46 +843,46 @@ export const GuildsView: React.FC = () => {
 
                   {/* Join Requests Queue (Leader/Officer) */}
                   {(guildDetails.guild.myRole === 'leader' || guildDetails.guild.myRole === 'officer') && (
-                    <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 shadow-[0_12px_32px_rgba(2,8,20,0.6)] rounded-2xl p-5 space-y-3">
+                    <div className="bg-[#141420]/95 backdrop-blur-md border border-white/10 shadow-[0_12px_32px_rgba(0,0,0,0.6)] rounded-2xl p-5 space-y-3">
                       <h3 className="font-['Cinzel'] font-bold text-sm text-white">
                         Join Requests ({guildDetails.joinRequests.length})
                       </h3>
                       {guildDetails.joinRequests.length === 0 ? (
-                        <p className="text-xs text-[#A9B8CC]/75">No pending join applications.</p>
+                        <p className="text-xs text-[#A1A1B8]/75">No pending join applications.</p>
                       ) : (
                         <div className="space-y-2.5">
                           {guildDetails.joinRequests.map(req => (
                             <div
                               key={req.id}
-                              className="p-3 rounded-xl bg-[#0A1930] border border-[#1677FF]/30 space-y-2"
+                              className="p-3 rounded-xl bg-[#0E0E17] border border-white/10 space-y-2"
                             >
                               <div className="flex items-center justify-between gap-2">
                                 <button
                                   type="button"
                                   onClick={() => openPublicProfile(req.userId)}
-                                  className="text-xs font-bold text-white hover:text-[#00D9FF] truncate"
+                                  className="text-xs font-bold text-white hover:text-[#D6A84B] truncate transition-colors"
                                 >
                                   {req.username}
                                 </button>
-                                <span className="text-[11px] text-[#A9B8CC] tabular-nums shrink-0">
+                                <span className="text-[11px] text-[#A1A1B8] tabular-nums shrink-0">
                                   Lv.{req.level} {req.characterClass}
                                 </span>
                               </div>
                               {req.message && (
-                                <p className="text-[11px] text-[#A9B8CC]">{req.message}</p>
+                                <p className="text-[11px] text-[#A1A1B8]">{req.message}</p>
                               )}
                               <div className="flex items-center gap-2">
                                 <button
                                   disabled={isSubmitting}
                                   onClick={() => handleRespondRequest(req.id, true)}
-                                  className="flex-1 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-[11px] font-semibold"
+                                  className="flex-1 py-1.5 rounded-lg bg-[#34D399] hover:bg-[#6EE7B7] text-[#090910] text-[11px] font-bold transition-colors"
                                 >
                                   Accept
                                 </button>
                                 <button
                                   disabled={isSubmitting}
                                   onClick={() => handleRespondRequest(req.id, false)}
-                                  className="flex-1 py-1.5 rounded-lg bg-[#102440] border border-[#1677FF]/30 hover:bg-[#16325C] text-[#A9B8CC] hover:text-white text-[11px] font-semibold"
+                                  className="flex-1 py-1.5 rounded-lg bg-[#141420] border border-white/15 hover:bg-[#1B1B2B] text-[#A1A1B8] hover:text-white text-[11px] font-semibold transition-colors"
                                 >
                                   Reject
                                 </button>
@@ -897,9 +896,9 @@ export const GuildsView: React.FC = () => {
 
                   {/* Invite Players (Leader/Officer) */}
                   {(guildDetails.guild.myRole === 'leader' || guildDetails.guild.myRole === 'officer') && (
-                    <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 shadow-[0_12px_32px_rgba(2,8,20,0.6)] rounded-2xl p-5 space-y-3">
+                    <div className="bg-[#141420]/95 backdrop-blur-md border border-white/10 shadow-[0_12px_32px_rgba(0,0,0,0.6)] rounded-2xl p-5 space-y-3">
                       <h3 className="font-['Cinzel'] font-bold text-sm text-white flex items-center gap-1.5">
-                        <UserPlus className="w-4 h-4 text-[#00D9FF]" />
+                        <UserPlus className="w-4 h-4 text-[#8B5CF6]" />
                         Invite Players
                       </h3>
 
@@ -909,12 +908,12 @@ export const GuildsView: React.FC = () => {
                           value={inviteQuery}
                           onChange={e => setInviteQuery(e.target.value)}
                           placeholder="Search username..."
-                          className="flex-1 min-w-0 bg-[#0A1930] border border-[#1677FF]/35 rounded-xl px-3 py-1.5 text-xs text-white placeholder-[#A9B8CC]/60 focus:outline-none focus:border-[#00D9FF]"
+                          className="flex-1 min-w-0 bg-[#0E0E17] border border-white/15 rounded-xl px-3 py-1.5 text-xs text-white placeholder-[#A1A1B8]/60 focus:outline-none focus:border-[#8B5CF6]"
                         />
                         <button
                           type="submit"
                           disabled={searchingInvites}
-                          className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white text-xs font-semibold shrink-0 transition-all"
+                          className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] hover:from-[#7C3AED] hover:to-[#A78BFA] text-white text-xs font-semibold shrink-0 transition-all"
                         >
                           <Search className="w-3.5 h-3.5" />
                         </button>
@@ -925,18 +924,18 @@ export const GuildsView: React.FC = () => {
                           ? inviteResults.map(c => (
                               <div
                                 key={c.id}
-                                className="p-2.5 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 flex items-center justify-between gap-2"
+                                className="p-2.5 rounded-xl bg-[#0E0E17] border border-white/10 flex items-center justify-between gap-2"
                               >
                                 <div className="min-w-0">
                                   <p className="text-xs font-bold text-white truncate">{c.username}</p>
-                                  <p className="text-[11px] text-[#A9B8CC] tabular-nums">
+                                  <p className="text-[11px] text-[#A1A1B8] tabular-nums">
                                     Lv.{c.level} {c.characterClass}
                                   </p>
                                 </div>
                                 <button
                                   disabled={isSubmitting || Boolean(c.guildId)}
                                   onClick={() => handleSendInvite(c.id, c.username)}
-                                  className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] disabled:from-[#0A1930] disabled:to-[#0A1930] disabled:border disabled:border-[#1677FF]/25 disabled:text-[#A9B8CC]/50 text-white text-[11px] font-semibold shrink-0"
+                                  className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] hover:from-[#7C3AED] hover:to-[#A78BFA] disabled:from-[#0E0E17] disabled:to-[#0E0E17] disabled:border disabled:border-white/10 disabled:text-[#A1A1B8]/50 text-white text-[11px] font-semibold shrink-0"
                                 >
                                   {c.guildId ? 'In Guild' : 'Invite'}
                                 </button>
@@ -945,18 +944,18 @@ export const GuildsView: React.FC = () => {
                           : acceptedFriends.map(f => (
                               <div
                                 key={f.friendshipId}
-                                className="p-2.5 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 flex items-center justify-between gap-2"
+                                className="p-2.5 rounded-xl bg-[#0E0E17] border border-white/10 flex items-center justify-between gap-2"
                               >
                                 <div className="min-w-0">
                                   <p className="text-xs font-bold text-white truncate">{f.champion.username}</p>
-                                  <p className="text-[11px] text-[#A9B8CC] tabular-nums">
+                                  <p className="text-[11px] text-[#A1A1B8] tabular-nums">
                                     Friend · Lv.{f.champion.level}
                                   </p>
                                 </div>
                                 <button
                                   disabled={isSubmitting}
                                   onClick={() => handleSendInvite(f.champion.id, f.champion.username)}
-                                  className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white text-[11px] font-semibold shrink-0"
+                                  className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] hover:from-[#7C3AED] hover:to-[#A78BFA] text-white text-[11px] font-semibold shrink-0"
                                 >
                                   Invite
                                 </button>
@@ -974,35 +973,35 @@ export const GuildsView: React.FC = () => {
         /* GUILD DIRECTORY */
         <div className="space-y-5">
           {guilds.length > 0 && (
-            <div className="flex items-center gap-3 bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 rounded-2xl p-4 shadow-[0_12px_32px_rgba(2,8,20,0.5)]">
-              <Search className="w-4 h-4 text-[#00D9FF] shrink-0" />
+            <div className="flex items-center gap-3 bg-[#141420]/90 backdrop-blur-md border border-white/10 rounded-2xl p-4 shadow-[0_12px_32px_rgba(0,0,0,0.5)]">
+              <Search className="w-4 h-4 text-[#8B5CF6] shrink-0" />
               <input
                 type="text"
                 value={directorySearch}
                 onChange={e => setDirectorySearch(e.target.value)}
                 placeholder="Filter guilds by name, tag, or focus..."
-                className="flex-1 bg-transparent text-xs text-white placeholder-[#A9B8CC]/65 focus:outline-none"
+                className="flex-1 bg-transparent text-xs text-white placeholder-[#A1A1B8]/65 focus:outline-none"
               />
             </div>
           )}
 
           {guilds.length === 0 ? (
-            <div className="p-12 rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 shadow-[0_12px_32px_rgba(2,8,20,0.6)] text-center space-y-4">
-              <div className="w-14 h-14 rounded-2xl bg-[#0A1930] border border-[#00D9FF]/40 flex items-center justify-center mx-auto text-[#00D9FF] shadow-[0_0_16px_rgba(0,217,255,0.2)]">
+            <div className="p-12 rounded-2xl bg-[#141420]/90 backdrop-blur-md border border-white/10 shadow-[0_12px_32px_rgba(0,0,0,0.6)] text-center space-y-4">
+              <div className="w-14 h-14 rounded-2xl bg-[#0E0E17] border border-[#D6A84B]/40 flex items-center justify-center mx-auto text-[#D6A84B] shadow-[0_0_16px_rgba(214,168,75,0.2)]">
                 <Shield className="w-7 h-7" />
               </div>
               <div className="space-y-1.5">
                 <h2 className="font-['Cinzel'] font-bold text-lg text-white">
                   No Guilds Founded Yet
                 </h2>
-                <p className="text-xs sm:text-sm text-[#A9B8CC] max-w-md mx-auto">
+                <p className="text-xs sm:text-sm text-[#A1A1B8] max-w-md mx-auto">
                   No guilds have been founded yet. Be the first to establish one!
                 </p>
               </div>
               {unifiedBackendReady && (
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="px-5 py-2.5 rounded-xl font-bold font-['Cinzel'] text-xs tracking-wider bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white shadow-[0_0_16px_rgba(22,119,255,0.35)] inline-flex items-center gap-2 transition-all"
+                  className="px-5 py-2.5 rounded-xl font-bold font-['Cinzel'] text-xs tracking-wider bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] hover:from-[#7C3AED] hover:to-[#A78BFA] text-white shadow-[0_0_16px_rgba(139,92,246,0.35)] inline-flex items-center gap-2 transition-all"
                 >
                   <Plus className="w-4 h-4" />
                   Create Guild
@@ -1010,7 +1009,7 @@ export const GuildsView: React.FC = () => {
               )}
             </div>
           ) : filteredGuilds.length === 0 ? (
-            <div className="p-10 rounded-2xl bg-[#102440]/90 border border-[#1677FF]/30 text-center text-xs text-[#A9B8CC]">
+            <div className="p-10 rounded-2xl bg-[#141420]/90 border border-white/10 text-center text-xs text-[#A1A1B8]">
               No guilds match "{directorySearch}".
             </div>
           ) : (
@@ -1026,28 +1025,28 @@ export const GuildsView: React.FC = () => {
                 return (
                   <div
                     key={guild.id}
-                    className={`p-6 rounded-2xl border flex flex-col justify-between transition-all shadow-[0_12px_32px_rgba(2,8,20,0.6)] backdrop-blur-md ${
+                    className={`p-6 rounded-2xl border flex flex-col justify-between transition-all shadow-[0_12px_32px_rgba(0,0,0,0.6)] backdrop-blur-md ${
                       guild.isMember
-                        ? 'bg-[#102440]/95 border-[#00D9FF]/60 shadow-[0_0_24px_rgba(0,217,255,0.16)]'
-                        : 'bg-[#102440]/90 border-[#1677FF]/30 hover:border-[#00D9FF]/50'
+                        ? 'bg-[#141420]/95 border-[#8B5CF6]/60 shadow-[0_0_24px_rgba(139,92,246,0.18)]'
+                        : 'bg-[#141420]/90 border-white/10 hover:border-[#8B5CF6]/45'
                     }`}
                   >
                     <div>
                       <div className="flex items-start justify-between gap-2 mb-3">
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-11 h-11 rounded-xl bg-[#0A1930] flex items-center justify-center border border-[#1677FF]/45 shrink-0">
-                            {renderGuildEmblem(guild.emblem, 'w-5 h-5 text-[#00D9FF]')}
+                          <div className="w-11 h-11 rounded-xl bg-[#0E0E17] flex items-center justify-center border border-[#D6A84B]/35 shrink-0">
+                            {renderGuildEmblem(guild.emblem, 'w-5 h-5 text-[#D6A84B]')}
                           </div>
                           <div className="min-w-0">
                             <button
                               type="button"
                               onClick={() => setSelectedGuildId(guild.id)}
-                              className="font-['Cinzel'] font-bold text-base text-white hover:text-[#00D9FF] truncate block text-left transition-colors"
+                              className="font-['Cinzel'] font-bold text-base text-white hover:text-[#D6A84B] truncate block text-left transition-colors"
                             >
                               {guild.name}
                             </button>
-                            <p className="text-[11px] text-[#A9B8CC] tabular-nums mt-0.5">
-                              <span className="font-mono font-bold text-[#00D9FF]">[{guild.tag}]</span>
+                            <p className="text-[11px] text-[#A1A1B8] tabular-nums mt-0.5">
+                              <span className="font-mono font-bold text-[#D6A84B]">[{guild.tag}]</span>
                               {' · '}Lv.{guild.level}
                               {' · '}
                               {isPrivate ? 'Private' : 'Public'}
@@ -1057,36 +1056,36 @@ export const GuildsView: React.FC = () => {
                         </div>
 
                         {guild.isMember && (
-                          <span className="text-[11px] font-semibold text-emerald-400 shrink-0">
+                          <span className="text-[11px] font-semibold text-[#34D399] shrink-0">
                             Joined ({guild.myRole || 'member'})
                           </span>
                         )}
                       </div>
 
-                      <p className="text-xs text-[#A9B8CC] leading-relaxed mb-4 line-clamp-2">
+                      <p className="text-xs text-[#A1A1B8] leading-relaxed mb-4 line-clamp-2">
                         {guild.description || 'Active player-led fellowship.'}
                       </p>
 
                       {/* Real Raid Quest Progress */}
-                      <div className="bg-[#0A1930] p-3.5 rounded-xl border border-[#1677FF]/25 space-y-2 mb-4">
+                      <div className="bg-[#0E0E17] p-3.5 rounded-xl border border-white/10 space-y-2 mb-4">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-[11px] text-[#00D9FF] font-semibold">
+                          <span className="text-[11px] text-[#8B5CF6] font-semibold">
                             Weekly Guild Challenge
                           </span>
-                          <span className="text-[11px] text-[#00D9FF] font-mono font-bold tabular-nums">
+                          <span className="text-[11px] text-[#D6A84B] font-mono font-bold tabular-nums">
                             {progressPercent}%
                           </span>
                         </div>
                         <p className="text-xs font-semibold text-white truncate">
                           {guild.weeklyQuestName}
                         </p>
-                        <div className="w-full bg-[#061225] h-2 rounded-full overflow-hidden border border-[#1677FF]/20">
+                        <div className="w-full bg-[#090910] h-2 rounded-full overflow-hidden border border-white/10">
                           <div
-                            className="bg-gradient-to-r from-[#1677FF] to-[#00D9FF] h-full transition-all duration-300"
+                            className="bg-gradient-to-r from-[#6D28D9] via-[#8B5CF6] to-[#D6A84B] h-full transition-all duration-300"
                             style={{ width: `${progressPercent}%` }}
                           />
                         </div>
-                        <div className="text-[11px] text-[#A9B8CC] flex justify-between font-mono tabular-nums">
+                        <div className="text-[11px] text-[#A1A1B8] flex justify-between font-mono tabular-nums">
                           <span>Progress</span>
                           <span>
                             {guild.weeklyQuestProgress.toLocaleString()} /{' '}
@@ -1096,15 +1095,15 @@ export const GuildsView: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="pt-3 border-t border-[#1677FF]/20 flex items-center justify-between gap-2">
-                      <span className="text-xs text-[#A9B8CC] font-mono tabular-nums">
+                    <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-2">
+                      <span className="text-xs text-[#A1A1B8] font-mono tabular-nums">
                         {guild.membersCount} / {guild.maxMembers} Members
                       </span>
 
                       <div className="flex items-center gap-2 shrink-0">
                         <button
                           onClick={() => setSelectedGuildId(guild.id)}
-                          className="px-3 py-2 rounded-xl bg-[#0A1930] border border-[#1677FF]/40 hover:bg-[#16325C] hover:border-[#00D9FF]/50 text-white text-xs font-semibold whitespace-nowrap transition-colors"
+                          className="px-3 py-2 rounded-xl bg-[#0E0E17] border border-white/15 hover:bg-[#1B1B2B] hover:border-[#8B5CF6]/50 text-white text-xs font-semibold whitespace-nowrap transition-colors"
                         >
                           {guild.isMember ? 'Manage' : 'Inspect'}
                         </button>
@@ -1112,14 +1111,14 @@ export const GuildsView: React.FC = () => {
                         {!guild.isMember && !myGuild && (
                           isPrivate ? (
                             guild.hasPendingRequest ? (
-                              <span className="px-3 py-2 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 text-[#A9B8CC] text-xs font-semibold whitespace-nowrap">
+                              <span className="px-3 py-2 rounded-xl bg-[#0E0E17] border border-white/10 text-[#A1A1B8] text-xs font-semibold whitespace-nowrap">
                                 Requested
                               </span>
                             ) : (
                               <button
                                 disabled={!meetsMinLevel || isSubmitting}
                                 onClick={() => setRequestModalGuildId(guild.id)}
-                                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] disabled:from-[#0A1930] disabled:to-[#0A1930] disabled:border disabled:border-[#1677FF]/25 disabled:text-[#A9B8CC]/50 text-white text-xs font-semibold whitespace-nowrap transition-all"
+                                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] hover:from-[#7C3AED] hover:to-[#A78BFA] disabled:from-[#0E0E17] disabled:to-[#0E0E17] disabled:border disabled:border-white/10 disabled:text-[#A1A1B8]/50 text-white text-xs font-semibold whitespace-nowrap transition-all"
                               >
                                 Request Join
                               </button>
@@ -1128,7 +1127,7 @@ export const GuildsView: React.FC = () => {
                             <button
                               disabled={!meetsMinLevel || isSubmitting}
                               onClick={() => handleJoinPublic(guild.id)}
-                              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] disabled:from-[#0A1930] disabled:to-[#0A1930] disabled:border disabled:border-[#1677FF]/25 disabled:text-[#A9B8CC]/50 text-white text-xs font-semibold whitespace-nowrap transition-all"
+                              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] hover:from-[#7C3AED] hover:to-[#A78BFA] disabled:from-[#0E0E17] disabled:to-[#0E0E17] disabled:border disabled:border-white/10 disabled:text-[#A1A1B8]/50 text-white text-xs font-semibold whitespace-nowrap transition-all"
                             >
                               Join
                             </button>
@@ -1149,11 +1148,11 @@ export const GuildsView: React.FC = () => {
       {/* Create Guild Modal */}
       {showCreateModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#061225]/85 backdrop-blur-sm animate-in fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#090910]/85 backdrop-blur-sm animate-in fade-in"
           onClick={() => setShowCreateModal(false)}
         >
           <div
-            className="w-full max-w-lg bg-[#102440] border border-[#00D9FF]/40 rounded-2xl p-6 shadow-[0_20px_50px_rgba(2,8,20,0.85)] max-h-[90vh] overflow-y-auto"
+            className="w-full max-w-lg bg-[#141420] border border-[#8B5CF6]/40 rounded-2xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.85)] max-h-[90vh] overflow-y-auto"
             onClick={e => e.stopPropagation()}
           >
             <h3 className="text-lg font-bold font-['Cinzel'] text-white mb-4">
@@ -1162,7 +1161,7 @@ export const GuildsView: React.FC = () => {
             <form onSubmit={handleCreateGuild} className="space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-2">
-                  <label className="block font-medium text-[#A9B8CC] mb-1">Guild Name</label>
+                  <label className="block font-medium text-[#A1A1B8] mb-1">Guild Name</label>
                   <input
                     type="text"
                     required
@@ -1171,11 +1170,11 @@ export const GuildsView: React.FC = () => {
                     value={guildName}
                     onChange={e => setGuildName(e.target.value)}
                     placeholder="e.g. Iron Vanguard"
-                    className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2 text-white focus:outline-none"
+                    className="w-full bg-[#0E0E17] border border-white/15 focus:border-[#8B5CF6] rounded-xl px-3 py-2 text-white focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block font-medium text-[#A9B8CC] mb-1">Tag (2–4 chars)</label>
+                  <label className="block font-medium text-[#A1A1B8] mb-1">Tag (2–4 chars)</label>
                   <input
                     type="text"
                     required
@@ -1184,25 +1183,25 @@ export const GuildsView: React.FC = () => {
                     value={guildTag}
                     onChange={e => setGuildTag(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
                     placeholder="IRON"
-                    className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2 text-white focus:outline-none font-mono"
+                    className="w-full bg-[#0E0E17] border border-white/15 focus:border-[#8B5CF6] rounded-xl px-3 py-2 text-white focus:outline-none font-mono"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-medium text-[#A9B8CC] mb-1">Guild Charter</label>
+                <label className="block font-medium text-[#A1A1B8] mb-1">Guild Charter</label>
                 <textarea
                   value={guildDesc}
                   onChange={e => setGuildDesc(e.target.value)}
                   rows={3}
                   maxLength={300}
                   placeholder="Describe your guild's fitness routines and goals..."
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2 text-white focus:outline-none"
+                  className="w-full bg-[#0E0E17] border border-white/15 focus:border-[#8B5CF6] rounded-xl px-3 py-2 text-white focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block font-medium text-[#A9B8CC] mb-1.5">Guild Emblem</label>
+                <label className="block font-medium text-[#A1A1B8] mb-1.5">Guild Emblem</label>
                 <div className="flex flex-wrap gap-2">
                   {EMBLEM_OPTIONS.map(opt => (
                     <button
@@ -1211,11 +1210,11 @@ export const GuildsView: React.FC = () => {
                       onClick={() => setGuildEmblem(opt.id)}
                       className={`px-3 py-2 rounded-xl border flex items-center gap-1.5 transition-colors ${
                         guildEmblem === opt.id
-                          ? 'bg-[#1677FF]/25 border-[#00D9FF] text-white shadow-[0_0_10px_rgba(0,217,255,0.2)]'
-                          : 'bg-[#0A1930] border-[#1677FF]/30 text-[#A9B8CC] hover:text-white'
+                          ? 'bg-[#6D28D9]/25 border-[#8B5CF6] text-white shadow-[0_0_10px_rgba(139,92,246,0.25)]'
+                          : 'bg-[#0E0E17] border-white/10 text-[#A1A1B8] hover:text-white'
                       }`}
                     >
-                      <opt.Icon className="w-3.5 h-3.5 text-[#00D9FF]" />
+                      <opt.Icon className="w-3.5 h-3.5 text-[#D6A84B]" />
                       <span>{opt.label}</span>
                     </button>
                   ))}
@@ -1224,25 +1223,25 @@ export const GuildsView: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-medium text-[#A9B8CC] mb-1">Membership Type</label>
+                  <label className="block font-medium text-[#A1A1B8] mb-1">Membership Type</label>
                   <select
                     value={guildPublic ? 'public' : 'private'}
                     onChange={e => setGuildPublic(e.target.value === 'public')}
-                    className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2 text-white focus:outline-none"
+                    className="w-full bg-[#0E0E17] border border-white/15 focus:border-[#8B5CF6] rounded-xl px-3 py-2 text-white focus:outline-none"
                   >
                     <option value="public">Public (Anyone can join)</option>
                     <option value="private">Private (Requires approval)</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block font-medium text-[#A9B8CC] mb-1">Minimum Level</label>
+                  <label className="block font-medium text-[#A1A1B8] mb-1">Minimum Level</label>
                   <input
                     type="number"
                     min={1}
                     max={50}
                     value={guildMinLevel}
                     onChange={e => setGuildMinLevel(Math.max(1, Math.min(50, Number(e.target.value) || 1)))}
-                    className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2 text-white focus:outline-none font-mono"
+                    className="w-full bg-[#0E0E17] border border-white/15 focus:border-[#8B5CF6] rounded-xl px-3 py-2 text-white focus:outline-none font-mono"
                   />
                 </div>
               </div>
@@ -1251,14 +1250,14 @@ export const GuildsView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 text-[#A9B8CC] hover:text-white"
+                  className="px-4 py-2 text-[#A1A1B8] hover:text-white"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2 font-bold font-['Cinzel'] bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white rounded-xl shadow-[0_0_16px_rgba(22,119,255,0.35)] transition-all"
+                  className="px-5 py-2 font-bold font-['Cinzel'] bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] hover:from-[#7C3AED] hover:to-[#A78BFA] text-white rounded-xl shadow-[0_0_16px_rgba(139,92,246,0.35)] transition-all"
                 >
                   {isSubmitting ? 'Creating...' : 'Found Guild'}
                 </button>
@@ -1271,11 +1270,11 @@ export const GuildsView: React.FC = () => {
       {/* Request Join Private Guild Modal */}
       {requestModalGuildId && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#061225]/85 backdrop-blur-sm animate-in fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#090910]/85 backdrop-blur-sm animate-in fade-in"
           onClick={() => setRequestModalGuildId(null)}
         >
           <div
-            className="w-full max-w-md bg-[#102440] border border-[#00D9FF]/40 rounded-2xl p-6 shadow-[0_20px_50px_rgba(2,8,20,0.85)]"
+            className="w-full max-w-md bg-[#141420] border border-[#8B5CF6]/40 rounded-2xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.85)]"
             onClick={e => e.stopPropagation()}
           >
             <h3 className="text-base font-bold font-['Cinzel'] text-white mb-3">
@@ -1283,28 +1282,28 @@ export const GuildsView: React.FC = () => {
             </h3>
             <form onSubmit={handleSubmitJoinRequest} className="space-y-4 text-xs">
               <div>
-                <label className="block text-[#A9B8CC] mb-1">Message to Guild Officers (Optional)</label>
+                <label className="block text-[#A1A1B8] mb-1">Message to Guild Officers (Optional)</label>
                 <textarea
                   value={requestNote}
                   onChange={e => setRequestNote(e.target.value)}
                   maxLength={240}
                   rows={3}
                   placeholder="Share your workout focus or why you'd like to join..."
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2 text-white focus:outline-none"
+                  className="w-full bg-[#0E0E17] border border-white/15 focus:border-[#8B5CF6] rounded-xl px-3 py-2 text-white focus:outline-none"
                 />
               </div>
               <div className="flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setRequestModalGuildId(null)}
-                  className="px-4 py-2 text-[#A9B8CC] hover:text-white"
+                  className="px-4 py-2 text-[#A1A1B8] hover:text-white"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white font-semibold shadow-[0_0_14px_rgba(22,119,255,0.3)]"
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] hover:from-[#7C3AED] hover:to-[#A78BFA] text-white font-semibold shadow-[0_0_14px_rgba(139,92,246,0.3)]"
                 >
                   Send Request
                 </button>
@@ -1317,11 +1316,11 @@ export const GuildsView: React.FC = () => {
       {/* Create Challenge Modal */}
       {showChallengeModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#061225]/85 backdrop-blur-sm animate-in fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#090910]/85 backdrop-blur-sm animate-in fade-in"
           onClick={() => setShowChallengeModal(false)}
         >
           <div
-            className="w-full max-w-md bg-[#102440] border border-[#00D9FF]/40 rounded-2xl p-6 shadow-[0_20px_50px_rgba(2,8,20,0.85)]"
+            className="w-full max-w-md bg-[#141420] border border-[#8B5CF6]/40 rounded-2xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.85)]"
             onClick={e => e.stopPropagation()}
           >
             <h3 className="text-base font-bold font-['Cinzel'] text-white mb-4">
@@ -1329,7 +1328,7 @@ export const GuildsView: React.FC = () => {
             </h3>
             <form onSubmit={handleCreateChallenge} className="space-y-4 text-xs">
               <div>
-                <label className="block text-[#A9B8CC] mb-1">Challenge Title</label>
+                <label className="block text-[#A1A1B8] mb-1">Challenge Title</label>
                 <input
                   type="text"
                   required
@@ -1338,41 +1337,41 @@ export const GuildsView: React.FC = () => {
                   value={challengeTitle}
                   onChange={e => setChallengeTitle(e.target.value)}
                   placeholder="e.g. 1,000 Verified Squad Reps"
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2 text-white focus:outline-none"
+                  className="w-full bg-[#0E0E17] border border-white/15 focus:border-[#8B5CF6] rounded-xl px-3 py-2 text-white focus:outline-none"
                 />
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-[#A9B8CC] mb-1">Target</label>
+                  <label className="block text-[#A1A1B8] mb-1">Target</label>
                   <input
                     type="number"
                     min={100}
                     max={50000}
                     value={challengeTarget}
                     onChange={e => setChallengeTarget(Number(e.target.value) || 500)}
-                    className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2 text-white font-mono focus:outline-none"
+                    className="w-full bg-[#0E0E17] border border-white/15 focus:border-[#8B5CF6] rounded-xl px-3 py-2 text-white font-mono focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#A9B8CC] mb-1">Gold Reward</label>
+                  <label className="block text-[#A1A1B8] mb-1">Gold Reward</label>
                   <input
                     type="number"
                     min={20}
                     max={300}
                     value={challengeRewardGold}
                     onChange={e => setChallengeRewardGold(Number(e.target.value) || 100)}
-                    className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2 text-white font-mono focus:outline-none"
+                    className="w-full bg-[#0E0E17] border border-white/15 focus:border-[#8B5CF6] rounded-xl px-3 py-2 text-white font-mono focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#A9B8CC] mb-1">XP Reward</label>
+                  <label className="block text-[#A1A1B8] mb-1">XP Reward</label>
                   <input
                     type="number"
                     min={20}
                     max={300}
                     value={challengeRewardXp}
                     onChange={e => setChallengeRewardXp(Number(e.target.value) || 80)}
-                    className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2 text-white font-mono focus:outline-none"
+                    className="w-full bg-[#0E0E17] border border-white/15 focus:border-[#8B5CF6] rounded-xl px-3 py-2 text-white font-mono focus:outline-none"
                   />
                 </div>
               </div>
@@ -1380,14 +1379,14 @@ export const GuildsView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowChallengeModal(false)}
-                  className="px-4 py-2 text-[#A9B8CC] hover:text-white"
+                  className="px-4 py-2 text-[#A1A1B8] hover:text-white"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white font-semibold shadow-[0_0_14px_rgba(22,119,255,0.3)]"
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] hover:from-[#7C3AED] hover:to-[#A78BFA] text-white font-semibold shadow-[0_0_14px_rgba(139,92,246,0.3)]"
                 >
                   Publish Challenge
                 </button>
@@ -1400,11 +1399,11 @@ export const GuildsView: React.FC = () => {
       {/* Edit Guild Settings Modal */}
       {showSettingsModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#061225]/85 backdrop-blur-sm animate-in fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#090910]/85 backdrop-blur-sm animate-in fade-in"
           onClick={() => setShowSettingsModal(false)}
         >
           <div
-            className="w-full max-w-md bg-[#102440] border border-[#00D9FF]/40 rounded-2xl p-6 shadow-[0_20px_50px_rgba(2,8,20,0.85)]"
+            className="w-full max-w-md bg-[#141420] border border-[#8B5CF6]/40 rounded-2xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.85)]"
             onClick={e => e.stopPropagation()}
           >
             <h3 className="text-base font-bold font-['Cinzel'] text-white mb-4">
@@ -1412,55 +1411,55 @@ export const GuildsView: React.FC = () => {
             </h3>
             <form onSubmit={handleSaveSettings} className="space-y-4 text-xs">
               <div>
-                <label className="block text-[#A9B8CC] mb-1">Charter Description</label>
+                <label className="block text-[#A1A1B8] mb-1">Charter Description</label>
                 <textarea
                   value={editDesc}
                   onChange={e => setEditDesc(e.target.value)}
                   rows={3}
                   maxLength={300}
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2 text-white focus:outline-none"
+                  className="w-full bg-[#0E0E17] border border-white/15 focus:border-[#8B5CF6] rounded-xl px-3 py-2 text-white focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block text-[#A9B8CC] mb-1">Weekly Focus Name</label>
+                <label className="block text-[#A1A1B8] mb-1">Weekly Focus Name</label>
                 <input
                   type="text"
                   value={editQuestName}
                   onChange={e => setEditQuestName(e.target.value)}
                   maxLength={120}
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2 text-white focus:outline-none"
+                  className="w-full bg-[#0E0E17] border border-white/15 focus:border-[#8B5CF6] rounded-xl px-3 py-2 text-white focus:outline-none"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#A9B8CC] mb-1">Visibility</label>
+                  <label className="block text-[#A1A1B8] mb-1">Visibility</label>
                   <select
                     value={editPublic ? 'public' : 'private'}
                     onChange={e => setEditPublic(e.target.value === 'public')}
-                    className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2 text-white focus:outline-none"
+                    className="w-full bg-[#0E0E17] border border-white/15 focus:border-[#8B5CF6] rounded-xl px-3 py-2 text-white focus:outline-none"
                   >
                     <option value="public">Public</option>
                     <option value="private">Private</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[#A9B8CC] mb-1">Min Level</label>
+                  <label className="block text-[#A1A1B8] mb-1">Min Level</label>
                   <input
                     type="number"
                     min={1}
                     max={50}
                     value={editMinLevel}
                     onChange={e => setEditMinLevel(Math.max(1, Math.min(50, Number(e.target.value) || 1)))}
-                    className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2 text-white font-mono focus:outline-none"
+                    className="w-full bg-[#0E0E17] border border-white/15 focus:border-[#8B5CF6] rounded-xl px-3 py-2 text-white font-mono focus:outline-none"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-[#A9B8CC] mb-1">Emblem</label>
+                <label className="block text-[#A1A1B8] mb-1">Emblem</label>
                 <select
                   value={editEmblem}
                   onChange={e => setEditEmblem(e.target.value)}
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2 text-white focus:outline-none"
+                  className="w-full bg-[#0E0E17] border border-white/15 focus:border-[#8B5CF6] rounded-xl px-3 py-2 text-white focus:outline-none"
                 >
                   {EMBLEM_OPTIONS.map(o => (
                     <option key={o.id} value={o.id}>
@@ -1473,14 +1472,14 @@ export const GuildsView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowSettingsModal(false)}
-                  className="px-4 py-2 text-[#A9B8CC] hover:text-white"
+                  className="px-4 py-2 text-[#A1A1B8] hover:text-white"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white font-semibold shadow-[0_0_14px_rgba(22,119,255,0.3)]"
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] hover:from-[#7C3AED] hover:to-[#A78BFA] text-white font-semibold shadow-[0_0_14px_rgba(139,92,246,0.3)]"
                 >
                   Save Settings
                 </button>
@@ -1493,14 +1492,14 @@ export const GuildsView: React.FC = () => {
       {/* Destructive Confirmation Dialog */}
       {confirmState && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#061225]/85 backdrop-blur-sm animate-in fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#090910]/85 backdrop-blur-sm animate-in fade-in"
           onClick={() => setConfirmState(null)}
         >
           <div
-            className="w-full max-w-sm bg-[#102440] border border-rose-900/70 rounded-2xl p-6 shadow-[0_20px_50px_rgba(2,8,20,0.85)] space-y-4"
+            className="w-full max-w-sm bg-[#141420] border border-[#FB7185]/45 rounded-2xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.85)] space-y-4"
             onClick={e => e.stopPropagation()}
           >
-            <div className="flex items-center gap-2.5 text-rose-300">
+            <div className="flex items-center gap-2.5 text-[#FB7185]">
               <AlertTriangle className="w-5 h-5 shrink-0" />
               <h3 className="font-['Cinzel'] font-bold text-base">
                 {confirmState.kind === 'disband'
@@ -1512,7 +1511,7 @@ export const GuildsView: React.FC = () => {
                   : 'Transfer Leadership?'}
               </h3>
             </div>
-            <p className="text-xs text-[#A9B8CC] leading-relaxed">
+            <p className="text-xs text-[#A1A1B8] leading-relaxed">
               {confirmState.kind === 'disband'
                 ? `Permanently disband "${confirmState.guildName}"? All members, invites, and active challenges will be removed.`
                 : confirmState.kind === 'leave'
@@ -1524,14 +1523,14 @@ export const GuildsView: React.FC = () => {
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setConfirmState(null)}
-                className="px-4 py-2 text-xs text-[#A9B8CC] hover:text-white"
+                className="px-4 py-2 text-xs text-[#A1A1B8] hover:text-white"
               >
                 Cancel
               </button>
               <button
                 disabled={isSubmitting}
                 onClick={executeConfirmedAction}
-                className="px-4 py-2 rounded-xl bg-rose-700 hover:bg-rose-600 text-white text-xs font-semibold"
+                className="px-4 py-2 rounded-xl bg-[#BE123C] hover:bg-[#E11D48] text-white text-xs font-semibold"
               >
                 Confirm
               </button>

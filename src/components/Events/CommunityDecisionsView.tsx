@@ -95,31 +95,31 @@ export const CommunityDecisionsView: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in">
       {/* Header Banner */}
-      <div className="relative rounded-2xl overflow-hidden border border-[#1677FF]/30 bg-[#102440]/90 shadow-[0_12px_32px_rgba(2,8,20,0.6)]">
+      <div className="relative rounded-2xl overflow-hidden border border-[#D6A84B]/30 bg-[#141420]/90 shadow-[0_12px_32px_rgba(0,0,0,0.6)]">
         <img
           src={realmCitadelGatheringImg}
           alt="Citadel Council Chamber"
           className="absolute inset-0 w-full h-full object-cover opacity-20"
         />
-        <div className="relative z-10 p-5 sm:p-6 bg-gradient-to-r from-[#061225]/95 via-[#0A1930]/85 to-transparent flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="relative z-10 p-5 sm:p-6 bg-gradient-to-r from-[#090910]/95 via-[#0E0E17]/85 to-transparent flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 text-xs mb-1">
-              <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#00D9FF]">
+              <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#D6A84B]">
                 Aetheria Realm Council
               </span>
-              <span className="text-[#A9B8CC]/40" aria-hidden="true">·</span>
-              <span className="text-[#A9B8CC] tabular-nums">
+              <span className="text-[#A1A1B8]/40" aria-hidden="true">·</span>
+              <span className="text-[#A1A1B8] tabular-nums">
                 {communityDecisionPolls.length} Active Votes
               </span>
             </div>
             <h2 className="text-2xl font-black font-['Cinzel'] text-white">
               COMMUNITY DECISIONS
             </h2>
-            <p className="text-xs sm:text-sm text-[#A9B8CC] max-w-2xl mt-1">
+            <p className="text-xs sm:text-sm text-[#A1A1B8] max-w-2xl mt-1">
               Vote on upcoming community events, weekly raid boss themes, seasonal rewards, and challenge categories. Published decrees are preserved in the council archive.
             </p>
           </div>
-          <div className="flex items-center gap-2 text-xs text-emerald-300/90 bg-[#061225]/85 border border-emerald-500/30 rounded-xl px-3.5 py-2.5 shrink-0">
+          <div className="flex items-center gap-2 text-xs text-[#34D399] bg-[#090910]/85 border border-[#34D399]/30 rounded-xl px-3.5 py-2.5 shrink-0">
             <ShieldCheck className="w-4 h-4 shrink-0" />
             <span>One Verified Ballot Per Player</span>
           </div>
@@ -131,8 +131,8 @@ export const CommunityDecisionsView: React.FC = () => {
           role="status"
           className={`px-4 py-3 rounded-xl border text-xs font-semibold ${
             notice.type === 'success'
-              ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-200'
-              : 'bg-rose-950/60 border-rose-500/40 text-rose-200'
+              ? 'bg-[#34D399]/10 border-[#34D399]/40 text-[#34D399]'
+              : 'bg-[#FB7185]/10 border-[#FB7185]/40 text-[#FB7185]'
           }`}
         >
           {notice.text}
@@ -142,10 +142,10 @@ export const CommunityDecisionsView: React.FC = () => {
       {/* Active Polls */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {communityDecisionPolls.length === 0 ? (
-          <div className="lg:col-span-2 rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 p-8 text-center shadow-[0_12px_32px_rgba(2,8,20,0.6)]">
-            <Scale className="w-8 h-8 text-[#00D9FF]/80 mx-auto mb-2" />
+          <div className="lg:col-span-2 rounded-2xl bg-[#141420]/90 backdrop-blur-md border border-white/10 p-8 text-center shadow-[0_12px_32px_rgba(0,0,0,0.6)]">
+            <Scale className="w-8 h-8 text-[#D6A84B]/80 mx-auto mb-2" />
             <p className="text-sm font-semibold text-white">No Active Council Votes Right Now</p>
-            <p className="text-xs text-[#A9B8CC] mt-1">Check back soon or review published decrees below.</p>
+            <p className="text-xs text-[#A1A1B8] mt-1">Check back soon or review published decrees below.</p>
           </div>
         ) : (
           communityDecisionPolls.map(poll => {
@@ -156,20 +156,20 @@ export const CommunityDecisionsView: React.FC = () => {
             return (
               <div
                 key={poll.id}
-                className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 p-5 flex flex-col justify-between gap-4 shadow-[0_12px_32px_rgba(2,8,20,0.6)]"
+                className="rounded-2xl bg-[#141420]/90 backdrop-blur-md border border-white/10 p-5 flex flex-col justify-between gap-4 shadow-[0_12px_32px_rgba(0,0,0,0.6)]"
               >
                 <div>
                   <div className="flex items-center justify-between gap-3 text-xs mb-2">
-                    <span className="font-['Cinzel'] font-bold text-[#00D9FF] capitalize">
+                    <span className="font-['Cinzel'] font-bold text-[#D6A84B] capitalize">
                       {poll.category.replace('_', ' ')} · {poll.pollType === 'multiple_choice' ? `Up to ${poll.maxChoices}` : 'Single Choice'}
                     </span>
-                    <span className="flex items-center gap-1 text-[#A9B8CC] tabular-nums shrink-0">
+                    <span className="flex items-center gap-1 text-[#A1A1B8] tabular-nums shrink-0">
                       <Clock className="w-3.5 h-3.5" />
                       {formatCountdown(poll.closesAt)}
                     </span>
                   </div>
                   <h3 className="text-lg font-bold font-['Cinzel'] text-white">{poll.title}</h3>
-                  <p className="text-xs text-[#A9B8CC] mt-1">{poll.description}</p>
+                  <p className="text-xs text-[#A1A1B8] mt-1">{poll.description}</p>
 
                   <div className="space-y-2.5 mt-4">
                     {poll.options.map(opt => {
@@ -182,32 +182,32 @@ export const CommunityDecisionsView: React.FC = () => {
                           onClick={() => toggleOption(poll.id, opt.id, poll.pollType, poll.maxChoices)}
                           className={`w-full text-left rounded-xl border p-3 transition-all ${
                             selected
-                              ? 'bg-[#0A1930] border-[#00D9FF] shadow-[0_0_12px_rgba(0,217,255,0.18)]'
-                              : 'bg-[#061225] border-[#1677FF]/20 hover:border-[#00D9FF]/45'
+                              ? 'bg-[#1B1B2B] border-[#8B5CF6] shadow-[0_0_12px_rgba(139,92,246,0.22)]'
+                              : 'bg-[#0E0E17] border-white/10 hover:border-[#8B5CF6]/45'
                           }`}
                         >
                           <div className="flex items-center justify-between gap-2 text-xs font-semibold text-white">
                             <span className="flex items-center gap-2">
                               <CheckCircle2
                                 className={`w-4 h-4 shrink-0 ${
-                                  selected ? 'text-[#00D9FF]' : 'text-[#A9B8CC]/35'
+                                  selected ? 'text-[#8B5CF6]' : 'text-[#A1A1B8]/35'
                                 }`}
                               />
                               {opt.label}
                             </span>
                             {poll.showLiveResults && (
-                              <span className="font-mono text-[11px] text-[#00D9FF] tabular-nums">
+                              <span className="font-mono text-[11px] text-[#D6A84B] tabular-nums">
                                 {pct}% ({opt.voteCount})
                               </span>
                             )}
                           </div>
                           {opt.description && (
-                            <p className="text-[11px] text-[#A9B8CC] mt-1 pl-6">{opt.description}</p>
+                            <p className="text-[11px] text-[#A1A1B8] mt-1 pl-6">{opt.description}</p>
                           )}
                           {poll.showLiveResults && (
-                            <div className="mt-2 ml-6 h-1.5 rounded-full bg-[#0A1930] overflow-hidden">
+                            <div className="mt-2 ml-6 h-1.5 rounded-full bg-[#090910] overflow-hidden">
                               <div
-                                className="h-full bg-gradient-to-r from-[#1677FF] to-[#00D9FF]"
+                                className="h-full bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6]"
                                 style={{ width: `${pct}%` }}
                               />
                             </div>
@@ -218,8 +218,8 @@ export const CommunityDecisionsView: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between gap-3 pt-3 border-t border-[#1677FF]/20">
-                  <div className="flex items-center gap-3 text-xs text-[#A9B8CC] tabular-nums">
+                <div className="flex items-center justify-between gap-3 pt-3 border-t border-white/10">
+                  <div className="flex items-center gap-3 text-xs text-[#A1A1B8] tabular-nums">
                     <span>{poll.totalVotes} {poll.totalVotes === 1 ? 'vote' : 'votes'}</span>
                     <button
                       type="button"
@@ -227,7 +227,7 @@ export const CommunityDecisionsView: React.FC = () => {
                         setReportingPollId(poll.id);
                         setReportReason('');
                       }}
-                      className="flex items-center gap-1 text-[#A9B8CC]/75 hover:text-rose-300 transition-colors"
+                      className="flex items-center gap-1 text-[#A1A1B8]/75 hover:text-[#FB7185] transition-colors"
                     >
                       <Flag className="w-3.5 h-3.5" />
                       <span>Report</span>
@@ -238,7 +238,7 @@ export const CommunityDecisionsView: React.FC = () => {
                     type="button"
                     disabled={isBusy}
                     onClick={() => void handleSubmitVote(poll.id, poll.mySelectedOptionIds)}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white shadow-[0_0_16px_rgba(22,119,255,0.35)] text-xs font-bold whitespace-nowrap shrink-0 transition-all"
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] hover:from-[#7C3AED] hover:to-[#A78BFA] text-white shadow-[0_0_16px_rgba(139,92,246,0.35)] text-xs font-bold whitespace-nowrap shrink-0 transition-all"
                   >
                     <Vote className="w-4 h-4 shrink-0" />
                     <span>
@@ -257,25 +257,25 @@ export const CommunityDecisionsView: React.FC = () => {
       </div>
 
       {/* Published Archive */}
-      <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 p-5 shadow-[0_12px_32px_rgba(2,8,20,0.6)]">
-        <div className="flex items-center gap-2 text-xs font-['Cinzel'] font-bold uppercase tracking-wider text-[#00D9FF] mb-3">
+      <div className="rounded-2xl bg-[#141420]/90 backdrop-blur-md border border-white/10 p-5 shadow-[0_12px_32px_rgba(0,0,0,0.6)]">
+        <div className="flex items-center gap-2 text-xs font-['Cinzel'] font-bold uppercase tracking-wider text-[#D6A84B] mb-3">
           <Archive className="w-4 h-4" />
           <span>Published Council Archive</span>
         </div>
 
         {communityDecisionArchive.length === 0 ? (
-          <p className="text-xs text-[#A9B8CC]">No archived council decrees yet.</p>
+          <p className="text-xs text-[#A1A1B8]">No archived council decrees yet.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {communityDecisionArchive.map(item => (
-              <div key={item.id} className="rounded-xl bg-[#061225] border border-[#1677FF]/25 p-4">
-                <div className="flex items-center justify-between gap-2 text-[11px] text-[#A9B8CC]">
+              <div key={item.id} className="rounded-xl bg-[#0E0E17] border border-white/10 p-4">
+                <div className="flex items-center justify-between gap-2 text-[11px] text-[#A1A1B8]">
                   <span className="capitalize">{item.category.replace('_', ' ')}</span>
                   <span className="tabular-nums">{item.totalVotes} Total Votes</span>
                 </div>
                 <h4 className="text-sm font-bold text-white mt-1">{item.title}</h4>
                 {item.publishedOutcome && (
-                  <p className="text-xs text-emerald-300 mt-1.5">
+                  <p className="text-xs text-[#34D399] mt-1.5">
                     Enacted Outcome: {item.publishedOutcome}
                   </p>
                 )}
@@ -287,15 +287,15 @@ export const CommunityDecisionsView: React.FC = () => {
 
       {/* Report Modal */}
       {reportingPollId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#061225]/85 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#090910]/85 backdrop-blur-sm p-4">
           <form
             onSubmit={handleSubmitReport}
-            className="w-full max-w-md rounded-2xl bg-[#102440] border border-[#00D9FF]/40 p-5 space-y-4 shadow-[0_20px_50px_rgba(2,8,20,0.8)]"
+            className="w-full max-w-md rounded-2xl bg-[#141420] border border-[#FB7185]/40 p-5 space-y-4 shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
           >
             <h3 className="text-base font-bold font-['Cinzel'] text-white">
               Report Poll Concern
             </h3>
-            <p className="text-xs text-[#A9B8CC]">
+            <p className="text-xs text-[#A1A1B8]">
               Describe why this poll requires council moderator review.
             </p>
             <textarea
@@ -303,19 +303,19 @@ export const CommunityDecisionsView: React.FC = () => {
               value={reportReason}
               onChange={e => setReportReason(e.target.value)}
               placeholder="Explain concern..."
-              className="w-full rounded-xl bg-[#061225] border border-[#1677FF]/35 p-3 text-xs text-white placeholder-[#A9B8CC]/50 focus:outline-none focus:border-[#00D9FF]"
+              className="w-full rounded-xl bg-[#0E0E17] border border-white/15 p-3 text-xs text-white placeholder-[#A1A1B8]/50 focus:outline-none focus:border-[#FB7185]"
             />
             <div className="flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setReportingPollId(null)}
-                className="px-3.5 py-2 rounded-lg bg-[#0A1930] hover:bg-[#16325C] border border-[#1677FF]/30 text-xs text-[#A9B8CC] hover:text-white transition-colors"
+                className="px-3.5 py-2 rounded-lg bg-[#0E0E17] hover:bg-[#1B1B2B] border border-white/15 text-xs text-[#A1A1B8] hover:text-white transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition-colors"
+                className="px-4 py-2 rounded-lg bg-[#BE123C] hover:bg-[#E11D48] text-white text-xs font-bold transition-colors"
               >
                 Submit Report
               </button>

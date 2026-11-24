@@ -580,6 +580,25 @@ export const fetchCollectionCompletionServer = async (
   }
 };
 
+export const syncCollectionRelicsServer = async (
+  userId: string,
+  relicIds: string[]
+): Promise<{ ok: boolean; state?: CollectionCompletionResponse }> => {
+  try {
+    const headers = await getLifequestAuthHeaders(userId, true);
+    const res = await fetch('/api/collection/sync-relics', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ relicIds }),
+    });
+    const parsed = await safeJson(res);
+    if (!parsed.ok) return { ok: false };
+    return { ok: true, state: parsed.data.state };
+  } catch {
+    return { ok: false };
+  }
+};
+
 export const claimCollectionMilestoneServer = async (
   userId: string,
   milestoneId: string

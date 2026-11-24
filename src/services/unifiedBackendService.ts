@@ -42,7 +42,7 @@ import {
   getSkillNodeById,
   type VerifiedActivityMetadata,
 } from '../data/skillTreeData';
-import { getRpgAvatarForClass } from '../assets/images';
+import { characterWarriorAvatarImg, getRpgAvatarForClass } from '../assets/images';
 
 export const resolveSocialRpgAvatar = (
   avatarUrl: string | null | undefined,
@@ -306,6 +306,7 @@ export const createHabitServer = (params: {
   frequency: HabitFrequency;
   iconName: string;
   playerXpReward: number;
+  forgeXpReward: number;
   goldReward?: number;
 }) =>
   callRpc<any>('rpc_create_habit', {
@@ -314,6 +315,7 @@ export const createHabitServer = (params: {
     p_frequency: params.frequency,
     p_icon_name: params.iconName,
     p_player_xp: params.playerXpReward,
+    p_forge_xp: params.forgeXpReward,
     p_gold: params.goldReward ?? 15,
   });
 
@@ -386,6 +388,36 @@ export const purchaseShopItemServer = (itemId: string, idempotencyKey = createId
     p_idempotency_key: idempotencyKey,
   });
 
+export const equipWeaponServer = (weaponId: string) =>
+  callRpc<any>('rpc_equip_weapon', { p_weapon_id: weaponId });
+
+export const upgradeWeaponServer = (weaponId: string) =>
+  callRpc<any>('rpc_upgrade_weapon', { p_weapon_id: weaponId });
+
+export const trainWeaponMasteryServer = (weaponId: string, gainedXP = 40) =>
+  callRpc<any>('rpc_train_weapon_mastery', { p_weapon_id: weaponId, p_gained_xp: gainedXP });
+
+export const evolveWeaponServer = (weaponId: string) =>
+  callRpc<any>('rpc_evolve_weapon', { p_weapon_id: weaponId });
+
+export const unlockProgressionWeaponServer = (
+  weaponId: string,
+  idempotencyKey = createIdempotencyKey()
+) =>
+  callRpc<any>('rpc_unlock_progression_weapon', {
+    p_weapon_id: weaponId,
+    p_idempotency_key: idempotencyKey,
+  });
+
+export const ascendWeaponRarityServer = (
+  weaponId: string,
+  idempotencyKey = createIdempotencyKey()
+) =>
+  callRpc<any>('rpc_ascend_weapon_rarity', {
+    p_weapon_id: weaponId,
+    p_idempotency_key: idempotencyKey,
+  });
+
 export const toggleBuffServer = (buffId: string) =>
   callRpc<any>('rpc_toggle_buff', { p_buff_id: buffId });
 
@@ -421,12 +453,14 @@ export const resetBossEncounterServer = (kingdomId: string) =>
 export const claimStoryRewardServer = (params: {
   rewardKey: string;
   playerXp: number;
+  forgeXp: number;
   gold: number;
   description: string;
 }) =>
   callRpc<any>('rpc_claim_story_reward', {
     p_reward_key: params.rewardKey,
     p_player_xp: params.playerXp,
+    p_forge_xp: params.forgeXp,
     p_gold: params.gold,
     p_description: params.description,
   });
@@ -475,6 +509,7 @@ export const fetchShopCatalogServer = async (): Promise<RpcResult<ShopItem[]>> =
       description: row.description,
       rarity: row.rarity,
       priceGold: row.price_gold,
+      priceForgeXp: row.price_forge_xp,
       requiredLevel: row.required_level,
       metadata: row.metadata || {},
     })),
@@ -1088,6 +1123,7 @@ const mapDynamicQuestRow = (row: any): DynamicDailyQuest => ({
   unitLabel: String(row.unit_label || row.unitLabel || 'step'),
   estimatedMinutes: Math.max(5, Number(row.estimated_minutes || row.estimatedMinutes || 15)),
   playerXpReward: Number(row.player_xp_reward || row.playerXpReward || 30),
+  forgeXpReward: Number(row.forge_xp_reward || row.forgeXpReward || 20),
   goldReward: Number(row.gold_reward || row.goldReward || 25),
   isSpecialChallenge: Boolean(row.is_special_challenge ?? row.isSpecialChallenge),
   personalizationReason: String(row.personalization_reason || row.personalizationReason || ''),

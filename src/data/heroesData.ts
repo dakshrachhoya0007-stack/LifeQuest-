@@ -30,7 +30,7 @@ export const RPG_ATTRIBUTE_META: Array<{
     shortLabel: 'INT',
     description: 'Tactical clarity and arcane perception across corrupted realms.',
     realLifeSource: 'Mindfulness, study habits & Aether Vision meal/form scans',
-    accentHex: '#00D9FF',
+    accentHex: '#38BDF8',
   },
   {
     key: 'vitality',
@@ -90,8 +90,8 @@ export const PLAYABLE_HEROES: PlayableHeroDefinition[] = [
       'Dominates calisthenics, pushup/squat sets, and frontline boss combat',
       'Heavy-impact hand and leg strikes scale directly with bodyweight conditioning',
     ],
-    accentHex: '#1677FF',
-    secondaryHex: '#00D9FF',
+    accentHex: '#8B5CF6',
+    secondaryHex: '#D6A84B',
     introFlourishLabel: 'Iron-Knuckle Salute',
   },
   {
@@ -125,8 +125,8 @@ export const PLAYABLE_HEROES: PlayableHeroDefinition[] = [
       'Excels at high-cadence interval training, mobility, and daily streaks',
       'High critical kick precision against Void Sovereign phases',
     ],
-    accentHex: '#00D9FF',
-    secondaryHex: '#102440',
+    accentHex: '#8B5CF6',
+    secondaryHex: '#141420',
     introFlourishLabel: 'Swift Stance Cross Flourish',
   },
   {
@@ -160,8 +160,8 @@ export const PLAYABLE_HEROES: PlayableHeroDefinition[] = [
       'Scales smoothly with mindfulness, study, and nutrition logging',
       'Amplified elemental hand-and-leg technique power',
     ],
-    accentHex: '#00D9FF',
-    secondaryHex: '#1677FF',
+    accentHex: '#38BDF8',
+    secondaryHex: '#8B5CF6',
     introFlourishLabel: 'Astral Open-Palm Invocation',
   },
   {

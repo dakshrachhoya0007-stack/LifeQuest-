@@ -114,25 +114,25 @@ export const WorkoutPartiesView: React.FC = () => {
         {/* Create Party */}
         <form
           onSubmit={handleCreate}
-          className="lg:col-span-7 rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 p-5 space-y-4 shadow-[0_12px_32px_rgba(2,8,20,0.6)]"
+          className="lg:col-span-7 rounded-2xl bg-[#141420]/95 backdrop-blur-md border border-white/10 p-5 space-y-4 shadow-[0_12px_32px_rgba(0,0,0,0.6)]"
         >
           <div>
             <h2 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-              <Users className="w-4 h-4 text-[#00D9FF]" />
+              <Users className="w-4 h-4 text-[#34D399]" />
               Host Real-Time Workout Party
             </h2>
-            <p className="text-xs text-[#A9B8CC] mt-0.5">
+            <p className="text-xs text-[#A1A1B8] mt-0.5">
               Train alongside companions in real time. Verified completions automatically award mutual Friendship XP.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs text-[#A9B8CC] mb-1">Challenge Preset</label>
+              <label className="block text-xs text-[#A1A1B8] mb-1">Challenge Preset</label>
               <select
                 value={challengeId}
                 onChange={e => setChallengeId(e.target.value)}
-                className="w-full rounded-xl bg-[#061225] border border-[#1677FF]/35 focus:border-[#00D9FF] focus:outline-none px-3 py-2 text-xs text-white"
+                className="w-full rounded-xl bg-[#090910] border border-white/15 focus:border-[#34D399] focus:outline-none px-3 py-2 text-xs text-white"
               >
                 {WORKOUT_PARTY_TEMPLATES.map(tpl => (
                   <option key={tpl.id} value={tpl.id}>
@@ -142,11 +142,11 @@ export const WorkoutPartiesView: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="block text-xs text-[#A9B8CC] mb-1">Room Visibility</label>
+              <label className="block text-xs text-[#A1A1B8] mb-1">Room Visibility</label>
               <select
                 value={visibility}
                 onChange={e => setVisibility(e.target.value as 'friends' | 'private' | 'public')}
-                className="w-full rounded-xl bg-[#061225] border border-[#1677FF]/35 focus:border-[#00D9FF] focus:outline-none px-3 py-2 text-xs text-white"
+                className="w-full rounded-xl bg-[#090910] border border-white/15 focus:border-[#34D399] focus:outline-none px-3 py-2 text-xs text-white"
               >
                 <option value="friends">Friends</option>
                 <option value="private">Invite Code Only</option>
@@ -162,12 +162,12 @@ export const WorkoutPartiesView: React.FC = () => {
               onChange={e => setPartyTitle(e.target.value)}
               maxLength={60}
               placeholder="Optional room title (e.g. Morning Vanguard Session)"
-              className="flex-1 rounded-xl bg-[#061225] border border-[#1677FF]/35 focus:border-[#00D9FF] focus:outline-none px-3 py-2 text-xs text-white placeholder-[#A9B8CC]/50"
+              className="flex-1 rounded-xl bg-[#090910] border border-white/15 focus:border-[#34D399] focus:outline-none px-3 py-2 text-xs text-white placeholder-[#A1A1B8]/50"
             />
             <button
               type="submit"
               disabled={busyId === 'create-party'}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-[0_0_14px_rgba(22,119,255,0.35)] whitespace-nowrap shrink-0 cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] hover:from-[#7C3AED] hover:to-[#A78BFA] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-[0_0_14px_rgba(139,92,246,0.35)] whitespace-nowrap shrink-0 cursor-pointer transition-all"
             >
               <Plus className="w-3.5 h-3.5" />
               Create Party
@@ -178,11 +178,11 @@ export const WorkoutPartiesView: React.FC = () => {
         {/* Join via Room Code */}
         <form
           onSubmit={handleJoinCode}
-          className="lg:col-span-5 rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 p-5 flex flex-col justify-between gap-4 shadow-[0_12px_32px_rgba(2,8,20,0.6)]"
+          className="lg:col-span-5 rounded-2xl bg-[#141420]/95 backdrop-blur-md border border-white/10 p-5 flex flex-col justify-between gap-4 shadow-[0_12px_32px_rgba(0,0,0,0.6)]"
         >
           <div>
             <h3 className="font-['Cinzel'] font-bold text-base text-white">Join by Room Code</h3>
-            <p className="text-xs text-[#A9B8CC] mt-0.5">
+            <p className="text-xs text-[#A1A1B8] mt-0.5">
               Enter a 6-character code shared by another adventurer to join their lobby.
             </p>
           </div>
@@ -193,12 +193,12 @@ export const WorkoutPartiesView: React.FC = () => {
               onChange={e => setJoinCode(e.target.value.toUpperCase())}
               maxLength={12}
               placeholder="e.g. AQ74KP"
-              className="flex-1 rounded-xl bg-[#061225] border border-[#1677FF]/35 focus:border-[#00D9FF] focus:outline-none px-3 py-2 text-xs font-mono uppercase text-white placeholder-[#A9B8CC]/50"
+              className="flex-1 rounded-xl bg-[#090910] border border-white/15 focus:border-[#34D399] focus:outline-none px-3 py-2 text-xs font-mono uppercase text-white placeholder-[#A1A1B8]/50"
             />
             <button
               type="submit"
               disabled={busyId === 'join-code'}
-              className="px-4 py-2 rounded-xl bg-[#0A1930] hover:bg-[#16325C] border border-[#1677FF]/45 hover:border-[#00D9FF]/60 text-xs font-bold text-[#00D9FF] hover:text-white whitespace-nowrap shrink-0 transition-all cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-[#0E0E17] hover:bg-[#1B1B2B] border border-[#34D399]/40 hover:border-[#34D399] text-xs font-bold text-[#34D399] hover:text-white whitespace-nowrap shrink-0 transition-all cursor-pointer"
             >
               Join Room
             </button>
@@ -210,8 +210,8 @@ export const WorkoutPartiesView: React.FC = () => {
         <div
           className={`rounded-xl px-4 py-3 text-xs border ${
             notice.type === 'success'
-              ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-200'
-              : 'bg-rose-950/60 border-rose-500/40 text-rose-200'
+              ? 'bg-[#34D399]/10 border-[#34D399]/35 text-[#34D399]'
+              : 'bg-[#FB7185]/10 border-[#FB7185]/35 text-[#FB7185]'
           }`}
         >
           {notice.text}
@@ -221,11 +221,11 @@ export const WorkoutPartiesView: React.FC = () => {
       {/* Active Parties */}
       <div className="space-y-4">
         {partiesLoading && workoutParties.length === 0 ? (
-          <div className="rounded-2xl bg-[#102440]/90 border border-[#1677FF]/30 p-8 text-center text-xs text-[#A9B8CC]">
+          <div className="rounded-2xl bg-[#141420]/95 border border-white/10 p-8 text-center text-xs text-[#A1A1B8]">
             Loading live workout parties...
           </div>
         ) : workoutParties.length === 0 ? (
-          <div className="rounded-2xl bg-[#102440]/90 border border-[#1677FF]/30 p-8 text-center text-xs text-[#A9B8CC]">
+          <div className="rounded-2xl bg-[#141420]/95 border border-white/10 p-8 text-center text-xs text-[#A1A1B8]">
             No active workout parties. Host one above or enter a room code.
           </div>
         ) : (
@@ -237,16 +237,16 @@ export const WorkoutPartiesView: React.FC = () => {
             return (
               <div
                 key={party.id}
-                className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/35 p-5 space-y-5 shadow-[0_12px_32px_rgba(2,8,20,0.55)]"
+                className="rounded-2xl bg-[#141420]/95 backdrop-blur-md border border-[#34D399]/25 p-5 space-y-5 shadow-[0_12px_32px_rgba(0,0,0,0.55)]"
               >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#1677FF]/25">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
                   <div>
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-[#00D9FF]">
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-[#34D399]">
                       <span className="font-mono font-bold">Room {party.roomCode}</span>
-                      <span className="text-[#A9B8CC]/40" aria-hidden="true">·</span>
+                      <span className="text-[#A1A1B8]/40" aria-hidden="true">·</span>
                       <span className="capitalize">{party.status}</span>
-                      <span className="text-[#A9B8CC]/40" aria-hidden="true">·</span>
-                      <span>Host: {party.hostUsername}</span>
+                      <span className="text-[#A1A1B8]/40" aria-hidden="true">·</span>
+                      <span className="text-[#D6A84B]">Host: {party.hostUsername}</span>
                     </div>
                     <h3 className="font-['Cinzel'] font-bold text-lg text-white mt-0.5">
                       {party.title} — {party.challengeName}
@@ -258,7 +258,7 @@ export const WorkoutPartiesView: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => void startWorkoutParty(party.id)}
-                        className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+                        className="px-3.5 py-1.5 rounded-xl bg-[#34D399] hover:bg-[#6EE7B7] text-[#090910] text-xs font-bold flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer transition-colors"
                       >
                         <Play className="w-3.5 h-3.5" />
                         Start Session
@@ -268,7 +268,7 @@ export const WorkoutPartiesView: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => void saveWorkoutPartySummary(party.id)}
-                        className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer"
+                        className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] hover:from-[#7C3AED] hover:to-[#A78BFA] text-white text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer transition-all"
                       >
                         Save Summary
                       </button>
@@ -276,7 +276,7 @@ export const WorkoutPartiesView: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => void leaveWorkoutParty(party.id)}
-                      className="px-3 py-1.5 rounded-xl bg-[#0A1930] hover:bg-rose-950/60 border border-[#1677FF]/30 hover:border-rose-500/45 text-xs text-[#A9B8CC] hover:text-rose-200 flex items-center gap-1 whitespace-nowrap shrink-0 cursor-pointer"
+                      className="px-3 py-1.5 rounded-xl bg-[#0E0E17] hover:bg-[#FB7185]/15 border border-white/15 hover:border-[#FB7185]/50 text-xs text-[#A1A1B8] hover:text-[#FB7185] flex items-center gap-1 whitespace-nowrap shrink-0 cursor-pointer transition-colors"
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       Leave
@@ -287,14 +287,14 @@ export const WorkoutPartiesView: React.FC = () => {
                 {/* Combined Target Progress */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs tabular-nums">
-                    <span className="text-[#A9B8CC]">Group Goal Progress</span>
-                    <span className="font-mono font-bold text-[#00D9FF]">
+                    <span className="text-[#A1A1B8]">Group Goal Progress</span>
+                    <span className="font-mono font-bold text-[#34D399]">
                       {totalProgress} / {party.targetValue} {party.targetUnit} ({pct}%)
                     </span>
                   </div>
-                  <div className="h-2.5 rounded-full bg-[#061225] border border-[#1677FF]/30 overflow-hidden">
+                  <div className="h-2.5 rounded-full bg-[#090910] border border-white/10 overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-[#1677FF] to-[#00D9FF]"
+                      className="h-full bg-gradient-to-r from-[#059669] to-[#34D399]"
                       style={{ width: `${pct}%` }}
                     />
                   </div>
@@ -303,14 +303,14 @@ export const WorkoutPartiesView: React.FC = () => {
                 {/* Party Members + Invite */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2.5">
-                    <h4 className="text-xs font-semibold text-[#00D9FF]">
+                    <h4 className="text-xs font-semibold text-[#34D399]">
                       Party Roster ({party.members.length})
                     </h4>
                     <div className="space-y-2">
                       {party.members.map(m => (
                         <div
                           key={m.userId}
-                          className="rounded-xl bg-[#0A1930] border border-[#1677FF]/25 p-3 flex items-center justify-between gap-3"
+                          className="rounded-xl bg-[#0E0E17] border border-white/10 p-3 flex items-center justify-between gap-3"
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
                             <Character2DAvatar
@@ -321,17 +321,17 @@ export const WorkoutPartiesView: React.FC = () => {
                             />
                             <div className="min-w-0">
                               <p className="text-xs font-bold text-white truncate">{m.username}</p>
-                              <p className="text-[11px] text-[#A9B8CC] capitalize">
+                              <p className="text-[11px] text-[#A1A1B8] capitalize">
                                 Lv.{m.level} · {m.connectionStatus}
                               </p>
                             </div>
                           </div>
                           <div className="text-right font-mono text-xs tabular-nums shrink-0">
-                            <span className="text-[#00D9FF] font-bold">
+                            <span className="text-[#34D399] font-bold">
                               {m.progressValue} {party.targetUnit}
                             </span>
                             {m.completed && (
-                              <span className="block text-[10px] text-emerald-300">Goal Met</span>
+                              <span className="block text-[10px] text-[#D6A84B]">Goal Met</span>
                             )}
                           </div>
                         </div>
@@ -345,7 +345,7 @@ export const WorkoutPartiesView: React.FC = () => {
                           onChange={e =>
                             setInviteFriendMap(prev => ({ ...prev, [party.id]: e.target.value }))
                           }
-                          className="flex-1 rounded-xl bg-[#061225] border border-[#1677FF]/35 px-3 py-1.5 text-xs text-white"
+                          className="flex-1 rounded-xl bg-[#090910] border border-white/15 px-3 py-1.5 text-xs text-white"
                         >
                           <option value="">Invite a friend...</option>
                           {acceptedFriends.map(f => (
@@ -360,9 +360,9 @@ export const WorkoutPartiesView: React.FC = () => {
                             const targetId = inviteFriendMap[party.id];
                             if (targetId) void inviteToWorkoutParty(party.id, targetId);
                           }}
-                          className="px-3 py-1.5 rounded-xl bg-[#0A1930] hover:bg-[#16325C] border border-[#1677FF]/40 hover:border-[#00D9FF]/50 text-xs font-semibold text-white flex items-center gap-1 whitespace-nowrap shrink-0 cursor-pointer"
+                          className="px-3 py-1.5 rounded-xl bg-[#0E0E17] hover:bg-[#1B1B2B] border border-white/15 hover:border-[#8B5CF6]/50 text-xs font-semibold text-white flex items-center gap-1 whitespace-nowrap shrink-0 cursor-pointer transition-colors"
                         >
-                          <UserPlus className="w-3.5 h-3.5 text-[#00D9FF]" />
+                          <UserPlus className="w-3.5 h-3.5 text-[#8B5CF6]" />
                           Invite
                         </button>
                       </div>
@@ -371,13 +371,13 @@ export const WorkoutPartiesView: React.FC = () => {
 
                   {/* Verified Workout Submission & Party Chat */}
                   <div className="space-y-3">
-                    <div className="rounded-xl bg-[#0A1930] border border-[#1677FF]/25 p-3.5 space-y-2.5">
+                    <div className="rounded-xl bg-[#0E0E17] border border-white/10 p-3.5 space-y-2.5">
                       <h4 className="text-xs font-semibold text-white flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#34D399]" />
                         Submit Verified Workout Session
                       </h4>
                       {fitnessSessions.length === 0 ? (
-                        <p className="text-xs text-[#A9B8CC]">
+                        <p className="text-xs text-[#A1A1B8]">
                           Complete a workout in Fitness Log to submit verified progress here.
                         </p>
                       ) : (
@@ -385,11 +385,11 @@ export const WorkoutPartiesView: React.FC = () => {
                           <select
                             value={selectedSessionId}
                             onChange={e => setSelectedSessionId(e.target.value)}
-                            className="flex-1 rounded-lg bg-[#061225] border border-[#1677FF]/35 px-2.5 py-1.5 text-xs text-white"
+                            className="flex-1 rounded-lg bg-[#090910] border border-white/15 px-2.5 py-1.5 text-xs text-white"
                           >
                             {fitnessSessions.slice(0, 8).map(s => (
                               <option key={s.id} value={s.id}>
-                                {s.exerciseName} · {s.durationMinutes}m
+                                {s.exerciseName || s.exerciseType} · {s.durationMinutes}m
                               </option>
                             ))}
                           </select>
@@ -397,7 +397,7 @@ export const WorkoutPartiesView: React.FC = () => {
                             type="button"
                             disabled={busyId === `submit-${party.id}`}
                             onClick={() => void handleLogVerifiedProgress(party.id)}
-                            className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white text-xs font-bold whitespace-nowrap shrink-0 shadow-[0_0_12px_rgba(22,119,255,0.3)] cursor-pointer"
+                            className="px-3 py-1.5 rounded-lg bg-[#34D399] hover:bg-[#6EE7B7] text-[#090910] text-xs font-bold whitespace-nowrap shrink-0 shadow-[0_0_12px_rgba(52,211,153,0.3)] cursor-pointer transition-colors"
                           >
                             Submit Verified
                           </button>
@@ -405,16 +405,16 @@ export const WorkoutPartiesView: React.FC = () => {
                       )}
                     </div>
 
-                    <div className="rounded-xl bg-[#0A1930] border border-[#1677FF]/25 p-3.5 space-y-2">
+                    <div className="rounded-xl bg-[#0E0E17] border border-white/10 p-3.5 space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-semibold text-[#A9B8CC]">Party Chat</span>
+                        <span className="text-xs font-semibold text-[#A1A1B8]">Party Chat</span>
                         <div className="flex gap-1">
                           {['🔥', '💪', '⚔️'].map(emoji => (
                             <button
                               key={emoji}
                               type="button"
                               onClick={() => void sendWorkoutPartyMessage(party.id, emoji, 'reaction')}
-                              className="px-2 py-0.5 rounded bg-[#061225] hover:bg-[#16325C] border border-[#1677FF]/25 text-xs cursor-pointer"
+                              className="px-2 py-0.5 rounded bg-[#090910] hover:bg-[#1B1B2B] border border-white/10 text-xs cursor-pointer transition-colors"
                             >
                               {emoji}
                             </button>
@@ -424,8 +424,8 @@ export const WorkoutPartiesView: React.FC = () => {
                       <div className="max-h-28 overflow-y-auto space-y-1 text-xs">
                         {party.messages.slice(-8).map(msg => (
                           <div key={msg.id}>
-                            <span className="font-semibold text-[#00D9FF]">{msg.senderUsername}: </span>
-                            <span className="text-[#A9B8CC]">{msg.content}</span>
+                            <span className="font-semibold text-[#D6A84B]">{msg.senderUsername}: </span>
+                            <span className="text-[#A1A1B8]">{msg.content}</span>
                           </div>
                         ))}
                       </div>
@@ -437,7 +437,7 @@ export const WorkoutPartiesView: React.FC = () => {
                             setChatDrafts(prev => ({ ...prev, [party.id]: e.target.value }))
                           }
                           placeholder="Encourage the party..."
-                          className="flex-1 rounded-lg bg-[#061225] border border-[#1677FF]/35 px-2.5 py-1.5 text-xs text-white placeholder-[#A9B8CC]/50 focus:outline-none focus:border-[#00D9FF]"
+                          className="flex-1 rounded-lg bg-[#090910] border border-white/15 px-2.5 py-1.5 text-xs text-white placeholder-[#A1A1B8]/50 focus:outline-none focus:border-[#8B5CF6]"
                         />
                         <button
                           type="button"
@@ -448,7 +448,7 @@ export const WorkoutPartiesView: React.FC = () => {
                             setChatDrafts(prev => ({ ...prev, [party.id]: '' }));
                           }}
                           aria-label="Send party message"
-                          className="px-3 py-1.5 rounded-lg bg-[#061225] hover:bg-[#16325C] border border-[#1677FF]/40 text-[#00D9FF] text-xs font-semibold cursor-pointer"
+                          className="px-3 py-1.5 rounded-lg bg-[#090910] hover:bg-[#1B1B2B] border border-white/15 text-[#8B5CF6] text-xs font-semibold cursor-pointer transition-colors"
                         >
                           <Send className="w-3.5 h-3.5" />
                         </button>
@@ -464,16 +464,16 @@ export const WorkoutPartiesView: React.FC = () => {
 
       {/* Past Party History */}
       {workoutPartyHistory.length > 0 && (
-        <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 p-5 space-y-3">
+        <div className="rounded-2xl bg-[#141420]/95 backdrop-blur-md border border-white/10 p-5 space-y-3">
           <h3 className="font-['Cinzel'] font-bold text-sm text-white flex items-center gap-2">
-            <History className="w-4 h-4 text-[#00D9FF]" />
+            <History className="w-4 h-4 text-[#D6A84B]" />
             Completed Workout Party Archive
           </h3>
-          <div className="divide-y divide-[#1677FF]/20 text-xs">
+          <div className="divide-y divide-white/10 text-xs">
             {workoutPartyHistory.slice(0, 8).map(h => (
               <div key={h.id} className="py-2 flex items-center justify-between gap-2 tabular-nums">
                 <span className="text-white font-semibold">{h.challengeName}</span>
-                <span className="text-[#A9B8CC] font-mono">
+                <span className="text-[#A1A1B8] font-mono">
                   {h.groupTotal}/{h.targetValue} {h.targetUnit} · Your part: {h.userProgress} ·{' '}
                   {new Date(h.completedAt).toLocaleDateString()}
                 </span>

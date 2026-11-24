@@ -14,15 +14,21 @@ export const RECLAIM_HONOR_OBJECTIVES: Array<{
   targetTab: string;
 }> = [
   {
-    id: 'visit_fitness',
-    label: 'Enter Training Grounds',
-    hint: 'Visit the Fitness Log or Aether Vision to review your bodyweight conditioning.',
-    targetTab: 'fitness',
+    id: 'visit_armory',
+    label: 'Visit the Armoury',
+    hint: 'Enter the Blacksmith Forge & Armory to inspect your war gear.',
+    targetTab: 'armory',
+  },
+  {
+    id: 'inspect_equipment',
+    label: 'Inspect Equipment',
+    hint: 'Select any weapon or armor piece in the Armory or Shop to inspect its stats.',
+    targetTab: 'armory',
   },
   {
     id: 'visit_shop',
     label: 'Visit the Shop',
-    hint: 'Browse the Aetheria Grand Bazaar to see combat elixirs and cosmetics.',
+    hint: 'Browse the Aetheria Grand Bazaar to see weapons, elixirs and relics.',
     targetTab: 'store',
   },
   {
@@ -58,11 +64,11 @@ export const CAMPAIGN_CHAPTERS: CampaignChapterDefinition[] = [
     title: 'Chapter I: The Awakening',
     subtitle: 'Embers Beneath Broken Stone',
     narrationIntro:
-      'Cold starlight filters through the cracked archways of the Inner Keep. Beside a dying brazier, you steady your breathing, plant your feet, and feel the first pulse of Aether stir within your chest.',
+      'Cold starlight filters through the cracked archways of the Inner Keep. Beside a dying brazier, you retrieve a scarred blade and feel the first pulse of Aether stir within your chest.',
     npcSpeaker: 'Elder Thane',
     npcRole: 'Last Keeper of the Citadel Gate',
     npcDialogue:
-      '“You breathe yet, champion. Look upon these ruined flagstones—not with despair, but as foundation stones waiting for steady hands and strong legs. One true habit kindles the first flame.”',
+      '“You breathe yet, champion. Look upon these ruined flagstones—not with despair, but as foundation stones waiting for steady hands. One true habit kindles the first flame.”',
     loreDiscovery:
       'Chronicle Fragment I: When the High Bell fell, six ancient virtues scattered from the throne: Strength, Discipline, Intelligence, Vitality, Agility, and Resilience.',
     missionTitle: 'Kindle the Courtyard Brazier',
@@ -73,6 +79,7 @@ export const CAMPAIGN_CHAPTERS: CampaignChapterDefinition[] = [
     },
     rewards: {
       playerXp: 80,
+      forgeXp: 60,
       gold: 75,
       attributeBoost: { discipline: 2, resilience: 1 },
       restorationPercent: 20,
@@ -82,15 +89,15 @@ export const CAMPAIGN_CHAPTERS: CampaignChapterDefinition[] = [
     id: 'chapter-2-reclaim-honor',
     number: 2,
     title: 'Chapter II: Reclaim Your Honor',
-    subtitle: 'Conditioning Body & Purpose',
+    subtitle: 'Tempering Steel & Purpose',
     narrationIntro:
-      'An oath without action is mere ash. Across the training yard beneath the battlements, the stone ring waits for a fighter disciplined enough to build strength through bodyweight exercise.',
-    npcSpeaker: 'Warden Vaelen',
-    npcRole: 'Master of the Citadel Yard',
+      'An oath without action is mere ash. Inside the cold smithy beneath the battlements, the ancient anvil waits for a warrior disciplined enough to re-strike its iron.',
+    npcSpeaker: 'Forgemaster Vaelen',
+    npcRole: 'Armourer of the Fallen Guard',
     npcDialogue:
-      '“Doubt yields only to sweat and honest cadence. Train your hands and legs, walk the Grand Bazaar, and log your conditioning—then this citadel will recognize its champion once more.”',
+      '“Rust yields only to sweat and honest cadence. Inspect your steel, walk the Grand Bazaar, and train your body—then this citadel will recognize its champion once more.”',
     loreDiscovery:
-      'Chronicle Fragment II: Every stance and strike in Aetheria draws its power from real-life bodyweight reps and unwavering routines.',
+      'Chronicle Fragment II: Every forged blade in Aetheria remembers the cadence of real-life reps and unwavering routines.',
     missionTitle: 'Complete the Honor Trial & First Training',
     missionSummary: 'Complete all steps of the "Reclaim Your Honor" quest and log at least 1 workout session (manual or Aether Vision).',
     requirements: {
@@ -101,6 +108,7 @@ export const CAMPAIGN_CHAPTERS: CampaignChapterDefinition[] = [
     },
     rewards: {
       playerXp: 130,
+      forgeXp: 100,
       gold: 120,
       attributeBoost: { strength: 2, discipline: 2 },
       restorationPercent: 40,
@@ -118,7 +126,7 @@ export const CAMPAIGN_CHAPTERS: CampaignChapterDefinition[] = [
     npcDialogue:
       '“We held the ridge as long as supplies lasted, yet Void blight weakens any body starved of nourishment and rest. Feed your strength, clear the first Void Sovereign, and our banners join yours.”',
     loreDiscovery:
-      'Chronicle Fragment III: The Five Guardians sealed an accord after The Great Fall—whichever survivor restores body and resolve first shall rally all five orders.',
+      'Chronicle Fragment III: The Five Guardians forged an accord after The Great Fall—whichever survivor restores body and resolve first shall rally all five orders.',
     missionTitle: 'Rally the Guardians',
     missionSummary: 'Nourish your strength (log 1+ meal), build Discipline to 10+, and defeat 1 Kingdom Void Boss.',
     requirements: {
@@ -129,6 +137,7 @@ export const CAMPAIGN_CHAPTERS: CampaignChapterDefinition[] = [
     },
     rewards: {
       playerXp: 200,
+      forgeXp: 160,
       gold: 180,
       attributeBoost: { vitality: 2, agility: 2 },
       restorationPercent: 60,
@@ -140,13 +149,13 @@ export const CAMPAIGN_CHAPTERS: CampaignChapterDefinition[] = [
     title: 'Chapter IV: The Kingdom Reborn',
     subtitle: 'Stones Raised by Resolve',
     narrationIntro:
-      'Banner silk snaps once more along the high battlements. Builders return to the plaza, torches blaze along every archway, and the broken tower rises toward clear twilight.',
+      'Banner silk snaps once more along the high battlements. Craftsmen return to the plaza, torches blaze along every archway, and the broken tower rises toward clear twilight.',
     npcSpeaker: 'Commander Darion',
     npcRole: 'Marshal of the Restored Keep',
     npcDialogue:
-      '“Look upward—the masonry binds cleanly again. Three Void strongholds lie shattered, and your six virtues burn with hard-earned endurance.”',
+      '“Look upward—the masonry binds cleanly again. Three Void strongholds lie shattered, and your six virtues burn like forge-iron at white heat.”',
     loreDiscovery:
-      'Chronicle Fragment IV: Aetheria’s walls are bound not by mortar alone, but by daily perseverance verified across training and battle.',
+      'Chronicle Fragment IV: Aetheria’s walls are bound not by mortar alone, but by daily perseverance verified across battle and craft.',
     missionTitle: 'Rebuild the Citadel Battlements',
     missionSummary: 'Reach Level 4+, log 3+ total workouts, and liberate at least 2 Corrupted Kingdoms.',
     requirements: {
@@ -158,6 +167,7 @@ export const CAMPAIGN_CHAPTERS: CampaignChapterDefinition[] = [
     },
     rewards: {
       playerXp: 280,
+      forgeXp: 220,
       gold: 250,
       attributeBoost: { resilience: 3, strength: 2 },
       restorationPercent: 80,
@@ -173,7 +183,7 @@ export const CAMPAIGN_CHAPTERS: CampaignChapterDefinition[] = [
     npcSpeaker: 'Archon Seraphina',
     npcRole: 'Voice of the Crown Archive',
     npcDialogue:
-      '“The Great Fall broke stone and banner, yet failed to extinguish your will. Step onto the sunlit parapet—Aetheria rises whole through everything you built each day.”',
+      '“The Great Fall broke steel and stone, yet failed to extinguish your will. Step onto the sunlit parapet—Aetheria rises whole through everything you forged each day.”',
     loreDiscovery:
       'Final Chronicle: Legends speak not of champions born flawless, but of those who rose from the Fall and turned every single day into honor restored.',
     missionTitle: 'Claim the Sovereign Crown',
@@ -186,6 +196,7 @@ export const CAMPAIGN_CHAPTERS: CampaignChapterDefinition[] = [
     },
     rewards: {
       playerXp: 450,
+      forgeXp: 320,
       gold: 400,
       attributeBoost: { strength: 2, discipline: 2, intelligence: 2, vitality: 2, agility: 2, resilience: 2 },
       restorationPercent: 100,
@@ -207,7 +218,7 @@ export const TUTORIAL_STEPS: TutorialStepDefinition[] = [
   {
     id: 'tut-castle',
     title: 'Welcome to the Castle Courtyard',
-    sectionLabel: '1 / 10 · The Castle',
+    sectionLabel: '1 / 11 · The Castle',
     targetTab: 'dashboard',
     targetSelector: '[data-tutorial-id="castle-courtyard"]',
     description:
@@ -217,37 +228,47 @@ export const TUTORIAL_STEPS: TutorialStepDefinition[] = [
   {
     id: 'tut-character',
     title: 'Hero Level & Six Attributes',
-    sectionLabel: '2 / 10 · Character',
+    sectionLabel: '2 / 11 · Character',
     targetTab: 'character',
     targetSelector: '[data-tutorial-id="character-attributes"]',
     description:
-      'Track your Level alongside six independent RPG attributes—Strength, Discipline, Intelligence, Vitality, Agility, and Resilience—driven by your real-life bodyweight training and habits.',
-    actionTip: 'Inspect your Hands & Legs combat readiness inside your Character Profile.',
+      'Track your Level alongside six independent RPG attributes—Strength, Discipline, Intelligence, Vitality, Agility, and Resilience—driven by your real actions.',
+    actionTip: 'You can also switch between all five 3D heroes at any time without losing progress.',
   },
   {
     id: 'tut-quests',
     title: 'The Quest Board',
-    sectionLabel: '3 / 10 · Quest Board',
+    sectionLabel: '3 / 11 · Quest Board',
     targetTab: 'quests',
     targetSelector: '[data-tutorial-id="quest-board"]',
     description:
-      'Daily, weekly, and special bounties convert consistent wellness milestones into Player XP and Gold.',
+      'Daily, weekly, and special bounties convert consistent wellness milestones into Player XP, Forge XP, and Gold.',
     actionTip: 'Check back after workouts or habit streaks to claim completed bounties.',
   },
   {
     id: 'tut-shop',
-    title: 'The Royal Shop & Cosmetics',
-    sectionLabel: '4 / 10 · Shop',
+    title: 'The Royal Shop & Treasury',
+    sectionLabel: '4 / 11 · Shop',
     targetTab: 'store',
     targetSelector: '[data-tutorial-id="shop-bazaar"]',
     description:
-      'Spend hard-earned Gold on combat elixirs, recovery tonics, and cosmetic style upgrades.',
-    actionTip: 'Visit the Royal Bazaar to fulfill Reclaim Your Honor and stock combat buffs.',
+      'Spend hard-earned Gold and Forge XP on new swords, shields, armor sets, combat elixirs, and Beyond-Mythical progression relics.',
+    actionTip: 'Click Inspect on any piece of gear to preview its stats and fulfill Reclaim Your Honor.',
+  },
+  {
+    id: 'tut-armory',
+    title: 'The Blacksmith Armoury',
+    sectionLabel: '5 / 11 · Armoury',
+    targetTab: 'armory',
+    targetSelector: '[data-tutorial-id="armory-forge"]',
+    description:
+      'Equip weapons and shields, temper steel with Forge XP, hone Mastery abilities, and evolve legendary relics into higher realms.',
+    actionTip: 'Select any owned item here to inspect it, equip it, or temper it at the anvil.',
   },
   {
     id: 'tut-habits',
     title: 'Daily & Weekly Discipline Habits',
-    sectionLabel: '5 / 10 · Habits',
+    sectionLabel: '6 / 11 · Habits',
     targetTab: 'dashboard',
     targetSelector: '[data-tutorial-id="habits-panel"]',
     description:
@@ -257,17 +278,17 @@ export const TUTORIAL_STEPS: TutorialStepDefinition[] = [
   {
     id: 'tut-fitness',
     title: 'Fitness Log & Aether Vision',
-    sectionLabel: '6 / 10 · Fitness',
+    sectionLabel: '7 / 11 · Fitness',
     targetTab: 'fitness',
     targetSelector: '[data-tutorial-id="fitness-tracker"]',
     description:
-      'Log bodyweight strength, cardio, or mobility sessions manually—or use Aether Vision AI motion analysis for verified rep and form XP.',
-    actionTip: 'Every workout builds Strength and Agility for unarmed Hands & Legs Boss Battles.',
+      'Log strength, cardio, or mobility sessions manually—or use Aether Vision AI motion analysis for verified rep and form XP.',
+    actionTip: 'Every workout strengthens your Strength, Agility, and Boss Battle readiness.',
   },
   {
     id: 'tut-nutrition',
     title: 'Nutrition & Hydration Ledger',
-    sectionLabel: '7 / 10 · Nutrition',
+    sectionLabel: '8 / 11 · Nutrition',
     targetTab: 'nutrition',
     targetSelector: '[data-tutorial-id="nutrition-tracker"]',
     description:
@@ -277,17 +298,17 @@ export const TUTORIAL_STEPS: TutorialStepDefinition[] = [
   {
     id: 'tut-rewards',
     title: 'Achievements & Heroic Rewards',
-    sectionLabel: '8 / 10 · Rewards',
+    sectionLabel: '9 / 11 · Rewards',
     targetTab: 'achievements',
     targetSelector: '[data-tutorial-id="achievements-rewards"]',
     description:
-      'Major milestones across quests, streaks, training, and boss conquests unlock permanent achievements and bonus chests.',
+      'Major milestones across quests, streaks, armor forging, and boss conquests unlock permanent achievements and bonus chests.',
     actionTip: 'Claim unlocked achievements here whenever badges glow gold.',
   },
   {
     id: 'tut-story',
     title: 'The Fallen Knight Campaign',
-    sectionLabel: '9 / 10 · Story',
+    sectionLabel: '10 / 11 · Story',
     targetTab: 'storyline',
     targetSelector: '[data-tutorial-id="story-campaign"]',
     description:
@@ -297,11 +318,11 @@ export const TUTORIAL_STEPS: TutorialStepDefinition[] = [
   {
     id: 'tut-kingdom',
     title: 'Rebuild the Five Kingdoms',
-    sectionLabel: '10 / 10 · Kingdom',
+    sectionLabel: '11 / 11 · Kingdom',
     targetTab: 'storyline',
     targetSelector: '[data-tutorial-id="kingdom-restoration"]',
     description:
-      'Confront the Void Sovereigns across five corrupted provinces using disciplined Hands & Legs bodyweight techniques.',
+      'Confront the Void Sovereigns across five corrupted provinces. Every boss victory pushes back the darkness across Aetheria.',
     actionTip: 'You are ready, Champion. You can replay this tour anytime inside Settings.',
   },
 ];

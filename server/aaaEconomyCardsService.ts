@@ -46,6 +46,7 @@ interface StoredMarketplaceRecord {
 
 interface StoredCollectionRecord {
   claimedMilestoneIds: string[];
+  unlockedRelicIds: string[];
 }
 
 interface AaaEconomyCardsLedger {
@@ -62,6 +63,22 @@ const RARITY_RANK: Record<CollectibleCardRarity, number> = {
   Legendary: 4,
   Mythic: 5,
 };
+
+const CORE_COLLECTION_RELICS: Array<{
+  id: string;
+  name: string;
+  rarity: string;
+  hint: string;
+}> = [
+  { id: 'iron_fang', name: 'Iron Fang Blade', rarity: 'Common', hint: 'Starting Sanctuary weapon or Forge unlock.' },
+  { id: 'dawn_bastion', name: 'Dawn Bastion Greatsword', rarity: 'Rare', hint: 'Earn through consistent strength training.' },
+  { id: 'zephyr_longbow', name: 'Zephyr Gale Longbow', rarity: 'Rare', hint: 'Unlock via cardio and endurance milestones.' },
+  { id: 'astral_lexicon', name: 'Astral Focus Tome', rarity: 'Epic', hint: 'Attain higher Focus skill progression.' },
+  { id: 'aether_bulwark', name: 'Aether Sovereign Shield', rarity: 'Epic', hint: 'Defeat Citadel bosses or unlock Sanctuary armor.' },
+  { id: 'obsidian_sunblade', name: 'Obsidian Sunblade', rarity: 'Legendary', hint: 'Earned at Season 1 Battle Pass Tier 35 or Armory.' },
+  { id: 'canopy_halberd', name: 'Golden Canopy Halberd', rarity: 'Legendary', hint: 'High-tier Forge progression & Boss victories.' },
+  { id: 'celestial_crown_relic', name: 'Crown of Starlight Vigil', rarity: 'Mythic', hint: 'Pinnacle Armory relic earned through long-term dedication.' },
+];
 
 const safeReadJson = (p: string): any => {
   try {
@@ -238,10 +255,12 @@ export function createAaaEconomyCardsService(
     if (!ledger.collection[userId]) {
       ledger.collection[userId] = {
         claimedMilestoneIds: [],
+        unlockedRelicIds: ['iron_fang'],
       };
     }
     const c = ledger.collection[userId];
     if (!Array.isArray(c.claimedMilestoneIds)) c.claimedMilestoneIds = [];
+    if (!Array.isArray(c.unlockedRelicIds)) c.unlockedRelicIds = ['iron_fang'];
     return c;
   };
 
@@ -430,6 +449,14 @@ export function createAaaEconomyCardsService(
       })),
     ];
 
+    const relicsItems = CORE_COLLECTION_RELICS.map(r => ({
+      id: r.id,
+      name: r.name,
+      rarity: r.rarity,
+      status: col.unlockedRelicIds.includes(r.id) ? ('owned' as const) : ('unowned' as const),
+      hint: r.hint,
+    }));
+
     const cardsItems = COLLECTIBLE_CARDS_CATALOG.map(c => ({
       id: c.id,
       name: c.name,
@@ -481,6 +508,7 @@ export function createAaaEconomyCardsService(
       items: CollectionCompletionResponse['categories'][number]['items'];
     }> = [
       { key: 'trophies', label: 'Trophies & Rare Badges', items: trophiesItems },
+      { key: 'relics', label: 'Sanctuary Armory Relics', items: relicsItems },
       { key: 'cards', label: 'Collectible Fantasy Cards', items: cardsItems },
       { key: 'cosmetics', label: '2D Cosmetics & Frames', items: cosmeticsItems },
       { key: 'seasonal', label: 'Seasonal Limited Items', items: seasonalItems },
@@ -588,6 +616,18 @@ export function createAaaEconomyCardsService(
       await deps.evaluateIdentity({ userId });
     }
     return res;
+  };
+
+  const grantRelic = async (userId: string, relicId: string) => {
+    if (!userId || !relicId) return;
+    await withLock(() => {
+      const ledger = readLedger();
+      const col = ensureCollection(ledger, userId);
+      if (!col.unlockedRelicIds.includes(relicId)) {
+        col.unlockedRelicIds.push(relicId);
+        writeLedger(ledger);
+      }
+    });
   };
 
   const getUniqueCardCountSync = (userId: string): number => {
@@ -1099,6 +1139,28 @@ export function createAaaEconomyCardsService(
       res.json({ success: true, state });
     });
 
+    app.post('/api/collection/sync-relics', async (req: Request, res: Response) => {
+      const auth = await resolveVerifiedCaller(req);
+      if (!auth.ok || !auth.userId) {
+        res.status(auth.status || 401).json({ success: false, error: auth.error });
+        return;
+      }
+      const validIds = new Set(CORE_COLLECTION_RELICS.map(r => r.id));
+      const incoming: string[] = Array.isArray(req.body?.relicIds)
+        ? req.body.relicIds.map((x: unknown) => String(x || '').trim()).filter((id: string) => validIds.has(id))
+        : [];
+      const state = await withLock(() => {
+        const ledger = readLedger();
+        const col = ensureCollection(ledger, auth.userId!);
+        for (const id of incoming) {
+          if (!col.unlockedRelicIds.includes(id)) col.unlockedRelicIds.push(id);
+        }
+        writeLedger(ledger);
+        return computeCollectionState(ledger, auth.userId!);
+      });
+      res.json({ success: true, state });
+    });
+
     app.post('/api/collection/claim-milestone', async (req: Request, res: Response) => {
       const auth = await resolveVerifiedCaller(req);
       if (!auth.ok || !auth.userId) {
@@ -1189,6 +1251,7 @@ export function createAaaEconomyCardsService(
     creditFragments,
     grantCollectibleCard,
     grantCardPack,
+    grantRelic,
     getUniqueCardCountSync,
     getMarketplaceUnlockCountSync,
     getCollectionPercentSync,

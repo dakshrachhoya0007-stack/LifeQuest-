@@ -78,6 +78,7 @@ export function createSeasonService(
     onGrantFragments?: (userId: string, amount: number, source: string, key?: string) => Promise<any>;
     onGrantCard?: (userId: string, cardId: string, sourceRef: string) => Promise<any>;
     onGrantTitle?: (params: { userId: string; titleId: string; sourceRef: string }) => Promise<any>;
+    onGrantRelic?: (userId: string, relicId: string) => Promise<any>;
   }
 ) {
   const LEDGER_PATH = path.join(rootDir, '.lifequest_seasons.json');
@@ -648,6 +649,7 @@ export function createSeasonService(
               cosmeticId: ms.eliteCosmeticId,
               cardId: ms.eliteCardId,
               titleId: ms.eliteTitleId,
+              relicId: ms.eliteRelicId,
               gold: ms.eliteGold,
               fragments: ms.eliteFragments,
             },
@@ -689,6 +691,7 @@ export function createSeasonService(
             cosmeticId: ms.rewardRefId?.startsWith('hair_') || ms.rewardRefId?.startsWith('frame_') || ms.rewardRefId?.startsWith('banner_') || ms.rewardRefId?.startsWith('outfit_') || ms.rewardRefId?.startsWith('aura_') ? ms.rewardRefId : undefined,
             cardId: ms.rewardCardId,
             titleId: ms.rewardTitleId,
+            relicId: ms.rewardRelicId,
             gold: ms.rewardGold,
             fragments: ms.rewardFragments,
           },
@@ -721,6 +724,9 @@ export function createSeasonService(
         }
         if (g.titleId && opts?.onGrantTitle) {
           await opts.onGrantTitle({ userId: auth.userId!, titleId: g.titleId, sourceRef: keyBase });
+        }
+        if (g.relicId && opts?.onGrantRelic) {
+          await opts.onGrantRelic(auth.userId!, g.relicId);
         }
         if (g.gold && g.gold > 0 && opts?.onGrantGold) {
           await opts.onGrantGold(auth.userId!, g.gold, `Battle Pass ${track === 'elite' ? 'Premium' : 'Free'} Tier`, `${keyBase}:g`);

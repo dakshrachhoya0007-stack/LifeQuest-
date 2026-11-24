@@ -125,9 +125,11 @@ export interface PlayerStats {
   level: number;
   playerXP: number;
   playerXPNextLevel: number;
+  forgeXP?: number;
   gold: number;
   currentKingdomId: string;
   currentChapterId: string;
+  equippedWeaponId?: string;
   soundEnabled: boolean;
   totalWorkoutsCompleted: number;
   totalVerifiedReps: number;
@@ -147,6 +149,7 @@ export interface Habit {
   frequency: HabitFrequency;
   iconName: string;
   playerXpReward: number;
+  forgeXpReward?: number;
   goldReward?: number;
   completedToday: boolean;
   streak: number;
@@ -162,16 +165,60 @@ export interface Quest {
   title: string;
   description: string;
   type: QuestType;
-  category: 'fitness' | 'habit' | 'boss' | 'nutrition';
+  category: 'fitness' | 'habit' | 'boss' | 'nutrition' | 'armory';
   progress: number;
   maxProgress: number;
   playerXpReward: number;
+  forgeXpReward?: number;
   completed: boolean;
   claimed: boolean;
   expiresIn?: string;
 }
 
-export type ItemRarity =
+export interface BodyweightTechnique {
+  id: string;
+  name: string;
+  limb: 'hands' | 'legs' | 'both';
+  exerciseInspiration: string;
+  description: string;
+  combatEffect: string;
+  element: ElementType;
+  unlockLevel: number;
+  damageMultiplier: number;
+  critBonus?: number;
+  defenseBoost?: number;
+  staminaCost: number;
+}
+
+export type EquipmentSlotType = 'mainWeapon' | 'offHand' | 'armour' | 'helmet' | 'accessory';
+
+export interface EquippedGear {
+  mainWeaponId: string;
+  offHandId?: string | null;
+  armourId?: string | null;
+  helmetId?: string | null;
+  accessoryId?: string | null;
+}
+
+export type WeaponCategory =
+  | 'Swords'
+  | 'Greatswords'
+  | 'Daggers'
+  | 'Dual Blades'
+  | 'Bows'
+  | 'Crossbows'
+  | 'Magic Staffs'
+  | 'Wands'
+  | 'Spears'
+  | 'Axes'
+  | 'War Hammers'
+  | 'Scythes'
+  | 'Shields'
+  | 'Armour'
+  | 'Helmets'
+  | 'Accessories';
+
+export type WeaponRarity =
   | 'Common'
   | 'Uncommon'
   | 'Rare'
@@ -200,21 +247,105 @@ export type ElementType =
   | 'Physical'
   | 'Void';
 
-export type BodyweightLimb = 'hands' | 'legs' | 'both';
+export type WeaponObtainMethod =
+  | 'starter'
+  | 'shop'
+  | 'quest_unlock'
+  | 'boss_trophy'
+  | 'achievement'
+  | 'evolution';
 
-export interface BodyweightTechnique {
+export interface WeaponUnlockRequirement {
+  summary: string;
+  minLevel?: number;
+  minAetherRank?: AetherRankStage;
+  requiredKingdomCleared?: string;
+  minBossesDefeated?: number;
+  minStreakDays?: number;
+  minWorkouts?: number;
+  minVerifiedReps?: number;
+  forgeXpCost?: number;
+  goldCost?: number;
+  achievementId?: string;
+  sourceWeaponId?: string;
+}
+
+export interface WeaponEvolutionPath {
+  nextWeaponId: string;
+  nextName: string;
+  nextRarity: WeaponRarity;
+  reqWeaponLevel: number;
+  reqMasteryLevel: number;
+  reqAetherRank: AetherRankStage;
+  reqPlayerLevel?: number;
+  requiredKingdomCleared?: string;
+  minBossesDefeated?: number;
+  forgeXpCost: number;
+  goldCost: number;
+  description: string;
+  visualTransformation: string;
+  unlockedAbilityName?: string;
+}
+
+export interface WeaponAbility {
   id: string;
   name: string;
-  limb: BodyweightLimb;
-  exerciseInspiration: string;
+  icon: string;
   description: string;
+  unlockRequirement: string;
+  unlockMasteryLevel: number;
   combatEffect: string;
-  element: ElementType;
-  unlockLevel: number;
-  damageMultiplier: number;
+  unlocked: boolean;
+  damageMultiplier?: number;
   defenseBoost?: number;
   critBonus?: number;
-  staminaCost: number;
+  element?: ElementType;
+  staminaCost?: number;
+}
+
+export interface Weapon {
+  id: string;
+  name: string;
+  category: WeaponCategory;
+  rarity: WeaponRarity;
+  level: number;
+  maxLevel: number;
+  baseAttack: number;
+  attackPerLevel: number;
+  baseDefense: number;
+  defensePerLevel: number;
+  critChance?: number; // bonus % added in combat (e.g. 8 => +8%)
+  critDamage?: number; // crit multiplier % (e.g. 180 => 1.8x, 220 => 2.2x)
+  speed?: number; // 1-100 agility rating: improves stamina efficiency & dodge grace
+  element?: ElementType;
+  abilityPower?: number; // % bonus scaling on active combat abilities
+  specialAbilityName?: string;
+  specialAbilitySummary?: string;
+  combatIntegrationStatus?: 'active_in_combat' | 'passive_stat' | 'visual_only';
+  obtainMethod?: WeaponObtainMethod;
+  unlockRequirement?: WeaponUnlockRequirement;
+  evolutionPath?: WeaponEvolutionPath;
+  awakened?: boolean;
+  awakeningLevel?: number;
+  upgradeForgeCost: number;
+  unlocked: boolean;
+  equipped: boolean;
+  description: string;
+  lore: string;
+  illustration?: string;
+  // Hybrid Weapon Evolution System
+  evolutionStage: AetherRankStage;
+  masteryLevel: number;
+  masteryXP: number;
+  masteryXPNextLevel: number;
+  masteryPath: MasteryPath;
+  abilities: WeaponAbility[];
+  evolutionVisual?: {
+    glowColor: string;
+    auraStyle: string;
+    runeSymbol: string;
+    titlePrefix: string;
+  };
 }
 
 export type BuffEffectType = 'attack' | 'defense' | 'crit' | 'xp';
@@ -223,7 +354,7 @@ export interface Buff {
   id: string;
   name: string;
   description: string;
-  rarity: ItemRarity;
+  rarity: WeaponRarity;
   effectType: BuffEffectType;
   effectValue: number; // percentage e.g. 10 for +10%
   unlockRequirement: string;
@@ -366,6 +497,7 @@ export interface FitnessSession {
   verifiedWithAetherVision: boolean;
   timestamp: string;
   playerXpEarned: number;
+  forgeXpEarned: number;
   goldEarned?: number;
   aetherPointsEarned?: number;
   confidence?: number;
@@ -441,6 +573,7 @@ export interface Boss {
   specialAbility: string;
   specialAbilityDesc: string;
   rewardPlayerXp: number;
+  rewardForgeXp?: number;
   image: string;
   defeated: boolean;
   lore: string;
@@ -574,19 +707,20 @@ export interface Achievement {
   id: string;
   name: string;
   description: string;
-  category: 'quests' | 'consistency' | 'combat' | 'exploration' | 'multiplayer';
+  category: 'quests' | 'consistency' | 'armory' | 'combat' | 'exploration' | 'multiplayer';
   icon: string;
   progress: number;
   maxProgress: number;
   unlocked: boolean;
   claimed: boolean;
   rewardPlayerXp: number;
+  rewardForgeXp?: number;
   rewardGold?: number;
 }
 
 export interface Transaction {
   id: string;
-  type: 'PLAYER_XP' | 'GOLD' | 'AETHER_POINTS';
+  type: 'PLAYER_XP' | 'FORGE_XP' | 'GOLD' | 'AETHER_POINTS';
   source: string;
   amount: number;
   timestamp: string;
@@ -594,11 +728,12 @@ export interface Transaction {
 
 export interface ShopItem {
   id: string;
-  itemType: 'buff' | 'elixir' | 'cosmetic';
+  itemType: 'weapon' | 'shield' | 'armour' | 'helmet' | 'accessory' | 'buff' | 'elixir' | 'catalyst' | 'cosmetic';
   name: string;
   description: string;
-  rarity: ItemRarity;
+  rarity: WeaponRarity;
   priceGold: number;
+  priceForgeXp?: number;
   requiredLevel: number;
   metadata?: Record<string, any>;
 }
@@ -743,6 +878,17 @@ export interface PublicPlayerProfile {
     presenceStatus?: PresenceStatus;
     lastActiveAt?: string | null;
     hiddenFields?: PrivacyFieldKey[];
+    equippedWeapon?: {
+      weaponId: string;
+      name: string;
+      category: WeaponCategory;
+      rarity: WeaponRarity;
+      level: number;
+      evolutionStage: AetherRankStage;
+      masteryLevel: number;
+      element: ElementType;
+    };
+    unlockedWeaponsCount?: number;
     guild?: {
       id: string;
       name: string;
@@ -855,12 +1001,6 @@ export interface HeroAbilitySummary {
   description: string;
 }
 
-export interface HeroBodyweightDisciplines {
-  handsFocus: string;
-  legsFocus: string;
-  conditioningStyle: string;
-}
-
 export interface PlayableHeroDefinition {
   id: PlayableHeroId;
   name: string;
@@ -869,7 +1009,12 @@ export interface PlayableHeroDefinition {
   archetype: string;
   greatFallOrigin: string;
   roleSummary: string;
-  bodyweightDisciplines: HeroBodyweightDisciplines;
+  startingEquipment?: string[];
+  bodyweightDisciplines: {
+    conditioningStyle: string;
+    handsFocus: string;
+    legsFocus: string;
+  };
   attributeFocus: RpgAttributeKey[];
   abilities: HeroAbilitySummary[];
   strengths: string[];
@@ -879,7 +1024,8 @@ export interface PlayableHeroDefinition {
 }
 
 export type ReclaimHonorObjectiveId =
-  | 'visit_fitness'
+  | 'visit_armory'
+  | 'inspect_equipment'
   | 'visit_shop'
   | 'open_quest_board'
   | 'view_attributes'
@@ -917,6 +1063,7 @@ export interface CampaignChapterDefinition {
   };
   rewards: {
     playerXp: number;
+    forgeXp: number;
     gold: number;
     attributeBoost?: Partial<RpgAttributes>;
     restorationPercent: number;
@@ -978,6 +1125,7 @@ export interface DynamicDailyQuest {
   unitLabel: string;
   estimatedMinutes: number;
   playerXpReward: number;
+  forgeXpReward: number;
   goldReward: number;
   isSpecialChallenge: boolean;
   personalizationReason: string;
@@ -999,6 +1147,7 @@ export interface DynamicQuestHistoryEntry {
   completed: boolean;
   claimed: boolean;
   playerXpReward: number;
+  forgeXpReward: number;
   goldReward: number;
   evidenceNote?: string;
   recordedAt: string;
@@ -1028,6 +1177,7 @@ export interface DailyQuestReportData {
     workoutsLogged: number;
     mealsLogged: number;
     playerXpEarned: number;
+    forgeXpEarned: number;
     goldEarned: number;
     achievementsUnlocked: number;
     consistencyScore: number; // 0-100
@@ -1070,7 +1220,6 @@ export type GlobalAchievementCategory =
   | 'special_hidden_achievements';
 
 export type GlobalAchievementRarity =
-  | 'Epic'
   | 'Legendary'
   | 'Mythic'
   | 'Ascendant'
@@ -1105,6 +1254,8 @@ export type GlobalRequirementType =
   | 'dynamic_personal_growth_claimed'
   | 'dynamic_social_claimed'
   | 'normal_achievements_unlocked'
+  | 'unlocked_weapons_count'
+  | 'max_weapon_level'
   | 'friends_count'
   | 'guild_joined'
   | 'guild_leader'
@@ -1113,7 +1264,8 @@ export type GlobalRequirementType =
   | 'all_kingdoms_cleared'
   | 'honor_reclaimed'
   | 'daily_reports_generated'
-  | 'gold_balance';
+  | 'gold_balance'
+  | 'forge_xp_balance';
 
 export interface GlobalExclusiveAchievement {
   id: string;
@@ -1129,6 +1281,7 @@ export interface GlobalExclusiveAchievement {
   requirementType: GlobalRequirementType;
   threshold: number;
   rewardPlayerXp: number;
+  rewardForgeXp?: number;
   rewardGold: number;
   isHidden?: boolean;
   hint?: string;
@@ -1162,6 +1315,20 @@ export interface HallOfLegendsEntry extends GlobalExclusiveAchievement {
   userProgress: number;
   eligibleToClaim: boolean;
   ownedByCurrentUser: boolean;
+}
+
+export interface HiddenAchievementClientView {
+  id: string;
+  revealed: boolean;
+  unlockedByCaller: boolean;
+  name: string;
+  rarity: GlobalAchievementRarity;
+  emblemIcon: string;
+  hint: string;
+  story?: string;
+  requirementSummary?: string;
+  globalFirstOwnerName: string | null;
+  unlockedAt: string | null;
 }
 
 // --- PHASE 1: AAA EXPLORABLE 3D RPG WORLD (THE HEARTLANDS) ---
@@ -1384,6 +1551,7 @@ export interface WeeklyBossRewardConfig {
   participationXp: number;
   participationGold: number;
   defeatXp: number;
+  defeatForgeXp: number;
   defeatGold: number;
   topContributorBonusXp: number;
   topContributorBonusGold: number;
@@ -1677,6 +1845,7 @@ export interface MentorRecommendedQuest {
   maxProgress: number;
   unitLabel: string;
   playerXpReward: number;
+  forgeXpReward: number;
   goldReward: number;
   rationale: string;
   accepted: boolean;
@@ -1998,19 +2167,21 @@ export interface SeasonMilestoneReward {
   id: string;
   title: string;
   requiredSeasonXp: number;
-  rewardType: 'cosmetic_crest' | 'title' | 'badge' | 'achievement' | 'card' | 'fragments' | 'gold';
+  rewardType: 'cosmetic_crest' | 'title' | 'badge' | 'achievement' | 'card' | 'fragments' | 'gold' | 'relic';
   rewardLabel: string;
   rewardRefId?: string;
   rewardCardId?: string;
   rewardTitleId?: string;
+  rewardRelicId?: string;
   rewardGold?: number;
   rewardFragments?: number;
   track?: 'free' | 'elite' | 'premium';
-  eliteRewardType?: 'cosmetic_crest' | 'title' | 'badge' | 'card' | 'fragments' | 'gold';
+  eliteRewardType?: 'cosmetic_crest' | 'title' | 'badge' | 'card' | 'fragments' | 'gold' | 'relic';
   eliteRewardLabel?: string;
   eliteCosmeticId?: string;
   eliteCardId?: string;
   eliteTitleId?: string;
+  eliteRelicId?: string;
   eliteGold?: number;
   eliteFragments?: number;
 }
@@ -2237,8 +2408,8 @@ export interface WorkoutParty {
 
 export interface WorkoutPartyHistoryEntry {
   id: string;
-  partyId: string;
   userId?: string;
+  partyId: string;
   challengeId: string;
   challengeName: string;
   targetValue: number;
@@ -2374,24 +2545,6 @@ export interface TrophyShowcaseState {
   completionPercent: number;
 }
 
-export interface HiddenAchievementClientView {
-  id: string;
-  discovered: boolean;
-  revealed?: boolean;
-  unlockedByCaller?: boolean;
-  name: string;
-  maskedTitle: string;
-  maskedHint: string;
-  hint?: string;
-  rarity: GlobalAchievementRarity;
-  emblemIcon?: string;
-  story?: string;
-  titleTag?: string;
-  requirementSummary?: string;
-  globalFirstOwnerName?: string | null;
-  unlockedAt?: string | null;
-}
-
 // --- 6. TERRITORY WARS (GUILD VS GUILD, 2D FICTIONAL MAP) ---
 
 export type TerritoryMissionStance = 'offensive' | 'defensive';
@@ -2474,6 +2627,7 @@ export type BattlePassRewardType =
   | 'cosmetic_aura'
   | 'title'
   | 'badge'
+  | 'relic'
   | 'collectible_card'
   | 'card_pack'
   | 'fragments'
@@ -2493,7 +2647,7 @@ export interface CollectibleCardDef {
   seasonTag?: string;
   limitedEdition?: boolean;
   lore: string;
-  motif: 'flame' | 'stride' | 'crown' | 'canopy' | 'fist' | 'star' | 'wave' | 'titan';
+  motif: 'flame' | 'shield' | 'crown' | 'canopy' | 'blade' | 'star' | 'wave' | 'titan' | 'fist' | 'stride';
   primaryHex: string;
   secondaryHex: string;
   accentHex: string;
@@ -2738,7 +2892,7 @@ export interface SpectatorLiveMatchSummary {
 export interface CollectionCompletionResponse {
   userId: string;
   categories: Array<{
-    key: 'trophies' | 'cards' | 'cosmetics' | 'seasonal';
+    key: 'trophies' | 'relics' | 'cards' | 'cosmetics' | 'seasonal';
     label: string;
     ownedCount: number;
     totalCount: number;

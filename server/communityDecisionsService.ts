@@ -43,12 +43,12 @@ const buildDefaultPolls = (now = new Date()): StoredPoll[] => {
         {
           id: 'opt_starfall',
           label: 'Celestial Starfall Colossus',
-          description: 'Astral titan favoring endurance & consistency combos.',
+          description: 'Astral-forged titan favoring endurance & consistency combos.',
           voteCount: 0,
         },
         {
           id: 'opt_ember',
-          label: 'Emberstone Siege Golem',
+          label: 'Emberforge Siege Golem',
           description: 'Obsidian furnace construct centered on strength reps.',
           voteCount: 0,
         },

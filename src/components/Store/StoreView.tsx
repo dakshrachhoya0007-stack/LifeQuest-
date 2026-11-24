@@ -80,45 +80,45 @@ export const StoreView: React.FC = () => {
       {/* Header Banner */}
       <div
         data-tutorial-id="shop-bazaar"
-        className="rounded-2xl bg-gradient-to-r from-[#061225] via-[#0A1930] to-[#102440] border border-[#1677FF]/35 p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)]"
+        className="rounded-2xl bg-gradient-to-r from-[#090910] via-[#0E0E17] to-[#141420] border border-[#8B5CF6]/35 p-6 shadow-[0_12px_32px_rgba(9,9,16,0.75)]"
       >
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-[#00D9FF] bg-[#0A1930] border border-[#00D9FF]/45 px-2.5 py-0.5 rounded">
+              <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-[#D6A84B] bg-[#0E0E17] border border-[#D6A84B]/45 px-2.5 py-0.5 rounded">
                 Aetheria Grand Bazaar
               </span>
-              <span className="text-xs text-[#A9B8CC] font-medium">
+              <span className="text-xs text-[#A1A1B8] font-medium">
                 Hero Level {stats.level} · {stats.aetherRank} Rank
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-white flex items-center gap-2.5">
-              <ShoppingBag className="w-7 h-7 text-[#00D9FF]" />
+              <ShoppingBag className="w-7 h-7 text-[#D6A84B]" />
               ROYAL TREASURY &amp; COSMETIC BAZAAR
             </h1>
-            <p className="text-xs sm:text-sm text-[#A9B8CC] max-w-2xl">
+            <p className="text-xs sm:text-sm text-[#A1A1B8] max-w-2xl">
               Acquire restorative Elixirs &amp; Aura Blessings to fuel your bodyweight training and boss battles, or unlock 2D outfits and realm vanity themes.
             </p>
           </div>
 
           {/* Currencies */}
           <div className="flex flex-wrap items-center gap-3">
-            <div className="bg-[#0A1930]/95 border border-amber-400/50 rounded-xl px-4 py-2.5 flex items-center gap-3">
-              <Coins className="w-5 h-5 text-amber-400" />
+            <div className="bg-[#0E0E17]/95 border border-[#D6A84B]/50 rounded-xl px-4 py-2.5 flex items-center gap-3">
+              <Coins className="w-5 h-5 text-[#FBBF24]" />
               <div>
-                <span className="text-[10px] uppercase tracking-wider text-amber-300 font-bold block">
+                <span className="text-[10px] uppercase tracking-wider text-[#D6A84B] font-bold block">
                   Gold
                 </span>
-                <span className="font-mono text-lg font-black text-amber-200 tabular-nums">
+                <span className="font-mono text-lg font-black text-[#FBBF24] tabular-nums">
                   {stats.gold}
                 </span>
               </div>
             </div>
 
-            <div className="bg-[#0A1930]/95 border border-[#00D9FF]/50 rounded-xl px-4 py-2.5 flex items-center gap-3">
-              <Gem className="w-5 h-5 text-[#00D9FF]" />
+            <div className="bg-[#0E0E17]/95 border border-[#8B5CF6]/50 rounded-xl px-4 py-2.5 flex items-center gap-3">
+              <Gem className="w-5 h-5 text-[#8B5CF6]" />
               <div>
-                <span className="text-[10px] uppercase tracking-wider text-[#00D9FF] font-bold block">
+                <span className="text-[10px] uppercase tracking-wider text-[#C4B5FD] font-bold block">
                   Fragments
                 </span>
                 <span className="font-mono text-lg font-black text-white tabular-nums">
@@ -130,7 +130,7 @@ export const StoreView: React.FC = () => {
         </div>
 
         {/* Store Mode Switcher */}
-        <div className="mt-5 pt-4 border-t border-[#1677FF]/25 flex flex-wrap items-center gap-2">
+        <div className="mt-5 pt-4 border-t border-[#8B5CF6]/25 flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => {
@@ -139,8 +139,8 @@ export const StoreView: React.FC = () => {
             }}
             className={`px-4 py-2 rounded-xl text-xs font-['Cinzel'] font-black flex items-center gap-2 transition-all whitespace-nowrap ${
               storeMode === 'bazaar'
-                ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white shadow-[0_0_16px_rgba(22,119,255,0.35)]'
-                : 'bg-[#0A1930] hover:bg-[#16325C] border border-[#1677FF]/35 text-[#A9B8CC] hover:text-white'
+                ? 'bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] text-white shadow-[0_0_16px_rgba(139,92,246,0.35)] border border-[#D6A84B]/45'
+                : 'bg-[#0E0E17] hover:bg-[#1B1B2B] border border-[#8B5CF6]/30 text-[#A1A1B8] hover:text-white'
             }`}
           >
             <ShoppingBag className="w-4 h-4" />
@@ -155,8 +155,8 @@ export const StoreView: React.FC = () => {
             }}
             className={`px-4 py-2 rounded-xl text-xs font-['Cinzel'] font-black flex items-center gap-2 transition-all whitespace-nowrap ${
               storeMode === 'marketplace'
-                ? 'bg-gradient-to-r from-[#1677FF] to-[#00D9FF] text-white shadow-[0_0_16px_rgba(0,217,255,0.35)]'
-                : 'bg-[#0A1930] hover:bg-[#16325C] border border-[#1677FF]/35 text-[#A9B8CC] hover:text-white'
+                ? 'bg-gradient-to-r from-[#D6A84B] to-[#FBBF24] text-[#090910] shadow-[0_0_16px_rgba(214,168,75,0.35)]'
+                : 'bg-[#0E0E17] hover:bg-[#1B1B2B] border border-[#8B5CF6]/30 text-[#A1A1B8] hover:text-white'
             }`}
           >
             <Sparkles className="w-4 h-4" />
@@ -170,7 +170,7 @@ export const StoreView: React.FC = () => {
       ) : (
         <>
           {/* Filters Bar */}
-          <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 rounded-2xl p-4">
+          <div className="bg-[#141420]/95 backdrop-blur-md border border-[#8B5CF6]/30 rounded-2xl p-4">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
                 {categoryTabs.map(tab => (
@@ -183,8 +183,8 @@ export const StoreView: React.FC = () => {
                     }}
                     className={`px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
                       categoryFilter === tab.id
-                        ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white font-bold shadow-[0_0_12px_rgba(22,119,255,0.35)]'
-                        : 'bg-[#0A1930] hover:bg-[#16325C] text-[#A9B8CC] hover:text-white border border-[#1677FF]/25'
+                        ? 'bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] text-white font-bold shadow-[0_0_12px_rgba(139,92,246,0.35)]'
+                        : 'bg-[#0E0E17] hover:bg-[#1B1B2B] text-[#A1A1B8] hover:text-white border border-[#8B5CF6]/25'
                     }`}
                   >
                     {tab.label}
@@ -193,13 +193,13 @@ export const StoreView: React.FC = () => {
               </div>
 
               <div className="relative w-full md:w-64 shrink-0">
-                <Search className="w-4 h-4 text-[#A9B8CC] absolute left-3 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-[#A1A1B8] absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="Search elixirs, buffs, boosts..."
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-[#A9B8CC]/55 focus:outline-none focus:border-[#00D9FF]"
+                  className="w-full bg-[#0E0E17] border border-[#8B5CF6]/35 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-[#A1A1B8]/55 focus:outline-none focus:border-[#D6A84B]"
                 />
               </div>
             </div>
@@ -209,8 +209,8 @@ export const StoreView: React.FC = () => {
             <div
               className={`p-3.5 rounded-xl border text-xs font-medium text-center animate-in fade-in ${
                 feedback.type === 'error'
-                  ? 'bg-rose-950/80 border-rose-700 text-rose-200'
-                  : 'bg-emerald-950/80 border-emerald-600 text-emerald-200'
+                  ? 'bg-rose-950/80 border-[#FB7185] text-rose-200'
+                  : 'bg-emerald-950/80 border-[#34D399] text-emerald-200'
               }`}
             >
               {feedback.text}
@@ -218,11 +218,11 @@ export const StoreView: React.FC = () => {
           )}
 
           {filteredItems.length === 0 ? (
-            <div className="bg-[#102440]/90 border border-[#1677FF]/30 rounded-2xl p-10 text-center space-y-2">
+            <div className="bg-[#141420]/95 border border-[#8B5CF6]/30 rounded-2xl p-10 text-center space-y-2">
               <p className="font-['Cinzel'] font-bold text-white text-base">
                 No items match your current filter
               </p>
-              <p className="text-xs text-[#A9B8CC]">
+              <p className="text-xs text-[#A1A1B8]">
                 Clear your search or switch category tabs to view more Aetherian wares.
               </p>
             </div>
@@ -238,12 +238,12 @@ export const StoreView: React.FC = () => {
                 return (
                   <div
                     key={item.id}
-                    className={`rounded-2xl bg-[#102440]/90 backdrop-blur-md border-2 ${rStyle.border} ${rStyle.cardGlow} ${rStyle.ringClass} p-5 flex flex-col justify-between gap-4 transition-transform hover:-translate-y-0.5`}
+                    className={`rounded-2xl bg-[#141420]/95 backdrop-blur-md border-2 ${rStyle.border} ${rStyle.cardGlow} ${rStyle.ringClass} p-5 flex flex-col justify-between gap-4 transition-transform hover:-translate-y-0.5`}
                   >
                     <div className="space-y-3">
                       <div className="flex items-start gap-4">
                         <div
-                          className={`w-16 h-16 rounded-xl bg-[#0A1930] border-2 ${rStyle.border} shrink-0 flex items-center justify-center text-[#00D9FF]`}
+                          className={`w-16 h-16 rounded-xl bg-[#0E0E17] border-2 ${rStyle.border} shrink-0 flex items-center justify-center text-[#D6A84B]`}
                         >
                           <Sparkles className="w-7 h-7" />
                         </div>
@@ -256,8 +256,8 @@ export const StoreView: React.FC = () => {
                             <span
                               className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
                                 levelMet
-                                  ? 'bg-[#0A1930] border-[#1677FF]/35 text-[#A9B8CC]'
-                                  : 'bg-rose-950/70 border-rose-700 text-rose-300'
+                                  ? 'bg-[#0E0E17] border-[#8B5CF6]/35 text-[#A1A1B8]'
+                                  : 'bg-rose-950/70 border-[#FB7185] text-rose-300'
                               }`}
                             >
                               Req Lv.{item.requiredLevel}
@@ -268,27 +268,27 @@ export const StoreView: React.FC = () => {
                             {item.name}
                           </h3>
 
-                          <p className="text-[11px] font-mono text-[#00D9FF]">
+                          <p className="text-[11px] font-mono text-[#8B5CF6]">
                             {item.itemType.toUpperCase()}
                           </p>
                         </div>
                       </div>
 
-                      <p className="text-xs text-[#A9B8CC] leading-relaxed">{item.description}</p>
+                      <p className="text-xs text-[#A1A1B8] leading-relaxed">{item.description}</p>
 
-                      <div className="bg-[#0A1930] border border-[#1677FF]/25 rounded-xl p-2.5 text-xs font-mono">
-                        <span className="text-emerald-300 font-bold flex items-center gap-1.5">
+                      <div className="bg-[#0E0E17] border border-[#8B5CF6]/25 rounded-xl p-2.5 text-xs font-mono">
+                        <span className="text-[#34D399] font-bold flex items-center gap-1.5">
                           <Sparkles className="w-3.5 h-3.5" />+{Number(meta.uses || 2)} Battle Charges
                         </span>
                       </div>
                     </div>
 
-                    <div className="space-y-2.5 pt-2 border-t border-[#1677FF]/25">
+                    <div className="space-y-2.5 pt-2 border-t border-[#8B5CF6]/25">
                       <div className="flex items-center justify-between text-xs font-mono">
-                        <span className="text-[#A9B8CC]">Price:</span>
+                        <span className="text-[#A1A1B8]">Price:</span>
                         <span
                           className={`font-bold flex items-center gap-1 tabular-nums ${
-                            goldMet ? 'text-amber-300' : 'text-rose-400'
+                            goldMet ? 'text-[#FBBF24]' : 'text-[#FB7185]'
                           }`}
                         >
                           <Coins className="w-3.5 h-3.5" />
@@ -302,8 +302,8 @@ export const StoreView: React.FC = () => {
                         disabled={!canBuy}
                         className={`w-full py-2.5 rounded-xl font-['Cinzel'] font-black text-xs tracking-wider transition-all flex items-center justify-center gap-2 whitespace-nowrap ${
                           canBuy
-                            ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white shadow-[0_0_16px_rgba(22,119,255,0.35)] hover:scale-[1.01] active:scale-95'
-                            : 'bg-[#0A1930] text-[#A9B8CC]/50 border border-[#1677FF]/25 cursor-not-allowed'
+                            ? 'bg-gradient-to-r from-[#D6A84B] to-[#FBBF24] hover:brightness-110 text-[#090910] shadow-[0_0_16px_rgba(214,168,75,0.3)] hover:scale-[1.01] active:scale-95'
+                            : 'bg-[#0E0E17] text-[#A1A1B8]/50 border border-[#8B5CF6]/25 cursor-not-allowed'
                         }`}
                       >
                         {!levelMet ? (

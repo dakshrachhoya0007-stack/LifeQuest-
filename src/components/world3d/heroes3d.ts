@@ -64,6 +64,68 @@ const DEFAULT_PALETTE: PaletteConfig = {
   capeColor: '#5c1927',
 };
 
+function createSwordGeometry(): THREE.ExtrudeGeometry {
+  const shape = new THREE.Shape();
+  shape.moveTo(-0.042, 0);
+  shape.lineTo(0.042, 0);
+  shape.lineTo(0.032, 0.96);
+  shape.lineTo(0, 1.18);
+  shape.lineTo(-0.032, 0.96);
+  shape.closePath();
+
+  const geom = new THREE.ExtrudeGeometry(shape, {
+    depth: 0.018,
+    bevelEnabled: true,
+    bevelThickness: 0.008,
+    bevelSize: 0.007,
+    bevelSegments: 2,
+  });
+  geom.translate(0, 0, -0.009);
+  geom.computeVertexNormals();
+  return geom;
+}
+
+function createCurvedDaggerGeometry(): THREE.ExtrudeGeometry {
+  const shape = new THREE.Shape();
+  shape.moveTo(-0.028, 0);
+  shape.lineTo(0.026, 0);
+  shape.quadraticCurveTo(0.055, 0.24, 0.015, 0.48);
+  shape.lineTo(-0.035, 0.56);
+  shape.quadraticCurveTo(-0.005, 0.26, -0.028, 0);
+
+  const geom = new THREE.ExtrudeGeometry(shape, {
+    depth: 0.014,
+    bevelEnabled: true,
+    bevelThickness: 0.005,
+    bevelSize: 0.004,
+    bevelSegments: 2,
+  });
+  geom.translate(0, 0, -0.007);
+  geom.computeVertexNormals();
+  return geom;
+}
+
+function createKiteShieldGeometry(): THREE.ExtrudeGeometry {
+  const shape = new THREE.Shape();
+  shape.moveTo(-0.34, 0.42);
+  shape.quadraticCurveTo(0, 0.50, 0.34, 0.42);
+  shape.quadraticCurveTo(0.36, 0.05, 0.24, -0.26);
+  shape.quadraticCurveTo(0.11, -0.50, 0, -0.62);
+  shape.quadraticCurveTo(-0.11, -0.50, -0.24, -0.26);
+  shape.quadraticCurveTo(-0.36, 0.05, -0.34, 0.42);
+
+  const geom = new THREE.ExtrudeGeometry(shape, {
+    depth: 0.045,
+    bevelEnabled: true,
+    bevelThickness: 0.016,
+    bevelSize: 0.014,
+    bevelSegments: 2,
+  });
+  geom.translate(0, 0, -0.022);
+  geom.computeVertexNormals();
+  return geom;
+}
+
 function createCapeGeometry(tattered: boolean): THREE.BufferGeometry {
   const wSeg = 8;
   const hSeg = 12;
@@ -90,6 +152,48 @@ function createCapeGeometry(tattered: boolean): THREE.BufferGeometry {
   }
   geom.computeVertexNormals();
   return geom;
+}
+
+function createRecurveBowGroup(woodMat: THREE.Material, goldMat: THREE.Material, stringMat: THREE.Material): THREE.Group {
+  const bowGroup = new THREE.Group();
+  const points = [
+    new THREE.Vector3(0, -0.82, 0.14),
+    new THREE.Vector3(0, -0.58, 0.02),
+    new THREE.Vector3(0, -0.26, -0.14),
+    new THREE.Vector3(0, 0, -0.18),
+    new THREE.Vector3(0, 0.26, -0.14),
+    new THREE.Vector3(0, 0.58, 0.02),
+    new THREE.Vector3(0, 0.82, 0.14),
+  ];
+  const curve = new THREE.CatmullRomCurve3(points);
+  const limbGeom = new THREE.TubeGeometry(curve, 32, 0.026, 8, false);
+  const limbMesh = new THREE.Mesh(limbGeom, woodMat);
+  limbMesh.castShadow = true;
+  bowGroup.add(limbMesh);
+
+  // Grip wrap
+  const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.034, 0.034, 0.19, 10), goldMat);
+  grip.position.set(0, 0, -0.18);
+  bowGroup.add(grip);
+
+  // Bowstring
+  const stringLen = 1.64;
+  const bowstring = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, stringLen, 6), stringMat);
+  bowstring.position.set(0, 0, 0.14);
+  bowGroup.add(bowstring);
+
+  // Ready arrow
+  const arrowShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.88, 6), woodMat);
+  arrowShaft.rotation.x = Math.PI / 2;
+  arrowShaft.position.set(0.03, 0.02, -0.20);
+  bowGroup.add(arrowShaft);
+
+  const arrowHead = new THREE.Mesh(new THREE.ConeGeometry(0.024, 0.09, 4), goldMat);
+  arrowHead.rotation.x = -Math.PI / 2;
+  arrowHead.position.set(0.03, 0.02, -0.66);
+  bowGroup.add(arrowHead);
+
+  return bowGroup;
 }
 
 export function buildHero3DModel(heroId: PlayableHeroId): Hero3DInstance {
@@ -448,14 +552,34 @@ export function buildHero3DModel(heroId: PlayableHeroId): Hero3DInstance {
     chestPendant.position.set(0, 0.38, 0.19);
     chest.add(chestPendant);
   } else if (heroId === 'ranger') {
-    // Leather shoulder harness
+    // Leather shoulder harness & back quiver
     const harness = new THREE.Mesh(new THREE.BoxGeometry(0.43, 0.06, 0.28), leatherMat);
     harness.position.set(0, 0.33, 0);
     harness.rotation.z = -0.56;
     chest.add(harness);
+
+    const quiverGroup = new THREE.Group();
+    quiverGroup.position.set(-0.14, 0.38, -0.19);
+    quiverGroup.rotation.z = -0.38;
+    quiverGroup.rotation.x = 0.12;
+    const quiverTube = new THREE.Mesh(new THREE.CylinderGeometry(0.062, 0.048, 0.48, 10), leatherMat);
+    quiverTube.castShadow = true;
+    quiverGroup.add(quiverTube);
+
+    const fletchMat = track(new THREE.MeshStandardMaterial({ color: 0xe2d8c3, roughness: 0.7 }));
+    for (let a = 0; a < 4; a++) {
+      const ang = (a / 4) * Math.PI * 2;
+      const arrow = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.22, 6), goldMat);
+      arrow.position.set(Math.cos(ang) * 0.025, 0.29, Math.sin(ang) * 0.025);
+      quiverGroup.add(arrow);
+      const fletch = new THREE.Mesh(new THREE.ConeGeometry(0.02, 0.06, 4), fletchMat);
+      fletch.position.set(Math.cos(ang) * 0.025, 0.40, Math.sin(ang) * 0.025);
+      quiverGroup.add(fletch);
+    }
+    chest.add(quiverGroup);
   }
 
-  // Fallen Knight: layered steel breastplate, segmented faulds and engraved trim.
+  // Fallen Knight: layered forged breastplate, segmented faulds and engraved trim.
   // These overlays add a more authored silhouette while keeping the original rig intact.
   if (heroId === 'fallen_knight') {
     const breastShape = new THREE.Shape();
@@ -682,7 +806,7 @@ export function buildHero3DModel(heroId: PlayableHeroId): Hero3DInstance {
     });
   }
 
-  // --- ARMS & UNARMED MARTIAL STANCES ---
+  // --- ARMS & WEAPONS ---
   const buildArm = (side: -1 | 1) => {
     const shoulderPivot = new THREE.Group();
     shoulderPivot.position.set(side * (heroId === 'fallen_knight' || heroId === 'paladin' ? 0.35 : 0.29), 0.51, 0);
@@ -774,15 +898,73 @@ export function buildHero3DModel(heroId: PlayableHeroId): Hero3DInstance {
   const { shoulderPivot: shoulderR, forearmPivot: forearmR } = buildArm(1);
   chest.add(shoulderL, shoulderR);
 
-  // Unarmed Hero Auras & Energy Foci (zero weapons)
+  // Attach Hero-Specific Weapons & Equipment
   let orbMesh: THREE.Object3D | undefined;
   let orbRing: THREE.Object3D | undefined;
   let auraGroup: THREE.Group | undefined;
   let heroLight: THREE.PointLight | undefined;
 
-  if (heroId === 'arcane_mage') {
-    const focusGroup = new THREE.Group();
-    focusGroup.position.set(0, -0.34, 0.14);
+  if (heroId === 'fallen_knight') {
+    const swordGroup = new THREE.Group();
+    swordGroup.position.set(0, -0.29, 0.03);
+    swordGroup.rotation.x = Math.PI * 0.48;
+
+    const hilt = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.02, 0.28, 8), leatherMat);
+    const pommel = new THREE.Mesh(new THREE.OctahedronGeometry(0.048, 0), goldMat);
+    pommel.position.y = -0.15;
+    const crossguard = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.038, 0.062), goldMat);
+    crossguard.position.y = 0.14;
+    const ricasso = new THREE.Mesh(new THREE.BoxGeometry(0.095, 0.11, 0.03), darkIronMat);
+    ricasso.position.y = 0.21;
+    const blade = new THREE.Mesh(track(createSwordGeometry()), steelMat);
+    blade.scale.set(1.16, 1.12, 1.12);
+    blade.position.y = 0.15;
+    blade.castShadow = true;
+    const goldFuller = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.78, 0.028), goldMat);
+    goldFuller.position.y = 0.62;
+
+    swordGroup.add(hilt, pommel, crossguard, ricasso, blade, goldFuller);
+    forearmR.add(swordGroup);
+  } else if (heroId === 'shadowblade') {
+    const buildDagger = (reverseGrip: boolean) => {
+      const dg = new THREE.Group();
+      dg.position.set(0, -0.285, 0.03);
+      dg.rotation.x = reverseGrip ? -Math.PI * 0.48 : Math.PI * 0.48;
+      const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.017, 0.017, 0.16, 8), leatherMat);
+      const guard = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.024, 0.035), goldMat);
+      guard.position.y = 0.085;
+      const bladeMat = track(
+        new THREE.MeshStandardMaterial({
+          color: 0x3b2c59,
+          emissive: 0x381966,
+          emissiveIntensity: 0.45,
+          metalness: 0.9,
+          roughness: 0.18,
+          envMapIntensity: 1.3,
+        })
+      );
+      const blade = new THREE.Mesh(track(createCurvedDaggerGeometry()), bladeMat);
+      blade.position.y = 0.095;
+      blade.castShadow = true;
+      dg.add(grip, guard, blade);
+      return dg;
+    };
+    forearmR.add(buildDagger(false));
+    forearmL.add(buildDagger(true));
+  } else if (heroId === 'arcane_mage') {
+    const staffGroup = new THREE.Group();
+    staffGroup.position.set(0, -0.28, 0.05);
+    staffGroup.rotation.x = Math.PI * 0.44;
+
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.024, 0.02, 1.75, 10), darkIronMat);
+    shaft.position.y = 0.35;
+    shaft.castShadow = true;
+    staffGroup.add(shaft);
+
+    const cradle = new THREE.Mesh(new THREE.TorusGeometry(0.095, 0.016, 8, 16, Math.PI * 1.45), goldMat);
+    cradle.position.y = 1.28;
+    cradle.rotation.z = -Math.PI * 0.22;
+    staffGroup.add(cradle);
 
     const crystalMat = track(
       new THREE.MeshStandardMaterial({
@@ -793,19 +975,74 @@ export function buildHero3DModel(heroId: PlayableHeroId): Hero3DInstance {
         roughness: 0.1,
       })
     );
-    const orb = new THREE.Mesh(new THREE.OctahedronGeometry(0.075, 0), crystalMat);
+    const orb = new THREE.Mesh(new THREE.OctahedronGeometry(0.085, 0), crystalMat);
+    orb.position.y = 1.31;
     orbMesh = orb;
-    focusGroup.add(orb);
+    staffGroup.add(orb);
 
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.13, 0.008, 6, 24), goldMat);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.145, 0.008, 6, 24), goldMat);
+    ring.position.y = 1.31;
     orbRing = ring;
-    focusGroup.add(ring);
+    staffGroup.add(ring);
 
-    heroLight = new THREE.PointLight(0x5ecfff, 1.35, 4.0, 1.6);
-    focusGroup.add(heroLight);
+    heroLight = new THREE.PointLight(0x5ecfff, 1.4, 4.2, 1.6);
+    heroLight.position.set(0, 1.31, 0);
+    staffGroup.add(heroLight);
 
-    forearmR.add(focusGroup);
+    forearmR.add(staffGroup);
+  } else if (heroId === 'ranger') {
+    const woodMat = track(
+      new THREE.MeshStandardMaterial({ color: 0x6b4728, metalness: 0.08, roughness: 0.72 })
+    );
+    const stringMat = track(
+      new THREE.MeshStandardMaterial({ color: 0xe6decb, roughness: 0.5 })
+    );
+    const bow = createRecurveBowGroup(woodMat, goldMat, stringMat);
+    bow.position.set(-0.04, -0.28, 0.06);
+    bow.rotation.z = 0.12;
+    forearmL.add(bow);
   } else if (heroId === 'paladin') {
+    // Radiant Sunforged Broadsword in right hand
+    const swordGroup = new THREE.Group();
+    swordGroup.position.set(0, -0.285, 0.03);
+    swordGroup.rotation.x = Math.PI * 0.48;
+
+    const hilt = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.22, 8), goldMat);
+    const crossguard = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.04, 0.055), goldMat);
+    crossguard.position.y = 0.11;
+    const blade = new THREE.Mesh(track(createSwordGeometry()), steelMat);
+    blade.scale.set(0.95, 0.88, 1);
+    blade.position.y = 0.125;
+    blade.castShadow = true;
+    swordGroup.add(hilt, crossguard, blade);
+    forearmR.add(swordGroup);
+
+    // Ornate Heraldic Kite Shield on left forearm
+    const shieldGroup = new THREE.Group();
+    shieldGroup.position.set(-0.09, -0.14, 0.08);
+    shieldGroup.rotation.y = -Math.PI / 2 + 0.35;
+    const shieldFaceMat = track(
+      new THREE.MeshStandardMaterial({
+        color: 0xe2dfd7,
+        metalness: 0.78,
+        roughness: 0.26,
+        envMapIntensity: 1.25,
+      })
+    );
+    const shieldBody = new THREE.Mesh(track(createKiteShieldGeometry()), shieldFaceMat);
+    shieldBody.castShadow = true;
+    shieldGroup.add(shieldBody);
+
+    const shieldRim = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.78, 0.06), goldMat);
+    shieldRim.position.set(0, -0.05, 0.015);
+    shieldGroup.add(shieldRim);
+
+    const shieldBar = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.075, 0.06), goldMat);
+    shieldBar.position.set(0, 0.12, 0.015);
+    shieldGroup.add(shieldBar);
+
+    forearmL.add(shieldGroup);
+
     // Golden Sacred Halo Ring behind shoulders
     auraGroup = new THREE.Group();
     auraGroup.position.set(0, 0.62, -0.18);

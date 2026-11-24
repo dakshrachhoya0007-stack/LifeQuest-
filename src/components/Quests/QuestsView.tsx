@@ -36,11 +36,11 @@ const CATEGORY_META: Record<
   DynamicQuestCategory,
   { label: string; color: string; icon: React.ComponentType<{ className?: string }> }
 > = {
-  physical: { label: 'Physical', color: 'text-rose-300', icon: Dumbbell },
-  intellectual: { label: 'Intellectual', color: 'text-sky-300', icon: BookOpen },
-  discipline: { label: 'Discipline', color: 'text-amber-300', icon: Shield },
-  personal_growth: { label: 'Personal Growth', color: 'text-emerald-300', icon: TrendingUp },
-  social: { label: 'Social', color: 'text-[#00D9FF]', icon: Users },
+  physical: { label: 'Physical', color: 'text-[#FB7185]', icon: Dumbbell },
+  intellectual: { label: 'Intellectual', color: 'text-[#38BDF8]', icon: BookOpen },
+  discipline: { label: 'Discipline', color: 'text-[#FBBF24]', icon: Shield },
+  personal_growth: { label: 'Personal Growth', color: 'text-[#34D399]', icon: TrendingUp },
+  social: { label: 'Social', color: 'text-[#8B5CF6]', icon: Users },
 };
 
 const TIER_LABELS: Record<AdaptiveDifficultyTier, { label: string; note: string }> = {
@@ -179,12 +179,12 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
         key={q.id}
         className={`rounded-2xl border p-5 flex flex-col justify-between transition-all ${
           spotlight
-            ? 'bg-gradient-to-br from-[#102440] via-[#0A1930] to-[#061225] border-[#00D9FF]/60 shadow-[0_12px_32px_rgba(2,8,20,0.6)] ring-1 ring-[#00D9FF]/25'
+            ? 'bg-gradient-to-br from-[#1B1B2B] via-[#141420] to-[#090910] border-[#D6A84B]/60 shadow-[0_12px_32px_rgba(9,9,16,0.65)] ring-1 ring-[#D6A84B]/25'
             : q.claimed
-            ? 'bg-[#0A1930]/75 border-[#1677FF]/20 opacity-85'
+            ? 'bg-[#0E0E17]/75 border-[#34D399]/25 opacity-85'
             : q.completed
-            ? 'bg-[#102440] border-emerald-500/55 ring-1 ring-emerald-500/30 shadow-lg'
-            : 'bg-[#102440]/90 backdrop-blur-md border-[#1677FF]/30 hover:border-[#00D9FF]/45 shadow-[0_12px_32px_rgba(2,8,20,0.6)]'
+            ? 'bg-[#141420] border-[#34D399]/55 ring-1 ring-[#34D399]/30 shadow-lg'
+            : 'bg-[#141420]/90 backdrop-blur-md border-[#8B5CF6]/30 hover:border-[#D6A84B]/45 shadow-[0_12px_32px_rgba(9,9,16,0.65)]'
         }`}
       >
         <div>
@@ -193,13 +193,13 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
             <div className="flex items-center gap-1.5 font-semibold">
               <CatIcon className={`w-3.5 h-3.5 ${catMeta.color}`} />
               <span className={catMeta.color}>{catMeta.label}</span>
-              <span className="text-[#A9B8CC]/40" aria-hidden="true">·</span>
-              <span className="uppercase tracking-wider font-mono text-[#00D9FF]">
+              <span className="text-[#A1A1B8]/40" aria-hidden="true">·</span>
+              <span className={`uppercase tracking-wider font-mono ${spotlight ? 'text-[#D6A84B]' : 'text-[#8B5CF6]'}`}>
                 {spotlight ? 'Special Daily Challenge' : q.difficulty}
               </span>
             </div>
-            <span className="text-[#A9B8CC] font-mono flex items-center gap-1 tabular-nums">
-              <Clock className="w-3 h-3 text-[#A9B8CC]/70" />
+            <span className="text-[#A1A1B8] font-mono flex items-center gap-1 tabular-nums">
+              <Clock className="w-3 h-3 text-[#A1A1B8]/70" />
               ~{q.estimatedMinutes}m
             </span>
           </div>
@@ -208,39 +208,39 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
             {q.title}
           </h3>
 
-          <p className="text-xs text-[#A9B8CC] leading-relaxed mt-1.5">
+          <p className="text-xs text-[#A1A1B8] leading-relaxed mt-1.5">
             {q.description}
           </p>
 
-          <p className="text-[11px] text-[#00D9FF]/90 mt-2.5 leading-snug">
-            <span className="font-semibold text-[#00D9FF]">Why this quest: </span>
+          <p className="text-[11px] text-[#38BDF8]/90 mt-2.5 leading-snug">
+            <span className="font-semibold text-[#38BDF8]">Why this quest: </span>
             {q.personalizationReason}
           </p>
         </div>
 
-        <div className="space-y-3 pt-4 mt-4 border-t border-[#1677FF]/20">
+        <div className="space-y-3 pt-4 mt-4 border-t border-[#8B5CF6]/20">
           {/* Rewards */}
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-mono tabular-nums">
-            <span className="text-[#00D9FF] font-semibold flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-[#00D9FF]" />+{q.playerXpReward} XP
+            <span className="text-[#FBBF24] font-semibold flex items-center gap-1">
+              <Sparkles className="w-3.5 h-3.5 text-[#FBBF24]" />+{q.playerXpReward} XP
             </span>
-            <span className="text-amber-300 font-semibold flex items-center gap-1">
-              <Coins className="w-3.5 h-3.5 text-amber-400" />+{q.goldReward} Gold
+            <span className="text-[#D6A84B] font-semibold flex items-center gap-1">
+              <Coins className="w-3.5 h-3.5 text-[#D6A84B]" />+{q.goldReward} Gold
             </span>
           </div>
 
           {/* Progress bar */}
           <div>
-            <div className="flex justify-between text-[11px] text-[#A9B8CC] mb-1 font-mono tabular-nums">
+            <div className="flex justify-between text-[11px] text-[#A1A1B8] mb-1 font-mono tabular-nums">
               <span className="truncate pr-2">{q.objectiveLabel}</span>
               <span className="shrink-0">
                 {q.progress}/{q.maxProgress} {q.unitLabel}
               </span>
             </div>
-            <div className="w-full bg-[#061225] h-2 rounded-full overflow-hidden border border-[#1677FF]/20">
+            <div className="w-full bg-[#090910] h-2 rounded-full overflow-hidden border border-[#8B5CF6]/20">
               <div
                 className={`h-full transition-all ${
-                  q.completed ? 'bg-emerald-400' : spotlight ? 'bg-[#00D9FF]' : 'bg-gradient-to-r from-[#1677FF] to-[#00D9FF]'
+                  q.completed ? 'bg-[#34D399]' : spotlight ? 'bg-[#D6A84B]' : 'bg-gradient-to-r from-[#8B5CF6] to-[#FBBF24]'
                 }`}
                 style={{ width: `${pct}%` }}
               />
@@ -249,8 +249,8 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
 
           {/* Inline Reflection Drawer for Offline / Study Quests */}
           {isEditingEvidence && !q.completed && (
-            <div className="rounded-xl bg-[#0A1930] border border-[#1677FF]/35 p-3 space-y-2">
-              <label className="block text-[11px] font-semibold text-[#00D9FF]">
+            <div className="rounded-xl bg-[#0E0E17] border border-[#8B5CF6]/35 p-3 space-y-2">
+              <label className="block text-[11px] font-semibold text-[#8B5CF6]">
                 Record Genuine Reflection (min 12 chars)
               </label>
               <textarea
@@ -258,9 +258,9 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
                 value={evidenceInput}
                 onChange={e => setEvidenceInput(e.target.value)}
                 placeholder="Briefly describe what you practiced, learned, or completed..."
-                className="w-full rounded-lg bg-[#061225] border border-[#1677FF]/30 p-2 text-xs text-white placeholder:text-[#A9B8CC]/50 focus:outline-none focus:border-[#00D9FF]"
+                className="w-full rounded-lg bg-[#090910] border border-[#8B5CF6]/30 p-2 text-xs text-white placeholder:text-[#A1A1B8]/50 focus:outline-none focus:border-[#D6A84B]"
               />
-              {evidenceError && <p className="text-[11px] text-rose-400">{evidenceError}</p>}
+              {evidenceError && <p className="text-[11px] text-[#FB7185]">{evidenceError}</p>}
               <div className="flex items-center justify-end gap-2">
                 <button
                   type="button"
@@ -268,14 +268,14 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
                     setActiveEvidenceQuestId(null);
                     setEvidenceError(null);
                   }}
-                  className="px-2.5 py-1 rounded-lg text-xs text-[#A9B8CC] hover:text-white"
+                  className="px-2.5 py-1 rounded-lg text-xs text-[#A1A1B8] hover:text-white"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={() => handleSubmitReflection(q.id)}
-                  className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white font-bold text-xs whitespace-nowrap shrink-0"
+                  className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] hover:brightness-110 text-white font-bold text-xs whitespace-nowrap shrink-0"
                 >
                   Confirm Completion
                 </button>
@@ -285,7 +285,7 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
 
           {/* Action Row */}
           {q.claimed ? (
-            <div className="text-center py-2 text-xs font-semibold text-emerald-400/90 flex items-center justify-center gap-1.5">
+            <div className="text-center py-2 text-xs font-semibold text-[#34D399] flex items-center justify-center gap-1.5">
               <CheckCircle2 className="w-4 h-4" />
               <span>Claimed &amp; Recorded in Chronicle</span>
             </div>
@@ -293,7 +293,7 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
             <button
               type="button"
               onClick={() => handleClaimAiQuest(q.id)}
-              className="w-full py-2.5 rounded-xl font-['Cinzel'] font-bold text-xs tracking-wider bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-950/60 transition-all"
+              className="w-full py-2.5 rounded-xl font-['Cinzel'] font-bold text-xs tracking-wider bg-gradient-to-r from-[#34D399] to-emerald-500 hover:brightness-110 text-[#090910] shadow-lg shadow-emerald-950/60 transition-all"
             >
               CLAIM REWARD
             </button>
@@ -303,7 +303,7 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
                 <button
                   type="button"
                   onClick={() => setActiveTab(autoRoute.tab)}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#00D9FF] hover:text-white transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#D6A84B] hover:text-white transition-colors"
                 >
                   <span>{autoRoute.label}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -318,9 +318,9 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
                     setEvidenceInput('');
                     setEvidenceError(null);
                   }}
-                  className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0A1930] hover:bg-[#16325C] border border-[#1677FF]/40 hover:border-[#00D9FF]/50 text-xs font-semibold text-white whitespace-nowrap shrink-0 transition-colors"
+                  className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0E0E17] hover:bg-[#1B1B2B] border border-[#8B5CF6]/40 hover:border-[#D6A84B]/50 text-xs font-semibold text-white whitespace-nowrap shrink-0 transition-colors"
                 >
-                  <PenLine className="w-3.5 h-3.5 text-[#00D9FF]" />
+                  <PenLine className="w-3.5 h-3.5 text-[#8B5CF6]" />
                   <span>
                     {q.evidenceType === 'friend_interaction'
                       ? 'Log Real-World Outreach'
@@ -342,26 +342,26 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
       {/* AI-Powered Dynamic Quest Generator Section */}
       <section
         data-tutorial-id="quest-board"
-        className="rounded-2xl border border-[#1677FF]/30 bg-[#102440]/90 backdrop-blur-md p-5 sm:p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)] space-y-5"
+        className="rounded-2xl border border-[#8B5CF6]/30 bg-[#141420]/90 backdrop-blur-md p-5 sm:p-6 shadow-[0_12px_32px_rgba(9,9,16,0.65)] space-y-5"
       >
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2 text-xs mb-1">
-              <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#00D9FF] flex items-center gap-1.5">
+              <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#38BDF8] flex items-center gap-1.5">
                 <Wand2 className="w-3.5 h-3.5" />
                 AI Quest Architect
               </span>
-              <span className="text-[#A9B8CC]/40" aria-hidden="true">·</span>
+              <span className="text-[#A1A1B8]/40" aria-hidden="true">·</span>
               <span className="text-white font-semibold">{activeTierMeta.label}</span>
-              <span className="text-[#A9B8CC]/40" aria-hidden="true">·</span>
-              <span className="text-[#A9B8CC] font-mono tabular-nums">
+              <span className="text-[#A1A1B8]/40" aria-hidden="true">·</span>
+              <span className="text-[#FBBF24] font-mono tabular-nums">
                 Daily Reset in {countdowns.dailyLabel}
               </span>
             </div>
             <h2 className="font-['Cinzel'] font-black text-xl sm:text-2xl text-white tracking-wide">
               TODAY&apos;S PERSONALIZED AI QUESTS
             </h2>
-            <p className="text-xs sm:text-sm text-[#A9B8CC] mt-1 max-w-2xl">
+            <p className="text-xs sm:text-sm text-[#A1A1B8] mt-1 max-w-2xl">
               {activeTierMeta.note} Every quest is tailored uniquely to your habits, goals, streak, and recent activity.
             </p>
           </div>
@@ -371,9 +371,9 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
               <button
                 type="button"
                 onClick={() => setShowCheckIn(prev => !prev)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#0A1930] hover:bg-[#16325C] border border-[#1677FF]/40 hover:border-[#00D9FF]/50 text-xs font-semibold text-white whitespace-nowrap shrink-0 transition-colors"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#0E0E17] hover:bg-[#1B1B2B] border border-[#8B5CF6]/40 hover:border-[#D6A84B]/50 text-xs font-semibold text-white whitespace-nowrap shrink-0 transition-colors"
               >
-                <SlidersHorizontal className="w-3.5 h-3.5 text-[#00D9FF]" />
+                <SlidersHorizontal className="w-3.5 h-3.5 text-[#8B5CF6]" />
                 <span>Energy &amp; Time Check-In</span>
               </button>
             )}
@@ -384,8 +384,8 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
               onClick={handleGenerate}
               className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-['Cinzel'] font-bold text-xs tracking-wider transition-all whitespace-nowrap shrink-0 ${
                 todaysAiQuests.length > 0
-                  ? 'bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 cursor-default'
-                  : 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] disabled:opacity-60 text-white shadow-[0_0_18px_rgba(22,119,255,0.35)]'
+                  ? 'bg-[#34D399]/15 border border-[#34D399]/40 text-[#34D399] cursor-default'
+                  : 'bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] hover:brightness-110 disabled:opacity-60 text-white shadow-[0_0_18px_rgba(139,92,246,0.35)]'
               }`}
             >
               {isGeneratingDailyQuests ? (
@@ -410,10 +410,10 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
 
         {/* Optional Check-In Drawer */}
         {showCheckIn && todaysAiQuests.length === 0 && (
-          <div className="rounded-xl bg-[#0A1930]/90 border border-[#1677FF]/30 p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="rounded-xl bg-[#0E0E17]/90 border border-[#8B5CF6]/30 p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-[#A9B8CC] mb-1.5">
-                Available Time Today: <span className="text-[#00D9FF] font-mono">{availableMinutes} min</span>
+              <label className="block text-xs font-semibold text-[#A1A1B8] mb-1.5">
+                Available Time Today: <span className="text-[#D6A84B] font-mono">{availableMinutes} min</span>
               </label>
               <input
                 type="range"
@@ -422,12 +422,12 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
                 step={15}
                 value={availableMinutes}
                 onChange={e => setAvailableMinutes(Number(e.target.value))}
-                className="w-full accent-[#1677FF]"
+                className="w-full accent-[#8B5CF6]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#A9B8CC] mb-1.5">
+              <label className="block text-xs font-semibold text-[#A1A1B8] mb-1.5">
                 Self-Reported Energy Level
               </label>
               <div className="flex gap-1.5">
@@ -438,8 +438,8 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
                     onClick={() => setEnergyLevel(lvl)}
                     className={`flex-1 py-1.5 rounded-lg text-xs font-semibold capitalize border transition-colors ${
                       energyLevel === lvl
-                        ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] border-[#00D9FF]/50 text-white'
-                        : 'bg-[#061225] border-[#1677FF]/25 text-[#A9B8CC] hover:text-white'
+                        ? 'bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] border-[#D6A84B]/50 text-white'
+                        : 'bg-[#090910] border-[#8B5CF6]/25 text-[#A1A1B8] hover:text-white'
                     }`}
                   >
                     {lvl}
@@ -449,7 +449,7 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#A9B8CC] mb-1.5">
+              <label className="block text-xs font-semibold text-[#A1A1B8] mb-1.5">
                 Optional Focus Note
               </label>
               <input
@@ -457,7 +457,7 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
                 value={focusNote}
                 onChange={e => setFocusNote(e.target.value)}
                 placeholder="e.g., exam study, light walk, clean evening routine"
-                className="w-full px-3 py-1.5 rounded-lg bg-[#061225] border border-[#1677FF]/30 text-xs text-white placeholder:text-[#A9B8CC]/50 focus:outline-none focus:border-[#00D9FF]"
+                className="w-full px-3 py-1.5 rounded-lg bg-[#090910] border border-[#8B5CF6]/30 text-xs text-white placeholder:text-[#A1A1B8]/50 focus:outline-none focus:border-[#D6A84B]"
               />
             </div>
           </div>
@@ -465,23 +465,23 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
 
         {/* Mentor Greeting */}
         {mentorGreeting && todaysAiQuests.length > 0 && (
-          <div className="rounded-xl bg-[#0A1930]/80 border border-[#00D9FF]/30 px-4 py-3 text-xs text-[#A9B8CC] italic">
+          <div className="rounded-xl bg-[#0E0E17]/80 border border-[#D6A84B]/30 px-4 py-3 text-xs text-[#A1A1B8] italic">
             &ldquo;{mentorGreeting}&rdquo;
           </div>
         )}
 
         {/* Errors */}
         {(questGenerationError || actionMessage) && (
-          <div className="rounded-xl border border-rose-500/40 bg-rose-950/35 p-3.5 flex items-center justify-between gap-3 text-xs text-rose-200">
+          <div className="rounded-xl border border-[#FB7185]/40 bg-[#FB7185]/15 p-3.5 flex items-center justify-between gap-3 text-xs text-[#FB7185]">
             <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+              <AlertCircle className="w-4 h-4 text-[#FB7185] shrink-0" />
               <span>{questGenerationError || actionMessage}</span>
             </div>
             {questGenerationError && todaysAiQuests.length === 0 && (
               <button
                 type="button"
                 onClick={handleGenerate}
-                className="px-3 py-1 rounded-lg bg-rose-900/70 hover:bg-rose-800 text-white font-semibold whitespace-nowrap shrink-0"
+                className="px-3 py-1 rounded-lg bg-[#FB7185]/20 hover:bg-[#FB7185]/30 text-white font-semibold whitespace-nowrap shrink-0"
               >
                 Retry
               </button>
@@ -491,12 +491,12 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
 
         {/* Rune-forging Loading State */}
         {isGeneratingDailyQuests && (
-          <div className="rounded-2xl border border-[#1677FF]/30 bg-[#0A1930] p-8 text-center space-y-3">
-            <div className="w-11 h-11 mx-auto rounded-full border-2 border-[#00D9FF] border-t-transparent animate-spin" />
-            <p className="font-['Cinzel'] font-bold text-sm text-[#00D9FF]">
+          <div className="rounded-2xl border border-[#8B5CF6]/30 bg-[#0E0E17] p-8 text-center space-y-3">
+            <div className="w-11 h-11 mx-auto rounded-full border-2 border-[#8B5CF6] border-t-transparent animate-spin" />
+            <p className="font-['Cinzel'] font-bold text-sm text-[#D6A84B]">
               Inscribing Personalized Runes from Your Chronicle...
             </p>
-            <p className="text-xs text-[#A9B8CC]">
+            <p className="text-xs text-[#A1A1B8]">
               Balancing Physical, Intellectual, Discipline, Personal Growth, and Social objectives.
             </p>
           </div>
@@ -507,7 +507,7 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
           <div className="space-y-4">
             {specialChallenge && (
               <div>
-                <div className="flex items-center gap-1.5 text-[11px] font-['Cinzel'] font-bold uppercase tracking-widest text-[#00D9FF] mb-2">
+                <div className="flex items-center gap-1.5 text-[11px] font-['Cinzel'] font-bold uppercase tracking-widest text-[#D6A84B] mb-2">
                   <Crown className="w-3.5 h-3.5" />
                   <span>Special Daily Challenge Spotlight</span>
                 </div>
@@ -523,26 +523,26 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
 
         {/* Empty State CTA */}
         {!isGeneratingDailyQuests && todaysAiQuests.length === 0 && (
-          <div className="rounded-xl border border-[#1677FF]/25 bg-[#0A1930]/80 p-6 text-center">
-            <p className="text-xs sm:text-sm text-[#A9B8CC] max-w-xl mx-auto">
-              Press <strong className="text-[#00D9FF]">GENERATE TODAY&apos;S QUESTS</strong> above to craft five adaptive daily objectives across Physical, Intellectual, Discipline, Personal Growth, and Social pillars.
+          <div className="rounded-xl border border-[#8B5CF6]/25 bg-[#0E0E17]/80 p-6 text-center">
+            <p className="text-xs sm:text-sm text-[#A1A1B8] max-w-xl mx-auto">
+              Press <strong className="text-[#D6A84B]">GENERATE TODAY&apos;S QUESTS</strong> above to craft five adaptive daily objectives across Physical, Intellectual, Discipline, Personal Growth, and Social pillars.
             </p>
           </div>
         )}
       </section>
 
       {/* Classic Realm Bounties Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 rounded-2xl p-4 shadow-[0_12px_32px_rgba(2,8,20,0.6)]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#141420]/90 backdrop-blur-md border border-[#8B5CF6]/30 rounded-2xl p-4 shadow-[0_12px_32px_rgba(9,9,16,0.65)]">
         <div>
           <h2 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-            <Scroll className="w-4 h-4 text-[#00D9FF]" />
+            <Scroll className="w-4 h-4 text-[#D6A84B]" />
             <span>Classic Realm Bounties</span>
           </h2>
-          <p className="text-xs text-[#A9B8CC] mt-0.5">
+          <p className="text-xs text-[#A1A1B8] mt-0.5">
             Weekly reset in {countdowns.weeklyLabel} · Preserved core habit and combat bounties.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-1.5 p-1 bg-[#061225] rounded-xl border border-[#1677FF]/25">
+        <div className="flex flex-wrap items-center gap-1.5 p-1 bg-[#090910] rounded-xl border border-[#8B5CF6]/25">
           {(['all', 'daily', 'weekly', 'special'] as const).map(type => (
             <button
               key={type}
@@ -550,8 +550,8 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
               onClick={() => setSelectedType(type)}
               className={`px-3 py-1.5 text-xs font-semibold rounded-lg capitalize transition-colors whitespace-nowrap shrink-0 ${
                 selectedType === type
-                  ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white shadow-[0_0_14px_rgba(22,119,255,0.35)]'
-                  : 'text-[#A9B8CC] hover:text-white'
+                  ? 'bg-gradient-to-r from-[#6D28D9] to-[#8B5CF6] text-white shadow-[0_0_14px_rgba(139,92,246,0.35)]'
+                  : 'text-[#A1A1B8] hover:text-white'
               }`}
             >
               {type}
@@ -571,20 +571,20 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
               key={q.id}
               className={`p-5 rounded-2xl border flex flex-col justify-between transition-all ${
                 isClaimed
-                  ? 'bg-[#0A1930]/70 border-[#1677FF]/20 text-[#A9B8CC]'
+                  ? 'bg-[#0E0E17]/70 border-[#34D399]/25 text-[#A1A1B8]'
                   : isCompleted
-                  ? 'bg-[#102440] border-[#00D9FF]/60 ring-1 ring-[#00D9FF]/30 shadow-[0_12px_32px_rgba(2,8,20,0.6)]'
-                  : 'bg-[#102440]/90 backdrop-blur-md border-[#1677FF]/30 hover:border-[#00D9FF]/45 shadow-[0_12px_32px_rgba(2,8,20,0.6)]'
+                  ? 'bg-[#141420] border-[#34D399]/60 ring-1 ring-[#34D399]/30 shadow-[0_12px_32px_rgba(9,9,16,0.65)]'
+                  : 'bg-[#141420]/90 backdrop-blur-md border-[#8B5CF6]/30 hover:border-[#D6A84B]/45 shadow-[0_12px_32px_rgba(9,9,16,0.65)]'
               }`}
             >
               <div>
                 <div className="flex items-start justify-between gap-2 mb-2 text-[11px]">
-                  <span className="uppercase font-bold text-[#00D9FF] tracking-wider">
+                  <span className="uppercase font-bold text-[#D6A84B] tracking-wider">
                     {q.type} Quest
                   </span>
                   {q.expiresIn && (
-                    <span className="text-[#A9B8CC] flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-[#A9B8CC]/70" />
+                    <span className="text-[#A1A1B8] flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-[#A1A1B8]/70" />
                       {q.expiresIn}
                     </span>
                   )}
@@ -593,29 +593,29 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
                 <h3 className="font-['Cinzel'] font-bold text-base text-white mb-1">
                   {q.title}
                 </h3>
-                <p className="text-xs text-[#A9B8CC] leading-relaxed mb-4">
+                <p className="text-xs text-[#A1A1B8] leading-relaxed mb-4">
                   {q.description}
                 </p>
               </div>
 
-              <div className="space-y-3 pt-3 border-t border-[#1677FF]/20">
+              <div className="space-y-3 pt-3 border-t border-[#8B5CF6]/20">
                 <div className="flex items-center justify-between text-xs font-mono tabular-nums">
-                  <span className="text-[#00D9FF] font-semibold flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5 text-[#00D9FF]" />
+                  <span className="text-[#FBBF24] font-semibold flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5 text-[#FBBF24]" />
                     +{q.playerXpReward} Player XP
                   </span>
                 </div>
 
                 <div>
-                  <div className="flex justify-between text-[11px] text-[#A9B8CC] mb-1 font-mono tabular-nums">
+                  <div className="flex justify-between text-[11px] text-[#A1A1B8] mb-1 font-mono tabular-nums">
                     <span>Progress</span>
                     <span>
                       {q.progress} / {q.maxProgress}
                     </span>
                   </div>
-                  <div className="w-full bg-[#061225] h-2 rounded-full overflow-hidden border border-[#1677FF]/20">
+                  <div className="w-full bg-[#090910] h-2 rounded-full overflow-hidden border border-[#8B5CF6]/20">
                     <div
-                      className="bg-gradient-to-r from-[#1677FF] to-[#00D9FF] h-full transition-all"
+                      className="bg-gradient-to-r from-[#8B5CF6] to-[#FBBF24] h-full transition-all"
                       style={{ width: `${Math.min(100, (q.progress / q.maxProgress) * 100)}%` }}
                     />
                   </div>
@@ -625,17 +625,17 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
                   <button
                     type="button"
                     onClick={() => claimQuest(q.id)}
-                    className="w-full py-2.5 rounded-xl font-['Cinzel'] font-bold text-xs tracking-wider bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-950/60 transition-all"
+                    className="w-full py-2.5 rounded-xl font-['Cinzel'] font-bold text-xs tracking-wider bg-gradient-to-r from-[#34D399] to-emerald-500 hover:brightness-110 text-[#090910] shadow-lg shadow-emerald-950/60 transition-all"
                   >
                     CLAIM REWARD
                   </button>
                 ) : isClaimed ? (
-                  <div className="text-center py-2 text-xs font-semibold text-emerald-400/80 flex items-center justify-center gap-1.5">
+                  <div className="text-center py-2 text-xs font-semibold text-[#34D399] flex items-center justify-center gap-1.5">
                     <CheckCircle2 className="w-4 h-4" />
                     <span>Reward Claimed</span>
                   </div>
                 ) : (
-                  <div className="text-center py-2 text-xs text-[#A9B8CC]/70 font-medium">
+                  <div className="text-center py-2 text-xs text-[#A1A1B8]/70 font-medium">
                     In Progress
                   </div>
                 )}
@@ -646,10 +646,10 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
       </div>
 
       {/* Combined AI Quest & Reward History */}
-      <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 rounded-2xl p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)] space-y-5">
+      <div className="bg-[#141420]/90 backdrop-blur-md border border-[#8B5CF6]/30 rounded-2xl p-6 shadow-[0_12px_32px_rgba(9,9,16,0.65)] space-y-5">
         {dynamicQuestHistory.length > 0 && (
           <div>
-            <h3 className="font-['Cinzel'] font-bold text-sm text-[#00D9FF] flex items-center gap-2 mb-3">
+            <h3 className="font-['Cinzel'] font-bold text-sm text-[#D6A84B] flex items-center gap-2 mb-3">
               <Wand2 className="w-4 h-4" />
               <span>AI QUEST ARCHIVE</span>
             </h3>
@@ -657,18 +657,18 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
               {dynamicQuestHistory.slice(0, 12).map(h => (
                 <div
                   key={h.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 text-xs"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-[#0E0E17] border border-[#8B5CF6]/25 text-xs"
                 >
                   <div>
                     <span className="font-semibold text-white">{h.title}</span>
-                    <span className="text-[11px] text-[#A9B8CC] ml-2 font-mono">{h.periodKey}</span>
+                    <span className="text-[11px] text-[#A1A1B8] ml-2 font-mono">{h.periodKey}</span>
                     {h.evidenceNote && (
-                      <p className="text-[11px] text-[#A9B8CC]/80 mt-0.5 italic">
+                      <p className="text-[11px] text-[#A1A1B8]/80 mt-0.5 italic">
                         &ldquo;{h.evidenceNote}&rdquo;
                       </p>
                     )}
                   </div>
-                  <span className="font-mono font-bold text-emerald-300 whitespace-nowrap shrink-0 tabular-nums">
+                  <span className="font-mono font-bold text-[#34D399] whitespace-nowrap shrink-0 tabular-nums">
                     +{h.playerXpReward} XP · +{h.goldReward}g
                   </span>
                 </div>
@@ -679,22 +679,22 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
 
         <div>
           <h3 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2 mb-4">
-            <History className="w-4 h-4 text-[#00D9FF]" />
+            <History className="w-4 h-4 text-[#D6A84B]" />
             <span>RECENT XP &amp; REWARD HISTORY</span>
           </h3>
           <div className="space-y-2 max-h-56 overflow-y-auto">
             {transactions.map(tx => (
               <div
                 key={tx.id}
-                className="flex items-center justify-between p-3 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 text-xs"
+                className="flex items-center justify-between p-3 rounded-xl bg-[#0E0E17] border border-[#8B5CF6]/25 text-xs"
               >
                 <div>
                   <span className="font-semibold text-white">{tx.source}</span>
-                  <span className="text-[10px] text-[#A9B8CC]/70 ml-2 font-mono">{tx.timestamp}</span>
+                  <span className="text-[10px] text-[#A1A1B8]/70 ml-2 font-mono">{tx.timestamp}</span>
                 </div>
                 <span
                   className={`font-mono font-bold tabular-nums ${
-                    tx.type === 'GOLD' ? 'text-amber-300' : 'text-[#00D9FF]'
+                    tx.type === 'GOLD' ? 'text-[#D6A84B]' : 'text-[#FBBF24]'
                   }`}
                 >
                   {tx.amount > 0 ? `+${tx.amount}` : tx.amount}{' '}

@@ -130,7 +130,7 @@ export const SKILL_TREE_ATTRIBUTES: SkillTreeAttributeDefinition[] = [
         branchId: 'str-iron-foundation',
         branchName: 'Iron Foundation',
         tier: 3,
-        name: 'Iron Sovereign',
+        name: 'Anvil Sovereign',
         tagline: 'Resilient joints across seasons.',
         description: 'Master lifelong sustainable strength mechanics without sacrificing recovery.',
         realLifePractice: 'Reach Strength Level 7 and sustain balanced training habits.',
@@ -143,11 +143,11 @@ export const SKILL_TREE_ATTRIBUTES: SkillTreeAttributeDefinition[] = [
         branchId: 'str-titan-force',
         branchName: 'Titan Force',
         tier: 1,
-        name: 'First Iron Lift',
+        name: 'First Forge Lift',
         tagline: 'Every rep leaves an imprint.',
         description: 'Build repeatable pushing and lower-body strength patterns.',
         realLifePractice: 'Log 2 verified strength training sessions.',
-        masteryTitle: 'Iron Apprentice',
+        masteryTitle: 'Forge Apprentice',
         requirements: { minAttributeLevel: 2, prerequisiteNodeIds: [], minVerifiedActivities: 2 },
       },
       {
@@ -199,7 +199,7 @@ export const SKILL_TREE_ATTRIBUTES: SkillTreeAttributeDefinition[] = [
         tagline: 'Balanced output left and right.',
         description: 'Eliminate side-to-side imbalances with unilateral and paused repetitions.',
         realLifePractice: 'Reach Strength Level 5 and unlock Steel Leverage or Measured Tempo.',
-        masteryTitle: 'Equilibrium Striker',
+        masteryTitle: 'Equilibrium Blade',
         requirements: { minAttributeLevel: 5, prerequisiteNodeIds: ['str-3a'], minVerifiedActivities: 5 },
       },
       {
@@ -232,7 +232,7 @@ export const SKILL_TREE_ATTRIBUTES: SkillTreeAttributeDefinition[] = [
         requiredNodesUnlocked: 3,
         title: 'Tempered Vanguard',
         description: 'Reached Strength Level 5 with at least 3 unlocked Strength skill nodes.',
-        honorSeal: 'Silver Bastion Crest',
+        honorSeal: 'Silver Anvil Crest',
       },
       {
         id: 'ms-str-8',
@@ -241,7 +241,7 @@ export const SKILL_TREE_ATTRIBUTES: SkillTreeAttributeDefinition[] = [
         requiredNodesUnlocked: 6,
         title: 'Citadel Lifter',
         description: 'Demonstrated sustained, safe resistance progression to Level 8.',
-        honorSeal: 'Gilded Iron Sigil',
+        honorSeal: 'Gilded Forge Sigil',
       },
       {
         id: 'ms-str-10',
@@ -259,7 +259,7 @@ export const SKILL_TREE_ATTRIBUTES: SkillTreeAttributeDefinition[] = [
     name: 'Endurance',
     subtitle: 'Aerobic Stamina & Steady Pace',
     description:
-      'Built through verified walking, running, cycling, and rhythmic cardio conditioning.',
+      'Forged through verified walking, running, cycling, and rhythmic cardio conditioning.',
     verifiedSources: [
       'Verified running, walking, cycling & jumping-jack workouts',
       'Cardiovascular duration & distance logs',
@@ -836,7 +836,7 @@ export const SKILL_TREE_ATTRIBUTES: SkillTreeAttributeDefinition[] = [
     name: 'Resilience',
     subtitle: 'Comeback Momentum & Grit',
     description:
-      'Built when you return after a missed day, adapt under stress, and rebuild momentum.',
+      'Forged when you return after a missed day, adapt under stress, and rebuild momentum.',
     verifiedSources: [
       'Consistent comeback activity after missed days',
       'Gentle-comeback / reset recovery actions & boss resilience triumphs',
@@ -938,11 +938,11 @@ export const SKILL_TREE_ATTRIBUTES: SkillTreeAttributeDefinition[] = [
         branchId: 'res-stoic-bulwark',
         branchName: 'Stoic Bulwark',
         tier: 3,
-        name: 'Unbreakable Bastion',
+        name: 'Unbreakable Shield',
         tagline: 'Storms pass; granite remains.',
         description: 'Demonstrate mature emotional steadiness through prolonged challenges.',
         realLifePractice: 'Reach Resilience Level 9 and complete 8 resilience activities.',
-        masteryTitle: 'Bastion Sovereign',
+        masteryTitle: 'Aegis Sovereign',
         requirements: { minAttributeLevel: 9, prerequisiteNodeIds: ['res-2b'], minVerifiedActivities: 8 },
       },
       {
@@ -1001,7 +1001,7 @@ export const SKILL_TREE_ATTRIBUTES: SkillTreeAttributeDefinition[] = [
         requiredNodesUnlocked: 3,
         title: 'Stormbound Defender',
         description: 'Reached Resilience Level 5 with 3 Resilience nodes unlocked.',
-        honorSeal: 'Tempered Bastion Crest',
+        honorSeal: 'Tempered Shield Crest',
       },
       {
         id: 'ms-res-8',
