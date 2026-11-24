@@ -110,7 +110,7 @@ export const FitnessView: React.FC = () => {
               FITNESS TRACKER & LOGS
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1">
-              Record daily workouts, walks, gym sets, and calisthenics. Camera-verified sessions on Aether Vision grant maximum Forge XP and combat buffs!
+              Record daily workouts, walks, gym sets, and calisthenics. Camera-verified sessions on Aether Vision grant maximum Player XP, bodyweight combat strength, and combat buffs!
             </p>
           </div>
 
@@ -273,7 +273,6 @@ export const FitnessView: React.FC = () => {
 
                 <div className="flex items-center gap-4 text-xs font-mono">
                   <span className="text-purple-300 font-semibold">+{session.playerXpEarned} Player XP</span>
-                  <span className="text-amber-400 font-semibold">+{session.forgeXpEarned} Forge XP</span>
                 </div>
               </div>
             ))}

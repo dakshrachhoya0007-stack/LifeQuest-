@@ -28,6 +28,7 @@ import {
   ChevronUp,
   Clock,
   Crown,
+  Dumbbell,
   Eye,
   Flame,
   Heart,
@@ -39,7 +40,6 @@ import {
   Scale,
   Search,
   Shield,
-  Swords,
   Target,
   Trophy,
   Unlock,
@@ -710,7 +710,7 @@ export const RivalsView: React.FC = () => {
       <div className="flex flex-wrap items-center gap-1.5 p-1 bg-[#100D19] border border-[#C5A15A]/20 rounded-xl w-fit">
         {(
           [
-            { id: 'queue', label: 'Arena & Queue', icon: Swords },
+            { id: 'queue', label: 'Arena & Queue', icon: Dumbbell },
             { id: 'challenge', label: 'Direct Challenge', icon: Target },
             {
               id: 'matches',
@@ -1135,7 +1135,7 @@ export const RivalsView: React.FC = () => {
           {/* Active Head-to-Head Duels */}
           <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-5 space-y-4">
             <h2 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-              <Swords className="w-4 h-4 text-[#C5A15A]" />
+              <Dumbbell className="w-4 h-4 text-[#C5A15A]" />
               Active Competitive Matches
             </h2>
 

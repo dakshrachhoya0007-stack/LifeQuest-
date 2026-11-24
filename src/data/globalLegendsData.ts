@@ -34,7 +34,7 @@ export const GLOBAL_LEGEND_CATEGORIES: Array<{
   {
     id: 'exploration_and_discovery',
     label: 'Exploration & Discovery',
-    subtitle: 'Grand campaigns, master smithing relics, and historic milestones.',
+    subtitle: 'Grand campaigns, historic feats, and realm-wide milestones.',
   },
   {
     id: 'social_legends',
@@ -149,7 +149,7 @@ export const RARITY_FRAME_META: Record<
 
 export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
   // =========================================================================
-  // 1. LEGENDARY DISCIPLINE (7) — Zero Player XP inflation (Honor + Title + Cosmetic Forge/Gold)
+  // 1. LEGENDARY DISCIPLINE (7) — Zero Player XP inflation (Honor + Title + Gold)
   // =========================================================================
   {
     id: 'gl-disc-01',
@@ -165,7 +165,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'dynamic_discipline_claimed',
     threshold: 75,
     rewardPlayerXp: 0,
-    rewardForgeXp: 500,
     rewardGold: 800,
   },
   {
@@ -182,13 +181,12 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'habits_claimed_total',
     threshold: 300,
     rewardPlayerXp: 0,
-    rewardForgeXp: 650,
     rewardGold: 1000,
   },
   {
     id: 'gl-disc-03',
     name: 'Architect of Order',
-    story: 'Carved structure out of chaos across one hundred fifty AI-forged daily quests.',
+    story: 'Carved structure out of chaos across one hundred fifty AI-crafted daily quests.',
     category: 'legendary_discipline',
     rarity: 'Mythic',
     difficulty: 'Extreme',
@@ -199,7 +197,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'dynamic_quests_claimed_total',
     threshold: 150,
     rewardPlayerXp: 0,
-    rewardForgeXp: 800,
     rewardGold: 1400,
   },
   {
@@ -216,24 +213,22 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'habits_claimed_total',
     threshold: 1000,
     rewardPlayerXp: 0,
-    rewardForgeXp: 1500,
     rewardGold: 3000,
   },
   {
     id: 'gl-disc-05',
-    name: 'Sentinel of Procrastination Slain',
-    story: 'Struck down hesitation permanently across two hundred Discipline quests.',
+    name: 'Sentinel of Procrastination Conquered',
+    story: 'Defeated hesitation permanently across two hundred Discipline quests.',
     category: 'legendary_discipline',
     rarity: 'Mythic',
     difficulty: 'Pinnacle',
     titleTag: 'IRON WILL SENTINEL',
     titleStyle: 'crimson',
-    emblemIcon: 'Swords',
+    emblemIcon: 'Flame',
     requirementSummary: 'Claim 200 Discipline category AI quests',
     requirementType: 'dynamic_discipline_claimed',
     threshold: 200,
     rewardPlayerXp: 0,
-    rewardForgeXp: 1200,
     rewardGold: 2200,
   },
   {
@@ -250,7 +245,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'quests_claimed_total',
     threshold: 300,
     rewardPlayerXp: 0,
-    rewardForgeXp: 1400,
     rewardGold: 2600,
   },
   {
@@ -267,7 +261,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'total_xp',
     threshold: 100000,
     rewardPlayerXp: 0,
-    rewardForgeXp: 2200,
     rewardGold: 5000,
   },
 
@@ -288,7 +281,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'dynamic_intellectual_claimed',
     threshold: 75,
     rewardPlayerXp: 0,
-    rewardForgeXp: 500,
     rewardGold: 800,
   },
   {
@@ -305,7 +297,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'dynamic_intellectual_claimed',
     threshold: 175,
     rewardPlayerXp: 0,
-    rewardForgeXp: 900,
     rewardGold: 1600,
   },
   {
@@ -322,7 +313,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'daily_reports_generated',
     threshold: 60,
     rewardPlayerXp: 0,
-    rewardForgeXp: 700,
     rewardGold: 1200,
   },
   {
@@ -339,7 +329,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'dynamic_personal_growth_claimed',
     threshold: 150,
     rewardPlayerXp: 0,
-    rewardForgeXp: 950,
     rewardGold: 1800,
   },
   {
@@ -356,7 +345,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'dynamic_intellectual_claimed',
     threshold: 300,
     rewardPlayerXp: 0,
-    rewardForgeXp: 1600,
     rewardGold: 3200,
   },
   {
@@ -373,7 +361,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'daily_reports_generated',
     threshold: 180,
     rewardPlayerXp: 0,
-    rewardForgeXp: 2000,
     rewardGold: 4200,
   },
 
@@ -383,7 +370,7 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
   {
     id: 'gl-phys-01',
     name: 'Vanguard of Iron',
-    story: 'Forged steel resilience across one hundred twenty verified workout sessions.',
+    story: 'Built steel resilience across one hundred twenty verified workout sessions.',
     category: 'physical_excellence',
     rarity: 'Legendary',
     difficulty: 'Extreme',
@@ -394,7 +381,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'total_workouts',
     threshold: 120,
     rewardPlayerXp: 0,
-    rewardForgeXp: 750,
     rewardGold: 1200,
   },
   {
@@ -411,7 +397,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'total_verified_reps',
     threshold: 15000,
     rewardPlayerXp: 0,
-    rewardForgeXp: 1100,
     rewardGold: 2000,
   },
   {
@@ -428,7 +413,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'dynamic_physical_claimed',
     threshold: 150,
     rewardPlayerXp: 0,
-    rewardForgeXp: 1000,
     rewardGold: 1800,
   },
   {
@@ -445,7 +429,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'total_workouts',
     threshold: 300,
     rewardPlayerXp: 0,
-    rewardForgeXp: 1800,
     rewardGold: 3500,
   },
   {
@@ -462,7 +445,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'total_verified_reps',
     threshold: 50000,
     rewardPlayerXp: 0,
-    rewardForgeXp: 2400,
     rewardGold: 5000,
   },
   {
@@ -479,7 +461,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'dynamic_physical_claimed',
     threshold: 80,
     rewardPlayerXp: 0,
-    rewardForgeXp: 650,
     rewardGold: 1100,
   },
   {
@@ -496,7 +477,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'aether_points',
     threshold: 18000,
     rewardPlayerXp: 0,
-    rewardForgeXp: 1400,
     rewardGold: 2800,
   },
 
@@ -517,7 +497,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'current_streak',
     threshold: 45,
     rewardPlayerXp: 0,
-    rewardForgeXp: 750,
     rewardGold: 1200,
   },
   {
@@ -534,7 +513,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'current_streak',
     threshold: 90,
     rewardPlayerXp: 0,
-    rewardForgeXp: 1400,
     rewardGold: 2600,
   },
   {
@@ -551,7 +529,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'current_streak',
     threshold: 180,
     rewardPlayerXp: 0,
-    rewardForgeXp: 2500,
     rewardGold: 5500,
   },
   {
@@ -568,7 +545,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'hydration_goals_total',
     threshold: 60,
     rewardPlayerXp: 0,
-    rewardForgeXp: 650,
     rewardGold: 1100,
   },
   {
@@ -585,7 +561,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'meals_logged_total',
     threshold: 180,
     rewardPlayerXp: 0,
-    rewardForgeXp: 850,
     rewardGold: 1500,
   },
   {
@@ -602,7 +577,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'meals_logged_total',
     threshold: 500,
     rewardPlayerXp: 0,
-    rewardForgeXp: 1600,
     rewardGold: 3200,
   },
   {
@@ -619,7 +593,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'dynamic_quests_claimed_total',
     threshold: 350,
     rewardPlayerXp: 0,
-    rewardForgeXp: 1900,
     rewardGold: 3800,
   },
 
@@ -640,7 +613,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'habits_claimed_total',
     threshold: 450,
     rewardPlayerXp: 0,
-    rewardForgeXp: 800,
     rewardGold: 1400,
   },
   {
@@ -657,59 +629,7 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'level',
     threshold: 35,
     rewardPlayerXp: 0,
-    rewardForgeXp: 2000,
     rewardGold: 4000,
-  },
-  {
-    id: 'gl-expl-03',
-    name: 'Collector of Relics',
-    story: 'Assembled twenty distinct armaments forged through long-term dedication.',
-    category: 'exploration_and_discovery',
-    rarity: 'Mythic',
-    difficulty: 'Extreme',
-    titleTag: 'RELIC COLLECTOR',
-    titleStyle: 'arcane',
-    emblemIcon: 'Hammer',
-    requirementSummary: 'Unlock 20 weapons or gear pieces in your Armory',
-    requirementType: 'unlocked_weapons_count',
-    threshold: 20,
-    rewardPlayerXp: 0,
-    rewardForgeXp: 1000,
-    rewardGold: 1800,
-  },
-  {
-    id: 'gl-expl-04',
-    name: 'Grand Arsenal Curator',
-    story: 'Collected thirty legendary armaments into a sovereign armory vault.',
-    category: 'exploration_and_discovery',
-    rarity: 'Ascendant',
-    difficulty: 'Pinnacle',
-    titleTag: 'ARSENAL CURATOR',
-    titleStyle: 'gold',
-    emblemIcon: 'Swords',
-    requirementSummary: 'Unlock 30 weapons or gear pieces in your Armory',
-    requirementType: 'unlocked_weapons_count',
-    threshold: 30,
-    rewardPlayerXp: 0,
-    rewardForgeXp: 1600,
-    rewardGold: 3200,
-  },
-  {
-    id: 'gl-expl-05',
-    name: 'Master of the Anvil',
-    story: 'Tempered an heirloom weapon to pinnacle Level 25 in the Blacksmith Forge.',
-    category: 'exploration_and_discovery',
-    rarity: 'Mythic',
-    difficulty: 'Pinnacle',
-    titleTag: 'ANVIL MASTER',
-    titleStyle: 'crimson',
-    emblemIcon: 'Hammer',
-    requirementSummary: 'Upgrade any weapon in the Armory to Level 25',
-    requirementType: 'max_weapon_level',
-    threshold: 25,
-    rewardPlayerXp: 0,
-    rewardForgeXp: 1400,
-    rewardGold: 2500,
   },
   {
     id: 'gl-expl-06',
@@ -725,7 +645,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'normal_achievements_unlocked',
     threshold: 35,
     rewardPlayerXp: 0,
-    rewardForgeXp: 1200,
     rewardGold: 2200,
   },
 
@@ -746,7 +665,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'friends_count',
     threshold: 25,
     rewardPlayerXp: 0,
-    rewardForgeXp: 600,
     rewardGold: 1000,
   },
   {
@@ -763,7 +681,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'dynamic_social_claimed',
     threshold: 75,
     rewardPlayerXp: 0,
-    rewardForgeXp: 900,
     rewardGold: 1600,
   },
   {
@@ -780,7 +697,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'level',
     threshold: 30,
     rewardPlayerXp: 0,
-    rewardForgeXp: 1400,
     rewardGold: 2600,
   },
   {
@@ -797,7 +713,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'chat_messages_sent',
     threshold: 250,
     rewardPlayerXp: 0,
-    rewardForgeXp: 650,
     rewardGold: 1100,
   },
   {
@@ -814,13 +729,12 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'dynamic_social_claimed',
     threshold: 200,
     rewardPlayerXp: 0,
-    rewardForgeXp: 1700,
     rewardGold: 3400,
   },
   {
     id: 'gl-soc-06',
     name: 'Bannerlord of Sixty Allies',
-    story: 'Forged sixty trusted, accepted friendships across the realm.',
+    story: 'Formed sixty trusted, accepted friendships across the realm.',
     category: 'social_legends',
     rarity: 'Ascendant',
     difficulty: 'Pinnacle',
@@ -831,7 +745,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'friends_count',
     threshold: 60,
     rewardPlayerXp: 0,
-    rewardForgeXp: 1400,
     rewardGold: 2800,
   },
 
@@ -847,12 +760,11 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     difficulty: 'Extreme',
     titleTag: 'DREADSLAYER',
     titleStyle: 'crimson',
-    emblemIcon: 'Swords',
+    emblemIcon: 'Flame',
     requirementSummary: 'Defeat Kingdom Bosses 40 times',
     requirementType: 'total_bosses_defeated',
     threshold: 40,
     rewardPlayerXp: 0,
-    rewardForgeXp: 1300,
     rewardGold: 2400,
   },
   {
@@ -869,7 +781,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'total_bosses_defeated',
     threshold: 80,
     rewardPlayerXp: 0,
-    rewardForgeXp: 2200,
     rewardGold: 4500,
   },
   {
@@ -886,7 +797,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'level',
     threshold: 30,
     rewardPlayerXp: 0,
-    rewardForgeXp: 1500,
     rewardGold: 3000,
   },
   {
@@ -903,7 +813,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'level',
     threshold: 50,
     rewardPlayerXp: 0,
-    rewardForgeXp: 3000,
     rewardGold: 6500,
   },
   {
@@ -920,25 +829,7 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'gold_balance',
     threshold: 25000,
     rewardPlayerXp: 0,
-    rewardForgeXp: 1200,
     rewardGold: 2000,
-  },
-  {
-    id: 'gl-ult-06',
-    name: 'Emberheart Forge Master',
-    story: 'Accumulated 10,000 Forge XP—enough cosmic fire to reforge celestial steel.',
-    category: 'ultimate_challenges',
-    rarity: 'Mythic',
-    difficulty: 'Pinnacle',
-    titleTag: 'EMBERHEART',
-    titleStyle: 'crimson',
-    emblemIcon: 'Flame',
-    requirementSummary: 'Hold 10,000 Forge XP ready for the anvil',
-    requirementType: 'forge_xp_balance',
-    threshold: 10000,
-    rewardPlayerXp: 0,
-    rewardForgeXp: 1100,
-    rewardGold: 2200,
   },
   {
     id: 'gl-ult-07',
@@ -954,7 +845,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'aether_points',
     threshold: 35000,
     rewardPlayerXp: 0,
-    rewardForgeXp: 2600,
     rewardGold: 5800,
   },
 
@@ -975,7 +865,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'current_streak',
     threshold: 120,
     rewardPlayerXp: 0,
-    rewardForgeXp: 1800,
     rewardGold: 3600,
     isHidden: true,
     hint: 'Tending your daily flame across four quiet seasons unlocks an ancient echo.',
@@ -994,7 +883,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'chat_messages_sent',
     threshold: 500,
     rewardPlayerXp: 0,
-    rewardForgeXp: 1100,
     rewardGold: 2000,
     isHidden: true,
     hint: 'Encouragement spoken steadily across Realm and Guild halls shapes fellowship.',
@@ -1006,36 +894,34 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     category: 'special_hidden_achievements',
     rarity: 'Celestial',
     difficulty: 'Secret',
-    titleTag: 'SOULFORGED',
+    titleTag: 'SOULBOUND',
     titleStyle: 'emerald',
     emblemIcon: 'Sparkles',
     requirementSummary: 'Complete 200 Personal Growth AI quests',
     requirementType: 'dynamic_personal_growth_claimed',
     threshold: 200,
     rewardPlayerXp: 0,
-    rewardForgeXp: 1800,
     rewardGold: 3600,
     isHidden: true,
     hint: 'Look inward with patience; quiet self-reflection compounds into rare clarity.',
   },
   {
     id: 'gl-hid-04',
-    name: 'Century of the Aether Blade',
-    story: 'Defeated Kingdom Bosses 100 times in silent mastery of timing and resolve.',
+    name: 'Century of the Unarmed Fist',
+    story: 'Defeated Kingdom Bosses 100 times through bodyweight strength, timing, and resolve.',
     category: 'special_hidden_achievements',
     rarity: 'Eternal',
     difficulty: 'Secret',
     titleTag: 'VOIDBREAKER',
     titleStyle: 'crimson',
-    emblemIcon: 'Swords',
+    emblemIcon: 'Flame',
     requirementSummary: 'Defeat Kingdom Bosses 100 times',
     requirementType: 'total_bosses_defeated',
     threshold: 100,
     rewardPlayerXp: 0,
-    rewardForgeXp: 2600,
     rewardGold: 5500,
     isHidden: true,
-    hint: 'One hundred shadows fall only to veterans who return battle after battle.',
+    hint: 'One hundred shadows fall only to veterans who return training round after round.',
   },
   {
     id: 'gl-hid-05',
@@ -1051,7 +937,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'quests_claimed_total',
     threshold: 500,
     rewardPlayerXp: 0,
-    rewardForgeXp: 2200,
     rewardGold: 4500,
     isHidden: true,
     hint: 'Hundreds of small daily promises eventually rewrite the Citadel’s chronicle.',
@@ -1070,7 +955,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'total_xp',
     threshold: 250000,
     rewardPlayerXp: 0,
-    rewardForgeXp: 3500,
     rewardGold: 7500,
     isHidden: true,
     hint: 'Only heroes who walk the long horizon for years awaken the Sovereign flame.',
@@ -1089,7 +973,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'hydration_goals_total',
     threshold: 30,
     rewardPlayerXp: 0,
-    rewardForgeXp: 900,
     rewardGold: 1600,
     isHidden: true,
     hint: 'Clear water tended thirty days over quietly awakens an ancient wellspring.',
@@ -1108,7 +991,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'daily_reports_generated',
     threshold: 30,
     rewardPlayerXp: 0,
-    rewardForgeXp: 950,
     rewardGold: 1800,
     isHidden: true,
     hint: 'Reviewing your footsteps across thirty evenings reveals a hidden chronicle.',
@@ -1127,7 +1009,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'meals_logged_total',
     threshold: 120,
     rewardPlayerXp: 0,
-    rewardForgeXp: 1300,
     rewardGold: 2400,
     isHidden: true,
     hint: 'Honest nourishment repeated through the months earns the Hearth’s silent blessing.',
@@ -1146,7 +1027,6 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     requirementType: 'dynamic_intellectual_claimed',
     threshold: 50,
     rewardPlayerXp: 0,
-    rewardForgeXp: 1500,
     rewardGold: 2800,
     isHidden: true,
     hint: 'Curiosity practiced fifty times unlocks an archive sealed to the impatient.',
@@ -1173,8 +1053,6 @@ export interface GlobalMetricSnapshot {
   dynamicPersonalGrowthClaimed: number;
   dynamicSocialClaimed: number;
   normalAchievementsUnlocked: number;
-  unlockedWeaponsCount: number;
-  maxWeaponLevel: number;
   friendsCount: number;
   guildJoined: number;
   guildLeader: number;
@@ -1184,7 +1062,6 @@ export interface GlobalMetricSnapshot {
   honorReclaimed: number;
   dailyReportsGenerated: number;
   goldBalance: number;
-  forgeXpBalance: number;
 }
 
 export const getMetricValueForRequirement = (
@@ -1230,10 +1107,6 @@ export const getMetricValueForRequirement = (
       return snapshot.dynamicSocialClaimed;
     case 'normal_achievements_unlocked':
       return snapshot.normalAchievementsUnlocked;
-    case 'unlocked_weapons_count':
-      return snapshot.unlockedWeaponsCount;
-    case 'max_weapon_level':
-      return snapshot.maxWeaponLevel;
     case 'friends_count':
       return snapshot.friendsCount;
     case 'guild_joined':
@@ -1252,8 +1125,6 @@ export const getMetricValueForRequirement = (
       return snapshot.dailyReportsGenerated;
     case 'gold_balance':
       return snapshot.goldBalance;
-    case 'forge_xp_balance':
-      return snapshot.forgeXpBalance;
     default:
       return 0;
   }

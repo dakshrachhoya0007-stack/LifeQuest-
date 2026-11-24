@@ -7,10 +7,11 @@ import {
   AlertTriangle,
   ArrowLeft,
   Check,
+  Dumbbell,
+  Footprints,
+  Hand,
   Lock,
-  Shield,
   Sparkles,
-  Swords,
   X,
 } from 'lucide-react';
 
@@ -301,20 +302,25 @@ export const HeroSelectionModal: React.FC<HeroSelectionModalProps> = ({
                 </div>
               </div>
 
-              {/* Hero Strengths, Starting Gear & Attribute Focus */}
+              {/* Hero Bodyweight Combat & Attribute Focus */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                 <div className="p-3 rounded-xl bg-[#100D19] border border-[#7046A5]/35 space-y-1.5">
                   <span className="text-[10px] uppercase tracking-wider text-[#C5A15A] font-bold flex items-center gap-1">
-                    <Swords className="w-3 h-3" /> Starting Gear
+                    <Dumbbell className="w-3 h-3" /> Bodyweight Combat
                   </span>
                   <ul className="space-y-1">
-                    {focusedHero.startingEquipment.map(item => (
-                      <li key={item} className="text-[11px] text-[#D9D2C5]/85 flex items-center gap-1.5">
-                        <Shield className="w-2.5 h-2.5 text-[#C5A15A] shrink-0" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
+                    <li className="text-[11px] text-[#D9D2C5]/85 flex items-center gap-1.5">
+                      <Hand className="w-2.5 h-2.5 text-[#C5A15A] shrink-0" />
+                      <span>Hands: {focusedHero.bodyweightDisciplines.handsFocus}</span>
+                    </li>
+                    <li className="text-[11px] text-[#D9D2C5]/85 flex items-center gap-1.5">
+                      <Footprints className="w-2.5 h-2.5 text-[#C5A15A] shrink-0" />
+                      <span>Legs: {focusedHero.bodyweightDisciplines.legsFocus}</span>
+                    </li>
                   </ul>
+                  <p className="text-[10px] text-[#D9D2C5]/60 leading-snug pt-0.5">
+                    {focusedHero.bodyweightDisciplines.conditioningStyle}
+                  </p>
                 </div>
 
                 <div className="p-3 rounded-xl bg-[#100D19] border border-[#7046A5]/35 space-y-1.5">

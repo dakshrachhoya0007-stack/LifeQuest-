@@ -4,13 +4,11 @@ import {
   Award,
   Scroll,
   Flame,
-  Hammer,
-  Swords,
+  Dumbbell,
   Camera,
   Compass,
   Users,
   CheckCircle2,
-  Sparkles,
 } from 'lucide-react';
 
 export const AchievementsView: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
@@ -20,8 +18,10 @@ export const AchievementsView: React.FC<{ embedded?: boolean }> = ({ embedded = 
     switch (iconName) {
       case 'Scroll': return Scroll;
       case 'Flame': return Flame;
-      case 'Hammer': return Hammer;
-      case 'Swords': return Swords;
+      case 'Dumbbell':
+      case 'Hammer':
+      case 'Swords':
+        return Dumbbell;
       case 'Camera': return Camera;
       case 'Compass': return Compass;
       case 'Users': return Users;
@@ -77,7 +77,7 @@ export const AchievementsView: React.FC<{ embedded?: boolean }> = ({ embedded = 
                 ACHIEVEMENTS & REWARDS
               </h1>
               <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1">
-                Earn permanent badges of distinction and substantial Player XP and Forge XP by conquering healthy milestones across real life and the realm.
+                Earn permanent badges of distinction and substantial Player XP by conquering healthy milestones across real life and the realm.
               </p>
             </div>
           </div>
@@ -134,7 +134,9 @@ export const AchievementsView: React.FC<{ embedded?: boolean }> = ({ embedded = 
               <div className="pt-3 border-t border-purple-950/80 space-y-3">
                 <div className="flex items-center justify-between text-xs font-mono">
                   <span className="text-purple-300 font-semibold">+{ach.rewardPlayerXp} Player XP</span>
-                  <span className="text-amber-400 font-semibold">+{ach.rewardForgeXp} Forge XP</span>
+                  <span className="text-slate-400 font-semibold">
+                    {ach.progress} / {ach.maxProgress}
+                  </span>
                 </div>
 
                 {isUnlocked && !isClaimed ? (

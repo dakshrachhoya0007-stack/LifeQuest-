@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   aetheriaCitadelKingdomImg,
-  blacksmithForgeImg,
+  aetheriaForegroundTerraceImg,
   bossVoidStalkerImg,
   getHeroArtwork,
   heroAetheriaWorldImg,
@@ -16,12 +16,11 @@ import {
   Check,
   Compass,
   Crown,
+  Dumbbell,
+  Flag,
   Flame,
-  Hammer,
   Menu,
-  Shield,
   Sparkles,
-  Swords,
   Trophy,
   Users,
   X,
@@ -199,8 +198,8 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
 
           <p className="mt-6 text-base sm:text-xl text-[#D9D2C5]/85 max-w-2xl leading-relaxed font-normal">
             Transform everyday workouts, daily habits, and nourishing meals into character
-            progression, tempered weaponry, and epic kingdom victories across the fallen
-            realm of Aetheria.
+            progression, bodyweight strength through exercise (hands &amp; legs), and epic kingdom
+            victories across the fallen realm of Aetheria.
           </p>
 
           {/* Primary Public CTAs */}
@@ -308,7 +307,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
             </h2>
             <p className="text-sm sm:text-base text-[#D9D2C5]/75 leading-relaxed">
               Five distinct champions survived The Great Fall. Preview their abilities,
-              virtues, and starting armaments below before binding one permanently to your account.
+              virtues, and bodyweight combat disciplines below before binding one permanently to your account.
             </p>
           </div>
           <button
@@ -420,10 +419,13 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
               </div>
               <div className="space-y-1.5">
                 <span className="text-[10px] font-mono uppercase tracking-widest text-[#C5A15A] block">
-                  Starting Loadout &amp; Focus
+                  Bodyweight Combat &amp; Focus
                 </span>
                 <p className="text-[#D9D2C5]/80">
-                  Gear: {previewHero.startingEquipment.join(' · ')}
+                  Hands: {previewHero.bodyweightDisciplines.handsFocus}
+                </p>
+                <p className="text-[#D9D2C5]/80">
+                  Legs: {previewHero.bodyweightDisciplines.legsFocus}
                 </p>
                 <p className="text-[#C5A15A] font-mono">
                   Virtues:{' '}
@@ -458,8 +460,8 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
           <article className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/22 overflow-hidden flex flex-col">
             <div className="h-44 overflow-hidden bg-[#151022] relative">
               <img
-                src={blacksmithForgeImg}
-                alt="Blacksmith forge anvil"
+                src={aetheriaForegroundTerraceImg}
+                alt="Aetheria bodyweight training terrace"
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover opacity-80"
               />
@@ -471,7 +473,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
                 Aether Vision Training
               </h3>
               <p className="text-xs text-[#D9D2C5]/75 leading-relaxed">
-                Private on-device camera motion tracking verifies squats, push-ups, lunges, and meal scans to award genuine Player XP and Forge XP.
+                Private on-device camera motion tracking verifies squats, push-ups, lunges, and meal scans to award genuine Player XP and bodyweight combat strength.
               </p>
             </div>
           </article>
@@ -482,7 +484,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
                 <div className="p-2.5 rounded-lg bg-[#19122b] border border-[#C5A15A]/25">
                   <Flame className="w-3.5 h-3.5 text-[#C5A15A] mb-1" />
                   <span className="font-semibold text-[#F5EFE6] block">Daily Rituals</span>
-                  <span className="text-[10px] text-[#D9D2C5]/60">+25 XP · +25 Forge</span>
+                  <span className="text-[10px] text-[#D9D2C5]/60">+25 Player XP</span>
                 </div>
                 <div className="p-2.5 rounded-lg bg-[#19122b] border border-[#C5A15A]/25">
                   <Compass className="w-3.5 h-3.5 text-[#C5A15A] mb-1" />
@@ -490,7 +492,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
                   <span className="text-[10px] text-[#D9D2C5]/60">Timed Reset Cycles</span>
                 </div>
               </div>
-              <Shield className="w-5 h-5 text-[#C5A15A] absolute bottom-3 left-4" />
+              <Check className="w-5 h-5 text-[#C5A15A] absolute bottom-3 left-4" />
             </div>
             <div className="p-5 space-y-2 flex-1">
               <h3 className="font-['Cinzel'] font-bold text-base text-[#F5EFE6]">
@@ -511,14 +513,14 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
                 className="w-full h-full object-cover opacity-85"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#100D19] to-transparent" />
-              <Swords className="w-5 h-5 text-[#C5A15A] absolute bottom-3 left-4" />
+              <Dumbbell className="w-5 h-5 text-[#C5A15A] absolute bottom-3 left-4" />
             </div>
             <div className="p-5 space-y-2 flex-1">
               <h3 className="font-['Cinzel'] font-bold text-base text-[#F5EFE6]">
                 Tactical Boss Encounters
               </h3>
               <p className="text-xs text-[#D9D2C5]/75 leading-relaxed">
-                Read boss telegraphs, exploit elemental weaknesses, trigger active wellness buffs, and conquer multi-phase Void Sovereigns across five kingdoms.
+                Read boss telegraphs, strike with trained hands and legs, trigger active wellness buffs, and conquer multi-phase Void Sovereigns across five kingdoms.
               </p>
             </div>
           </article>
@@ -536,7 +538,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
               04 · Progression &amp; Mastery
             </span>
             <h2 className="text-3xl sm:text-4xl font-['Cinzel'] font-black text-[#F5EFE6]">
-              LEVELS, FORGED STEEL &amp; SIX VIRTUES
+              LEVELS, CONDITIONING &amp; SIX VIRTUES
             </h2>
             <p className="text-sm sm:text-base text-[#D9D2C5]/75 leading-relaxed">
               Watch real-world consistency evolve every system in your character sheet—without shortcuts or artificial bloat.
@@ -544,13 +546,13 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
 
             <div className="space-y-3 pt-2">
               <div className="p-4 rounded-xl bg-[#100D19] border border-[#C5A15A]/22 flex items-start gap-3">
-                <Hammer className="w-5 h-5 text-[#C5A15A] shrink-0 mt-0.5" />
+                <Dumbbell className="w-5 h-5 text-[#C5A15A] shrink-0 mt-0.5" />
                 <div>
                   <h3 className="font-['Cinzel'] font-bold text-sm text-[#F5EFE6]">
-                    Blacksmith Forge &amp; Weapon Evolution
+                    Hands &amp; Legs Bodyweight Combat
                   </h3>
                   <p className="text-xs text-[#D9D2C5]/70 mt-1">
-                    Temper swords, staffs, bows, shields, and armor from Dormant up to Transcendent rarities with unique combat abilities.
+                    Build combat strength naturally through bodyweight exercises—delivering strikes, guard stances, and agile footwork using only hands and legs.
                   </p>
                 </div>
               </div>
@@ -639,7 +641,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
           </div>
 
           <div className="p-6 rounded-2xl bg-[#100D19] border border-[#C5A15A]/22 space-y-3">
-            <Shield className="w-6 h-6 text-[#C5A15A]" />
+            <Flag className="w-6 h-6 text-[#C5A15A]" />
             <h3 className="font-['Cinzel'] font-bold text-base text-[#F5EFE6]">
               Guild Halls &amp; Raids
             </h3>

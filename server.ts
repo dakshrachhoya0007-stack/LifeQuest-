@@ -784,7 +784,6 @@ async function startServer() {
                     unitLabel: { type: Type.STRING },
                     estimatedMinutes: { type: Type.INTEGER },
                     playerXpReward: { type: Type.INTEGER },
-                    forgeXpReward: { type: Type.INTEGER },
                     goldReward: { type: Type.INTEGER },
                     isSpecialChallenge: { type: Type.BOOLEAN },
                     personalizationReason: { type: Type.STRING },
@@ -800,7 +799,6 @@ async function startServer() {
                     'unitLabel',
                     'estimatedMinutes',
                     'playerXpReward',
-                    'forgeXpReward',
                     'goldReward',
                     'isSpecialChallenge',
                     'personalizationReason',
@@ -872,7 +870,6 @@ async function startServer() {
         const baseMultiplier =
           difficulty === 'special' ? 1.55 : difficulty === 'challenging' ? 1.3 : difficulty === 'medium' ? 1.0 : 0.75;
         const playerXpReward = Math.min(180, Math.max(25, Math.round(Number(q.playerXpReward || 45 * baseMultiplier))));
-        const forgeXpReward = Math.min(140, Math.max(15, Math.round(Number(q.forgeXpReward || 30 * baseMultiplier))));
         const goldReward = Math.min(160, Math.max(20, Math.round(Number(q.goldReward || 32 * baseMultiplier))));
 
         let title = String(q.title || `${category} Daily Trial`).trim().slice(0, 110);
@@ -895,7 +892,6 @@ async function startServer() {
           unitLabel: String(q.unitLabel || 'step').slice(0, 32),
           estimatedMinutes: Math.min(90, Math.max(5, Math.round(Number(q.estimatedMinutes || 15)))),
           playerXpReward,
-          forgeXpReward,
           goldReward,
           isSpecialChallenge: isSpecial,
           personalizationReason: String(
@@ -912,7 +908,7 @@ async function startServer() {
         adaptiveTier,
         mentorGreeting: String(
           parsed.mentorGreeting ||
-            'Your daily scroll has been forged from your genuine realm chronicle.'
+            'Your daily scroll has been prepared from your genuine realm chronicle.'
         ).slice(0, 260),
         quests: sanitized,
       });
@@ -1044,7 +1040,6 @@ async function startServer() {
           workoutsLogged: wLogged,
           mealsLogged: mLogged,
           playerXpEarned: Math.max(0, Number(metrics.yesterdayPlayerXp || 0)),
-          forgeXpEarned: Math.max(0, Number(metrics.yesterdayForgeXp || 0)),
           goldEarned: Math.max(0, Number(metrics.yesterdayGold || 0)),
           achievementsUnlocked: Math.max(0, Number(metrics.yesterdayAchievements || 0)),
           consistencyScore: cScore,
@@ -1233,8 +1228,6 @@ async function startServer() {
           Number(snap.totalAchievementsUnlocked || 0),
           Array.isArray(syncedProfile.achievements) ? syncedProfile.achievements.length : 0
         );
-      case 'unlocked_weapons_count':
-        return Number(syncedProfile.unlockedWeaponsCount || 0);
       case 'friends_count':
         return Array.isArray(syncedProfile.friendIds) ? syncedProfile.friendIds.length : 0;
       case 'guild_joined':
@@ -1345,7 +1338,6 @@ async function startServer() {
           ownership: claimRecord,
           rewards: {
             rewardPlayerXp: 0, // Zero XP leaderboard inflation
-            rewardForgeXp: achievementDef.rewardForgeXp,
             rewardGold: achievementDef.rewardGold,
           },
           announcements: ledger.announcements.slice(0, 25),
@@ -1511,8 +1503,6 @@ async function startServer() {
     onGrantCard: (userId, cardId, sourceRef) =>
       aaaEconomyCardsService.grantCollectibleCard(userId, cardId, sourceRef),
     onGrantTitle: params => identityService.grantDirectTitle(params),
-    onGrantRelic: (userId, relicId) =>
-      aaaEconomyCardsService.grantRelic(userId, relicId),
   });
   const leaderboardService = createLeaderboardService(__dirname);
 

@@ -2,7 +2,7 @@ import React from 'react';
 import { useGame } from '../../context/GameContext';
 import { RARITY_FRAME_META, TITLE_STYLE_META } from '../../data/globalLegendsData';
 import { LegendEmblemIcon, LegendTitleBadge } from '../Social/LegendTitleBadge';
-import { Crown, Sparkles, Hammer, Coins, Globe2, X } from 'lucide-react';
+import { Crown, Sparkles, Coins, Globe2, X } from 'lucide-react';
 
 export const GlobalLegendUnlockModal: React.FC = () => {
   const {
@@ -91,18 +91,12 @@ export const GlobalLegendUnlockModal: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-3 gap-2 w-full text-xs font-mono tabular-nums">
+          <div className="mt-4 grid grid-cols-2 gap-2 w-full text-xs font-mono tabular-nums">
             <div className="rounded-xl bg-[#110c21] border border-purple-900/50 p-2.5">
               <div className="text-purple-300 font-bold flex items-center justify-center gap-1">
                 <Sparkles className="w-3.5 h-3.5" />+{entry.rewardPlayerXp}
               </div>
               <div className="text-[10px] text-slate-400 mt-0.5">Player XP</div>
-            </div>
-            <div className="rounded-xl bg-[#110c21] border border-amber-900/50 p-2.5">
-              <div className="text-amber-300 font-bold flex items-center justify-center gap-1">
-                <Hammer className="w-3.5 h-3.5" />+{entry.rewardForgeXp}
-              </div>
-              <div className="text-[10px] text-slate-400 mt-0.5">Forge XP</div>
             </div>
             <div className="rounded-xl bg-[#110c21] border border-yellow-900/50 p-2.5">
               <div className="text-yellow-300 font-bold flex items-center justify-center gap-1">

@@ -5,7 +5,6 @@ import {
   Eye,
   EyeOff,
   Flame,
-  Hammer,
   Lock,
   ShoppingBag,
   Sparkles,
@@ -258,7 +257,7 @@ export const AetheriaKingdomHero: React.FC<AetheriaKingdomHeroProps> = ({
                     <button
                       key={b.id}
                       type="button"
-                      onClick={() => onNavigate('buffs')}
+                      onClick={() => onNavigate('store')}
                       className="text-[10px] font-semibold px-2 py-0.5 rounded bg-[#251638]/85 border border-[#7046A5]/45 text-[#D9D2C5] hover:border-[#C5A15A]/60 flex items-center gap-1 transition-colors whitespace-nowrap shrink-0"
                     >
                       <Sparkles className="w-2.5 h-2.5 text-[#C5A15A]" />
@@ -281,17 +280,6 @@ export const AetheriaKingdomHero: React.FC<AetheriaKingdomHeroProps> = ({
               <div className="flex items-center gap-4">
                 <div className="flex flex-col">
                   <span className="text-[10px] text-[#C5A15A] uppercase tracking-widest font-semibold flex items-center gap-1">
-                    <Hammer className="w-3 h-3" /> Forge XP
-                  </span>
-                  <span className="font-mono text-base sm:text-lg font-bold text-[#D9D2C5] tabular-nums">
-                    {stats.forgeXP.toLocaleString()}
-                  </span>
-                </div>
-
-                <div className="w-px h-8 bg-[#C5A15A]/20" />
-
-                <div className="flex flex-col">
-                  <span className="text-[10px] text-[#C5A15A] uppercase tracking-widest font-semibold flex items-center gap-1">
                     <Coins className="w-3 h-3" /> Gold
                   </span>
                   <span className="font-mono text-base sm:text-lg font-bold text-[#C5A15A] tabular-nums">
@@ -301,13 +289,6 @@ export const AetheriaKingdomHero: React.FC<AetheriaKingdomHeroProps> = ({
               </div>
 
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => onNavigate('armory')}
-                  className="px-3.5 py-2 text-xs font-bold font-['Cinzel'] rounded-lg bg-[#251638] hover:bg-[#7046A5]/45 text-[#D9D2C5] border border-[#7046A5]/50 transition-colors whitespace-nowrap shrink-0"
-                >
-                  Armory
-                </button>
                 <button
                   type="button"
                   onClick={() => onNavigate('store')}

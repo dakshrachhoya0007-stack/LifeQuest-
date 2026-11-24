@@ -227,22 +227,20 @@ export const CollectibleCardArtwork: React.FC<CollectibleCardArtworkProps> = ({
             strokeLinejoin="round"
           />
         );
-      case 'blade':
+      case 'fist':
         return (
-          <g stroke={card.accentHex} strokeWidth="3" strokeLinecap="round" fill="none">
-            <path d="M60 18 L66 64 L60 72 L54 64 Z" />
-            <path d="M44 68 H76" />
-            <path d="M60 72 V84" />
+          <g stroke={card.accentHex} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none">
+            <rect x="40" y="34" width="40" height="32" rx="8" />
+            <path d="M50 34 V48 M60 34 V48 M70 34 V48 M46 66 V78 H74 V66" />
           </g>
         );
-      case 'shield':
+      case 'stride':
         return (
-          <path
-            d="M60 20 L86 30 V54 C86 70 72 80 60 86 C48 80 34 70 34 54 V30 Z"
-            fill="none"
-            stroke={card.accentHex}
-            strokeWidth="3"
-          />
+          <g stroke={card.accentHex} strokeWidth="3" strokeLinecap="round" fill="none">
+            <path d="M30 70 Q52 28 90 36" />
+            <path d="M36 80 Q58 50 88 58" />
+            <circle cx="88" cy="36" r="4" fill={card.accentHex} />
+          </g>
         );
       case 'flame':
         return (

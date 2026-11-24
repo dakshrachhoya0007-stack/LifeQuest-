@@ -200,7 +200,7 @@ export const NutritionView: React.FC = () => {
     setLogStatusMessage(
       res.dailyCapReached
         ? 'Meal saved cleanly (daily XP reward cap of 5 meals reached today).'
-        : `Meal logged! +${res.rewards?.playerXp ?? 0} Player XP, +${res.rewards?.forgeXp ?? 0} Forge XP, +${res.rewards?.gold ?? 0} Gold.`
+        : `Meal logged! +${res.rewards?.playerXp ?? 0} Player XP, +${res.rewards?.gold ?? 0} Gold.`
     );
   };
 

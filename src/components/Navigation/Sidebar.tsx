@@ -8,13 +8,15 @@ import {
   Activity,
   Apple,
   Camera,
-  Hammer,
-  Swords,
+  Dumbbell,
+  Flame,
+  Trophy,
   Map,
   Users,
   Settings,
   X,
-  Shield,
+  Flag,
+  Award,
   Zap,
   ShoppingBag,
   Crown,
@@ -90,11 +92,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   // Mobile-only quick access for routes shown in TopBar on md+ screens (avoids desktop duplication)
   const mobileTopBarItems: NavItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'rivals', label: 'Rivals Arena', icon: Swords, badge: pendingRivalsCount, highlight: true },
+    { id: 'rivals', label: 'Rivals Arena', icon: Trophy, badge: pendingRivalsCount, highlight: true },
     { id: 'aether-vision', label: 'Aether Vision AI', icon: Camera, highlight: true },
-    { id: 'armory', label: 'The Armory', icon: Hammer },
     { id: 'store', label: 'Store', icon: ShoppingBag },
-    { id: 'boss-battles', label: 'Boss Battles', icon: Swords },
+    { id: 'boss-battles', label: 'Boss Battles', icon: Flame },
   ];
 
   const navGroups: Array<{ title: string; items: NavItem[] }> = [
@@ -124,7 +125,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           id: 'rivals',
           label: 'RIVALS ARENA',
           subtitle: 'Divisions, Tournaments & Spectate',
-          icon: Swords,
+          icon: Trophy,
           badge: pendingRivalsCount,
           highlight: true,
         },
@@ -136,7 +137,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           badge: incomingFriendCount,
         },
         { id: 'events', label: 'Community Events', subtitle: 'Community Events & Council', icon: Calendar },
-        { id: 'guilds', label: 'Guilds & Territory', subtitle: 'Guilds & Territory Wars', icon: Shield, badge: guildInvites.length },
+        { id: 'guilds', label: 'Guilds & Territory', subtitle: 'Guilds & Territory Wars', icon: Flag, badge: guildInvites.length },
       ],
     },
     {
@@ -275,7 +276,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   />
                 )}
                 <p className="text-[11px] text-[#C5A15A] font-medium flex items-center gap-1 tabular-nums truncate">
-                  <Shield className="w-3 h-3 text-[#C5A15A] shrink-0" />
+                  <Award className="w-3 h-3 text-[#C5A15A] shrink-0" />
                   Lv.{stats.level} · {heroDef.name}
                 </p>
               </div>

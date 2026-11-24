@@ -3,10 +3,10 @@ import { useGame } from '../../context/GameContext';
 import {
   characterWarriorAvatarImg,
   getRpgAvatarForClass,
+  heroArcaneMageImg,
+  heroPaladinImg,
+  heroRangerImg,
   resolveAssetUrl,
-  rpgAvatarGuardianImg,
-  rpgAvatarMageImg,
-  rpgAvatarRangerImg,
 } from '../../assets/images';
 import {
   CharacterClass,
@@ -18,7 +18,6 @@ import {
   NotificationPreferences,
 } from '../../types/game';
 import {
-  Shield,
   ArrowRight,
   ArrowLeft,
   Check,
@@ -35,7 +34,8 @@ import {
   AlertTriangle,
   RefreshCw,
   Globe,
-  Swords,
+  Dumbbell,
+  Heart,
   Sparkles,
   Compass,
 } from 'lucide-react';
@@ -52,9 +52,9 @@ const makeCrestAvatar = (bg1: string, bg2: string, kind: 'solar' | 'arcane', rin
 
 const PRESET_AVATARS = [
   { id: 'knight', label: 'Warrior Knight', src: characterWarriorAvatarImg },
-  { id: 'mage-portrait', label: 'Astral Mage', src: rpgAvatarMageImg },
-  { id: 'ranger-portrait', label: 'Verdant Ranger', src: rpgAvatarRangerImg },
-  { id: 'guardian-portrait', label: 'Iron Guardian', src: rpgAvatarGuardianImg },
+  { id: 'mage-portrait', label: 'Astral Mage', src: heroArcaneMageImg },
+  { id: 'ranger-portrait', label: 'Verdant Ranger', src: heroRangerImg },
+  { id: 'guardian-portrait', label: 'Iron Guardian', src: heroPaladinImg },
   { id: 'warrior-crest', label: 'Solar Crest', src: makeCrestAvatar('#4c1d95', '#1e1b4b', 'solar', '#f59e0b') },
   { id: 'mage-crest', label: 'Arcane Crest', src: makeCrestAvatar('#312e81', '#0f172a', 'arcane', '#38bdf8') },
 ];
@@ -143,7 +143,7 @@ export const OnboardingWizard: React.FC = () => {
       id: 'Warrior',
       title: 'Warrior',
       desc: 'Steadfast champions of physical conditioning, functional strength, and stamina.',
-      Icon: Swords,
+      Icon: Dumbbell,
       perk: 'Suited for calisthenics, gym sets, and steady strength progression.',
     },
     {
@@ -164,7 +164,7 @@ export const OnboardingWizard: React.FC = () => {
       id: 'Guardian',
       title: 'Guardian',
       desc: 'Protectors devoted to restful sleep, balanced fueling, and long-term resilience.',
-      Icon: Shield,
+      Icon: Heart,
       perk: 'Suited for recovery routines, consistent habits, and steady pacing.',
     },
   ];
@@ -654,7 +654,7 @@ export const OnboardingWizard: React.FC = () => {
             </div>
 
             <div className="p-3 rounded-xl bg-purple-950/40 border border-purple-800/40 text-xs text-purple-200 flex items-start gap-2">
-              <Shield className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+              <Heart className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
               <span>
                 LifeQuest promotes sustainable daily movement and vitality at every pace — never restrictive targets or body-image scoring.
               </span>

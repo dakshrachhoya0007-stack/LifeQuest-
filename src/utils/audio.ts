@@ -92,44 +92,6 @@ class SoundEngine {
     } catch {}
   }
 
-  public playForgeUpgrade() {
-    const ctx = this.getContext();
-    if (!ctx) return;
-    try {
-      // Anvil strike metallic impulse
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(220, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(60, ctx.currentTime + 0.15);
-
-      gain.gain.setValueAtTime(0.2, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.2);
-
-      // Arcane shimmer sparkle
-      const shimmer = [880, 1174.66, 1760];
-      shimmer.forEach((freq, i) => {
-        const sOsc = ctx.createOscillator();
-        const sGain = ctx.createGain();
-        sOsc.type = 'sine';
-        sOsc.frequency.setValueAtTime(freq, ctx.currentTime + 0.1 + i * 0.06);
-
-        sGain.gain.setValueAtTime(0.1, ctx.currentTime + 0.1 + i * 0.06);
-        sGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1 + i * 0.06 + 0.25);
-
-        sOsc.connect(sGain);
-        sGain.connect(ctx.destination);
-        sOsc.start(ctx.currentTime + 0.1 + i * 0.06);
-        sOsc.stop(ctx.currentTime + 0.1 + i * 0.06 + 0.25);
-      });
-    } catch {}
-  }
-
   public playAttack() {
     const ctx = this.getContext();
     if (!ctx) return;
@@ -242,7 +204,7 @@ class SoundEngine {
     } catch {}
   }
 
-  public playShieldBlock() {
+  public playGuardBlock() {
     const ctx = this.getContext();
     if (!ctx) return;
     try {

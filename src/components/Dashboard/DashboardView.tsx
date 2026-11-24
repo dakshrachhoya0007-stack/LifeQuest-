@@ -9,7 +9,7 @@ import {
   PLAYER_TITLES_CATALOG,
   RARE_BADGES_CATALOG,
 } from '../../data/polish2Data';
-import { Award, Flame, Landmark, Shield, Star, Target } from 'lucide-react';
+import { Award, Flame, Landmark, Star, Target, User } from 'lucide-react';
 
 export const DashboardView: React.FC = () => {
   const {
@@ -19,9 +19,6 @@ export const DashboardView: React.FC = () => {
     heroLocked,
     setShowHeroSelectModal,
     rpgAttributes,
-    weapons,
-    equippedWeapon,
-    equippedGear,
     activeBuffs,
     setActiveTab,
     identityState,
@@ -74,9 +71,6 @@ export const DashboardView: React.FC = () => {
         selectedHeroId={selectedHeroId}
         heroLocked={heroLocked}
         rpgAttributes={rpgAttributes}
-        weapons={weapons}
-        equippedWeapon={equippedWeapon}
-        equippedGear={equippedGear}
         activeBuffs={activeBuffs}
         onNavigate={setActiveTab}
         onOpenHeroSelect={() => setShowHeroSelectModal(true)}
@@ -95,7 +89,7 @@ export const DashboardView: React.FC = () => {
         >
           <div className="flex items-center justify-between gap-2 pb-3 border-b border-[#C5A15A]/15">
             <h2 className="font-['Cinzel'] font-bold text-sm tracking-wider uppercase text-[#C5A15A] flex items-center gap-2">
-              <Shield className="w-4 h-4" />
+              <User className="w-4 h-4" />
               Character Identity
             </h2>
             <button

@@ -1,10 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import {
+  Dumbbell,
   Flame,
+  Footprints,
+  Hand,
   Heart,
-  Shield,
   Sparkles,
-  Swords,
+  Target,
+  Trophy,
   User,
   Users,
   Wind,
@@ -15,17 +18,14 @@ import {
 } from 'lucide-react';
 import {
   Buff,
-  EquippedGear,
   PlayableHeroId,
   PlayerStats,
   RpgAttributeKey,
   RpgAttributes,
   UserAccount,
-  Weapon,
 } from '../../types/game';
 import { getHeroById, RPG_ATTRIBUTE_META } from '../../data/heroesData';
 import { aetheriaCitadelKingdomImg, getHeroArtwork } from '../../assets/images';
-import { EquipmentIllustration } from '../../assets/equipmentArtwork';
 import { AtmosphereParticlesCanvas } from './AtmosphereParticlesCanvas';
 import { LegendTitleBadge } from '../Social/LegendTitleBadge';
 import { useGame } from '../../context/GameContext';
@@ -36,9 +36,6 @@ interface HeroCommandStageProps {
   selectedHeroId: PlayableHeroId;
   heroLocked: boolean;
   rpgAttributes: RpgAttributes;
-  weapons: Weapon[];
-  equippedWeapon: Weapon;
-  equippedGear: EquippedGear;
   activeBuffs: Buff[];
   onNavigate: (tab: string) => void;
   onOpenHeroSelect: () => void;
@@ -49,8 +46,8 @@ interface HeroCommandStageProps {
 }
 
 const ATTR_ICON_MAP: Record<RpgAttributeKey, React.ComponentType<{ className?: string }>> = {
-  strength: Swords,
-  discipline: Shield,
+  strength: Dumbbell,
+  discipline: Target,
   intelligence: Sparkles,
   vitality: Heart,
   agility: Wind,
@@ -72,9 +69,6 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
   selectedHeroId,
   heroLocked,
   rpgAttributes,
-  weapons,
-  equippedWeapon,
-  equippedGear,
   activeBuffs,
   onNavigate,
   onOpenHeroSelect,
@@ -111,30 +105,14 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
     Math.round((stats.aetherPoints / Math.max(1, stats.aetherPointsNextRank)) * 100)
   );
 
-  const offHand = equippedGear.offHandId
-    ? weapons.find(w => w.id === equippedGear.offHandId && w.id !== equippedWeapon.id)
-    : undefined;
-  const armour = equippedGear.armourId
-    ? weapons.find(w => w.id === equippedGear.armourId)
-    : undefined;
-  const helmet = equippedGear.helmetId
-    ? weapons.find(w => w.id === equippedGear.helmetId)
-    : undefined;
-  const accessory = equippedGear.accessoryId
-    ? weapons.find(w => w.id === equippedGear.accessoryId)
-    : undefined;
-
-  const equippedList = [equippedWeapon, offHand, armour, helmet, accessory].filter(
-    (item): item is Weapon => Boolean(item)
-  );
-  const rawAtk = equippedList.reduce((sum, item) => sum + item.baseAttack, 0);
-  const rawDef = equippedList.reduce((sum, item) => sum + item.baseDefense, 0);
+  const rawAtk = 18 + Math.round(rpgAttributes.strength * 1.4 + rpgAttributes.agility * 0.6);
+  const rawDef = 12 + Math.round(rpgAttributes.resilience * 1.2 + rpgAttributes.discipline * 0.8);
   const atkBuff = activeBuffs.find(b => b.effectType === 'attack');
   const defBuff = activeBuffs.find(b => b.effectType === 'defense');
   const critBuff = activeBuffs.find(b => b.effectType === 'crit');
   const totalAttack = Math.round(rawAtk * (1 + (atkBuff ? atkBuff.effectValue / 100 : 0)));
   const totalDefense = Math.round(rawDef * (1 + (defBuff ? defBuff.effectValue / 100 : 0)));
-  const critPercent = 10 + (equippedWeapon.critChance ?? 5) + (critBuff ? critBuff.effectValue : 0);
+  const critPercent = Math.min(60, 10 + Math.round(rpgAttributes.agility * 0.25) + (critBuff ? critBuff.effectValue : 0));
 
   const maxStatScale = Math.max(
     40,
@@ -278,7 +256,7 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
               onClick={() => onNavigate('rivals')}
               className="px-3.5 py-2 rounded-lg bg-[#251638]/95 hover:bg-[#331e4d] border border-[#C5A15A]/55 text-xs font-['Cinzel'] font-bold text-[#F5EFE6] flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 shadow-sm"
             >
-              <Swords className="w-3.5 h-3.5 text-[#C5A15A]" />
+              <Trophy className="w-3.5 h-3.5 text-[#C5A15A]" />
               Rivals Arena
             </button>
             <button
@@ -346,51 +324,46 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
               </div>
             </div>
 
-            {/* Equipped Main Armament Spotlight */}
+            {/* Hands & Legs Bodyweight Combat Spotlight */}
             <div className="pt-2 border-t border-[#C5A15A]/15 space-y-3">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-['Cinzel'] font-bold text-[#C5A15A] tracking-wider uppercase text-[11px]">
-                  Equipped Armament
+                  Bodyweight Combat Form
                 </span>
                 <span className="text-[11px] text-[#D9D2C5]/65 font-mono tabular-nums">
-                  {equippedWeapon.rarity} · Lv.{equippedWeapon.level}
+                  Hands &amp; Legs Only
                 </span>
               </div>
 
               <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-lg bg-[#140E22] border border-[#C5A15A]/30 p-1.5 shrink-0 flex items-center justify-center">
-                  <EquipmentIllustration
-                    itemId={equippedWeapon.id}
-                    rarity={equippedWeapon.rarity}
-                    level={equippedWeapon.level}
-                    evolutionStage={equippedWeapon.evolutionStage}
-                  />
+                <div className="w-12 h-12 rounded-lg bg-[#140E22] border border-[#C5A15A]/30 shrink-0 flex items-center justify-center text-[#C5A15A]">
+                  <Dumbbell className="w-6 h-6" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-bold text-[#F2ECE1] truncate">
-                    {equippedWeapon.name}
+                    {heroDef.bodyweightDisciplines.conditioningStyle}
                   </p>
-                  <p className="text-[11px] text-[#D9D2C5]/65 font-mono tabular-nums mt-0.5">
-                    ATK +{equippedWeapon.baseAttack} · DEF +{equippedWeapon.baseDefense} · {equippedWeapon.evolutionStage}
+                  <p className="text-[11px] text-[#D9D2C5]/65 mt-0.5 leading-snug">
+                    Bodyweight training builds strength through exercise.
                   </p>
                 </div>
               </div>
 
-              {/* Concise Secondary Loadout Lines */}
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 pt-2 border-t border-white/8 text-[11px]">
-                {[
-                  { label: 'Off-Hand', item: offHand },
-                  { label: 'Armour', item: armour },
-                  { label: 'Helm', item: helmet },
-                  { label: 'Relic', item: accessory },
-                ].map(slot => (
-                  <div key={slot.label} className="min-w-0">
-                    <span className="text-[#D9D2C5]/45 mr-1">{slot.label}:</span>
-                    <span className={slot.item ? 'text-[#D9D2C5]/90 font-medium truncate' : 'text-[#D9D2C5]/35'}>
-                      {slot.item ? slot.item.name : 'Unassigned'}
-                    </span>
-                  </div>
-                ))}
+              <div className="grid grid-cols-1 gap-1.5 pt-2 border-t border-white/8 text-[11px]">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Hand className="w-3.5 h-3.5 text-[#C5A15A] shrink-0" />
+                  <span className="text-[#D9D2C5]/50 shrink-0">Hands:</span>
+                  <span className="text-[#D9D2C5]/90 font-medium truncate">
+                    {heroDef.bodyweightDisciplines.handsFocus}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 min-w-0">
+                  <Footprints className="w-3.5 h-3.5 text-[#C5A15A] shrink-0" />
+                  <span className="text-[#D9D2C5]/50 shrink-0">Legs:</span>
+                  <span className="text-[#D9D2C5]/90 font-medium truncate">
+                    {heroDef.bodyweightDisciplines.legsFocus}
+                  </span>
+                </div>
               </div>
             </div>
 

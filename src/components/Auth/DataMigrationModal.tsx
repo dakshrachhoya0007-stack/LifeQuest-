@@ -63,7 +63,7 @@ export const DataMigrationModal: React.FC<DataMigrationModalProps> = ({
             {localSummary || 'Level 1+ Knight with customized character progression & habits.'}
           </div>
           <p className="text-[11px] text-slate-400 leading-relaxed pt-1">
-            Transferring will securely link your forged weapons, habits, fitness sessions, and Aether Rank to your account so you can continue seamlessly across all your devices.
+            Transferring will securely link your bodyweight strength, habits, fitness sessions, and Aether Rank to your account so you can continue seamlessly across all your devices.
           </p>
         </div>
 

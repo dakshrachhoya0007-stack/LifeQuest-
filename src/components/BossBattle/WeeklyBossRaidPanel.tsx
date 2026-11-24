@@ -8,10 +8,9 @@ import {
   ChevronRight,
   Clock,
   Crown,
+  Dumbbell,
   Flame,
-  Shield,
   Sparkles,
-  Swords,
   Trophy,
   Users,
 } from 'lucide-react';
@@ -296,7 +295,7 @@ export const WeeklyBossRaidPanel: React.FC = () => {
           <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-5 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-                <Swords className="w-4 h-4 text-[#C5A15A]" />
+                <Dumbbell className="w-4 h-4 text-[#C5A15A]" />
                 Weekly Raid Missions
               </h3>
               <span className="text-[11px] text-[#D9D2C5]/55">

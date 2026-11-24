@@ -1,34 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { getHeroArtwork, resolveAssetUrl } from '../../assets/images';
-import { EquipmentIllustration } from '../../assets/equipmentArtwork';
+import { getHeroById } from '../../data/heroesData';
+import { BODYWEIGHT_TECHNIQUES } from '../../data/initialData';
 import {
-  Swords,
-  Shield,
+  Activity,
+  Dumbbell,
+  Footprints,
+  Hand,
   Sparkles,
   Flame,
-  RotateCcw,
   Trophy,
-  ArrowRight,
   Zap,
-  Heart,
   AlertTriangle,
-  Eye,
-  Info,
-  ShieldAlert,
   Wind,
   Droplets,
   CloudLightning,
   Sun,
   Moon,
-  Compass,
   BookOpen,
   Check,
   HelpCircle,
   Skull,
-  Crosshair,
+  Target,
 } from 'lucide-react';
-import { ElementType, WeaponAbility } from '../../types/game';
+import { BodyweightTechnique, ElementType } from '../../types/game';
 import { sound } from '../../utils/audio';
 import confetti from 'canvas-confetti';
 import { WeeklyBossRaidPanel } from './WeeklyBossRaidPanel';
@@ -38,8 +34,8 @@ export const BossBattleView: React.FC = () => {
     user,
     stats,
     selectedHeroId,
+    rpgAttributes,
     kingdoms,
-    equippedWeapon,
     buffs,
     activateBuff,
     startBossBattle,
@@ -88,6 +84,16 @@ export const BossBattleView: React.FC = () => {
 
   const activeKingdom = kingdoms.find(k => k.id === selectedKingdomId) || kingdoms[0];
   const boss = activeKingdom.boss;
+  const heroDef = getHeroById(selectedHeroId);
+
+  const bodyweightTechniques = BODYWEIGHT_TECHNIQUES.map(tech => ({
+    ...tech,
+    unlocked: stats.level >= tech.unlockLevel,
+  }));
+
+  const rawAtk = 18 + Math.round(rpgAttributes.strength * 1.4 + rpgAttributes.agility * 0.6);
+  const rawDef = 12 + Math.round(rpgAttributes.resilience * 1.2 + rpgAttributes.discipline * 0.8);
+  const critPercent = Math.min(60, 10 + Math.round(rpgAttributes.agility * 0.25));
 
   // Calculate Boss Current Phase
   const bossHpRatio = boss.health / boss.maxHealth;
@@ -118,7 +124,7 @@ export const BossBattleView: React.FC = () => {
       case 'Nature':
         return { label: 'Nature', color: 'bg-emerald-950 border-emerald-500 text-emerald-300', icon: <Sparkles className="w-3.5 h-3.5 text-emerald-400" /> };
       case 'Earth':
-        return { label: 'Earth', color: 'bg-amber-950 border-amber-700 text-amber-200', icon: <Shield className="w-3.5 h-3.5 text-amber-500" /> };
+        return { label: 'Earth', color: 'bg-amber-950 border-amber-700 text-amber-200', icon: <Dumbbell className="w-3.5 h-3.5 text-amber-500" /> };
       case 'Wind':
         return { label: 'Wind', color: 'bg-teal-950 border-teal-400 text-teal-200', icon: <Wind className="w-3.5 h-3.5 text-teal-300" /> };
       case 'Shadow':
@@ -128,7 +134,7 @@ export const BossBattleView: React.FC = () => {
       case 'Cosmic':
         return { label: 'Cosmic', color: 'bg-violet-950 border-violet-400 text-violet-200', icon: <CloudLightning className="w-3.5 h-3.5 text-violet-300" /> };
       default:
-        return { label: 'Physical', color: 'bg-slate-900 border-slate-600 text-slate-300', icon: <Swords className="w-3.5 h-3.5 text-slate-400" /> };
+        return { label: 'Physical', color: 'bg-slate-900 border-slate-600 text-slate-300', icon: <Hand className="w-3.5 h-3.5 text-slate-400" /> };
     }
   };
 
@@ -157,8 +163,8 @@ export const BossBattleView: React.FC = () => {
         damageTaken: 0,
       });
       setCombatLogs([
-        `Battle commenced! You brandish ${equippedWeapon.name} against ${boss.name}.`,
-        `[Tip] Monitor stamina, exploit weaknesses, and heed telegraphed attack warnings!`,
+        `Battle commenced! You enter a bodyweight combat stance (Hands & Legs) against ${boss.name}.`,
+        `[Tip] Monitor stamina, chain Hand & Leg techniques built from exercise, and heed attack warnings!`,
       ]);
       sound.playClick();
     } finally {
@@ -166,10 +172,10 @@ export const BossBattleView: React.FC = () => {
     }
   };
 
-  // Execute Strategic Action: Attack, Ability, Defend, or Dodge
+  // Execute Strategic Action: Hands/Legs Strike, Technique, Brace Defend, or Footwork Dodge
   const executeCombatAction = async (
     action: 'attack' | 'ability' | 'defend' | 'dodge',
-    abilityToUse?: WeaponAbility
+    techniqueToUse?: BodyweightTechnique
   ) => {
     if (isAnimating || boss.health <= 0) return;
 
@@ -177,12 +183,12 @@ export const BossBattleView: React.FC = () => {
     let staminaCost = 0;
     if (action === 'dodge') staminaCost = 20;
     else if (action === 'defend') staminaCost = 15;
-    else if (action === 'ability' && abilityToUse) staminaCost = abilityToUse.staminaCost || 30;
+    else if (action === 'ability' && techniqueToUse) staminaCost = techniqueToUse.staminaCost || 25;
 
     if (playerStamina < staminaCost) {
       sound.playClick();
       setCombatLogs(prev => [
-        `⚠️ Not enough stamina! Need ${staminaCost} STAM (Current: ${playerStamina}). Rest with a standard Attack!`,
+        `⚠️ Not enough stamina! Need ${staminaCost} STAM (Current: ${playerStamina}). Recover with a Hands & Legs Combo!`,
         ...prev.slice(0, 4),
       ]);
       return;
@@ -192,9 +198,9 @@ export const BossBattleView: React.FC = () => {
 
     try {
       // 2. Execute Strategic Engine via Server RPC
-      const abilityId = action === 'ability' && abilityToUse ? abilityToUse.id : undefined;
+      const abilityId = action === 'ability' && techniqueToUse ? techniqueToUse.id : undefined;
       const isWarning = isTelegraphWarningActive;
-      const result = await attackBoss(activeKingdom.id, action, abilityId, isWarning);
+      const result = await attackBoss(activeKingdom.id, action, abilityId);
 
       if (result.error) {
         setCombatLogs(prev => [`⚠️ ${result.error}`, ...prev.slice(0, 5)]);
@@ -217,7 +223,7 @@ export const BossBattleView: React.FC = () => {
         sound.playDodge();
       } else if (result.isDefended) {
         setFeedbackType('defended');
-        sound.playShieldBlock();
+        sound.playGuardBlock();
       } else {
         setFeedbackType('normal');
         sound.playAttack();
@@ -301,7 +307,7 @@ export const BossBattleView: React.FC = () => {
       {/* Mode Switcher: Weekly Community Raid vs Kingdom Story Bosses */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[#100D19] border border-[#C5A15A]/25 p-3">
         <div className="flex items-center gap-2 px-2">
-          <Swords className="w-4 h-4 text-[#C5A15A]" />
+          <Dumbbell className="w-4 h-4 text-[#C5A15A]" />
           <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-[#C5A15A]">
             Boss Encounters
           </span>
@@ -537,95 +543,99 @@ export const BossBattleView: React.FC = () => {
             </div>
           </div>
 
-          {/* Battle Prep & Champion Loadout (5 Cols) */}
+          {/* Battle Prep & Champion Bodyweight Conditioning (5 Cols) */}
           <div className="lg:col-span-5 bg-[#0e0a1b] border-2 border-purple-950 rounded-2xl p-6 shadow-xl space-y-5">
             <h4 className="font-['Cinzel'] font-bold text-sm text-slate-100 flex items-center gap-2">
-              <Shield className="w-4 h-4 text-purple-400" />
-              CHAMPION COMBAT READINESS
+              <Dumbbell className="w-4 h-4 text-purple-400" />
+              HANDS &amp; LEGS BODYWEIGHT READINESS
             </h4>
 
-            {/* Equipped Weapon & Strategic Elements */}
+            {/* Bodyweight Conditioning Profile */}
             <div className="p-4 rounded-xl bg-[#130f24] border border-purple-900/60 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400">Equipped Hand</span>
+                <span className="text-xs text-slate-400">Combat Discipline</span>
                 <span className="text-[10px] uppercase font-bold text-purple-300 bg-purple-950 px-2 py-0.5 rounded border border-purple-800">
-                  {equippedWeapon.evolutionStage || 'Dormant'} · Lv.{equippedWeapon.level}
+                  Hands &amp; Legs Only · {stats.aetherRank}
                 </span>
               </div>
 
               <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <h5 className="font-['Cinzel'] font-black text-base text-white">{equippedWeapon.name}</h5>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#090514] border border-purple-700/70 text-amber-300">
-                    {equippedWeapon.rarity}
-                  </span>
-                  {equippedWeapon.awakened && (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-teal-950 border border-teal-500/70 text-teal-200 font-bold">
-                      Awakened (+8% Strike)
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-purple-300 font-mono">
-                  {equippedWeapon.category} · {equippedWeapon.masteryPath} Path (Mastery Lv.{equippedWeapon.masteryLevel || 1})
+                <h5 className="font-['Cinzel'] font-black text-base text-white">
+                  {heroDef.bodyweightDisciplines.conditioningStyle}
+                </h5>
+                <p className="text-xs text-purple-300 mt-0.5">
+                  Bodyweight training builds strength through exercise — every strike comes from your hands and legs.
                 </p>
+
+                <div className="grid grid-cols-1 gap-1.5 mt-2.5 text-[11px] bg-[#090514] border border-purple-950 rounded-lg p-2.5">
+                  <div className="flex items-center gap-2">
+                    <Hand className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span className="text-slate-400">Hands:</span>
+                    <span className="text-slate-200 font-medium">{heroDef.bodyweightDisciplines.handsFocus}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Footprints className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <span className="text-slate-400">Legs:</span>
+                    <span className="text-slate-200 font-medium">{heroDef.bodyweightDisciplines.legsFocus}</span>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-4 gap-1.5 mt-2 bg-[#090514] border border-purple-950 rounded-lg p-2 text-[10px] font-mono text-center">
                   <div>
+                    <span className="text-slate-500 block">STRIKE</span>
+                    <span className="text-purple-300 font-bold">+{rawAtk}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 block">GUARD</span>
+                    <span className="text-indigo-300 font-bold">+{rawDef}</span>
+                  </div>
+                  <div>
                     <span className="text-slate-500 block">CRIT</span>
-                    <span className="text-amber-300 font-bold">+{equippedWeapon.critChance ?? 5}%</span>
+                    <span className="text-amber-300 font-bold">{critPercent}%</span>
                   </div>
                   <div>
-                    <span className="text-slate-500 block">CRIT DMG</span>
-                    <span className="text-rose-300 font-bold">{equippedWeapon.critDamage ?? 180}%</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-500 block">SPEED</span>
-                    <span className="text-cyan-300 font-bold">{equippedWeapon.speed ?? 65}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-500 block">AP / ELEM</span>
-                    <span className="text-purple-200 font-bold">+{equippedWeapon.abilityPower ?? 5}% {equippedWeapon.element || 'Phys'}</span>
+                    <span className="text-slate-500 block">REPS</span>
+                    <span className="text-emerald-300 font-bold">{stats.totalVerifiedReps}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Equipped Weapon Abilities Preview */}
+              {/* Bodyweight Techniques Preview */}
               <div className="space-y-1.5 pt-2 border-t border-purple-950/80">
                 <span className="text-[10px] uppercase tracking-wider text-slate-400 font-mono block">
-                  Available Mastery Elements:
+                  Hands &amp; Legs Bodyweight Techniques:
                 </span>
-                <div className="grid grid-cols-1 gap-1.5">
-                  {equippedWeapon.abilities?.map(ab => {
-                    const badge = ab.element ? getElementBadge(ab.element) : null;
-                    const isWeaknessMatch = boss.weakness?.element === ab.element;
+                <div className="grid grid-cols-1 gap-1.5 max-h-48 overflow-y-auto pr-1">
+                  {bodyweightTechniques.map(tech => {
+                    const badge = getElementBadge(tech.element);
+                    const isWeaknessMatch = boss.weakness?.element === tech.element;
                     return (
                       <div
-                        key={ab.id}
+                        key={tech.id}
                         className={`p-2 rounded-lg border flex items-center justify-between text-xs ${
-                          ab.unlocked
-                            ? isWeaknessMatch
-                              ? 'bg-amber-950/50 border-amber-500/80 text-amber-200'
-                              : 'bg-[#090514] border-purple-900/70 text-slate-300'
-                            : 'bg-[#06030c] border-purple-950/40 text-slate-600'
+                          isWeaknessMatch
+                            ? 'bg-amber-950/50 border-amber-500/80 text-amber-200'
+                            : 'bg-[#090514] border-purple-900/70 text-slate-300'
                         }`}
                       >
-                        <div className="flex items-center gap-2">
-                          {badge?.icon}
-                          <span className="font-['Cinzel'] font-bold text-[11px] truncate">{ab.name}</span>
-                          {badge && (
-                            <span className="text-[9px] font-mono px-1 rounded bg-black/60 text-slate-400">
-                              {badge.label}
+                        <div className="flex items-center gap-2 min-w-0">
+                          {badge.icon}
+                          <div className="min-w-0">
+                            <span className="font-['Cinzel'] font-bold text-[11px] block truncate">{tech.name}</span>
+                            <span className="text-[10px] text-slate-400 block truncate">
+                              {tech.limb === 'hands' ? 'Hands' : tech.limb === 'legs' ? 'Legs' : 'Hands & Legs'} · Built from {tech.exerciseInspiration}
                             </span>
-                          )}
+                          </div>
                         </div>
 
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5 shrink-0">
                           {isWeaknessMatch && (
                             <span className="text-[9px] font-mono font-black text-amber-400 animate-pulse">
                               WEAKNESS!
                             </span>
                           )}
                           <span className="text-[10px] font-mono text-slate-400">
-                            {ab.staminaCost || 30} STAM
+                            {tech.staminaCost} STAM
                           </span>
                         </div>
                       </div>
@@ -735,16 +745,13 @@ export const BossBattleView: React.FC = () => {
                     <h4 className="font-['Cinzel'] font-bold text-base text-white">
                       {user?.characterName || user?.username || 'Hero of Aetheria'}
                     </h4>
-                    <p className="text-xs text-purple-300 font-mono">Wielding {equippedWeapon.name}</p>
+                    <p className="text-xs text-purple-300 font-mono">
+                      Hands &amp; Legs · {heroDef.bodyweightDisciplines.conditioningStyle}
+                    </p>
                   </div>
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-[#080511] border border-purple-700/60 p-1 shrink-0">
-                  <EquipmentIllustration
-                    itemId={equippedWeapon.id}
-                    rarity={equippedWeapon.rarity}
-                    level={equippedWeapon.level}
-                    evolutionStage={equippedWeapon.evolutionStage}
-                  />
+                <div className="w-12 h-12 rounded-xl bg-[#080511] border border-purple-700/60 flex items-center justify-center shrink-0 text-amber-400">
+                  <Dumbbell className="w-5 h-5" />
                 </div>
               </div>
 
@@ -869,21 +876,21 @@ export const BossBattleView: React.FC = () => {
             </div>
           </div>
 
-          {/* 3. FOUR STRATEGIC COMBAT CHOICES */}
+          {/* 3. FOUR STRATEGIC BODYWEIGHT COMBAT CHOICES */}
           <div className="p-5 rounded-2xl bg-[#090714] border border-purple-950 space-y-4">
             <div className="flex items-center justify-between border-b border-purple-950 pb-2">
               <span className="text-xs uppercase font-['Cinzel'] font-black tracking-widest text-slate-300 flex items-center gap-1.5">
-                <Swords className="w-4 h-4 text-purple-400" />
-                Select Combat Action (Turn {turnCount})
+                <Hand className="w-4 h-4 text-purple-400" />
+                Hands &amp; Legs Combat Actions (Turn {turnCount})
               </span>
               <span className="text-xs font-mono text-cyan-300 font-bold">
                 Stamina: {playerStamina} / 100
               </span>
             </div>
 
-            {/* 4 Main Action Pillars: Attack / Use Ability / Defend / Dodge */}
+            {/* 4 Main Action Pillars: Strike / Technique / Brace / Footwork Evade */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              {/* ACTION 1: ATTACK */}
+              {/* ACTION 1: HANDS & LEGS STRIKE */}
               <button
                 onClick={() => executeCombatAction('attack')}
                 disabled={isAnimating}
@@ -891,23 +898,23 @@ export const BossBattleView: React.FC = () => {
               >
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="font-['Cinzel'] font-black text-xs text-white flex items-center gap-1.5">
-                    <Swords className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
-                    ATTACK
+                    <Hand className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
+                    STRIKE
                   </span>
                   <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-950/80 px-1.5 py-0.2 rounded border border-emerald-700">
                     +25 STAM
                   </span>
                 </div>
                 <p className="text-[11px] text-purple-200">
-                  Standard weapon blow. Restores stamina and maintains pressure.
+                  Bodyweight punch &amp; kick combo. Restores stamina and builds pressure.
                 </p>
               </button>
 
-              {/* ACTION 2: USE ABILITY (Toggles ability panel or casts chosen ability) */}
+              {/* ACTION 2: BODYWEIGHT TECHNIQUE */}
               <button
                 onClick={() => {
-                  const unlocked = equippedWeapon.abilities?.filter(a => a.unlocked);
-                  if (unlocked && unlocked.length > 0) {
+                  const unlocked = bodyweightTechniques.filter(t => t.unlocked);
+                  if (unlocked.length > 0) {
                     executeCombatAction('ability', unlocked[0]);
                   } else {
                     executeCombatAction('attack');
@@ -919,18 +926,18 @@ export const BossBattleView: React.FC = () => {
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="font-['Cinzel'] font-black text-xs text-amber-300 flex items-center gap-1.5">
                     <Zap className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
-                    USE ABILITY
+                    TECHNIQUE
                   </span>
                   <span className="text-[10px] font-mono font-bold text-amber-300 bg-amber-950/80 px-1.5 py-0.2 rounded border border-amber-700">
-                    20-45 STAM
+                    20-35 STAM
                   </span>
                 </div>
                 <p className="text-[11px] text-amber-100">
-                  Unleash elemental mastery to exploit boss weaknesses.
+                  Unleash a trained Hand or Leg strike to exploit boss weaknesses.
                 </p>
               </button>
 
-              {/* ACTION 3: DEFEND */}
+              {/* ACTION 3: DEFEND / BRACE */}
               <button
                 onClick={() => executeCombatAction('defend')}
                 disabled={isAnimating || playerStamina < 15}
@@ -942,19 +949,19 @@ export const BossBattleView: React.FC = () => {
               >
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="font-['Cinzel'] font-black text-xs text-cyan-200 flex items-center gap-1.5">
-                    <Shield className="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform" />
-                    DEFEND
+                    <Activity className="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform" />
+                    BRACE GUARD
                   </span>
                   <span className="text-[10px] font-mono font-bold text-cyan-300 bg-cyan-950/80 px-1.5 py-0.2 rounded border border-cyan-700">
                     15 STAM
                   </span>
                 </div>
                 <p className="text-[11px] text-cyan-100">
-                  Raise shield & guard. Reduces damage by 80% and mitigates Ground Slams.
+                  Root your stance with forearms &amp; core. Reduces damage by 80% against Ground Slams.
                 </p>
               </button>
 
-              {/* ACTION 4: DODGE */}
+              {/* ACTION 4: FOOTWORK DODGE */}
               <button
                 onClick={() => executeCombatAction('dodge')}
                 disabled={isAnimating || playerStamina < 20}
@@ -966,78 +973,79 @@ export const BossBattleView: React.FC = () => {
               >
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="font-['Cinzel'] font-black text-xs text-emerald-200 flex items-center gap-1.5">
-                    <Wind className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
-                    DODGE
+                    <Footprints className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+                    FOOTWORK EVADE
                   </span>
                   <span className="text-[10px] font-mono font-bold text-emerald-300 bg-emerald-950/80 px-1.5 py-0.2 rounded border border-emerald-700">
                     20 STAM
                   </span>
                 </div>
                 <p className="text-[11px] text-emerald-100">
-                  Evasive roll. Evades 100% damage from telegraphed ambushes.
+                  Agile leg step &amp; evasive roll. Avoids 100% damage from telegraphed ambushes.
                 </p>
               </button>
             </div>
 
-            {/* WEAPON MASTERY ABILITY SELECTOR STRIP */}
-            {equippedWeapon?.abilities && equippedWeapon.abilities.length > 0 && (
-              <div className="pt-3 border-t border-purple-950">
-                <span className="text-[10px] uppercase tracking-widest font-black text-amber-400 font-['Cinzel'] block mb-2">
-                  Tactical Mastery Abilities ({equippedWeapon.name}):
-                </span>
+            {/* HANDS & LEGS BODYWEIGHT TECHNIQUE SELECTOR STRIP */}
+            <div className="pt-3 border-t border-purple-950">
+              <span className="text-[10px] uppercase tracking-widest font-black text-amber-400 font-['Cinzel'] block mb-2">
+                Hands &amp; Legs Bodyweight Techniques (Strength Built Through Exercise):
+              </span>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                  {equippedWeapon.abilities.map(ability => {
-                    const isUnlocked = ability.unlocked;
-                    const badge = ability.element ? getElementBadge(ability.element) : null;
-                    const isWeaknessMatch = boss.weakness?.element === ability.element;
-                    const cost = ability.staminaCost || 30;
-                    const hasEnoughStamina = playerStamina >= cost;
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                {bodyweightTechniques.map(tech => {
+                  const isUnlocked = tech.unlocked;
+                  const badge = getElementBadge(tech.element);
+                  const isWeaknessMatch = boss.weakness?.element === tech.element;
+                  const cost = tech.staminaCost || 25;
+                  const hasEnoughStamina = playerStamina >= cost;
 
-                    return (
-                      <button
-                        key={ability.id}
-                        onClick={() => executeCombatAction('ability', ability)}
-                        disabled={isAnimating || !isUnlocked || !hasEnoughStamina}
-                        className={`p-3 rounded-xl border text-left transition-all relative overflow-hidden group ${
-                          isUnlocked && hasEnoughStamina
-                            ? isWeaknessMatch
-                              ? 'bg-gradient-to-r from-[#2c1340] to-[#1c0828] border-amber-400 ring-2 ring-amber-400/60 hover:scale-[1.02] cursor-pointer shadow-lg'
-                              : 'bg-gradient-to-r from-[#170c2a] to-[#0e061c] border-purple-800/80 hover:border-purple-500 hover:scale-[1.01] cursor-pointer'
-                            : 'bg-[#080512]/60 border-purple-950 text-slate-500 cursor-not-allowed opacity-50'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between gap-1 mb-1">
-                          <span className="font-['Cinzel'] font-black text-xs text-white truncate flex items-center gap-1.5">
-                            {badge?.icon}
-                            {ability.name}
-                          </span>
-                          <span className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded ${
-                            isWeaknessMatch
-                              ? 'bg-amber-400 text-slate-950 animate-pulse'
-                              : 'bg-slate-800 text-slate-300'
-                          }`}>
-                            {cost} STAM
-                          </span>
-                        </div>
-
-                        <p className="text-[11px] text-purple-200 line-clamp-1">{ability.combatEffect}</p>
-
-                        <div className="flex items-center justify-between mt-1 text-[10px] font-mono">
-                          <span className="text-slate-400">{badge?.label} Element</span>
-                          {isWeaknessMatch && (
-                            <span className="text-amber-400 font-bold">1.8x - 2.0x BONUS!</span>
+                  return (
+                    <button
+                      key={tech.id}
+                      onClick={() => executeCombatAction('ability', tech)}
+                      disabled={isAnimating || !isUnlocked || !hasEnoughStamina}
+                      className={`p-3 rounded-xl border text-left transition-all relative overflow-hidden group ${
+                        isUnlocked && hasEnoughStamina
+                          ? isWeaknessMatch
+                            ? 'bg-gradient-to-r from-[#2c1340] to-[#1c0828] border-amber-400 ring-2 ring-amber-400/60 hover:scale-[1.02] cursor-pointer shadow-lg'
+                            : 'bg-gradient-to-r from-[#170c2a] to-[#0e061c] border-purple-800/80 hover:border-purple-500 hover:scale-[1.01] cursor-pointer'
+                          : 'bg-[#080512]/60 border-purple-950 text-slate-500 cursor-not-allowed opacity-50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-1 mb-1">
+                        <span className="font-['Cinzel'] font-black text-xs text-white truncate flex items-center gap-1.5">
+                          {tech.limb === 'legs' ? (
+                            <Footprints className="w-3.5 h-3.5 text-cyan-300 shrink-0" />
+                          ) : (
+                            <Hand className="w-3.5 h-3.5 text-amber-300 shrink-0" />
                           )}
-                          {!isUnlocked && (
-                            <span className="text-slate-500 italic">Unlock at M-Lv.{ability.unlockMasteryLevel}</span>
-                          )}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
+                          {tech.name}
+                        </span>
+                        <span className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded ${
+                          isWeaknessMatch
+                            ? 'bg-amber-400 text-slate-950 animate-pulse'
+                            : 'bg-slate-800 text-slate-300'
+                        }`}>
+                          {cost} STAM
+                        </span>
+                      </div>
+
+                      <p className="text-[11px] text-purple-200 line-clamp-1">{tech.combatEffect}</p>
+
+                      <div className="flex items-center justify-between mt-1 text-[10px] font-mono">
+                        <span className="text-slate-400">
+                          {tech.exerciseInspiration} · {badge.label}
+                        </span>
+                        {isWeaknessMatch && (
+                          <span className="text-amber-400 font-bold">1.8x - 2.0x BONUS!</span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
-            )}
+            </div>
           </div>
 
           {/* Combat Logs Console */}
@@ -1098,14 +1106,10 @@ export const BossBattleView: React.FC = () => {
           </div>
 
           {/* Rewards Grid */}
-          <div className="grid grid-cols-3 gap-3 max-w-sm mx-auto bg-[#120822] p-3 rounded-xl border border-amber-500/50 font-mono text-xs">
+          <div className="grid grid-cols-2 gap-3 max-w-xs mx-auto bg-[#120822] p-3 rounded-xl border border-amber-500/50 font-mono text-xs">
             <div>
               <span className="text-[10px] text-purple-300 uppercase block">Player XP</span>
               <span className="text-lg font-bold text-purple-200">+{boss.rewardPlayerXp}</span>
-            </div>
-            <div>
-              <span className="text-[10px] text-amber-300 uppercase block">Forge XP</span>
-              <span className="text-lg font-bold text-amber-200">+{boss.rewardForgeXp}</span>
             </div>
             <div>
               <span className="text-[10px] text-cyan-300 uppercase block">Aether Pts</span>
@@ -1174,10 +1178,10 @@ export const BossBattleView: React.FC = () => {
               Retry Encounter
             </button>
             <button
-              onClick={() => setActiveTab('armory')}
+              onClick={() => setActiveTab('fitness')}
               className="px-6 py-2.5 rounded-xl border border-amber-600/70 text-amber-300 hover:bg-amber-950/40 text-xs font-bold"
             >
-              Upgrade at Armory
+              Train Bodyweight Strength
             </button>
           </div>
         </div>

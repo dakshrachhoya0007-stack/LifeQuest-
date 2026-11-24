@@ -11,7 +11,6 @@ import {
   Crown,
   Lock,
   Sparkles,
-  Hammer,
   Coins,
   Search,
   RefreshCw,
@@ -401,9 +400,6 @@ export const HallOfLegendsView: React.FC = () => {
                   <span className="flex items-center gap-1 text-[#C5A15A]">
                     <Crown className="w-3 h-3" />
                     {entry.rewardPlayerXp > 0 ? `+${entry.rewardPlayerXp} XP` : 'Prestige Title'}
-                  </span>
-                  <span className="flex items-center gap-1 text-amber-300">
-                    <Hammer className="w-3 h-3" />+{entry.rewardForgeXp} Forge
                   </span>
                   <span className="flex items-center gap-1 text-yellow-300">
                     <Coins className="w-3 h-3" />+{entry.rewardGold}g

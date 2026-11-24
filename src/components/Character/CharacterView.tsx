@@ -1,8 +1,6 @@
 import React from 'react';
 import { useGame } from '../../context/GameContext';
 import { getHeroById, RPG_ATTRIBUTE_META } from '../../data/heroesData';
-import { EquipmentIllustration } from '../../assets/equipmentArtwork';
-import { getRarityStyle } from '../../utils/rarityStyles';
 import {
   IDENTITY_RARITY_STYLE,
   PLAYER_TITLES_CATALOG,
@@ -10,9 +8,10 @@ import {
 } from '../../data/polish2Data';
 import { COLLECTIBLE_CARDS_CATALOG } from '../../data/aaaGamingData';
 import {
-  Shield,
-  Swords,
+  Dumbbell,
   Flame,
+  Footprints,
+  Hand,
   Award,
   Edit,
   ShoppingBag,
@@ -27,6 +26,7 @@ import {
   Palette,
   Layers,
   Trophy,
+  User,
 } from 'lucide-react';
 import { LegendTitleBadge } from '../Social/LegendTitleBadge';
 import { Character2DAvatar, CollectibleCardArtwork } from './Character2DAvatar';
@@ -44,9 +44,6 @@ export const CharacterView: React.FC = () => {
     heroLocked,
     setShowHeroSelectModal,
     rpgAttributes,
-    weapons,
-    equippedWeapon,
-    equippedGear,
     activeBuffs,
     setActiveTab,
     setProgressionSubTab,
@@ -191,18 +188,8 @@ export const CharacterView: React.FC = () => {
   const heroDef = getHeroById(selectedHeroId);
   const xpPercent = Math.min(100, Math.round((stats.playerXP / stats.playerXPNextLevel) * 100));
 
-  const offHandGear = equippedGear.offHandId
-    ? weapons.find(w => w.id === equippedGear.offHandId && w.id !== equippedWeapon.id)
-    : undefined;
-  const armourGear = equippedGear.armourId ? weapons.find(w => w.id === equippedGear.armourId) : undefined;
-  const helmetGear = equippedGear.helmetId ? weapons.find(w => w.id === equippedGear.helmetId) : undefined;
-  const accessoryGear = equippedGear.accessoryId ? weapons.find(w => w.id === equippedGear.accessoryId) : undefined;
-
-  const equippedGearItems = [equippedWeapon, offHandGear, armourGear, helmetGear, accessoryGear].filter(
-    (item): item is NonNullable<typeof item> => Boolean(item)
-  );
-  const rawAttack = equippedGearItems.reduce((sum, item) => sum + item.baseAttack, 0);
-  const rawDefense = equippedGearItems.reduce((sum, item) => sum + item.baseDefense, 0);
+  const rawAttack = 18 + Math.round(rpgAttributes.strength * 1.4 + rpgAttributes.agility * 0.6);
+  const rawDefense = 12 + Math.round(rpgAttributes.resilience * 1.2 + rpgAttributes.discipline * 0.8);
 
   // Buff multipliers
   const atkBuff = activeBuffs.find(b => b.effectType === 'attack');
@@ -211,8 +198,7 @@ export const CharacterView: React.FC = () => {
 
   const totalAttack = Math.round(rawAttack * (1 + (atkBuff ? atkBuff.effectValue / 100 : 0)));
   const totalDefense = Math.round(rawDefense * (1 + (defBuff ? defBuff.effectValue / 100 : 0)));
-  const critPercent = 10 + (equippedWeapon.critChance ?? 5) + (critBuff ? critBuff.effectValue : 0);
-  const mainRarityStyle = getRarityStyle(equippedWeapon.rarity);
+  const critPercent = Math.min(60, 10 + Math.round(rpgAttributes.agility * 0.25) + (critBuff ? critBuff.effectValue : 0));
 
   const favoriteCardDefs = (cardsState?.favoriteCardIds || [])
     .map(id => COLLECTIBLE_CARDS_CATALOG.find(c => c.id === id))
@@ -224,7 +210,7 @@ export const CharacterView: React.FC = () => {
     label: string;
     icon: React.ComponentType<{ className?: string }>;
   }> = [
-    { id: 'overview', label: 'Hero Overview', icon: Shield },
+    { id: 'overview', label: 'Hero Overview', icon: User },
     { id: 'customization', label: '2D Wardrobe & Loadouts', icon: Palette },
     { id: 'cards', label: 'Card Binder', icon: Layers },
     { id: 'trophies', label: 'Trophies & Prestige', icon: Trophy },
@@ -526,13 +512,13 @@ export const CharacterView: React.FC = () => {
         {/* Combat Stats */}
         <div className="bg-[#0e0a1b] border border-purple-950 rounded-2xl p-6 shadow-md space-y-4">
           <h3 className="font-['Cinzel'] font-bold text-base text-slate-100 flex items-center gap-2">
-            <Swords className="w-4 h-4 text-purple-400" />
-            COMBAT ATTRIBUTES
+            <Dumbbell className="w-4 h-4 text-purple-400" />
+            BODYWEIGHT COMBAT ATTRIBUTES
           </h3>
 
           <div className="grid grid-cols-3 gap-3 font-mono">
             <div className="p-4 rounded-xl bg-[#130f24] border border-purple-950 text-center">
-              <span className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1">Attack</span>
+              <span className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1">Strike Power</span>
               <span className="text-2xl font-black text-purple-300">+{totalAttack}</span>
               {atkBuff && (
                 <span className="text-[10px] text-amber-400 block mt-0.5">+{atkBuff.effectValue}% Buff</span>
@@ -540,7 +526,7 @@ export const CharacterView: React.FC = () => {
             </div>
 
             <div className="p-4 rounded-xl bg-[#130f24] border border-purple-950 text-center">
-              <span className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1">Defense</span>
+              <span className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1">Body Guard</span>
               <span className="text-2xl font-black text-indigo-300">+{totalDefense}</span>
               {defBuff && (
                 <span className="text-[10px] text-amber-400 block mt-0.5">+{defBuff.effectValue}% Buff</span>
@@ -556,27 +542,24 @@ export const CharacterView: React.FC = () => {
             </div>
           </div>
 
-          {/* Equipped Weapon Card */}
-          <div className={`p-4 rounded-xl bg-[#130f24] border ${mainRarityStyle.border} flex items-center justify-between gap-3`}>
+          {/* Hands & Legs Bodyweight Training Card */}
+          <div className="p-4 rounded-xl bg-[#130f24] border border-[#C5A15A]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
-              <div className={`w-14 h-14 rounded-xl bg-[#080511] border ${mainRarityStyle.border} p-1.5 shrink-0`}>
-                <EquipmentIllustration
-                  itemId={equippedWeapon.id}
-                  rarity={equippedWeapon.rarity}
-                  level={equippedWeapon.level}
-                  evolutionStage={equippedWeapon.evolutionStage}
-                />
+              <div className="w-12 h-12 rounded-xl bg-[#080511] border border-[#C5A15A]/40 flex items-center justify-center shrink-0 text-[#C5A15A]">
+                <Dumbbell className="w-6 h-6" />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] uppercase font-bold text-purple-400">Main Hand</span>
-                  <span className={`text-[9px] uppercase px-1.5 py-0.5 rounded ${mainRarityStyle.badge}`}>
-                    {equippedWeapon.rarity}
+                  <span className="text-[10px] uppercase font-bold text-purple-400">Hands &amp; Legs Combat</span>
+                  <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/40">
+                    Unarmed
                   </span>
                 </div>
-                <h4 className="font-['Cinzel'] font-bold text-base text-white truncate">{equippedWeapon.name}</h4>
+                <h4 className="font-['Cinzel'] font-bold text-base text-white truncate">
+                  {heroDef.bodyweightDisciplines.conditioningStyle}
+                </h4>
                 <p className="text-xs text-slate-400">
-                  {equippedWeapon.category} · Lv.{equippedWeapon.level} · {equippedWeapon.element || 'Physical'} · SPD {equippedWeapon.speed ?? 65}
+                  Bodyweight training builds strength through exercise.
                 </p>
               </div>
             </div>
@@ -589,49 +572,34 @@ export const CharacterView: React.FC = () => {
                 Store
               </button>
               <button
-                onClick={() => setActiveTab('armory')}
+                onClick={() => setActiveTab('fitness')}
                 className="px-3.5 py-2 rounded-xl bg-purple-800 hover:bg-purple-700 text-white text-xs font-semibold"
               >
-                Armory
+                Train
               </button>
             </div>
           </div>
 
-          {/* Secondary Equipped Gear Slots */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
-            {[
-              { label: 'Off-Hand', item: offHandGear },
-              { label: 'Armour', item: armourGear },
-              { label: 'Helmet', item: helmetGear },
-              { label: 'Relic', item: accessoryGear },
-            ].map(slot => {
-              const slotStyle = slot.item ? getRarityStyle(slot.item.rarity) : null;
-              return (
-                <div
-                  key={slot.label}
-                  onClick={() => setActiveTab(slot.item ? 'armory' : 'store')}
-                  className={`p-2 rounded-xl border cursor-pointer flex items-center gap-2 transition-colors ${
-                    slot.item && slotStyle
-                      ? `bg-[#120d22] ${slotStyle.border}`
-                      : 'bg-[#090613] border-purple-950/70 hover:border-purple-700'
-                  }`}
-                >
-                  <div className="w-8 h-8 rounded-lg bg-[#07040e] border border-purple-950 p-0.5 shrink-0 flex items-center justify-center">
-                    {slot.item ? (
-                      <EquipmentIllustration itemId={slot.item.id} rarity={slot.item.rarity} level={slot.item.level} />
-                    ) : (
-                      <Shield className="w-3.5 h-3.5 text-slate-600" />
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <span className="text-[9px] uppercase text-slate-400 block">{slot.label}</span>
-                    <span className="text-[10px] font-semibold text-slate-200 truncate block">
-                      {slot.item ? slot.item.name : 'Empty'}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+          {/* Hands & Legs Focus Summary */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+            <div className="p-3 rounded-xl bg-[#090613] border border-purple-950/70 flex items-center gap-2.5">
+              <Hand className="w-4 h-4 text-amber-400 shrink-0" />
+              <div className="min-w-0">
+                <span className="text-[10px] uppercase text-slate-400 block">Hands Technique</span>
+                <span className="text-xs font-semibold text-slate-200 truncate block">
+                  {heroDef.bodyweightDisciplines.handsFocus}
+                </span>
+              </div>
+            </div>
+            <div className="p-3 rounded-xl bg-[#090613] border border-purple-950/70 flex items-center gap-2.5">
+              <Footprints className="w-4 h-4 text-cyan-400 shrink-0" />
+              <div className="min-w-0">
+                <span className="text-[10px] uppercase text-slate-400 block">Legs Technique</span>
+                <span className="text-xs font-semibold text-slate-200 truncate block">
+                  {heroDef.bodyweightDisciplines.legsFocus}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 

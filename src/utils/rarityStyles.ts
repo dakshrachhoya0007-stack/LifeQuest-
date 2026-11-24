@@ -1,4 +1,4 @@
-import { WeaponCategory, WeaponRarity } from '../types/game';
+import { ItemRarity } from '../types/game';
 
 export interface RarityVisualStyle {
   tierIndex: number;
@@ -18,7 +18,7 @@ export interface RarityVisualStyle {
   unlockTierHint: string;
 }
 
-export const RARITY_ORDER: WeaponRarity[] = [
+export const RARITY_ORDER: ItemRarity[] = [
   'Common',
   'Uncommon',
   'Rare',
@@ -31,41 +31,7 @@ export const RARITY_ORDER: WeaponRarity[] = [
   'Eternal',
 ];
 
-export const WEAPON_CATEGORIES_ORDER: WeaponCategory[] = [
-  'Swords',
-  'Greatswords',
-  'Daggers',
-  'Dual Blades',
-  'Bows',
-  'Crossbows',
-  'Magic Staffs',
-  'Wands',
-  'Spears',
-  'Axes',
-  'War Hammers',
-  'Scythes',
-  'Shields',
-  'Armour',
-  'Helmets',
-  'Accessories',
-];
-
-export const MAIN_HAND_WEAPON_CATEGORIES: WeaponCategory[] = [
-  'Swords',
-  'Greatswords',
-  'Daggers',
-  'Dual Blades',
-  'Bows',
-  'Crossbows',
-  'Magic Staffs',
-  'Wands',
-  'Spears',
-  'Axes',
-  'War Hammers',
-  'Scythes',
-];
-
-export const RARITY_STYLE_MAP: Record<WeaponRarity, RarityVisualStyle> = {
+export const RARITY_STYLE_MAP: Record<ItemRarity, RarityVisualStyle> = {
   Common: {
     tierIndex: 1,
     label: 'Common',
@@ -115,7 +81,7 @@ export const RARITY_STYLE_MAP: Record<WeaponRarity, RarityVisualStyle> = {
     pipActive: 'bg-blue-400 border-blue-200 text-slate-950',
     orb: 'bg-blue-500/25',
     frameAnimationClass: '',
-    unlockTierHint: 'Treasury & Realm Skirmishes',
+    unlockTierHint: 'Treasury & Realm Trials',
   },
   Epic: {
     tierIndex: 4,
@@ -132,7 +98,7 @@ export const RARITY_STYLE_MAP: Record<WeaponRarity, RarityVisualStyle> = {
     pipActive: 'bg-purple-400 border-purple-200 text-slate-950',
     orb: 'bg-purple-500/30',
     frameAnimationClass: '',
-    unlockTierHint: 'Masterwork Forge & Treasury',
+    unlockTierHint: 'Masterwork Vault & Treasury',
   },
   Legendary: {
     tierIndex: 5,
@@ -241,7 +207,7 @@ export const RARITY_STYLE_MAP: Record<WeaponRarity, RarityVisualStyle> = {
 export const getRarityStyle = (rarity?: string): RarityVisualStyle => {
   if (!rarity) return RARITY_STYLE_MAP.Common;
   if (rarity === 'Mythical') return RARITY_STYLE_MAP.Mythic;
-  return RARITY_STYLE_MAP[rarity as WeaponRarity] || RARITY_STYLE_MAP.Common;
+  return RARITY_STYLE_MAP[rarity as ItemRarity] || RARITY_STYLE_MAP.Common;
 };
 
 export const isBeyondMythicRarity = (rarity?: string): boolean => {

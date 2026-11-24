@@ -43,7 +43,6 @@ interface ConfirmedRewardState {
   kind: 'workout' | 'meal';
   title: string;
   playerXp: number;
-  forgeXp: number;
   gold: number;
   aetherPoints: number;
   buffActivated?: boolean;
@@ -59,77 +58,66 @@ const EXERCISE_OPTIONS: {
   name: string;
   targetMuscles: string;
   instructions: string;
-  forgeXpPerRep: number;
 }[] = [
   {
     id: 'squat',
     name: 'Squats',
     targetMuscles: 'Quadriceps, Glutes, Core',
     instructions: 'Stand shoulder-width apart. Lower hips with chest lifted, then press back up smoothly.',
-    forgeXpPerRep: 5,
   },
   {
     id: 'pushup',
     name: 'Push-ups',
     targetMuscles: 'Chest, Triceps, Shoulders',
     instructions: 'Keep torso braced in a straight line. Lower chest steadily and press back to extension.',
-    forgeXpPerRep: 6,
   },
   {
     id: 'jumping_jack',
     name: 'Jumping Jacks',
     targetMuscles: 'Cardio, Calves, Deltoids',
     instructions: 'Jump while spreading feet and raising arms overhead, then return cleanly.',
-    forgeXpPerRep: 3,
   },
   {
     id: 'lunge',
     name: 'Lunges',
     targetMuscles: 'Hamstrings, Glutes, Balance',
     instructions: 'Step forward smoothly, lower back knee with control, and drive back to standing.',
-    forgeXpPerRep: 5,
   },
   {
     id: 'knee_raise',
     name: 'Standing Knee Raises',
     targetMuscles: 'Hip Flexors, Core, Balance',
     instructions: 'Stand tall and lift alternating knees toward hip height at a controlled tempo.',
-    forgeXpPerRep: 4,
   },
   {
     id: 'walking',
     name: 'Walking',
     targetMuscles: 'Cardiovascular Endurance, Legs',
     instructions: 'Brisk, upright stride with relaxed shoulders and steady arm swing.',
-    forgeXpPerRep: 3,
   },
   {
     id: 'running',
     name: 'Running',
     targetMuscles: 'Cardio, Calves, Quads, Stamina',
     instructions: 'Balanced cadence with upright posture and controlled breathing.',
-    forgeXpPerRep: 4,
   },
   {
     id: 'cycling',
     name: 'Cycling',
     targetMuscles: 'Quads, Hamstrings, Cardiovascular',
     instructions: 'Smooth pedal cadence with neutral spine alignment.',
-    forgeXpPerRep: 4,
   },
   {
     id: 'gym',
     name: 'Strength / Gym Training',
     targetMuscles: 'Full Body / Resistance',
     instructions: 'Controlled eccentric and concentric form through comfortable range of motion.',
-    forgeXpPerRep: 5,
   },
   {
     id: 'yoga',
     name: 'Yoga & Mobility',
     targetMuscles: 'Mobility, Balance, Breath, Core',
     instructions: 'Steady nasal breathing and mindful joint alignment without forcing range.',
-    forgeXpPerRep: 3,
   },
 ];
 
@@ -395,7 +383,6 @@ export const AetherVisionView: React.FC = () => {
       kind: 'workout',
       title: confirmExerciseName.trim() || 'Workout Logged',
       playerXp: result.rewards?.playerXp ?? 0,
-      forgeXp: result.rewards?.forgeXp ?? 0,
       gold: result.rewards?.gold ?? 0,
       aetherPoints: result.rewards?.aetherPoints ?? 0,
       buffActivated: result.rewards?.buffActivated,
@@ -671,7 +658,6 @@ export const AetherVisionView: React.FC = () => {
       kind: 'workout',
       title: currentCameraExercise.name,
       playerXp: result.rewards?.playerXp ?? 0,
-      forgeXp: result.rewards?.forgeXp ?? 0,
       gold: result.rewards?.gold ?? 0,
       aetherPoints: result.rewards?.aetherPoints ?? 0,
       buffActivated: result.rewards?.buffActivated,
@@ -837,7 +823,6 @@ export const AetherVisionView: React.FC = () => {
       kind: 'meal',
       title: editableMealTitle.trim() || foodAnalysis.mealTitle,
       playerXp: result.rewards?.playerXp ?? 0,
-      forgeXp: result.rewards?.forgeXp ?? 0,
       gold: result.rewards?.gold ?? 0,
       aetherPoints: result.rewards?.aetherPoints ?? 0,
       deduplicated: result.deduplicated,
@@ -870,7 +855,7 @@ export const AetherVisionView: React.FC = () => {
           <div className="flex items-center gap-2 bg-[#090714] p-3 rounded-xl border border-purple-950 text-xs max-w-sm">
             <Shield className="w-4 h-4 text-emerald-400 shrink-0" />
             <span className="text-slate-400">
-              All earned XP, Forge XP, and Gold are verified and safely credited to your hero.
+              All earned Player XP and Gold are verified and safely credited to your hero.
             </span>
           </div>
         </div>
@@ -1373,12 +1358,6 @@ export const AetherVisionView: React.FC = () => {
                   <span className="text-slate-300">Vision-Verified Base + Rep XP</span>
                   <span className="font-mono font-bold text-purple-300">
                     max(10, reps) × 4 + 30
-                  </span>
-                </div>
-                <div className="p-3 rounded-xl bg-[#130f24] border border-purple-950 flex justify-between">
-                  <span className="text-slate-300">Forge XP Formula</span>
-                  <span className="font-mono font-bold text-amber-300">
-                    max(10, reps) × 5 + 40
                   </span>
                 </div>
                 <div className="p-3 rounded-xl bg-[#130f24] border border-purple-950 flex justify-between">
@@ -1925,7 +1904,7 @@ export const AetherVisionView: React.FC = () => {
               </div>
             )}
 
-            <div className="grid grid-cols-3 gap-2.5 bg-[#130f24] p-4 rounded-xl border border-purple-950">
+            <div className="grid grid-cols-2 gap-2.5 bg-[#130f24] p-4 rounded-xl border border-purple-950">
               <div>
                 <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
                   Player XP
@@ -1934,15 +1913,7 @@ export const AetherVisionView: React.FC = () => {
                   +{confirmedReward.playerXp}
                 </span>
               </div>
-              <div className="border-x border-purple-950">
-                <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
-                  Forge XP
-                </span>
-                <span className="font-mono text-xl font-bold text-amber-300">
-                  +{confirmedReward.forgeXp}
-                </span>
-              </div>
-              <div>
+              <div className="border-l border-purple-950">
                 <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
                   Gold
                 </span>

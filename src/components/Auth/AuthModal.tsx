@@ -215,9 +215,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </h2>
           <p className="text-xs text-purple-300/80 mt-1 max-w-xs mx-auto">
             {mode === 'login'
-              ? 'Authenticate to access your forged weapons, habits, and quest progress.'
+              ? 'Authenticate to access your training, habits, and quest progress.'
               : mode === 'register'
-              ? 'Create your adventurer account to save habits, gear, and realm progress.'
+              ? 'Create your adventurer account to save habits, workouts, and realm progress.'
               : 'Enter your account email to receive a password recovery dispatch.'}
           </p>
         </div>

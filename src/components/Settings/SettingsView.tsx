@@ -266,7 +266,7 @@ export const SettingsView: React.FC = () => {
                   {user?.email || user?.username}
                 </span>
                 <span className="text-[10px] text-slate-400 block">
-                  Kept separate from RPG gear
+                  Kept separate from RPG portrait
                 </span>
               </div>
             </div>
@@ -650,7 +650,7 @@ export const SettingsView: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-2 pt-1">
                 <label className="flex items-center justify-between gap-2 text-[11px] text-slate-300 cursor-pointer p-2 rounded-lg bg-[#090714] border border-white/5">
-                  <span>Show Equipped Gear</span>
+                  <span>Show Combat Stance</span>
                   <input
                     type="checkbox"
                     checked={privacySettings.showEquipment !== false}
@@ -838,7 +838,7 @@ export const SettingsView: React.FC = () => {
             </h3>
             <p className="text-xs text-slate-300 leading-relaxed">
               {heroLocked
-                ? `Replay the interactive 11-step tour of Aetheria at any time without affecting your level, XP, Gold, or equipment. Your champion oath is permanently bound to ${boundHero.name}.`
+                ? `Replay the interactive 11-step tour of Aetheria at any time without affecting your level, XP, Gold, or training progress. Your champion oath is permanently bound to ${boundHero.name}.`
                 : 'Replay the interactive 11-step tour of Aetheria or complete your one-time champion selection to permanently bind your hero to your account.'}
             </p>
             <div className="flex flex-wrap items-center gap-2.5 pt-1">
@@ -929,7 +929,7 @@ export const SettingsView: React.FC = () => {
               </span>
             </div>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Automatic saving keeps your hero, forged weapons, habit streaks, workouts, and realm progress safely synced across all your devices.
+              Automatic saving keeps your hero, bodyweight strength, habit streaks, workouts, and realm progress safely synced across all your devices.
             </p>
             {lastSavedAt && (
               <div className="text-[11px] text-purple-300/80 font-mono tabular-nums">
@@ -992,7 +992,7 @@ export const SettingsView: React.FC = () => {
               RESET ALL REALM PROGRESS?
             </h3>
             <p className="text-xs text-slate-400">
-              This will restore all habits, weapons, and levels to default initial values. This action cannot be reversed.
+              This will restore all habits, workouts, and levels to default initial values. This action cannot be reversed.
             </p>
             <div className="flex justify-center gap-3">
               <button

@@ -14,11 +14,11 @@ import {
   Circle,
   Compass,
   Crown,
+  Dumbbell,
   Lock,
   MessageSquareQuote,
   Shield,
   Sparkles,
-  Swords,
 } from 'lucide-react';
 
 export const StorylineView: React.FC = () => {
@@ -52,7 +52,7 @@ export const StorylineView: React.FC = () => {
     if (res.success) {
       setChapterFeedback({
         type: 'success',
-        text: 'Honor Reclaimed! +120 Player XP, +75 Forge XP & +100 Gold granted.',
+        text: 'Honor Reclaimed! +120 Player XP & +100 Gold granted.',
       });
     } else if (res.error) {
       setChapterFeedback({ type: 'error', text: res.error });
@@ -210,8 +210,8 @@ export const StorylineView: React.FC = () => {
                 <Award className="w-3 h-3" /> Completion Reward
               </span>
               <div className="text-xs font-mono text-[#D9D2C5] mt-1 space-y-0.5">
-                <div>+120 Player XP · +75 Forge XP</div>
-                <div className="text-[#C5A15A]">+100 Gold · +2 DIS · +1 RES</div>
+                <div>+120 Player XP · +100 Gold</div>
+                <div className="text-[#C5A15A]">+2 DIS · +1 RES</div>
               </div>
             </div>
           </div>
@@ -322,7 +322,7 @@ export const StorylineView: React.FC = () => {
                     )}
 
                     <div className="text-[11px] font-mono text-[#C5A15A] pt-1">
-                      Reward: +{ch.rewards.playerXp} Player XP · +{ch.rewards.forgeXp} Forge XP · +{ch.rewards.gold} Gold
+                      Reward: +{ch.rewards.playerXp} Player XP · +{ch.rewards.gold} Gold
                     </div>
                   </div>
 
@@ -437,7 +437,7 @@ export const StorylineView: React.FC = () => {
                           onClick={() => setActiveTab('boss-battles')}
                           className="px-5 py-2 rounded-xl font-['Cinzel'] font-bold text-xs tracking-wider bg-rose-700 hover:bg-rose-600 text-white shadow flex items-center gap-1.5 transition-colors"
                         >
-                          <Swords className="w-3.5 h-3.5" />
+                          <Dumbbell className="w-3.5 h-3.5" />
                           Challenge Boss
                         </button>
                       ) : (

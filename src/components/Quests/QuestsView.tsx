@@ -16,7 +16,6 @@ import {
   CheckCircle2,
   Clock,
   Sparkles,
-  Hammer,
   History,
   Wand2,
   Dumbbell,
@@ -225,9 +224,6 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
             <span className="text-purple-300 font-semibold flex items-center gap-1">
               <Sparkles className="w-3.5 h-3.5 text-purple-400" />+{q.playerXpReward} XP
             </span>
-            <span className="text-amber-300 font-semibold flex items-center gap-1">
-              <Hammer className="w-3.5 h-3.5 text-amber-400" />+{q.forgeXpReward} Forge
-            </span>
             <span className="text-yellow-300 font-semibold flex items-center gap-1">
               <Coins className="w-3.5 h-3.5 text-yellow-400" />+{q.goldReward} Gold
             </span>
@@ -395,7 +391,7 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
               {isGeneratingDailyQuests ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Forging Quests...</span>
+                  <span>Generating Quests...</span>
                 </>
               ) : todaysAiQuests.length > 0 ? (
                 <>
@@ -529,7 +525,7 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
         {!isGeneratingDailyQuests && todaysAiQuests.length === 0 && (
           <div className="rounded-xl border border-white/10 bg-[#090714]/70 p-6 text-center">
             <p className="text-xs sm:text-sm text-[#D9D2C5]/80 max-w-xl mx-auto">
-              Press <strong className="text-[#C5A15A]">GENERATE TODAY&apos;S QUESTS</strong> above to forge five adaptive daily objectives across Physical, Intellectual, Discipline, Personal Growth, and Social pillars.
+              Press <strong className="text-[#C5A15A]">GENERATE TODAY&apos;S QUESTS</strong> above to craft five adaptive daily objectives across Physical, Intellectual, Discipline, Personal Growth, and Social pillars.
             </p>
           </div>
         )}
@@ -608,10 +604,6 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
                     <Sparkles className="w-3.5 h-3.5 text-purple-400" />
                     +{q.playerXpReward} Player XP
                   </span>
-                  <span className="text-amber-400 font-semibold flex items-center gap-1">
-                    <Hammer className="w-3.5 h-3.5 text-amber-500" />
-                    +{q.forgeXpReward} Forge XP
-                  </span>
                 </div>
 
                 <div>
@@ -677,7 +669,7 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
                     )}
                   </div>
                   <span className="font-mono font-bold text-emerald-300 whitespace-nowrap shrink-0 tabular-nums">
-                    +{h.playerXpReward} XP · +{h.forgeXpReward} Forge · +{h.goldReward}g
+                    +{h.playerXpReward} XP · +{h.goldReward}g
                   </span>
                 </div>
               ))}
@@ -702,19 +694,11 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
                 </div>
                 <span
                   className={`font-mono font-bold tabular-nums ${
-                    tx.type === 'FORGE_XP'
-                      ? 'text-amber-400'
-                      : tx.type === 'GOLD'
-                      ? 'text-yellow-300'
-                      : 'text-purple-300'
+                    tx.type === 'GOLD' ? 'text-yellow-300' : 'text-purple-300'
                   }`}
                 >
                   {tx.amount > 0 ? `+${tx.amount}` : tx.amount}{' '}
-                  {tx.type === 'FORGE_XP'
-                    ? 'Forge XP'
-                    : tx.type === 'GOLD'
-                    ? 'Gold'
-                    : 'Player XP'}
+                  {tx.type === 'GOLD' ? 'Gold' : 'Player XP'}
                 </span>
               </div>
             ))}

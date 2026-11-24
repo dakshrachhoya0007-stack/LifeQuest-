@@ -2,7 +2,6 @@ import {
   aetheriaCitadelKingdomImg,
   aetheriaForegroundTerraceImg,
   aetheriaSkyVistaImg,
-  blacksmithForgeImg,
   heroAetheriaWorldImg,
 } from '../assets/images';
 import {
@@ -90,12 +89,12 @@ export const WORLD_REGIONS: WorldRegionDefinition[] = [
   {
     id: 'ashen_expanse',
     name: 'Ashen Expanse',
-    subtitle: 'Shattered Calderas & Forge Wastes',
+    subtitle: 'Shattered Calderas & Ember Wastes',
     description:
-      'Obsidian basalt ridges and ember-lit obsidian monoliths guarding the ancient subterranean smithies of the First Forgemasters.',
+      'Obsidian basalt ridges and ember-lit obsidian monoliths guarding the ancient subterranean halls of the First Wardens.',
     status: 'locked',
     paletteSummary: 'Charcoal Obsidian · Molten Amber · Bronze',
-    artwork: blacksmithForgeImg,
+    artwork: aetheriaForegroundTerraceImg,
     phaseNote: 'Locked Preview — Future Phase',
   },
   {
@@ -200,7 +199,7 @@ export const HEARTLANDS_LANDMARKS: LandmarkDefinition[] = [
     description:
       'A fortified medieval citadel overlooking the northern ridge of the Heartlands. Walk through the arched gatehouse into its stone courtyard flanked by watchtowers and banners.',
     lore:
-      'Once the seat of the Shield-Wardens of Aetheria, its gatehouse held firm during the Great Fall until its watchfires were extinguished.',
+      'Once the seat of the Keep-Wardens of Aetheria, its gatehouse held firm during the Great Fall until its watchfires were extinguished.',
     coordinates: { x: 0, z: -72 },
     interactionRadius: 11.5,
     artwork: aetheriaCitadelKingdomImg,
@@ -219,10 +218,10 @@ export const HEARTLANDS_LANDMARKS: LandmarkDefinition[] = [
     description:
       'A quiet medieval settlement along the western cobble road with timber-framed cottages, a stone village well, and mossy garden walls.',
     lore:
-      'Traders, herbalists, and blacksmith apprentices gathered around this central well before the mist drove families beyond the river.',
+      'Traders, herbalists, and stonemason apprentices gathered around this central well before the mist drove families beyond the river.',
     coordinates: { x: -50, z: -12 },
     interactionRadius: 11.0,
-    artwork: blacksmithForgeImg,
+    artwork: aetheriaForegroundTerraceImg,
     stageSummaries: {
       ruined: 'Sagging cottage roofs, cold hearths, and overgrown cobblestone lanes.',
       repaired: 'Mended timber trusses, cleared stone paths, and restored well stonework.',

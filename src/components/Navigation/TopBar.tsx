@@ -8,7 +8,6 @@ import { PresenceBadge } from '../Brand/PresenceBadge';
 import {
   Volume2,
   VolumeX,
-  Hammer,
   Menu,
   Coins,
   Bell,
@@ -122,14 +121,6 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
             }`}
           >
             Aether Vision
-          </button>
-          <button
-            onClick={() => setActiveTab('armory')}
-            className={`whitespace-nowrap shrink-0 transition-colors hover:text-[#F5EFE6] ${
-              activeTab === 'armory' ? 'text-[#C5A15A] font-semibold border-b-2 border-[#C5A15A] pb-0.5' : ''
-            }`}
-          >
-            The Armory
           </button>
           <button
             onClick={() => setActiveTab('boss-battles')}
@@ -366,7 +357,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
             </div>
           )}
 
-          {/* Currencies Split: Player XP, Forge XP & Gold */}
+          {/* Currencies Split: Player XP & Gold */}
           <div className="hidden sm:flex items-center gap-3 bg-[#130f24] border border-purple-900/50 rounded-xl px-3 py-1.5 shadow-inner">
             {/* Level & XP */}
             <div className="flex items-center gap-2">
@@ -384,23 +375,6 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
                     style={{ width: `${xpPercentage}%` }}
                   />
                 </div>
-              </div>
-            </div>
-
-            <div className="w-px h-6 bg-purple-900/60" />
-
-            {/* Forge XP (Armory Currency) */}
-            <div
-              onClick={() => setActiveTab('armory')}
-              className="flex items-center gap-1.5 cursor-pointer group"
-              title="Forge XP: Used for Blacksmith weapon upgrades"
-            >
-              <Hammer className="w-4 h-4 text-amber-400 group-hover:rotate-12 transition-transform" />
-              <div className="flex flex-col">
-                <span className="text-[10px] text-amber-400/90 font-medium uppercase tracking-wider">Forge XP</span>
-                <span className="font-mono tabular-nums text-xs font-bold text-amber-200">
-                  {stats.forgeXP}
-                </span>
               </div>
             </div>
 

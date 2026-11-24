@@ -60,7 +60,7 @@ export const claimWeeklyBossRewardServer = async (params: {
   timezone?: string;
 }): Promise<{
   ok: boolean;
-  rewards?: { xp: number; forgeXp: number; gold: number };
+  rewards?: { xp: number; gold: number };
   state?: WeeklyBossStatePayload;
   error?: string;
 }> => {

@@ -7,7 +7,7 @@ import {
   Shield,
   Flame,
   Crown,
-  Swords,
+  Dumbbell,
   Sparkles,
   Compass,
   Sun,
@@ -37,13 +37,14 @@ const EMBLEM_OPTIONS = [
   { id: 'Shield', label: 'Shield', Icon: Shield },
   { id: 'Flame', label: 'Flame', Icon: Flame },
   { id: 'Crown', label: 'Crown', Icon: Crown },
-  { id: 'Swords', label: 'Swords', Icon: Swords },
+  { id: 'Dumbbell', label: 'Strength', Icon: Dumbbell },
   { id: 'Sparkles', label: 'Sparkles', Icon: Sparkles },
   { id: 'Compass', label: 'Compass', Icon: Compass },
   { id: 'Sun', label: 'Sun', Icon: Sun },
 ] as const;
 
 const renderGuildEmblem = (emblem: string, className = 'w-5 h-5 text-amber-400') => {
+  if (emblem === 'Swords') return <Dumbbell className={className} />;
   const found = EMBLEM_OPTIONS.find(e => e.id === emblem);
   const Icon = found ? found.Icon : Shield;
   return <Icon className={className} />;

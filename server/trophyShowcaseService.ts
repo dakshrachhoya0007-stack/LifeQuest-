@@ -52,14 +52,6 @@ const KNOWN_STANDARD_ACHIEVEMENTS: Array<{
     requirement: 'Maintain a 3-day habit streak',
   },
   {
-    id: 'ach-3',
-    name: 'First Forge',
-    description: 'Upgraded a weapon at the Blacksmith Armory.',
-    category: 'achievements',
-    rarity: 'Common',
-    requirement: 'Upgrade 1 weapon in Armory',
-  },
-  {
     id: 'ach-4',
     name: 'Boss Slayer',
     description: 'Defeated your first Kingdom boss in turn-based combat.',

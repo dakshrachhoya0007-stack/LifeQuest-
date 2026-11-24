@@ -57,8 +57,6 @@ export interface SyncedProfileRecord {
   totalActiveMinutes?: number;
   bio?: string;
   profileVisibility?: string;
-  equippedWeapon?: Record<string, any> | null;
-  unlockedWeaponsCount?: number;
   guild?: Record<string, any> | null;
   achievements?: Array<Record<string, any>>;
   workoutHistory?: Array<Record<string, any>>;
@@ -795,16 +793,7 @@ export function attachPresenceAndPrivacySystem(
       playerPayload.bio = target.bio;
     }
 
-    // Equipment & Guild (respect privateByDefault and toggles)
-    if (
-      effectiveRelation === 'self' ||
-      (privacy.showEquipment !== false && !privacy.privateByDefault)
-    ) {
-      if (target.equippedWeapon) playerPayload.equippedWeapon = target.equippedWeapon;
-      if (typeof target.unlockedWeaponsCount === 'number') {
-        playerPayload.unlockedWeaponsCount = target.unlockedWeaponsCount;
-      }
-    }
+    // Guild (respect privateByDefault and toggles)
     if (
       effectiveRelation === 'self' ||
       (privacy.showGuild !== false && !privacy.privateByDefault)
@@ -972,12 +961,6 @@ export function attachPresenceAndPrivacySystem(
         typeof body.profileVisibility === 'string'
           ? body.profileVisibility
           : existing?.profileVisibility,
-      equippedWeapon:
-        body.equippedWeapon !== undefined ? body.equippedWeapon : existing?.equippedWeapon,
-      unlockedWeaponsCount:
-        typeof body.unlockedWeaponsCount === 'number'
-          ? body.unlockedWeaponsCount
-          : existing?.unlockedWeaponsCount,
       guild: body.guild !== undefined ? body.guild : existing?.guild,
       achievements: Array.isArray(body.achievements)
         ? body.achievements

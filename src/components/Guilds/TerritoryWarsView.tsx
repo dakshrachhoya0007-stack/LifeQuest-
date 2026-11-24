@@ -5,11 +5,11 @@ import type { TerritoryMissionStance } from '../../types/game';
 import {
   Castle,
   Crown,
+  Flame,
   History,
   MapPin,
   Shield,
   Sparkles,
-  Swords,
   Users,
 } from 'lucide-react';
 
@@ -292,7 +292,7 @@ export const TerritoryWarsView: React.FC = () => {
                           : 'bg-[#090710] border-white/10 text-[#D9D2C5]/80 hover:border-rose-400/50'
                       }`}
                     >
-                      <Swords className="w-4 h-4 shrink-0" />
+                      <Flame className="w-4 h-4 shrink-0" />
                       <span>Offensive Push</span>
                     </button>
                     <button

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useGame } from '../../context/GameContext';
-import { EquipmentIllustration, ArtworkItemId } from '../../assets/equipmentArtwork';
-import { getRarityStyle } from '../../utils/rarityStyles';
+import { getHeroById, mapClassToDefaultHeroId } from '../../data/heroesData';
 import type {
   CharacterAppearance,
   EndorsementCategory,
@@ -40,7 +39,7 @@ import {
   Lock,
   Loader2,
   Award,
-  Swords,
+  Dumbbell,
   AlertTriangle,
   MailPlus,
   Crown,
@@ -319,8 +318,8 @@ export const PublicProfileModal: React.FC = () => {
   };
 
   const player = profile?.player;
-  const weaponRarityStyle = player?.equippedWeapon
-    ? getRarityStyle(player.equippedWeapon.rarity)
+  const heroProfile = player
+    ? getHeroById(mapClassToDefaultHeroId(player.characterClass))
     : null;
   const isSelfProfile = Boolean(player && (player.relationshipStatus === 'self' || player.id === user?.id));
   const playerEquippedLegend = player
@@ -620,7 +619,7 @@ export const PublicProfileModal: React.FC = () => {
                   <p className="text-xs text-slate-400 max-w-md mx-auto">
                     {profile.restrictedReason === 'private'
                       ? `${player.username} has set their profile to private.`
-                      : `Only accepted friends can view ${player.username}'s equipment, stats, guild, and achievements. Send a friend request to connect.`}
+                      : `Only accepted friends can view ${player.username}'s combat stance, stats, guild, and achievements. Send a friend request to connect.`}
                   </p>
                 </div>
               ) : (
@@ -644,51 +643,35 @@ export const PublicProfileModal: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Equipped Weapon & Stats */}
+                  {/* Bodyweight Stance & Stats */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {player.showEquipment !== false && (
+                    {player.showEquipment !== false && heroProfile && (
                       <div className="p-4 rounded-xl bg-[#130f24] border border-purple-950/80 space-y-3">
                         <div className="flex items-center justify-between text-xs">
                           <span className="font-semibold text-slate-200 flex items-center gap-1.5">
-                            <Swords className="w-3.5 h-3.5 text-purple-400" />
-                            Equipped Armament
+                            <Dumbbell className="w-3.5 h-3.5 text-purple-400" />
+                            Bodyweight Discipline
                           </span>
-                          {typeof player.unlockedWeaponsCount === 'number' && (
-                            <span className="text-[11px] text-slate-400 tabular-nums">
-                              {player.unlockedWeaponsCount} unlocked
-                            </span>
-                          )}
+                          <span className="text-[11px] text-purple-300">
+                            Hands &amp; Legs
+                          </span>
                         </div>
-                        {player.equippedWeapon ? (
-                          <div className="flex items-center gap-3">
-                            <div className="w-14 h-14 rounded-xl bg-[#0a0714] border border-purple-900/60 flex items-center justify-center shrink-0">
-                              <EquipmentIllustration
-                                itemId={player.equippedWeapon.weaponId as ArtworkItemId}
-                                rarity={player.equippedWeapon.rarity}
-                                evolutionStage={player.equippedWeapon.evolutionStage}
-                                level={player.equippedWeapon.level}
-                                className="w-12 h-12"
-                              />
-                            </div>
-                            <div className="min-w-0">
-                              <p
-                                className="text-sm font-bold truncate"
-                                style={{ color: weaponRarityStyle?.accentHex || '#f8fafc' }}
-                              >
-                                {player.equippedWeapon.name}
-                              </p>
-                              <p className="text-[11px] text-slate-400 tabular-nums">
-                                {player.equippedWeapon.rarity} · Lv.{player.equippedWeapon.level} ·{' '}
-                                {player.equippedWeapon.element}
-                              </p>
-                              <p className="text-[11px] text-purple-300 tabular-nums">
-                                {player.equippedWeapon.evolutionStage} Stage · Mastery {player.equippedWeapon.masteryLevel}
-                              </p>
-                            </div>
+                        <div className="space-y-1.5">
+                          <p className="text-sm font-bold text-white truncate">
+                            {heroProfile.bodyweightDisciplines.conditioningStyle}
+                          </p>
+                          <p className="text-[11px] text-slate-400">
+                            {heroProfile.archetype} · {player.characterClass || 'Champion'}
+                          </p>
+                          <div className="flex flex-wrap gap-1.5 pt-1">
+                            <span className="px-2 py-0.5 rounded bg-[#0a0714] border border-purple-900/60 text-[10px] text-purple-200">
+                              Hands: {heroProfile.bodyweightDisciplines.handsFocus}
+                            </span>
+                            <span className="px-2 py-0.5 rounded bg-[#0a0714] border border-purple-900/60 text-[10px] text-purple-200">
+                              Legs: {heroProfile.bodyweightDisciplines.legsFocus}
+                            </span>
                           </div>
-                        ) : (
-                          <p className="text-xs text-slate-500">No equipped weapon displayed.</p>
-                        )}
+                        </div>
                       </div>
                     )}
 
