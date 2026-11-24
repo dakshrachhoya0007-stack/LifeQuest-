@@ -27,8 +27,8 @@ import {
 const RARITY_COLORS: Record<CollectibleCardRarity, string> = {
   Common: 'text-slate-300',
   Rare: 'text-sky-300',
-  Epic: 'text-purple-300',
-  Legendary: 'text-[#E8CF96]',
+  Epic: 'text-[#00D9FF]',
+  Legendary: 'text-amber-300',
   Mythic: 'text-rose-300',
 };
 
@@ -151,22 +151,22 @@ export const CollectibleCardsView: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in">
       {/* Header Summary */}
-      <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/25 p-5 sm:p-6 flex flex-col xl:flex-row xl:items-center justify-between gap-5 shadow-xl">
+      <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 p-5 sm:p-6 flex flex-col xl:flex-row xl:items-center justify-between gap-5 shadow-[0_12px_32px_rgba(2,8,20,0.6)]">
         <div className="space-y-2">
-          <div className="text-xs font-['Cinzel'] font-bold uppercase tracking-widest text-[#C5A15A]">
+          <div className="text-xs font-['Cinzel'] font-bold uppercase tracking-widest text-[#00D9FF]">
             2D Collectible Chronicle Binder
           </div>
           <h2 className="text-2xl font-black font-['Cinzel'] text-white">
             FANTASY CARD COLLECTION
           </h2>
-          <div className="flex flex-wrap items-center gap-3 text-xs text-[#D9D2C5]/75 tabular-nums">
+          <div className="flex flex-wrap items-center gap-3 text-xs text-[#A9B8CC] tabular-nums">
             <span>
               <strong className="text-white">{ownedMap.size}</strong> / {COLLECTIBLE_CARDS_CATALOG.length} Cards Owned ({cardsState?.completionPercent || 0}%)
             </span>
             <span aria-hidden="true">·</span>
             <span className="text-amber-300 font-mono">{goldBalance.toLocaleString()} Gold</span>
             <span aria-hidden="true">·</span>
-            <span className="text-purple-300 font-mono">{fragmentBalance.toLocaleString()} Fragments</span>
+            <span className="text-[#00D9FF] font-mono">{fragmentBalance.toLocaleString()} Fragments</span>
           </div>
           <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] tabular-nums">
             {rarityBreakdown.map(r => (
@@ -177,7 +177,7 @@ export const CollectibleCardsView: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1.5 p-1.5 rounded-xl bg-[#08060f] border border-[#C5A15A]/20 self-start xl:self-auto">
+        <div className="flex flex-wrap items-center gap-1.5 p-1.5 rounded-xl bg-[#061225] border border-[#1677FF]/30 self-start xl:self-auto">
           {[
             { id: 'binder', label: 'Card Binder', icon: Layers },
             { id: 'packs', label: 'Card Packs', icon: PackageOpen },
@@ -190,10 +190,10 @@ export const CollectibleCardsView: React.FC = () => {
                 key={tab.id}
                 type="button"
                 onClick={() => setSubTab(tab.id as typeof subTab)}
-                className={`px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-colors whitespace-nowrap shrink-0 ${
+                className={`px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all whitespace-nowrap shrink-0 ${
                   active
-                    ? 'bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/45'
-                    : 'text-[#D9D2C5]/65 hover:text-white border border-transparent'
+                    ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white shadow-[0_0_16px_rgba(22,119,255,0.35)] border border-[#00D9FF]/45'
+                    : 'text-[#A9B8CC] hover:text-white hover:bg-[#102440] border border-transparent'
                 }`}
               >
                 <Icon className="w-4 h-4 shrink-0" />
@@ -220,13 +220,13 @@ export const CollectibleCardsView: React.FC = () => {
       {subTab === 'binder' && (
         <div className="space-y-5">
           {/* Favorites Showcase Strip */}
-          <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-5 space-y-3">
+          <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 p-5 space-y-3">
             <div className="flex items-center justify-between gap-2">
               <h3 className="font-['Cinzel'] font-bold text-sm text-white flex items-center gap-2">
-                <Heart className="w-4 h-4 text-rose-300" />
+                <Heart className="w-4 h-4 text-[#00D9FF]" />
                 Pinned Profile Favorite Cards ({favoriteIds.length} / 3)
               </h3>
-              <span className="text-xs text-[#D9D2C5]/60">Shown on your Public Champion Profile</span>
+              <span className="text-xs text-[#A9B8CC]">Shown on your Public Champion Profile</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[0, 1, 2].map(slot => {
@@ -235,7 +235,7 @@ export const CollectibleCardsView: React.FC = () => {
                 return card ? (
                   <div
                     key={card.id}
-                    className="rounded-xl bg-[#08060f] border border-[#C5A15A]/30 p-3 flex items-center justify-between gap-3"
+                    className="rounded-xl bg-[#0A1930] border border-[#00D9FF]/35 p-3 flex items-center justify-between gap-3"
                   >
                     <div className="min-w-0">
                       <p className={`text-[11px] font-semibold ${RARITY_COLORS[card.rarity]}`}>{card.rarity}</p>
@@ -244,7 +244,7 @@ export const CollectibleCardsView: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => void handleToggleFavorite(card.id)}
-                      className="px-2.5 py-1 rounded-lg bg-[#161124] hover:bg-rose-950/60 text-[11px] text-rose-200 whitespace-nowrap shrink-0"
+                      className="px-2.5 py-1 rounded-lg bg-[#061225] hover:bg-rose-950/60 border border-[#1677FF]/25 text-[11px] text-rose-200 whitespace-nowrap shrink-0 transition-colors"
                     >
                       Remove
                     </button>
@@ -252,7 +252,7 @@ export const CollectibleCardsView: React.FC = () => {
                 ) : (
                   <div
                     key={slot}
-                    className="rounded-xl bg-[#08060f]/60 border border-dashed border-white/10 p-3 text-xs text-[#D9D2C5]/45 flex items-center justify-center"
+                    className="rounded-xl bg-[#061225]/70 border border-dashed border-[#1677FF]/25 p-3 text-xs text-[#A9B8CC]/60 flex items-center justify-center"
                   >
                     Favorite Slot {slot + 1} Empty
                   </div>
@@ -270,10 +270,10 @@ export const CollectibleCardsView: React.FC = () => {
                     key={cat}
                     type="button"
                     onClick={() => setCategoryFilter(cat)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap shrink-0 ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
                       categoryFilter === cat
-                        ? 'bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/45'
-                        : 'bg-[#100D19] text-[#D9D2C5]/70 border border-white/10'
+                        ? 'bg-[#1677FF] text-white border border-[#00D9FF]/50 shadow-[0_0_12px_rgba(22,119,255,0.3)]'
+                        : 'bg-[#0A1930] hover:bg-[#16325C] text-[#A9B8CC] hover:text-white border border-[#1677FF]/30'
                     }`}
                   >
                     {CATEGORY_LABELS[cat]}
@@ -286,7 +286,7 @@ export const CollectibleCardsView: React.FC = () => {
               <select
                 value={rarityFilter}
                 onChange={e => setRarityFilter(e.target.value as CollectibleCardRarity | 'all')}
-                className="rounded-lg bg-[#08060f] border border-[#C5A15A]/25 px-3 py-1.5 text-xs text-white"
+                className="rounded-lg bg-[#0A1930] border border-[#1677FF]/35 px-3 py-1.5 text-xs text-white focus:border-[#00D9FF] focus:outline-none"
               >
                 <option value="all">All Rarities</option>
                 {(['Common', 'Rare', 'Epic', 'Legendary', 'Mythic'] as CollectibleCardRarity[]).map(r => (
@@ -298,7 +298,7 @@ export const CollectibleCardsView: React.FC = () => {
               <select
                 value={ownershipFilter}
                 onChange={e => setOwnershipFilter(e.target.value as 'all' | 'owned' | 'unowned')}
-                className="rounded-lg bg-[#08060f] border border-[#C5A15A]/25 px-3 py-1.5 text-xs text-white"
+                className="rounded-lg bg-[#0A1930] border border-[#1677FF]/35 px-3 py-1.5 text-xs text-white focus:border-[#00D9FF] focus:outline-none"
               >
                 <option value="all">All Status</option>
                 <option value="owned">Owned Only</option>
@@ -316,14 +316,16 @@ export const CollectibleCardsView: React.FC = () => {
               return (
                 <div
                   key={card.id}
-                  className={`rounded-2xl p-4 border flex flex-col justify-between gap-3 transition-colors ${
-                    isOwned ? 'bg-[#100D19] border-[#C5A15A]/30' : 'bg-[#0b0813] border-white/10 opacity-75'
+                  className={`rounded-2xl p-4 border flex flex-col justify-between gap-3 transition-all ${
+                    isOwned
+                      ? 'bg-[#102440]/90 border-[#1677FF]/35 hover:border-[#00D9FF]/50 shadow-[0_8px_24px_rgba(2,8,20,0.45)]'
+                      : 'bg-[#0A1930]/80 border-[#1677FF]/15 opacity-75'
                   }`}
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-[11px]">
                       <span className={`font-semibold ${RARITY_COLORS[card.rarity]}`}>{card.rarity}</span>
-                      <span className="text-[#D9D2C5]/60 font-mono tabular-nums">
+                      <span className="text-[#A9B8CC] font-mono tabular-nums">
                         {isOwned ? `Owned x${qty}` : 'Unowned'}
                       </span>
                     </div>
@@ -332,7 +334,7 @@ export const CollectibleCardsView: React.FC = () => {
 
                     <div>
                       <h4 className="font-['Cinzel'] font-bold text-sm text-white truncate">{card.name}</h4>
-                      <p className="text-[11px] text-[#D9D2C5]/65 mt-0.5">
+                      <p className="text-[11px] text-[#A9B8CC] mt-0.5">
                         {card.subtitle}
                         {card.limitedEdition ? ' · Limited' : ''}
                       </p>
@@ -343,7 +345,7 @@ export const CollectibleCardsView: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setInspectedCard(card)}
-                      className="flex-1 py-1.5 px-2.5 rounded-lg bg-[#161124] hover:bg-[#251638] border border-white/10 text-xs text-[#D9D2C5] flex items-center justify-center gap-1 whitespace-nowrap shrink-0"
+                      className="flex-1 py-1.5 px-2.5 rounded-lg bg-[#0A1930] hover:bg-[#16325C] border border-[#1677FF]/35 hover:border-[#00D9FF]/50 text-xs text-white flex items-center justify-center gap-1 whitespace-nowrap shrink-0 transition-all"
                     >
                       <Eye className="w-3.5 h-3.5" />
                       Inspect
@@ -353,10 +355,10 @@ export const CollectibleCardsView: React.FC = () => {
                         type="button"
                         disabled={busyId === `fav-${card.id}`}
                         onClick={() => void handleToggleFavorite(card.id)}
-                        className={`py-1.5 px-2.5 rounded-lg text-xs border whitespace-nowrap shrink-0 ${
+                        className={`py-1.5 px-2.5 rounded-lg text-xs border whitespace-nowrap shrink-0 transition-all ${
                           isFav
-                            ? 'bg-rose-950/60 border-rose-500/50 text-rose-200'
-                            : 'bg-[#161124] border-white/10 text-[#D9D2C5]/75 hover:text-white'
+                            ? 'bg-[#1677FF]/25 border-[#00D9FF]/55 text-[#00D9FF]'
+                            : 'bg-[#0A1930] border-[#1677FF]/30 text-[#A9B8CC] hover:text-white'
                         }`}
                       >
                         {isFav ? 'Pinned' : 'Pin'}
@@ -373,21 +375,23 @@ export const CollectibleCardsView: React.FC = () => {
       {/* PACKS TAB */}
       {subTab === 'packs' && (
         <div className="space-y-6">
-          <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
               <h3 className="font-['Cinzel'] font-bold text-base text-white">
                 Transparent Card Packs · Earned Currency Only
               </h3>
-              <p className="text-xs text-[#D9D2C5]/75">
+              <p className="text-xs text-[#A9B8CC]">
                 Every pack displays exact rarity odds summing to 100%. Duplicate draws automatically convert into Cosmetic Fragments (Common {DUPLICATE_CARD_FRAGMENT_RATES.Common}, Rare {DUPLICATE_CARD_FRAGMENT_RATES.Rare}, Epic {DUPLICATE_CARD_FRAGMENT_RATES.Epic}, Legendary {DUPLICATE_CARD_FRAGMENT_RATES.Legendary}, Mythic {DUPLICATE_CARD_FRAGMENT_RATES.Mythic}).
               </p>
             </div>
-            <div className="flex items-center gap-1 p-1 rounded-xl bg-[#08060f] border border-[#C5A15A]/20 shrink-0">
+            <div className="flex items-center gap-1 p-1 rounded-xl bg-[#061225] border border-[#1677FF]/30 shrink-0">
               <button
                 type="button"
                 onClick={() => setCurrency('gold')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
-                  currency === 'gold' ? 'bg-[#C5A15A] text-[#0c0914]' : 'text-[#D9D2C5]/70'
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all ${
+                  currency === 'gold'
+                    ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white shadow-[0_0_12px_rgba(22,119,255,0.35)]'
+                    : 'text-[#A9B8CC] hover:text-white'
                 }`}
               >
                 <Coins className="w-3.5 h-3.5" />
@@ -396,8 +400,10 @@ export const CollectibleCardsView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setCurrency('fragments')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
-                  currency === 'fragments' ? 'bg-[#7046A5] text-white' : 'text-[#D9D2C5]/70'
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all ${
+                  currency === 'fragments'
+                    ? 'bg-gradient-to-r from-[#1677FF] to-[#00D9FF] text-white shadow-[0_0_12px_rgba(0,217,255,0.35)]'
+                    : 'text-[#A9B8CC] hover:text-white'
                 }`}
               >
                 <Sparkles className="w-3.5 h-3.5" />
@@ -413,23 +419,23 @@ export const CollectibleCardsView: React.FC = () => {
               return (
                 <div
                   key={pack.id}
-                  className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/25 p-5 flex flex-col justify-between gap-5"
+                  className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 hover:border-[#00D9FF]/45 p-5 flex flex-col justify-between gap-5 transition-all"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-[#C5A15A]">{pack.cardCount} Cards Inside</span>
-                      <span className="text-[#D9D2C5]/65">Min {pack.guaranteedMinRarity}</span>
+                      <span className="font-semibold text-[#00D9FF]">{pack.cardCount} Cards Inside</span>
+                      <span className="text-[#A9B8CC]">Min {pack.guaranteedMinRarity}</span>
                     </div>
                     <h4 className="font-['Cinzel'] font-bold text-lg text-white">{pack.name}</h4>
-                    <p className="text-xs text-[#D9D2C5]/75 leading-relaxed">{pack.description}</p>
+                    <p className="text-xs text-[#A9B8CC] leading-relaxed">{pack.description}</p>
 
-                    <div className="pt-2 border-t border-white/10 space-y-1.5">
-                      <p className="text-[11px] font-semibold text-[#D9D2C5]/70">Disclosed Drop Odds (100%)</p>
+                    <div className="pt-2 border-t border-[#1677FF]/20 space-y-1.5">
+                      <p className="text-[11px] font-semibold text-[#A9B8CC]">Disclosed Drop Odds (100%)</p>
                       <div className="grid grid-cols-2 gap-1 text-[11px] font-mono tabular-nums">
                         {(['Common', 'Rare', 'Epic', 'Legendary', 'Mythic'] as CollectibleCardRarity[]).map(r => (
                           <div key={r} className="flex items-center justify-between pr-2">
                             <span className={RARITY_COLORS[r]}>{r}</span>
-                            <span className="text-[#D9D2C5]/80">{pack.dropRates[r]}%</span>
+                            <span className="text-white/90">{pack.dropRates[r]}%</span>
                           </div>
                         ))}
                       </div>
@@ -440,10 +446,10 @@ export const CollectibleCardsView: React.FC = () => {
                     type="button"
                     disabled={!canAfford || busyId === `pack-${pack.id}`}
                     onClick={() => void handleOpenPack(pack.id)}
-                    className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold whitespace-nowrap ${
+                    className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                       canAfford
-                        ? 'bg-[#C5A15A] hover:bg-[#d8b46d] text-[#0c0914]'
-                        : 'bg-[#161124] text-[#D9D2C5]/45 border border-white/10'
+                        ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white shadow-[0_0_18px_rgba(22,119,255,0.35)]'
+                        : 'bg-[#0A1930] text-[#A9B8CC]/50 border border-[#1677FF]/25'
                     }`}
                   >
                     {busyId === `pack-${pack.id}`
@@ -471,25 +477,25 @@ export const CollectibleCardsView: React.FC = () => {
             return (
               <div
                 key={ach.id}
-                className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-5 flex items-center justify-between gap-4"
+                className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 p-5 flex items-center justify-between gap-4"
               >
                 <div className="space-y-1">
                   <h4 className="font-['Cinzel'] font-bold text-sm text-white">{ach.title}</h4>
-                  <p className="text-xs text-[#D9D2C5]/75">{ach.description}</p>
-                  <p className="text-xs text-[#C5A15A] font-mono tabular-nums pt-1">
-                    Progress: {Math.min(currentCount, ach.requiredUniqueCards)} / {ach.requiredUniqueCards} · +{ach.rewardGold} Gold · +{ach.rewardFragments} Fragments
+                  <p className="text-xs text-[#A9B8CC]">{ach.description}</p>
+                  <p className="text-xs text-amber-300 font-mono tabular-nums pt-1">
+                    Progress: {Math.min(currentCount, ach.requiredUniqueCards)} / {ach.requiredUniqueCards} · +{ach.rewardGold} Gold · <span className="text-[#00D9FF]">+{ach.rewardFragments} Fragments</span>
                   </p>
                 </div>
                 <button
                   type="button"
                   disabled={!eligible || busyId === `ach-${ach.id}`}
                   onClick={() => void handleClaimAchievement(ach.id)}
-                  className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 ${
+                  className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
                     claimed
                       ? 'bg-emerald-950/60 border border-emerald-500/40 text-emerald-300'
                       : eligible
-                      ? 'bg-[#C5A15A] hover:bg-[#d8b46d] text-[#0c0914]'
-                      : 'bg-[#161124] border border-white/10 text-[#D9D2C5]/45'
+                      ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white shadow-[0_0_16px_rgba(22,119,255,0.35)]'
+                      : 'bg-[#0A1930] border border-[#1677FF]/25 text-[#A9B8CC]/50'
                   }`}
                 >
                   {claimed ? 'Claimed' : eligible ? 'Claim' : 'Locked'}
@@ -503,11 +509,11 @@ export const CollectibleCardsView: React.FC = () => {
       {/* Card Detail Inspection Modal */}
       {inspectedCard && (
         <div
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-[#020814]/85 backdrop-blur-xs flex items-center justify-center p-4"
           onClick={() => setInspectedCard(null)}
         >
           <div
-            className="w-full max-w-md rounded-2xl bg-[#100D19] border border-[#C5A15A]/50 p-6 space-y-4 shadow-2xl"
+            className="w-full max-w-md rounded-2xl bg-[#102440] border border-[#00D9FF]/50 p-6 space-y-4 shadow-[0_16px_40px_rgba(2,8,20,0.85)]"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between gap-2">
@@ -518,7 +524,7 @@ export const CollectibleCardsView: React.FC = () => {
                 type="button"
                 onClick={() => setInspectedCard(null)}
                 aria-label="Close card preview"
-                className="text-[#D9D2C5]/60 hover:text-white"
+                className="text-[#A9B8CC] hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -526,12 +532,12 @@ export const CollectibleCardsView: React.FC = () => {
             <CollectibleCardArtwork card={inspectedCard} size="lg" />
             <div>
               <h3 className="font-['Cinzel'] font-black text-xl text-white">{inspectedCard.name}</h3>
-              <p className="text-xs text-[#C5A15A] mt-0.5">{inspectedCard.subtitle}</p>
-              <p className="text-xs text-[#D9D2C5]/80 mt-3 leading-relaxed">{inspectedCard.lore}</p>
+              <p className="text-xs text-[#00D9FF] mt-0.5">{inspectedCard.subtitle}</p>
+              <p className="text-xs text-[#A9B8CC] mt-3 leading-relaxed">{inspectedCard.lore}</p>
             </div>
-            <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs">
-              <span className="text-[#D9D2C5]/60">{inspectedCard.flavorStatLabel}</span>
-              <span className="font-bold text-[#E8CF96]">{inspectedCard.flavorStatValue}</span>
+            <div className="pt-3 border-t border-[#1677FF]/25 flex items-center justify-between text-xs">
+              <span className="text-[#A9B8CC]">{inspectedCard.flavorStatLabel}</span>
+              <span className="font-bold text-[#00D9FF]">{inspectedCard.flavorStatValue}</span>
             </div>
           </div>
         </div>
@@ -540,21 +546,21 @@ export const CollectibleCardsView: React.FC = () => {
       {/* Pack Reveal Modal */}
       {drawnModalCards && (
         <div
-          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xs flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-[#020814]/85 backdrop-blur-xs flex items-center justify-center p-4"
           onClick={() => setDrawnModalCards(null)}
         >
           <div
-            className="w-full max-w-2xl rounded-2xl bg-[#100D19] border border-[#C5A15A]/55 p-6 space-y-5 shadow-2xl"
+            className="w-full max-w-2xl rounded-2xl bg-[#102440] border border-[#00D9FF]/50 p-6 space-y-5 shadow-[0_16px_40px_rgba(2,8,20,0.85)]"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h3 className="font-['Cinzel'] font-black text-lg text-[#E8CF96]">
+              <h3 className="font-['Cinzel'] font-black text-lg text-[#00D9FF]">
                 Cards Drawn From Pack
               </h3>
               <button
                 type="button"
                 onClick={() => setDrawnModalCards(null)}
-                className="px-3 py-1.5 rounded-lg bg-[#C5A15A] text-[#0c0914] text-xs font-bold"
+                className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white text-xs font-bold shadow-[0_0_14px_rgba(22,119,255,0.35)]"
               >
                 Done
               </button>
@@ -563,7 +569,7 @@ export const CollectibleCardsView: React.FC = () => {
               {drawnModalCards.map((d, i) => (
                 <div
                   key={`${d.card.id}-${i}`}
-                  className="rounded-xl bg-[#08060f] border border-[#C5A15A]/30 p-3 space-y-2.5"
+                  className="rounded-xl bg-[#0A1930] border border-[#1677FF]/35 p-3 space-y-2.5"
                 >
                   <CollectibleCardArtwork card={d.card} size="sm" />
                   <div>

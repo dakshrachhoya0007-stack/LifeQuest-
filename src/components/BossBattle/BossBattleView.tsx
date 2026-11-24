@@ -103,7 +103,7 @@ export const BossBattleView: React.FC = () => {
     name: currentPhaseNumber === 3 ? 'Desperation Frenzy' : currentPhaseNumber === 2 ? 'Enraged Awakening' : 'Initial Stance',
     description: 'Engaging challenger in battle.',
     attackMultiplier: currentPhaseNumber === 3 ? 1.5 : currentPhaseNumber === 2 ? 1.25 : 1.0,
-    auraColor: currentPhaseNumber === 3 ? 'text-rose-400' : currentPhaseNumber === 2 ? 'text-amber-400' : 'text-purple-400',
+    auraColor: currentPhaseNumber === 3 ? 'text-rose-400' : currentPhaseNumber === 2 ? 'text-amber-400' : 'text-[#00D9FF]',
   };
 
   // Helper for elemental icon
@@ -120,7 +120,7 @@ export const BossBattleView: React.FC = () => {
       case 'Light':
         return { label: 'Light', color: 'bg-yellow-950 border-yellow-400 text-yellow-200', icon: <Sun className="w-3.5 h-3.5 text-yellow-300" /> };
       case 'Void':
-        return { label: 'Void', color: 'bg-purple-950 border-purple-500 text-purple-300', icon: <Moon className="w-3.5 h-3.5 text-purple-400" /> };
+        return { label: 'Void', color: 'bg-[#061225] border-[#00D9FF]/60 text-[#00D9FF]', icon: <Moon className="w-3.5 h-3.5 text-[#00D9FF]" /> };
       case 'Nature':
         return { label: 'Nature', color: 'bg-emerald-950 border-emerald-500 text-emerald-300', icon: <Sparkles className="w-3.5 h-3.5 text-emerald-400" /> };
       case 'Earth':
@@ -128,13 +128,13 @@ export const BossBattleView: React.FC = () => {
       case 'Wind':
         return { label: 'Wind', color: 'bg-teal-950 border-teal-400 text-teal-200', icon: <Wind className="w-3.5 h-3.5 text-teal-300" /> };
       case 'Shadow':
-        return { label: 'Shadow', color: 'bg-slate-950 border-indigo-600 text-indigo-300', icon: <Moon className="w-3.5 h-3.5 text-indigo-400" /> };
+        return { label: 'Shadow', color: 'bg-[#0A1930] border-slate-500 text-slate-300', icon: <Moon className="w-3.5 h-3.5 text-[#A9B8CC]" /> };
       case 'Arcane':
-        return { label: 'Arcane', color: 'bg-fuchsia-950 border-fuchsia-500 text-fuchsia-200', icon: <Sparkles className="w-3.5 h-3.5 text-fuchsia-400" /> };
+        return { label: 'Arcane', color: 'bg-[#0A1930] border-[#1677FF] text-sky-300', icon: <Sparkles className="w-3.5 h-3.5 text-[#00D9FF]" /> };
       case 'Cosmic':
-        return { label: 'Cosmic', color: 'bg-violet-950 border-violet-400 text-violet-200', icon: <CloudLightning className="w-3.5 h-3.5 text-violet-300" /> };
+        return { label: 'Cosmic', color: 'bg-[#061225] border-cyan-400 text-cyan-200', icon: <CloudLightning className="w-3.5 h-3.5 text-[#00D9FF]" /> };
       default:
-        return { label: 'Physical', color: 'bg-slate-900 border-slate-600 text-slate-300', icon: <Hand className="w-3.5 h-3.5 text-slate-400" /> };
+        return { label: 'Physical', color: 'bg-[#0A1930] border-slate-600 text-slate-300', icon: <Hand className="w-3.5 h-3.5 text-[#A9B8CC]" /> };
     }
   };
 
@@ -295,7 +295,7 @@ export const BossBattleView: React.FC = () => {
       particleCount: 70,
       spread: 60,
       origin: { y: 0.6 },
-      colors: ['#f59e0b', '#38bdf8', '#a855f7'],
+      colors: ['#1677FF', '#00D9FF', '#FFFFFF'],
     });
   };
 
@@ -305,27 +305,27 @@ export const BossBattleView: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in pb-12">
       {/* Mode Switcher: Weekly Community Raid vs Kingdom Story Bosses */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[#100D19] border border-[#C5A15A]/25 p-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 p-3 shadow-[0_12px_32px_rgba(2,8,20,0.6)]">
         <div className="flex items-center gap-2 px-2">
-          <Dumbbell className="w-4 h-4 text-[#C5A15A]" />
-          <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-[#C5A15A]">
+          <Dumbbell className="w-4 h-4 text-[#00D9FF]" />
+          <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-[#00D9FF]">
             Boss Encounters
           </span>
         </div>
         <div
           role="tablist"
           aria-label="Boss battle modes"
-          className="flex items-center gap-1.5 p-1 rounded-xl bg-[#090714] border border-[#C5A15A]/20"
+          className="flex items-center gap-1.5 p-1 rounded-xl bg-[#0A1930] border border-[#1677FF]/30"
         >
           <button
             type="button"
             role="tab"
             aria-selected={bossMode === 'weekly'}
             onClick={() => setBossMode('weekly')}
-            className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap shrink-0 ${
+            className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
               bossMode === 'weekly'
-                ? 'bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/45'
-                : 'text-[#D9D2C5]/65 hover:text-white border border-transparent'
+                ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white border border-[#00D9FF]/45 shadow-[0_0_16px_rgba(22,119,255,0.35)]'
+                : 'text-[#A9B8CC] hover:text-white hover:bg-[#102440] border border-transparent'
             }`}
           >
             Weekly Community Raid
@@ -335,10 +335,10 @@ export const BossBattleView: React.FC = () => {
             role="tab"
             aria-selected={bossMode === 'kingdom'}
             onClick={() => setBossMode('kingdom')}
-            className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap shrink-0 ${
+            className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
               bossMode === 'kingdom'
-                ? 'bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/45'
-                : 'text-[#D9D2C5]/65 hover:text-white border border-transparent'
+                ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white border border-[#00D9FF]/45 shadow-[0_0_16px_rgba(22,119,255,0.35)]'
+                : 'text-[#A9B8CC] hover:text-white hover:bg-[#102440] border border-transparent'
             }`}
           >
             Kingdom Story Bosses
@@ -351,25 +351,25 @@ export const BossBattleView: React.FC = () => {
       ) : (
         <>
       {/* Top Banner & Kingdom Navigation */}
-      <div className="rounded-2xl bg-gradient-to-r from-[#200e1e] via-[#150a1b] to-[#26102a] border border-rose-950/80 p-5 sm:p-6 shadow-xl">
+      <div className="rounded-2xl bg-gradient-to-br from-[#061225] via-[#0A1930] to-[#102440] border border-[#1677FF]/35 p-5 sm:p-6 shadow-[0_12px_32px_rgba(2,8,20,0.65)]">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-rose-400 bg-rose-950/70 border border-rose-700/60 px-2.5 py-0.5 rounded">
+              <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-rose-300 bg-rose-950/70 border border-rose-500/45 px-2.5 py-0.5 rounded">
                 Strategic Kingdom Encounters
               </span>
-              <span className="text-xs text-purple-300 font-semibold">{activeKingdom.name}</span>
+              <span className="text-xs text-[#00D9FF] font-semibold">{activeKingdom.name}</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-white">
               KINGDOM BOSS ENCOUNTERS
             </h1>
-            <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mt-1">
+            <p className="text-xs sm:text-sm text-[#A9B8CC] max-w-2xl mt-1">
               Exploit elemental weaknesses, manage stamina, respond to telegraphed attack warnings, and weather 3 boss phases.
             </p>
           </div>
 
           {/* Kingdom Selector */}
-          <div className="flex items-center gap-1.5 p-1 bg-[#090714] rounded-xl border border-purple-950 overflow-x-auto max-w-full">
+          <div className="flex items-center gap-1.5 p-1 bg-[#061225] rounded-xl border border-[#1677FF]/30 overflow-x-auto max-w-full">
             {kingdoms.map(k => (
               <button
                 key={k.id}
@@ -379,12 +379,12 @@ export const BossBattleView: React.FC = () => {
                   sound.playClick();
                 }}
                 disabled={!k.unlocked}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap shrink-0 ${
+                className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap shrink-0 ${
                   selectedKingdomId === k.id
-                    ? 'bg-rose-800 text-white shadow'
+                    ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white shadow-[0_0_12px_rgba(22,119,255,0.4)] cursor-pointer'
                     : k.unlocked
-                    ? 'text-slate-400 hover:text-white'
-                    : 'text-slate-600 cursor-not-allowed'
+                    ? 'text-[#A9B8CC] hover:text-white hover:bg-[#102440] cursor-pointer'
+                    : 'text-[#A9B8CC]/40 cursor-not-allowed'
                 }`}
               >
                 {k.name} {!k.unlocked && '🔒'}
@@ -398,7 +398,7 @@ export const BossBattleView: React.FC = () => {
       {battleState === 'PREP' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Boss Tactical Dossier (7 Cols) */}
-          <div className="lg:col-span-7 bg-[#0e0a1b] border-2 border-purple-950 rounded-2xl overflow-hidden shadow-2xl">
+          <div className="lg:col-span-7 bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/35 rounded-2xl overflow-hidden shadow-[0_12px_32px_rgba(2,8,20,0.65)]">
             {/* Header Art & Phase Indicator */}
             <div className="relative h-64 overflow-hidden">
               <img
@@ -407,13 +407,13 @@ export const BossBattleView: React.FC = () => {
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover filter brightness-90 contrast-110"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0e0a1b] via-[#0e0a1b]/40 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#102440] via-[#061225]/45 to-transparent" />
 
               <div className="absolute top-4 left-4 flex items-center gap-2">
-                <span className="bg-purple-950/90 backdrop-blur-md px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider text-purple-200 border border-purple-700/60 shadow">
+                <span className="bg-[#0A1930]/90 backdrop-blur-md px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider text-[#00D9FF] border border-[#00D9FF]/45 shadow">
                   {boss.difficulty} Difficulty
                 </span>
-                <span className="bg-rose-950/90 backdrop-blur-md px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider text-rose-300 border border-rose-700/60 shadow">
+                <span className="bg-rose-950/90 backdrop-blur-md px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider text-rose-300 border border-rose-500/45 shadow">
                   3 Boss Phases
                 </span>
               </div>
@@ -421,9 +421,9 @@ export const BossBattleView: React.FC = () => {
               {/* Quick Inspect Weakness Clue Button */}
               <button
                 onClick={handleInspectClue}
-                className="absolute top-4 right-4 bg-amber-950/90 hover:bg-amber-900 border border-amber-500/80 text-amber-300 text-xs font-bold px-3 py-1 rounded-lg flex items-center gap-1.5 backdrop-blur-md shadow-lg transition-transform hover:scale-105"
+                className="absolute top-4 right-4 bg-[#0A1930]/90 hover:bg-[#16325C] border border-[#00D9FF]/50 hover:border-[#00D9FF] text-white text-xs font-bold px-3 py-1 rounded-lg flex items-center gap-1.5 backdrop-blur-md shadow-lg transition-all hover:scale-105 cursor-pointer"
               >
-                <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+                <BookOpen className="w-3.5 h-3.5 text-[#00D9FF]" />
                 <span>Weakness Dossier</span>
               </button>
             </div>
@@ -431,40 +431,40 @@ export const BossBattleView: React.FC = () => {
             <div className="p-6 space-y-4">
               <div>
                 <h3 className="font-['Cinzel'] font-black text-2xl text-white">{boss.name}</h3>
-                <p className="text-xs text-purple-400 font-medium">{boss.title}</p>
+                <p className="text-xs text-[#00D9FF] font-medium">{boss.title}</p>
               </div>
 
-              <p className="text-xs text-slate-300 leading-relaxed italic border-l-2 border-purple-800 pl-3">
+              <p className="text-xs text-[#A9B8CC] leading-relaxed italic border-l-2 border-[#1677FF] pl-3">
                 "{boss.lore}"
               </p>
 
               {/* Vitals Grid */}
-              <div className="grid grid-cols-3 gap-3 bg-[#130f24] p-3 rounded-xl border border-purple-950 text-xs font-mono">
+              <div className="grid grid-cols-3 gap-3 bg-[#0A1930] p-3 rounded-xl border border-[#1677FF]/25 text-xs font-mono">
                 <div>
-                  <span className="text-[10px] text-slate-400 uppercase block">Max Health</span>
+                  <span className="text-[10px] text-[#A9B8CC] uppercase block">Max Health</span>
                   <span className="text-rose-400 font-bold">{boss.maxHealth} HP</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-400 uppercase block">Base Attack</span>
+                  <span className="text-[10px] text-[#A9B8CC] uppercase block">Base Attack</span>
                   <span className="text-amber-400 font-bold">{boss.attack} ATK</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-400 uppercase block">Armor Def</span>
-                  <span className="text-indigo-400 font-bold">{boss.defense} DEF</span>
+                  <span className="text-[10px] text-[#A9B8CC] uppercase block">Armor Def</span>
+                  <span className="text-[#00D9FF] font-bold">{boss.defense} DEF</span>
                 </div>
               </div>
 
               {/* TACTICAL PROFILE: WEAKNESS, RESISTANCE & MECHANICS */}
-              <div className="space-y-3 pt-2 border-t border-purple-950/80">
-                <span className="text-xs font-['Cinzel'] font-bold text-slate-200 uppercase tracking-wider block">
+              <div className="space-y-3 pt-2 border-t border-[#1677FF]/25">
+                <span className="text-xs font-['Cinzel'] font-bold text-white uppercase tracking-wider block">
                   Tactical Reconnaissance Profile
                 </span>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   {/* Elemental Weakness */}
-                  <div className="p-3 rounded-xl bg-[#120a22] border border-purple-900/60 space-y-1.5">
+                  <div className="p-3 rounded-xl bg-[#0A1930] border border-[#1677FF]/30 space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] uppercase font-bold text-slate-400 font-mono">
+                      <span className="text-[10px] uppercase font-bold text-[#A9B8CC] font-mono">
                         Elemental Weakness
                       </span>
                       {boss.weakness?.discovered ? (
@@ -486,18 +486,18 @@ export const BossBattleView: React.FC = () => {
                             {boss.weakness.element} Element ({boss.weakness.damageMultiplier}x Damage)
                           </span>
                         </div>
-                        <p className="text-[11px] text-purple-200/90 leading-tight">
+                        <p className="text-[11px] text-[#A9B8CC] leading-tight">
                           {boss.weakness.description}
                         </p>
                       </div>
                     ) : (
                       <div className="space-y-1">
-                        <span className="text-slate-400 font-mono italic text-[11px] block">
+                        <span className="text-[#A9B8CC] font-mono italic text-[11px] block">
                           ??? [Undiscovered Elemental Weakness]
                         </span>
                         <button
                           onClick={handleInspectClue}
-                          className="text-[10px] font-bold text-amber-400 hover:text-amber-300 underline block"
+                          className="text-[10px] font-bold text-[#00D9FF] hover:text-white underline block cursor-pointer"
                         >
                           Consult Archives to Reveal Clue ➔
                         </button>
@@ -506,8 +506,8 @@ export const BossBattleView: React.FC = () => {
                   </div>
 
                   {/* Resistance */}
-                  <div className="p-3 rounded-xl bg-[#120a22] border border-purple-900/60 space-y-1.5">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 font-mono block">
+                  <div className="p-3 rounded-xl bg-[#0A1930] border border-[#1677FF]/30 space-y-1.5">
+                    <span className="text-[10px] uppercase font-bold text-[#A9B8CC] font-mono block">
                       Damage Resistance
                     </span>
                     <div className="flex items-center gap-1.5 mb-1">
@@ -516,7 +516,7 @@ export const BossBattleView: React.FC = () => {
                         {boss.resistance?.element} Element (-{boss.resistance?.damageReductionPercent}%)
                       </span>
                     </div>
-                    <p className="text-[11px] text-purple-200/90 leading-tight">
+                    <p className="text-[11px] text-[#A9B8CC] leading-tight">
                       {boss.resistance?.description}
                     </p>
                   </div>
@@ -524,7 +524,7 @@ export const BossBattleView: React.FC = () => {
 
                 {/* Signature Attack Warning Info */}
                 {boss.signatureAttack && (
-                  <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-900/60 text-xs space-y-1">
+                  <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-500/35 text-xs space-y-1">
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-rose-300 flex items-center gap-1.5">
                         <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
@@ -534,7 +534,7 @@ export const BossBattleView: React.FC = () => {
                         Counter with {boss.signatureAttack.defenseResponse.toUpperCase()}
                       </span>
                     </div>
-                    <p className="text-slate-300 text-[11px] leading-tight">
+                    <p className="text-[#A9B8CC] text-[11px] leading-tight">
                       {boss.signatureAttack.description}
                     </p>
                   </div>
@@ -544,17 +544,17 @@ export const BossBattleView: React.FC = () => {
           </div>
 
           {/* Battle Prep & Champion Bodyweight Conditioning (5 Cols) */}
-          <div className="lg:col-span-5 bg-[#0e0a1b] border-2 border-purple-950 rounded-2xl p-6 shadow-xl space-y-5">
-            <h4 className="font-['Cinzel'] font-bold text-sm text-slate-100 flex items-center gap-2">
-              <Dumbbell className="w-4 h-4 text-purple-400" />
+          <div className="lg:col-span-5 bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/35 rounded-2xl p-6 shadow-[0_12px_32px_rgba(2,8,20,0.65)] space-y-5">
+            <h4 className="font-['Cinzel'] font-bold text-sm text-white flex items-center gap-2">
+              <Dumbbell className="w-4 h-4 text-[#00D9FF]" />
               HANDS &amp; LEGS BODYWEIGHT READINESS
             </h4>
 
             {/* Bodyweight Conditioning Profile */}
-            <div className="p-4 rounded-xl bg-[#130f24] border border-purple-900/60 space-y-3">
+            <div className="p-4 rounded-xl bg-[#0A1930] border border-[#1677FF]/30 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400">Combat Discipline</span>
-                <span className="text-[10px] uppercase font-bold text-purple-300 bg-purple-950 px-2 py-0.5 rounded border border-purple-800">
+                <span className="text-xs text-[#A9B8CC]">Combat Discipline</span>
+                <span className="text-[10px] uppercase font-bold text-[#00D9FF] bg-[#061225] px-2 py-0.5 rounded border border-[#1677FF]/40">
                   Hands &amp; Legs Only · {stats.aetherRank}
                 </span>
               </div>
@@ -563,46 +563,46 @@ export const BossBattleView: React.FC = () => {
                 <h5 className="font-['Cinzel'] font-black text-base text-white">
                   {heroDef.bodyweightDisciplines.conditioningStyle}
                 </h5>
-                <p className="text-xs text-purple-300 mt-0.5">
+                <p className="text-xs text-[#A9B8CC] mt-0.5">
                   Bodyweight training builds strength through exercise — every strike comes from your hands and legs.
                 </p>
 
-                <div className="grid grid-cols-1 gap-1.5 mt-2.5 text-[11px] bg-[#090514] border border-purple-950 rounded-lg p-2.5">
+                <div className="grid grid-cols-1 gap-1.5 mt-2.5 text-[11px] bg-[#061225] border border-[#1677FF]/25 rounded-lg p-2.5">
                   <div className="flex items-center gap-2">
-                    <Hand className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                    <span className="text-slate-400">Hands:</span>
-                    <span className="text-slate-200 font-medium">{heroDef.bodyweightDisciplines.handsFocus}</span>
+                    <Hand className="w-3.5 h-3.5 text-[#1677FF] shrink-0" />
+                    <span className="text-[#A9B8CC]">Hands:</span>
+                    <span className="text-white font-medium">{heroDef.bodyweightDisciplines.handsFocus}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Footprints className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                    <span className="text-slate-400">Legs:</span>
-                    <span className="text-slate-200 font-medium">{heroDef.bodyweightDisciplines.legsFocus}</span>
+                    <Footprints className="w-3.5 h-3.5 text-[#00D9FF] shrink-0" />
+                    <span className="text-[#A9B8CC]">Legs:</span>
+                    <span className="text-white font-medium">{heroDef.bodyweightDisciplines.legsFocus}</span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-4 gap-1.5 mt-2 bg-[#090514] border border-purple-950 rounded-lg p-2 text-[10px] font-mono text-center">
+                <div className="grid grid-cols-4 gap-1.5 mt-2 bg-[#061225] border border-[#1677FF]/25 rounded-lg p-2 text-[10px] font-mono text-center">
                   <div>
-                    <span className="text-slate-500 block">STRIKE</span>
-                    <span className="text-purple-300 font-bold">+{rawAtk}</span>
+                    <span className="text-[#A9B8CC] block">STRIKE</span>
+                    <span className="text-[#00D9FF] font-bold">+{rawAtk}</span>
                   </div>
                   <div>
-                    <span className="text-slate-500 block">GUARD</span>
-                    <span className="text-indigo-300 font-bold">+{rawDef}</span>
+                    <span className="text-[#A9B8CC] block">GUARD</span>
+                    <span className="text-[#1677FF] font-bold">+{rawDef}</span>
                   </div>
                   <div>
-                    <span className="text-slate-500 block">CRIT</span>
+                    <span className="text-[#A9B8CC] block">CRIT</span>
                     <span className="text-amber-300 font-bold">{critPercent}%</span>
                   </div>
                   <div>
-                    <span className="text-slate-500 block">REPS</span>
+                    <span className="text-[#A9B8CC] block">REPS</span>
                     <span className="text-emerald-300 font-bold">{stats.totalVerifiedReps}</span>
                   </div>
                 </div>
               </div>
 
               {/* Bodyweight Techniques Preview */}
-              <div className="space-y-1.5 pt-2 border-t border-purple-950/80">
-                <span className="text-[10px] uppercase tracking-wider text-slate-400 font-mono block">
+              <div className="space-y-1.5 pt-2 border-t border-[#1677FF]/25">
+                <span className="text-[10px] uppercase tracking-wider text-[#A9B8CC] font-mono block">
                   Hands &amp; Legs Bodyweight Techniques:
                 </span>
                 <div className="grid grid-cols-1 gap-1.5 max-h-48 overflow-y-auto pr-1">
@@ -614,15 +614,15 @@ export const BossBattleView: React.FC = () => {
                         key={tech.id}
                         className={`p-2 rounded-lg border flex items-center justify-between text-xs ${
                           isWeaknessMatch
-                            ? 'bg-amber-950/50 border-amber-500/80 text-amber-200'
-                            : 'bg-[#090514] border-purple-900/70 text-slate-300'
+                            ? 'bg-[#102440] border-[#00D9FF]/60 text-white'
+                            : 'bg-[#061225] border-[#1677FF]/25 text-[#A9B8CC]'
                         }`}
                       >
                         <div className="flex items-center gap-2 min-w-0">
                           {badge.icon}
                           <div className="min-w-0">
-                            <span className="font-['Cinzel'] font-bold text-[11px] block truncate">{tech.name}</span>
-                            <span className="text-[10px] text-slate-400 block truncate">
+                            <span className="font-['Cinzel'] font-bold text-[11px] text-white block truncate">{tech.name}</span>
+                            <span className="text-[10px] text-[#A9B8CC] block truncate">
                               {tech.limb === 'hands' ? 'Hands' : tech.limb === 'legs' ? 'Legs' : 'Hands & Legs'} · Built from {tech.exerciseInspiration}
                             </span>
                           </div>
@@ -630,11 +630,11 @@ export const BossBattleView: React.FC = () => {
 
                         <div className="flex items-center gap-1.5 shrink-0">
                           {isWeaknessMatch && (
-                            <span className="text-[9px] font-mono font-black text-amber-400 animate-pulse">
+                            <span className="text-[9px] font-mono font-black text-[#00D9FF] animate-pulse">
                               WEAKNESS!
                             </span>
                           )}
-                          <span className="text-[10px] font-mono text-slate-400">
+                          <span className="text-[10px] font-mono text-[#A9B8CC]">
                             {tech.staminaCost} STAM
                           </span>
                         </div>
@@ -647,7 +647,7 @@ export const BossBattleView: React.FC = () => {
 
             {/* Active Combat Buffs */}
             <div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-purple-300 mb-2 block">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-2 block">
                 Combat Buffs ({buffs.filter(b => b.active).length} Active)
               </span>
               <div className="space-y-2">
@@ -657,15 +657,15 @@ export const BossBattleView: React.FC = () => {
                     onClick={() => activateBuff(b.id)}
                     className={`p-2.5 rounded-xl border cursor-pointer text-xs flex items-center justify-between transition-all ${
                       b.active
-                        ? 'bg-purple-900/50 border-purple-500 text-purple-100 shadow'
-                        : 'bg-[#130f24] border-purple-950 text-slate-400 hover:text-white'
+                        ? 'bg-[#1677FF]/20 border-[#00D9FF]/60 text-white shadow-[0_0_12px_rgba(0,217,255,0.2)]'
+                        : 'bg-[#0A1930] border-[#1677FF]/25 text-[#A9B8CC] hover:text-white hover:border-[#00D9FF]/40'
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <Sparkles className={`w-3.5 h-3.5 ${b.active ? 'text-amber-400' : 'text-slate-500'}`} />
+                      <Sparkles className={`w-3.5 h-3.5 ${b.active ? 'text-[#00D9FF]' : 'text-[#A9B8CC]'}`} />
                       <span className="font-semibold">{b.name}</span>
                     </div>
-                    <span className="text-[11px] font-mono font-bold text-purple-300">
+                    <span className="text-[11px] font-mono font-bold text-[#00D9FF]">
                       +{b.effectValue}% {b.effectType.toUpperCase()}
                     </span>
                   </div>
@@ -674,7 +674,7 @@ export const BossBattleView: React.FC = () => {
             </div>
 
             {battleError && (
-              <div className="p-2.5 rounded-xl bg-rose-950/80 border border-rose-800 text-xs text-rose-200 text-center">
+              <div className="p-2.5 rounded-xl bg-rose-950/80 border border-rose-500/45 text-xs text-rose-200 text-center">
                 {battleError}
               </div>
             )}
@@ -683,7 +683,7 @@ export const BossBattleView: React.FC = () => {
             <button
               onClick={handleStartFight}
               disabled={isStartingBattle}
-              className="w-full py-4 font-black font-['Cinzel'] tracking-widest text-sm rounded-xl bg-gradient-to-r from-rose-700 via-purple-700 to-indigo-700 hover:from-rose-600 hover:to-purple-600 text-white shadow-xl shadow-purple-950/80 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 cursor-pointer"
+              className="w-full py-4 font-black font-['Cinzel'] tracking-widest text-sm rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white shadow-[0_0_20px_rgba(22,119,255,0.4)] hover:shadow-[0_0_28px_rgba(0,217,255,0.5)] transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 cursor-pointer"
             >
               {isStartingBattle ? 'ENTERING COMBAT ARENA...' : 'ENGAGE IN STRATEGIC COMBAT'}
             </button>
@@ -693,10 +693,10 @@ export const BossBattleView: React.FC = () => {
 
       {/* 2. ACTIVE STRATEGIC COMBAT ARENA */}
       {battleState === 'FIGHTING' && (
-        <div className="bg-[#0e0a1b] border-2 border-purple-900 rounded-2xl p-5 sm:p-7 shadow-2xl space-y-6 relative overflow-hidden">
+        <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/40 rounded-2xl p-5 sm:p-7 shadow-[0_12px_32px_rgba(2,8,20,0.65)] space-y-6 relative overflow-hidden">
           {/* Phase Transition Banner Overlay */}
           {phaseAnnouncement && (
-            <div className="absolute top-4 inset-x-4 z-40 bg-gradient-to-r from-amber-600 via-rose-600 to-purple-600 text-slate-950 p-3 rounded-xl text-center font-['Cinzel'] font-black text-sm tracking-widest shadow-2xl border-2 border-amber-300 animate-in zoom-in-95">
+            <div className="absolute top-4 inset-x-4 z-40 bg-gradient-to-r from-[#1677FF] via-rose-600 to-[#00D9FF] text-white p-3 rounded-xl text-center font-['Cinzel'] font-black text-sm tracking-widest shadow-2xl border border-[#00D9FF] animate-in zoom-in-95">
               {phaseAnnouncement}
             </div>
           )}
@@ -725,7 +725,7 @@ export const BossBattleView: React.FC = () => {
           {/* Combatants Dual Showcase */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
             {/* PLAYER HERO HUD */}
-            <div className="p-5 rounded-2xl bg-[#130f24] border border-purple-800/80 space-y-3 relative">
+            <div className="p-5 rounded-2xl bg-[#0A1930] border border-[#1677FF]/35 space-y-3 relative">
               {/* Floating Boss Damage over Player */}
               {lastBossDamage !== null && (
                 <div className="absolute top-2 right-4 text-2xl font-black font-mono text-rose-400 animate-bounce">
@@ -739,29 +739,29 @@ export const BossBattleView: React.FC = () => {
                     src={getHeroArtwork(selectedHeroId, user?.characterClass)}
                     alt={`${user?.characterClass || 'Warrior'} Champion`}
                     referrerPolicy="no-referrer"
-                    className="w-14 h-14 rounded-xl object-cover object-top border border-purple-500"
+                    className="w-14 h-14 rounded-xl object-cover object-top border border-[#00D9FF]/60"
                   />
                   <div>
                     <h4 className="font-['Cinzel'] font-bold text-base text-white">
                       {user?.characterName || user?.username || 'Hero of Aetheria'}
                     </h4>
-                    <p className="text-xs text-purple-300 font-mono">
+                    <p className="text-xs text-[#00D9FF] font-mono">
                       Hands &amp; Legs · {heroDef.bodyweightDisciplines.conditioningStyle}
                     </p>
                   </div>
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-[#080511] border border-purple-700/60 flex items-center justify-center shrink-0 text-amber-400">
+                <div className="w-12 h-12 rounded-xl bg-[#061225] border border-[#1677FF]/40 flex items-center justify-center shrink-0 text-[#00D9FF]">
                   <Dumbbell className="w-5 h-5" />
                 </div>
               </div>
 
               {/* Player Vitality HP Bar */}
               <div>
-                <div className="flex justify-between text-xs text-slate-300 mb-1 font-mono">
+                <div className="flex justify-between text-xs text-[#A9B8CC] mb-1 font-mono">
                   <span>Player Vitality</span>
                   <span className="font-bold text-emerald-400">{playerCurrentHp} / {playerMaxHp} HP</span>
                 </div>
-                <div className="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800">
+                <div className="w-full bg-[#061225] h-2.5 rounded-full overflow-hidden border border-[#1677FF]/25">
                   <div
                     className="bg-emerald-500 h-full transition-all duration-300"
                     style={{ width: `${Math.max(0, (playerCurrentHp / playerMaxHp) * 100)}%` }}
@@ -771,26 +771,26 @@ export const BossBattleView: React.FC = () => {
 
               {/* Player Stamina Bar (Crucial strategic resource!) */}
               <div>
-                <div className="flex justify-between text-xs text-slate-300 mb-1 font-mono">
-                  <span className="flex items-center gap-1 text-cyan-300">
+                <div className="flex justify-between text-xs text-[#A9B8CC] mb-1 font-mono">
+                  <span className="flex items-center gap-1 text-[#00D9FF]">
                     <Zap className="w-3.5 h-3.5" /> Stamina
                   </span>
-                  <span className="font-bold text-cyan-400">{playerStamina} / {playerMaxStamina} STAM</span>
+                  <span className="font-bold text-[#00D9FF]">{playerStamina} / {playerMaxStamina} STAM</span>
                 </div>
-                <div className="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800">
+                <div className="w-full bg-[#061225] h-2.5 rounded-full overflow-hidden border border-[#1677FF]/25">
                   <div
-                    className="bg-gradient-to-r from-cyan-500 to-blue-500 h-full transition-all duration-300"
+                    className="bg-gradient-to-r from-[#1677FF] to-[#00D9FF] h-full transition-all duration-300"
                     style={{ width: `${Math.max(0, (playerStamina / playerMaxStamina) * 100)}%` }}
                   />
                 </div>
-                <span className="text-[10px] text-slate-500 font-mono mt-0.5 block">
+                <span className="text-[10px] text-[#A9B8CC]/70 font-mono mt-0.5 block">
                   +15 passive / +25 standard attack
                 </span>
               </div>
             </div>
 
             {/* BOSS ENCOUNTER HUD */}
-            <div className={`p-5 rounded-2xl bg-[#130f24] border border-rose-900/80 space-y-3 relative ${isAnimating ? 'animate-pulse' : ''}`}>
+            <div className={`p-5 rounded-2xl bg-[#0A1930] border border-rose-500/40 space-y-3 relative ${isAnimating ? 'animate-pulse' : ''}`}>
               {/* Floating Damage Feedback over Boss */}
               {lastDamageDealt !== null && (
                 <div className={`absolute top-2 right-4 text-2xl font-black font-mono animate-bounce ${
@@ -798,7 +798,7 @@ export const BossBattleView: React.FC = () => {
                     ? 'text-amber-300 drop-shadow-[0_0_12px_rgba(245,158,11,0.9)]'
                     : feedbackType === 'crit'
                     ? 'text-yellow-400 drop-shadow'
-                    : 'text-amber-400'
+                    : 'text-[#00D9FF]'
                 }`}>
                   -{lastDamageDealt}{' '}
                   {feedbackType === 'weakness' ? '💥 WEAKNESS HIT!' : feedbackType === 'crit' ? 'CRIT!' : ''}
@@ -821,10 +821,10 @@ export const BossBattleView: React.FC = () => {
 
                 {/* Boss Current Phase Indicator */}
                 <div className="text-right">
-                  <span className={`text-[10px] font-mono uppercase font-black px-2 py-0.5 rounded border border-purple-700 bg-purple-950 ${currentPhaseInfo.auraColor}`}>
+                  <span className={`text-[10px] font-mono uppercase font-black px-2 py-0.5 rounded border border-[#1677FF]/45 bg-[#061225] ${currentPhaseInfo.auraColor}`}>
                     PHASE {currentPhaseNumber}: {currentPhaseInfo.name}
                   </span>
-                  <span className="text-[10px] text-slate-400 block mt-0.5 font-mono">
+                  <span className="text-[10px] text-[#A9B8CC] block mt-0.5 font-mono">
                     ATK x{currentPhaseInfo.attackMultiplier}
                   </span>
                 </div>
@@ -832,11 +832,11 @@ export const BossBattleView: React.FC = () => {
 
               {/* Boss HP Bar */}
               <div>
-                <div className="flex justify-between text-xs text-slate-300 mb-1 font-mono">
+                <div className="flex justify-between text-xs text-[#A9B8CC] mb-1 font-mono">
                   <span>Void Corruption Health</span>
                   <span className="font-bold text-rose-400">{boss.health} / {boss.maxHealth} HP</span>
                 </div>
-                <div className="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800">
+                <div className="w-full bg-[#061225] h-2.5 rounded-full overflow-hidden border border-[#1677FF]/25">
                   <div
                     className="bg-gradient-to-r from-rose-600 to-amber-500 h-full transition-all duration-300"
                     style={{ width: `${Math.max(0, (boss.health / boss.maxHealth) * 100)}%` }}
@@ -849,8 +849,8 @@ export const BossBattleView: React.FC = () => {
                 {boss.weakness && (
                   <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md border flex items-center gap-1 ${
                     boss.weakness.discovered
-                      ? 'bg-amber-950/70 border-amber-500 text-amber-300'
-                      : 'bg-slate-900 border-slate-700 text-slate-500'
+                      ? 'bg-[#061225] border-[#00D9FF]/60 text-[#00D9FF]'
+                      : 'bg-[#061225] border-[#1677FF]/25 text-[#A9B8CC]/70'
                   }`}>
                     {boss.weakness.discovered ? (
                       <>
@@ -859,7 +859,7 @@ export const BossBattleView: React.FC = () => {
                       </>
                     ) : (
                       <>
-                        <HelpCircle className="w-3 h-3 text-slate-500" />
+                        <HelpCircle className="w-3 h-3 text-[#A9B8CC]/70" />
                         <span>Weakness: ???</span>
                       </>
                     )}
@@ -867,7 +867,7 @@ export const BossBattleView: React.FC = () => {
                 )}
 
                 {boss.resistance && (
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-md border bg-slate-900 border-purple-900 text-purple-300 flex items-center gap-1">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-md border bg-[#061225] border-[#1677FF]/35 text-[#A9B8CC] flex items-center gap-1">
                     {bossResistanceBadge?.icon}
                     <span>Resist: {boss.resistance.element}</span>
                   </span>
@@ -877,13 +877,13 @@ export const BossBattleView: React.FC = () => {
           </div>
 
           {/* 3. FOUR STRATEGIC BODYWEIGHT COMBAT CHOICES */}
-          <div className="p-5 rounded-2xl bg-[#090714] border border-purple-950 space-y-4">
-            <div className="flex items-center justify-between border-b border-purple-950 pb-2">
-              <span className="text-xs uppercase font-['Cinzel'] font-black tracking-widest text-slate-300 flex items-center gap-1.5">
-                <Hand className="w-4 h-4 text-purple-400" />
+          <div className="p-5 rounded-2xl bg-[#0A1930] border border-[#1677FF]/30 space-y-4">
+            <div className="flex items-center justify-between border-b border-[#1677FF]/25 pb-2">
+              <span className="text-xs uppercase font-['Cinzel'] font-black tracking-widest text-white flex items-center gap-1.5">
+                <Hand className="w-4 h-4 text-[#00D9FF]" />
                 Hands &amp; Legs Combat Actions (Turn {turnCount})
               </span>
-              <span className="text-xs font-mono text-cyan-300 font-bold">
+              <span className="text-xs font-mono text-[#00D9FF] font-bold">
                 Stamina: {playerStamina} / 100
               </span>
             </div>
@@ -894,18 +894,18 @@ export const BossBattleView: React.FC = () => {
               <button
                 onClick={() => executeCombatAction('attack')}
                 disabled={isAnimating}
-                className="p-3.5 rounded-xl bg-gradient-to-b from-[#1b1035] to-[#110722] hover:from-[#241547] hover:to-[#170a2f] border border-purple-700/80 hover:border-purple-500 text-left transition-all shadow-md group disabled:opacity-50 cursor-pointer"
+                className="p-3.5 rounded-xl bg-gradient-to-b from-[#102440] to-[#061225] hover:from-[#16325C] hover:to-[#0A1930] border border-[#1677FF]/45 hover:border-[#00D9FF] hover:shadow-[0_0_16px_rgba(0,217,255,0.2)] text-left transition-all shadow-md group disabled:opacity-50 cursor-pointer"
               >
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="font-['Cinzel'] font-black text-xs text-white flex items-center gap-1.5">
-                    <Hand className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
+                    <Hand className="w-4 h-4 text-[#00D9FF] group-hover:scale-110 transition-transform" />
                     STRIKE
                   </span>
                   <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-950/80 px-1.5 py-0.2 rounded border border-emerald-700">
                     +25 STAM
                   </span>
                 </div>
-                <p className="text-[11px] text-purple-200">
+                <p className="text-[11px] text-[#A9B8CC]">
                   Bodyweight punch &amp; kick combo. Restores stamina and builds pressure.
                 </p>
               </button>
@@ -921,18 +921,18 @@ export const BossBattleView: React.FC = () => {
                   }
                 }}
                 disabled={isAnimating || playerStamina < 20}
-                className="p-3.5 rounded-xl bg-gradient-to-b from-[#2a1340] to-[#160a28] hover:from-[#351952] hover:to-[#1f0e38] border border-amber-600/80 hover:border-amber-400 text-left transition-all shadow-md group disabled:opacity-50 cursor-pointer"
+                className="p-3.5 rounded-xl bg-gradient-to-b from-[#102440] to-[#061225] hover:from-[#16325C] hover:to-[#0A1930] border border-[#1677FF]/60 hover:border-[#00D9FF] hover:shadow-[0_0_16px_rgba(22,119,255,0.3)] text-left transition-all shadow-md group disabled:opacity-50 cursor-pointer"
               >
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="font-['Cinzel'] font-black text-xs text-amber-300 flex items-center gap-1.5">
-                    <Zap className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+                  <span className="font-['Cinzel'] font-black text-xs text-white flex items-center gap-1.5">
+                    <Zap className="w-4 h-4 text-[#1677FF] group-hover:scale-110 transition-transform" />
                     TECHNIQUE
                   </span>
-                  <span className="text-[10px] font-mono font-bold text-amber-300 bg-amber-950/80 px-1.5 py-0.2 rounded border border-amber-700">
+                  <span className="text-[10px] font-mono font-bold text-[#00D9FF] bg-[#061225] px-1.5 py-0.2 rounded border border-[#1677FF]/50">
                     20-35 STAM
                   </span>
                 </div>
-                <p className="text-[11px] text-amber-100">
+                <p className="text-[11px] text-[#A9B8CC]">
                   Unleash a trained Hand or Leg strike to exploit boss weaknesses.
                 </p>
               </button>
@@ -943,20 +943,20 @@ export const BossBattleView: React.FC = () => {
                 disabled={isAnimating || playerStamina < 15}
                 className={`p-3.5 rounded-xl border text-left transition-all shadow-md group disabled:opacity-50 cursor-pointer ${
                   isTelegraphWarningActive && boss.signatureAttack?.defenseResponse === 'defend'
-                    ? 'bg-gradient-to-b from-indigo-900 to-indigo-950 border-cyan-400 ring-2 ring-cyan-400/80 animate-pulse'
-                    : 'bg-gradient-to-b from-[#131a38] to-[#0a0e22] border-indigo-700/80 hover:border-indigo-500'
+                    ? 'bg-gradient-to-b from-[#1677FF]/40 to-[#0A1930] border-[#00D9FF] ring-2 ring-[#00D9FF]/80 animate-pulse'
+                    : 'bg-gradient-to-b from-[#102440] to-[#061225] hover:from-[#16325C] hover:to-[#0A1930] border-[#00D9FF]/40 hover:border-[#00D9FF]'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="font-['Cinzel'] font-black text-xs text-cyan-200 flex items-center gap-1.5">
-                    <Activity className="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform" />
+                  <span className="font-['Cinzel'] font-black text-xs text-white flex items-center gap-1.5">
+                    <Activity className="w-4 h-4 text-[#00D9FF] group-hover:scale-110 transition-transform" />
                     BRACE GUARD
                   </span>
-                  <span className="text-[10px] font-mono font-bold text-cyan-300 bg-cyan-950/80 px-1.5 py-0.2 rounded border border-cyan-700">
+                  <span className="text-[10px] font-mono font-bold text-[#00D9FF] bg-[#061225] px-1.5 py-0.2 rounded border border-[#00D9FF]/40">
                     15 STAM
                   </span>
                 </div>
-                <p className="text-[11px] text-cyan-100">
+                <p className="text-[11px] text-[#A9B8CC]">
                   Root your stance with forearms &amp; core. Reduces damage by 80% against Ground Slams.
                 </p>
               </button>
@@ -968,7 +968,7 @@ export const BossBattleView: React.FC = () => {
                 className={`p-3.5 rounded-xl border text-left transition-all shadow-md group disabled:opacity-50 cursor-pointer ${
                   isTelegraphWarningActive && boss.signatureAttack?.defenseResponse === 'dodge'
                     ? 'bg-gradient-to-b from-emerald-900 to-teal-950 border-emerald-400 ring-2 ring-emerald-400/80 animate-pulse'
-                    : 'bg-gradient-to-b from-[#0f2824] to-[#071714] border-emerald-700/80 hover:border-emerald-500'
+                    : 'bg-gradient-to-b from-[#0f2824] to-[#061225] border-emerald-700/80 hover:border-emerald-400'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1.5">
@@ -980,15 +980,15 @@ export const BossBattleView: React.FC = () => {
                     20 STAM
                   </span>
                 </div>
-                <p className="text-[11px] text-emerald-100">
+                <p className="text-[11px] text-[#A9B8CC]">
                   Agile leg step &amp; evasive roll. Avoids 100% damage from telegraphed ambushes.
                 </p>
               </button>
             </div>
 
             {/* HANDS & LEGS BODYWEIGHT TECHNIQUE SELECTOR STRIP */}
-            <div className="pt-3 border-t border-purple-950">
-              <span className="text-[10px] uppercase tracking-widest font-black text-amber-400 font-['Cinzel'] block mb-2">
+            <div className="pt-3 border-t border-[#1677FF]/25">
+              <span className="text-[10px] uppercase tracking-widest font-black text-[#00D9FF] font-['Cinzel'] block mb-2">
                 Hands &amp; Legs Bodyweight Techniques (Strength Built Through Exercise):
               </span>
 
@@ -1008,37 +1008,37 @@ export const BossBattleView: React.FC = () => {
                       className={`p-3 rounded-xl border text-left transition-all relative overflow-hidden group ${
                         isUnlocked && hasEnoughStamina
                           ? isWeaknessMatch
-                            ? 'bg-gradient-to-r from-[#2c1340] to-[#1c0828] border-amber-400 ring-2 ring-amber-400/60 hover:scale-[1.02] cursor-pointer shadow-lg'
-                            : 'bg-gradient-to-r from-[#170c2a] to-[#0e061c] border-purple-800/80 hover:border-purple-500 hover:scale-[1.01] cursor-pointer'
-                          : 'bg-[#080512]/60 border-purple-950 text-slate-500 cursor-not-allowed opacity-50'
+                            ? 'bg-gradient-to-r from-[#16325C] to-[#102440] border-[#00D9FF] ring-2 ring-[#00D9FF]/50 hover:scale-[1.02] cursor-pointer shadow-[0_0_16px_rgba(0,217,255,0.25)]'
+                            : 'bg-gradient-to-r from-[#102440] to-[#061225] border-[#1677FF]/40 hover:border-[#00D9FF]/60 hover:scale-[1.01] cursor-pointer'
+                          : 'bg-[#061225]/60 border-[#1677FF]/20 text-[#A9B8CC]/50 cursor-not-allowed opacity-50'
                       }`}
                     >
                       <div className="flex items-center justify-between gap-1 mb-1">
                         <span className="font-['Cinzel'] font-black text-xs text-white truncate flex items-center gap-1.5">
                           {tech.limb === 'legs' ? (
-                            <Footprints className="w-3.5 h-3.5 text-cyan-300 shrink-0" />
+                            <Footprints className="w-3.5 h-3.5 text-[#00D9FF] shrink-0" />
                           ) : (
-                            <Hand className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                            <Hand className="w-3.5 h-3.5 text-[#1677FF] shrink-0" />
                           )}
                           {tech.name}
                         </span>
                         <span className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded ${
                           isWeaknessMatch
-                            ? 'bg-amber-400 text-slate-950 animate-pulse'
-                            : 'bg-slate-800 text-slate-300'
+                            ? 'bg-[#00D9FF] text-[#061225] animate-pulse'
+                            : 'bg-[#0A1930] text-[#A9B8CC] border border-[#1677FF]/30'
                         }`}>
                           {cost} STAM
                         </span>
                       </div>
 
-                      <p className="text-[11px] text-purple-200 line-clamp-1">{tech.combatEffect}</p>
+                      <p className="text-[11px] text-[#A9B8CC] line-clamp-1">{tech.combatEffect}</p>
 
                       <div className="flex items-center justify-between mt-1 text-[10px] font-mono">
-                        <span className="text-slate-400">
+                        <span className="text-[#A9B8CC]/80">
                           {tech.exerciseInspiration} · {badge.label}
                         </span>
                         {isWeaknessMatch && (
-                          <span className="text-amber-400 font-bold">1.8x - 2.0x BONUS!</span>
+                          <span className="text-[#00D9FF] font-bold">1.8x - 2.0x BONUS!</span>
                         )}
                       </div>
                     </button>
@@ -1049,14 +1049,14 @@ export const BossBattleView: React.FC = () => {
           </div>
 
           {/* Combat Logs Console */}
-          <div className="p-4 rounded-xl bg-[#090712] border border-purple-950 text-xs font-mono space-y-1.5 max-h-36 overflow-y-auto">
+          <div className="p-4 rounded-xl bg-[#061225] border border-[#1677FF]/30 text-xs font-mono space-y-1.5 max-h-36 overflow-y-auto">
             {combatLogs.map((log, idx) => (
               <p
                 key={idx}
                 className={
                   idx === 0
-                    ? 'text-amber-300 font-bold border-l-2 border-amber-400 pl-2'
-                    : 'text-slate-400 pl-2'
+                    ? 'text-[#00D9FF] font-bold border-l-2 border-[#00D9FF] pl-2'
+                    : 'text-[#A9B8CC] pl-2'
                 }
               >
                 {log}
@@ -1068,27 +1068,27 @@ export const BossBattleView: React.FC = () => {
 
       {/* 4. VICTORY SCREEN WITH COMPREHENSIVE RECAP */}
       {battleState === 'VICTORY' && (
-        <div className="bg-[#0e0a1b] border-2 border-amber-500/80 rounded-2xl p-6 sm:p-8 text-center shadow-2xl animate-in zoom-in-95 space-y-5">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500">
+        <div className="bg-[#102440]/90 backdrop-blur-md border border-[#00D9FF]/60 rounded-2xl p-6 sm:p-8 text-center shadow-[0_12px_32px_rgba(2,8,20,0.7)] animate-in zoom-in-95 space-y-5">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-[#1677FF]/20 text-[#00D9FF] flex items-center justify-center border border-[#00D9FF]/50 shadow-[0_0_20px_rgba(0,217,255,0.3)]">
             <Trophy className="w-8 h-8" />
           </div>
 
           <div>
-            <span className="text-[10px] uppercase font-bold tracking-widest text-amber-400 font-['Cinzel'] block">
+            <span className="text-[10px] uppercase font-bold tracking-widest text-[#00D9FF] font-['Cinzel'] block">
               Strategic Encounter Cleared
             </span>
             <h3 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-white">
               VICTORY! {boss.name.toUpperCase()} PURIFIED
             </h3>
-            <p className="text-xs sm:text-sm text-purple-300 max-w-md mx-auto mt-1">
+            <p className="text-xs sm:text-sm text-[#A9B8CC] max-w-md mx-auto mt-1">
               Through strategic weakness exploitation and disciplined defenses, the Void corruption in {activeKingdom.name} has been banished!
             </p>
           </div>
 
           {/* Combat Analytics Breakdown */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-lg mx-auto bg-[#130f24] p-4 rounded-xl border border-purple-900 text-xs font-mono">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-lg mx-auto bg-[#0A1930] p-4 rounded-xl border border-[#1677FF]/30 text-xs font-mono">
             <div>
-              <span className="text-[10px] text-slate-400 uppercase block">Turns Taken</span>
+              <span className="text-[10px] text-[#A9B8CC] uppercase block">Turns Taken</span>
               <span className="text-base font-bold text-white">{battleStats.turns}</span>
             </div>
             <div>
@@ -1096,8 +1096,8 @@ export const BossBattleView: React.FC = () => {
               <span className="text-base font-bold text-amber-300">{battleStats.weaknessHits}</span>
             </div>
             <div>
-              <span className="text-[10px] text-cyan-400 uppercase block">Avoided / Guarded</span>
-              <span className="text-base font-bold text-cyan-300">{battleStats.attacksAvoided}</span>
+              <span className="text-[10px] text-[#00D9FF] uppercase block">Avoided / Guarded</span>
+              <span className="text-base font-bold text-[#00D9FF]">{battleStats.attacksAvoided}</span>
             </div>
             <div>
               <span className="text-[10px] text-emerald-400 uppercase block">Damage Dealt</span>
@@ -1106,14 +1106,14 @@ export const BossBattleView: React.FC = () => {
           </div>
 
           {/* Rewards Grid */}
-          <div className="grid grid-cols-2 gap-3 max-w-xs mx-auto bg-[#120822] p-3 rounded-xl border border-amber-500/50 font-mono text-xs">
+          <div className="grid grid-cols-2 gap-3 max-w-xs mx-auto bg-[#061225] p-3 rounded-xl border border-[#1677FF]/35 font-mono text-xs">
             <div>
-              <span className="text-[10px] text-purple-300 uppercase block">Player XP</span>
-              <span className="text-lg font-bold text-purple-200">+{boss.rewardPlayerXp}</span>
+              <span className="text-[10px] text-[#A9B8CC] uppercase block">Player XP</span>
+              <span className="text-lg font-bold text-[#00D9FF]">+{boss.rewardPlayerXp}</span>
             </div>
             <div>
-              <span className="text-[10px] text-cyan-300 uppercase block">Aether Pts</span>
-              <span className="text-lg font-bold text-cyan-200">+60</span>
+              <span className="text-[10px] text-[#A9B8CC] uppercase block">Aether Pts</span>
+              <span className="text-lg font-bold text-white">+60</span>
             </div>
           </div>
 
@@ -1124,13 +1124,13 @@ export const BossBattleView: React.FC = () => {
                 setBattleState('PREP');
                 sound.playClick();
               }}
-              className="px-6 py-2.5 rounded-xl border border-purple-700 text-xs font-semibold text-slate-300 hover:text-white"
+              className="px-6 py-2.5 rounded-xl bg-[#0A1930] hover:bg-[#16325C] border border-[#1677FF]/40 hover:border-[#00D9FF]/60 text-xs font-semibold text-white transition-all cursor-pointer"
             >
               Challenge Again
             </button>
             <button
               onClick={() => setActiveTab('storyline')}
-              className="px-6 py-2.5 rounded-xl bg-purple-700 hover:bg-purple-600 text-white font-['Cinzel'] font-bold text-xs"
+              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white font-['Cinzel'] font-bold text-xs shadow-[0_0_16px_rgba(22,119,255,0.35)] transition-all cursor-pointer"
             >
               Advance Realm Storyline
             </button>
@@ -1140,8 +1140,8 @@ export const BossBattleView: React.FC = () => {
 
       {/* 5. DEFEAT SCREEN WITH STRATEGIC HINTS */}
       {battleState === 'DEFEAT' && (
-        <div className="bg-[#0e0a1b] border-2 border-rose-900 rounded-2xl p-6 sm:p-8 text-center shadow-2xl space-y-4 animate-in zoom-in-95">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-rose-950/80 text-rose-400 flex items-center justify-center border border-rose-700">
+        <div className="bg-[#102440]/90 backdrop-blur-md border border-rose-500/50 rounded-2xl p-6 sm:p-8 text-center shadow-[0_12px_32px_rgba(2,8,20,0.7)] space-y-4 animate-in zoom-in-95">
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-rose-950/80 text-rose-400 flex items-center justify-center border border-rose-500/50">
             <Skull className="w-7 h-7" />
           </div>
 
@@ -1149,19 +1149,19 @@ export const BossBattleView: React.FC = () => {
             DEFEATED BY {boss.name.toUpperCase()}
           </h3>
 
-          <div className="max-w-md mx-auto p-4 rounded-xl bg-[#130b1c] border border-rose-900/60 text-xs text-slate-300 text-left space-y-2">
-            <span className="font-bold text-amber-400 font-['Cinzel'] block">
+          <div className="max-w-md mx-auto p-4 rounded-xl bg-[#0A1930] border border-rose-500/35 text-xs text-[#A9B8CC] text-left space-y-2">
+            <span className="font-bold text-[#00D9FF] font-['Cinzel'] block">
               Tactical Battle Debrief:
             </span>
-            <ul className="space-y-1 list-disc list-inside text-[11px] text-slate-300">
+            <ul className="space-y-1 list-disc list-inside text-[11px] text-[#A9B8CC]">
               <li>
-                <strong>Heed Telegraphed Warnings:</strong> Use <strong>DEFEND</strong> against slams or <strong>DODGE</strong> against ambushes when warnings appear.
+                <strong className="text-white">Heed Telegraphed Warnings:</strong> Use <strong className="text-white">DEFEND</strong> against slams or <strong className="text-white">DODGE</strong> against ambushes when warnings appear.
               </li>
               <li>
-                <strong>Exploit Weakness:</strong> {boss.name} is vulnerable to <strong>{boss.weakness?.element}</strong> for massive bonus damage.
+                <strong className="text-white">Exploit Weakness:</strong> {boss.name} is vulnerable to <strong className="text-white">{boss.weakness?.element}</strong> for massive bonus damage.
               </li>
               <li>
-                <strong>Manage Stamina:</strong> Don't deplete all stamina on abilities; standard attacks restore +25 STAM.
+                <strong className="text-white">Manage Stamina:</strong> Don't deplete all stamina on abilities; standard attacks restore +25 STAM.
               </li>
             </ul>
           </div>
@@ -1173,13 +1173,13 @@ export const BossBattleView: React.FC = () => {
                 setBattleState('PREP');
                 sound.playClick();
               }}
-              className="px-6 py-2.5 rounded-xl bg-purple-700 hover:bg-purple-600 text-white text-xs font-bold"
+              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white text-xs font-bold shadow-[0_0_16px_rgba(22,119,255,0.35)] transition-all cursor-pointer"
             >
               Retry Encounter
             </button>
             <button
               onClick={() => setActiveTab('fitness')}
-              className="px-6 py-2.5 rounded-xl border border-amber-600/70 text-amber-300 hover:bg-amber-950/40 text-xs font-bold"
+              className="px-6 py-2.5 rounded-xl bg-[#0A1930] hover:bg-[#16325C] border border-[#1677FF]/40 hover:border-[#00D9FF]/60 text-white text-xs font-bold transition-all cursor-pointer"
             >
               Train Bodyweight Strength
             </button>
@@ -1189,38 +1189,38 @@ export const BossBattleView: React.FC = () => {
 
       {/* 6. WEAKNESS DISCOVERY & CLUE MODAL */}
       {showLoreClueModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in">
-          <div className="relative w-full max-w-lg rounded-2xl bg-gradient-to-b from-[#1c0f33] via-[#0d0718] to-[#120822] border-2 border-amber-500 p-6 sm:p-7 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-purple-900 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#061225]/85 backdrop-blur-md p-4 animate-in fade-in">
+          <div className="relative w-full max-w-lg rounded-2xl bg-gradient-to-b from-[#102440] via-[#0A1930] to-[#061225] border border-[#00D9FF]/50 p-6 sm:p-7 shadow-[0_16px_48px_rgba(0,0,0,0.8)] space-y-4">
+            <div className="flex items-center justify-between border-b border-[#1677FF]/30 pb-3">
               <div className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-amber-400" />
+                <BookOpen className="w-5 h-5 text-[#00D9FF]" />
                 <h3 className="font-['Cinzel'] font-black text-lg text-white">
                   ARCHIVAL WEAKNESS CLUE
                 </h3>
               </div>
               <button
                 onClick={() => setShowLoreClueModal(false)}
-                className="text-slate-400 hover:text-white text-sm"
+                className="text-[#A9B8CC] hover:text-white text-sm cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
-            {/* Ancient Clue Parchment */}
-            <div className="p-4 rounded-xl bg-[#090514] border border-amber-600/60 space-y-2">
-              <span className="text-[10px] font-mono uppercase text-amber-400 font-bold block">
+            {/* Ancient Clue Dossier */}
+            <div className="p-4 rounded-xl bg-[#061225] border border-[#1677FF]/40 space-y-2">
+              <span className="text-[10px] font-mono uppercase text-[#00D9FF] font-bold block">
                 Storyline Intel · {boss.name}
               </span>
-              <p className="text-xs text-amber-100/90 leading-relaxed italic border-l-2 border-amber-500 pl-3">
+              <p className="text-xs text-[#A9B8CC] leading-relaxed italic border-l-2 border-[#00D9FF] pl-3">
                 "{boss.weakness?.clue}"
               </p>
             </div>
 
             {/* Discovery State & Action */}
-            <div className="p-3.5 rounded-xl bg-[#120924] border border-purple-900 flex items-center justify-between">
+            <div className="p-3.5 rounded-xl bg-[#0A1930] border border-[#1677FF]/30 flex items-center justify-between">
               <div>
-                <span className="text-[10px] text-slate-400 font-mono block">Bestiary Status:</span>
-                <span className={`text-xs font-bold ${boss.weakness?.discovered ? 'text-emerald-400' : 'text-amber-400'}`}>
+                <span className="text-[10px] text-[#A9B8CC] font-mono block">Bestiary Status:</span>
+                <span className={`text-xs font-bold ${boss.weakness?.discovered ? 'text-emerald-400' : 'text-[#00D9FF]'}`}>
                   {boss.weakness?.discovered
                     ? `Discovered: ${boss.weakness.element} Element (${boss.weakness.damageMultiplier}x)`
                     : 'Hidden in Bestiary'}
@@ -1230,7 +1230,7 @@ export const BossBattleView: React.FC = () => {
               {!boss.weakness?.discovered ? (
                 <button
                   onClick={handleUnlockWeakness}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-slate-950 font-['Cinzel'] font-black text-xs shadow-lg transition-transform hover:scale-105"
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white font-['Cinzel'] font-black text-xs shadow-[0_0_16px_rgba(22,119,255,0.4)] transition-all hover:scale-105 cursor-pointer"
                 >
                   DECRYPT WEAKNESS
                 </button>
@@ -1244,7 +1244,7 @@ export const BossBattleView: React.FC = () => {
             <div className="pt-2 text-center">
               <button
                 onClick={() => setShowLoreClueModal(false)}
-                className="px-6 py-2 rounded-xl bg-purple-950 hover:bg-purple-900 border border-purple-700 text-xs font-semibold text-slate-300 hover:text-white"
+                className="px-6 py-2 rounded-xl bg-[#0A1930] hover:bg-[#16325C] border border-[#1677FF]/40 hover:border-[#00D9FF]/60 text-xs font-semibold text-white transition-all cursor-pointer"
               >
                 Return to Chamber
               </button>

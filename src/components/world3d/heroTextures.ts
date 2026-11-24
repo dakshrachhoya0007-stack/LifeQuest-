@@ -106,9 +106,9 @@ export function createScarredSteelTextures(
  * Heavy woven medieval fabric / tattered cape texture.
  */
 export function createClothWeaveTexture(
-  primaryHex = '#591d28',
-  shadowHex = '#2e0d15',
-  trimHex = '#c5a15a'
+  primaryHex = '#0A1930',
+  shadowHex = '#061225',
+  trimHex = '#00D9FF'
 ): ProceduralTextureSet {
   const size = 256;
   const [canvas, ctx] = makeCanvas(size, size);
@@ -132,9 +132,9 @@ export function createClothWeaveTexture(
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, size, size);
 
-  // Thin weathered gold border thread
+  // Thin glowing trim border thread
   ctx.fillStyle = trimHex;
-  ctx.globalAlpha = 0.45;
+  ctx.globalAlpha = 0.5;
   ctx.fillRect(0, 10, size, 3);
   ctx.fillRect(0, size - 16, size, 3);
   ctx.globalAlpha = 1;
@@ -149,7 +149,7 @@ export function createClothWeaveTexture(
 /**
  * Stitched dark leather texture (Assassin / Ranger armor).
  */
-export function createLeatherTexture(baseHex = '#271f2d', grainHex = '#151019'): ProceduralTextureSet {
+export function createLeatherTexture(baseHex = '#102440', grainHex = '#061225'): ProceduralTextureSet {
   const size = 256;
   const [canvas, ctx] = makeCanvas(size, size);
   ctx.fillStyle = baseHex;
@@ -166,7 +166,7 @@ export function createLeatherTexture(baseHex = '#271f2d', grainHex = '#151019'):
   }
 
   // Cross-stitched seam
-  ctx.strokeStyle = 'rgba(197, 161, 90, 0.25)';
+  ctx.strokeStyle = 'rgba(0, 217, 255, 0.25)';
   ctx.lineWidth = 1.4;
   ctx.setLineDash([6, 5]);
   ctx.strokeRect(12, 12, size - 24, size - 24);
@@ -182,7 +182,7 @@ export function createLeatherTexture(baseHex = '#271f2d', grainHex = '#151019'):
 /**
  * Arcane embroidered tunic & rune trim texture.
  */
-export function createArcaneClothTexture(baseHex = '#241840', accentHex = '#7046a5'): ProceduralTextureSet {
+export function createArcaneClothTexture(baseHex = '#0A1930', accentHex = '#1677FF'): ProceduralTextureSet {
   const size = 256;
   const [canvas, ctx] = makeCanvas(size, size);
   ctx.fillStyle = baseHex;
@@ -190,7 +190,7 @@ export function createArcaneClothTexture(baseHex = '#241840', accentHex = '#7046
 
   // Subtle woven diamond lattice
   ctx.strokeStyle = accentHex;
-  ctx.globalAlpha = 0.22;
+  ctx.globalAlpha = 0.25;
   ctx.lineWidth = 1.2;
   for (let x = -size; x < size * 2; x += 28) {
     ctx.beginPath();
@@ -205,8 +205,8 @@ export function createArcaneClothTexture(baseHex = '#241840', accentHex = '#7046
   }
   ctx.globalAlpha = 1;
 
-  // Gold embroidered lower hem rune trim
-  ctx.fillStyle = '#c5a15a';
+  // Cyan embroidered lower hem rune trim
+  ctx.fillStyle = '#00D9FF';
   ctx.fillRect(0, size - 26, size, 4);
   ctx.fillRect(0, size - 12, size, 2);
 
@@ -218,7 +218,7 @@ export function createArcaneClothTexture(baseHex = '#241840', accentHex = '#7046
 }
 
 /**
- * Weathered medieval ashlar & cobblestone courtyard masonry textures.
+ * Weathered ashlar & cobblestone courtyard masonry textures.
  */
 export function createCastleStoneTextures(
   repeatX = 4,
@@ -228,7 +228,7 @@ export function createCastleStoneTextures(
   const [cCanvas, cCtx] = makeCanvas(size, size);
   const [bCanvas, bCtx] = makeCanvas(size, size);
 
-  cCtx.fillStyle = '#1d1928';
+  cCtx.fillStyle = '#0c1a30';
   cCtx.fillRect(0, 0, size, size);
   bCtx.fillStyle = '#383838';
   bCtx.fillRect(0, 0, size, size);
@@ -243,19 +243,19 @@ export function createCastleStoneTextures(
     for (let c = -1; c <= cols; c++) {
       const x = c * colW + offset;
       const y = r * rowH;
-      const shade = 36 + ((r * 13 + c * 29) % 18);
-      cCtx.fillStyle = `rgb(${shade + 4}, ${shade}, ${shade + 12})`;
+      const shade = 28 + ((r * 13 + c * 29) % 18);
+      cCtx.fillStyle = `rgb(${shade}, ${shade + 10}, ${shade + 24})`;
       cCtx.fillRect(x + 3, y + 3, colW - 6, rowH - 6);
 
       bCtx.fillStyle = `rgb(${155 + ((r + c) % 4) * 14}, ${155 + ((r + c) % 4) * 14}, ${155 + ((r + c) % 4) * 14})`;
       bCtx.fillRect(x + 3, y + 3, colW - 6, rowH - 6);
 
-      // Subtle stone speckling & moss hint
+      // Subtle stone speckling & cool patina
       for (let s = 0; s < 14; s++) {
         const sx = x + 6 + ((s * 23 + r * 11) % Math.max(8, colW - 12));
         const sy = y + 6 + ((s * 17 + c * 19) % Math.max(8, rowH - 12));
         cCtx.fillStyle =
-          s % 7 === 0 ? 'rgba(65, 92, 68, 0.25)' : 'rgba(217, 210, 197, 0.08)';
+          s % 7 === 0 ? 'rgba(0, 217, 255, 0.12)' : 'rgba(169, 184, 204, 0.08)';
         cCtx.fillRect(sx, sy, 3, 2);
       }
     }

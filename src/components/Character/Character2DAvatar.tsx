@@ -60,10 +60,10 @@ export const Character2DAvatar: React.FC<Character2DAvatarProps> = ({
     : null;
 
   const dims = SIZE_MAP[size];
-  const frameColor = frameItem?.accentHex || '#C5A15A';
-  const frameSecondary = frameItem?.primaryHex || '#4A3A22';
-  const auraColor = auraItem?.primaryHex || '#7046A5';
-  const colorAccent = colorItem?.accentHex || outfitItem?.accentHex || '#C5A15A';
+  const frameColor = frameItem?.accentHex || '#1677FF';
+  const frameSecondary = frameItem?.primaryHex || '#0A1930';
+  const auraColor = auraItem?.primaryHex || '#00D9FF';
+  const colorAccent = colorItem?.accentHex || outfitItem?.accentHex || '#00D9FF';
   const romanTier = prestigeTier > 0 ? PRESTIGE_ROMANS[Math.min(5, prestigeTier)] || `P${prestigeTier}` : null;
 
   return (
@@ -107,10 +107,10 @@ export const Character2DAvatar: React.FC<Character2DAvatarProps> = ({
       )}
 
       <div
-        className={`relative overflow-hidden ${dims.box} ${dims.radius} bg-[#0B0814] shadow-xl`}
+        className={`relative overflow-hidden ${dims.box} ${dims.radius} bg-[#061225] shadow-xl`}
         style={{
           border: `2px solid ${frameColor}`,
-          boxShadow: `0 0 0 1px ${frameSecondary}, 0 10px 25px -8px ${auraItem ? `${auraColor}55` : 'rgba(0,0,0,0.65)'}`,
+          boxShadow: `0 0 0 1px ${frameSecondary}, 0 10px 25px -8px ${auraItem ? `${auraColor}55` : 'rgba(2,8,20,0.75)'}`,
         }}
       >
         {colorItem && (
@@ -183,7 +183,7 @@ export const Character2DAvatar: React.FC<Character2DAvatarProps> = ({
       {romanTier && (
         <span
           title={`Prestige Tier ${romanTier}`}
-          className="absolute -top-2 -left-2 z-20 px-1.5 py-0.5 rounded-md bg-[#120D1E] border border-[#C5A15A]/75 font-['Cinzel'] font-black text-[10px] text-[#E8CF96] shadow-md tabular-nums"
+          className="absolute -top-2 -left-2 z-20 px-1.5 py-0.5 rounded-md bg-[#0A1930] border border-[#00D9FF]/65 font-['Cinzel'] font-black text-[10px] text-[#00D9FF] shadow-[0_0_10px_rgba(0,217,255,0.28)] tabular-nums"
         >
           {romanTier}
         </span>

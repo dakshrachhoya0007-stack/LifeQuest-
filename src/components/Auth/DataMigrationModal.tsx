@@ -39,9 +39,9 @@ export const DataMigrationModal: React.FC<DataMigrationModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in">
-      <div className="relative w-full max-w-md bg-[#0f0c1b] border border-amber-600/70 rounded-2xl p-6 sm:p-8 shadow-2xl shadow-amber-950/50">
-        <div className="w-12 h-12 mx-auto rounded-xl bg-amber-950/60 border border-amber-500/50 flex items-center justify-center text-amber-400 mb-4 shadow-lg">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#061225]/85 backdrop-blur-md animate-in fade-in">
+      <div className="relative w-full max-w-md bg-[#102440]/95 backdrop-blur-xl border border-[#00D9FF]/45 rounded-2xl p-6 sm:p-8 shadow-[0_24px_64px_rgba(2,8,20,0.85)]">
+        <div className="w-12 h-12 mx-auto rounded-xl bg-[#1677FF]/20 border border-[#00D9FF]/50 flex items-center justify-center text-[#00D9FF] mb-4 shadow-[0_0_20px_rgba(0,217,255,0.22)]">
           <CloudUpload className="w-6 h-6 animate-pulse" />
         </div>
 
@@ -49,20 +49,20 @@ export const DataMigrationModal: React.FC<DataMigrationModalProps> = ({
           <h2 className="text-xl font-black font-['Cinzel'] text-white">
             LOCAL HERO PROGRESS DETECTED
           </h2>
-          <p className="text-xs text-amber-300/90 mt-1.5 font-medium">
+          <p className="text-xs text-[#00D9FF] mt-1.5 font-medium">
             Save your device progress to your LifeQuest account
           </p>
         </div>
 
-        <div className="p-4 rounded-xl bg-[#140f26] border border-purple-900/60 mb-5 space-y-2 text-xs">
-          <div className="flex items-center gap-2 text-slate-300 font-semibold">
-            <Shield className="w-4 h-4 text-purple-400" />
+        <div className="p-4 rounded-xl bg-[#0A1930] border border-[#1677FF]/35 mb-5 space-y-2 text-xs">
+          <div className="flex items-center gap-2 text-white font-semibold">
+            <Shield className="w-4 h-4 text-[#00D9FF]" />
             Detected Local Progress:
           </div>
-          <div className="p-2.5 rounded-lg bg-black/50 border border-purple-950 text-purple-200 font-mono text-[11px]">
+          <div className="p-2.5 rounded-lg bg-[#061225] border border-[#1677FF]/25 text-[#A9B8CC] font-mono text-[11px]">
             {localSummary || 'Level 1+ Knight with customized character progression & habits.'}
           </div>
-          <p className="text-[11px] text-slate-400 leading-relaxed pt-1">
+          <p className="text-[11px] text-[#A9B8CC] leading-relaxed pt-1">
             Transferring will securely link your bodyweight strength, habits, fitness sessions, and Aether Rank to your account so you can continue seamlessly across all your devices.
           </p>
         </div>
@@ -79,7 +79,7 @@ export const DataMigrationModal: React.FC<DataMigrationModalProps> = ({
             type="button"
             disabled={isMigrating}
             onClick={handleConfirmMigrate}
-            className="w-full py-3 px-4 rounded-xl font-bold font-['Cinzel'] tracking-wider text-xs sm:text-sm bg-gradient-to-r from-amber-600 via-purple-600 to-indigo-600 hover:from-amber-500 hover:to-indigo-500 text-white shadow-lg shadow-purple-950/80 transition-all flex items-center justify-center gap-2"
+            className="w-full py-3 px-4 rounded-xl font-bold font-['Cinzel'] tracking-wider text-xs sm:text-sm bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2684FF] hover:to-[#00D9FF] border border-[#00D9FF]/45 text-white shadow-[0_6px_22px_rgba(22,119,255,0.4)] hover:shadow-[0_0_24px_rgba(0,217,255,0.5)] transition-all flex items-center justify-center gap-2"
           >
             {isMigrating ? (
               <>
@@ -88,7 +88,7 @@ export const DataMigrationModal: React.FC<DataMigrationModalProps> = ({
               </>
             ) : (
               <>
-                <CheckCircle className="w-4 h-4 text-emerald-300" />
+                <CheckCircle className="w-4 h-4 text-[#00D9FF]" />
                 SAVE PROGRESS TO ACCOUNT
               </>
             )}
@@ -98,7 +98,7 @@ export const DataMigrationModal: React.FC<DataMigrationModalProps> = ({
             type="button"
             disabled={isMigrating}
             onClick={onSkip}
-            className="w-full py-2.5 px-4 rounded-xl font-semibold text-xs text-slate-400 hover:text-white hover:bg-purple-950/30 transition-colors"
+            className="w-full py-2.5 px-4 rounded-xl font-semibold text-xs text-[#A9B8CC] hover:text-white bg-[#0A1930] hover:bg-[#102440] border border-[#1677FF]/25 transition-all"
           >
             Start Fresh (Skip Transfer)
           </button>

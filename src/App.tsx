@@ -60,16 +60,16 @@ const MainAppContent: React.FC = () => {
   // 1. Loading gate while verifying existing Supabase session (prevents dashboard flash)
   if (isAuthLoading) {
     return (
-      <div className="min-h-screen bg-[#07050d] text-slate-100 flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-[#061225] text-[#FFFFFF] flex flex-col items-center justify-center p-6">
         <div className="flex flex-col items-center gap-4 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-600/30 to-indigo-700/30 border border-purple-500/50 flex items-center justify-center shadow-lg shadow-purple-950/60">
-            <div className="w-6 h-6 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#1677FF]/25 to-[#00D9FF]/15 border border-[#00D9FF]/45 flex items-center justify-center shadow-[0_0_28px_rgba(22,119,255,0.28)]">
+            <div className="w-6 h-6 border-2 border-[#00D9FF] border-t-transparent rounded-full animate-spin" />
           </div>
           <div>
-            <h1 className="font-['Cinzel'] font-black tracking-widest text-xl text-slate-100">
+            <h1 className="font-['Cinzel'] font-black tracking-widest text-xl text-[#FFFFFF]">
               LIFEQUEST
             </h1>
-            <p className="text-xs text-purple-300/80 mt-1 tracking-wide">
+            <p className="text-xs text-[#A9B8CC] mt-1 tracking-wide">
               Verifying Realm Session...
             </p>
           </div>
@@ -176,7 +176,13 @@ const MainAppContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0c0914] text-[#D9D2C5] flex flex-col antialiased selection:bg-[#7046A5] selection:text-[#D9D2C5]">
+    <div
+      className="min-h-screen bg-[#061225] text-[#FFFFFF] flex flex-col antialiased selection:bg-[#1677FF] selection:text-white"
+      style={{
+        backgroundImage:
+          'radial-gradient(ellipse 85% 45% at 50% -10%, rgba(22, 119, 255, 0.14), transparent 70%), radial-gradient(ellipse 60% 35% at 85% 15%, rgba(0, 217, 255, 0.06), transparent 65%)',
+      }}
+    >
       {/* Top Header */}
       <TopBar onToggleSidebar={() => setIsSidebarOpen(prev => !prev)} />
 

@@ -92,18 +92,18 @@ export const TITLE_STYLE_META: Record<
     accentHex: '#34D399',
   },
   arcane: {
-    badgeBg: 'bg-gradient-to-r from-[#1d0d36] via-[#371667] to-[#1d0d36]',
-    badgeBorder: 'border-purple-400/75',
-    badgeText: 'text-purple-200',
-    glowShadow: 'shadow-[0_0_16px_rgba(168,85,247,0.3)]',
-    accentHex: '#C084FC',
+    badgeBg: 'bg-gradient-to-r from-[#0A1930] via-[#102440] to-[#0A1930]',
+    badgeBorder: 'border-[#00D9FF]/75',
+    badgeText: 'text-[#00D9FF]',
+    glowShadow: 'shadow-[0_0_16px_rgba(0,217,255,0.3)]',
+    accentHex: '#00D9FF',
   },
   prismatic: {
-    badgeBg: 'bg-gradient-to-r from-[#29123c] via-[#122e4f] to-[#3a250b]',
-    badgeBorder: 'border-amber-300/85',
-    badgeText: 'text-amber-100',
-    glowShadow: 'shadow-[0_0_20px_rgba(251,191,36,0.35)]',
-    accentHex: '#FDE68A',
+    badgeBg: 'bg-gradient-to-r from-[#0A1930] via-[#102440] to-[#16325C]',
+    badgeBorder: 'border-[#00D9FF]/85',
+    badgeText: 'text-white',
+    glowShadow: 'shadow-[0_0_20px_rgba(22,119,255,0.4)]',
+    accentHex: '#00D9FF',
   },
 };
 
@@ -116,9 +116,9 @@ export const RARITY_FRAME_META: Record<
   }
 > = {
   Epic: {
-    textClass: 'text-purple-300',
-    borderClass: 'border-purple-500/45',
-    cardGlow: 'shadow-purple-950/30',
+    textClass: 'text-[#70B5FF]',
+    borderClass: 'border-[#1677FF]/55',
+    cardGlow: 'shadow-blue-950/35',
   },
   Legendary: {
     textClass: 'text-amber-300',
@@ -126,9 +126,9 @@ export const RARITY_FRAME_META: Record<
     cardGlow: 'shadow-amber-950/30',
   },
   Mythic: {
-    textClass: 'text-purple-300',
-    borderClass: 'border-purple-400/45',
-    cardGlow: 'shadow-purple-950/35',
+    textClass: 'text-[#00D9FF]',
+    borderClass: 'border-[#00D9FF]/55',
+    cardGlow: 'shadow-cyan-950/35',
   },
   Ascendant: {
     textClass: 'text-sky-300',

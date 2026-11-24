@@ -92,20 +92,20 @@ export const TrophyShowcasePanel: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in">
-      <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/25 p-5 sm:p-6 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+      <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 shadow-[0_12px_32px_rgba(2,8,20,0.6)] p-5 sm:p-6 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         <div>
-          <div className="text-xs font-['Cinzel'] font-bold uppercase tracking-widest text-[#C5A15A]">
+          <div className="text-xs font-['Cinzel'] font-bold uppercase tracking-widest text-[#00D9FF]">
             Honors, Vault Completion & Additive Prestige
           </div>
           <h2 className="text-2xl font-black font-['Cinzel'] text-white mt-0.5">
             TROPHY CABINET & VAULT
           </h2>
-          <p className="text-xs text-[#D9D2C5]/75 tabular-nums mt-1">
+          <p className="text-xs text-[#A9B8CC] tabular-nums mt-1">
             {trophyShowcase?.unlockedCount || 0} Trophies · {collectionState?.overallPercent || 0}% Collection Complete · Prestige Tier {prestigeState?.prestigeTier || 0}
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1.5 p-1.5 rounded-xl bg-[#08060f] border border-[#C5A15A]/20">
+        <div className="flex flex-wrap items-center gap-1.5 p-1.5 rounded-xl bg-[#061225] border border-[#1677FF]/30">
           {[
             { id: 'trophies', label: 'Trophy Showcase', icon: Trophy },
             { id: 'collection', label: 'Collection Tracker', icon: Layers },
@@ -119,10 +119,10 @@ export const TrophyShowcasePanel: React.FC = () => {
                 key={tab.id}
                 type="button"
                 onClick={() => setSection(tab.id as typeof section)}
-                className={`px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 ${
+                className={`px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0 ${
                   active
-                    ? 'bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/45'
-                    : 'text-[#D9D2C5]/65 hover:text-white border border-transparent'
+                    ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white shadow-[0_0_16px_rgba(22,119,255,0.35)] border border-[#00D9FF]/45'
+                    : 'text-[#A9B8CC] hover:text-white hover:bg-[#102440] border border-transparent'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5 shrink-0" />
@@ -156,10 +156,10 @@ export const TrophyShowcasePanel: React.FC = () => {
                     key={f}
                     type="button"
                     onClick={() => setTrophyFilter(f)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize whitespace-nowrap shrink-0 ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize whitespace-nowrap shrink-0 transition-all ${
                       trophyFilter === f
-                        ? 'bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/45'
-                        : 'bg-[#100D19] text-[#D9D2C5]/70 border border-white/10'
+                        ? 'bg-[#1677FF] text-white border border-[#00D9FF]/50 shadow-[0_0_12px_rgba(22,119,255,0.3)]'
+                        : 'bg-[#0A1930] hover:bg-[#16325C] text-[#A9B8CC] hover:text-white border border-[#1677FF]/30'
                     }`}
                   >
                     {f}
@@ -167,13 +167,13 @@ export const TrophyShowcasePanel: React.FC = () => {
                 )
               )}
             </div>
-            <span className="text-xs text-[#D9D2C5]/70 tabular-nums">
+            <span className="text-xs text-[#A9B8CC] tabular-nums">
               {pinnedIds.length} / 6 Pinned to Public Profile
             </span>
           </div>
 
           {trophies.length === 0 ? (
-            <div className="rounded-2xl bg-[#100D19] border border-white/10 p-8 text-center text-xs text-[#D9D2C5]/65">
+            <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 p-8 text-center text-xs text-[#A9B8CC]">
               Unlock achievements, personal records, badges, or seasonal milestones to display them in your Trophy Showcase.
             </div>
           ) : (
@@ -181,27 +181,29 @@ export const TrophyShowcasePanel: React.FC = () => {
               {trophies.map(t => (
                 <div
                   key={t.id}
-                  className={`rounded-2xl p-4 border flex flex-col justify-between gap-3 ${
-                    t.pinned ? 'bg-[#1a112b] border-[#C5A15A]/55' : 'bg-[#100D19] border-white/10'
+                  className={`rounded-2xl p-4 border flex flex-col justify-between gap-3 transition-all ${
+                    t.pinned
+                      ? 'bg-[#102440] border-[#00D9FF]/55 shadow-[0_0_20px_rgba(0,217,255,0.15)]'
+                      : 'bg-[#102440]/90 border-[#1677FF]/25 hover:border-[#00D9FF]/45'
                   }`}
                 >
                   <div>
                     <div className="flex items-center justify-between text-[11px] mb-1">
-                      <span className="text-[#C5A15A] font-semibold">{t.rarity}</span>
-                      <span className="text-[#D9D2C5]/50 capitalize">{t.category}</span>
+                      <span className="text-[#00D9FF] font-semibold">{t.rarity}</span>
+                      <span className="text-[#A9B8CC] capitalize">{t.category}</span>
                     </div>
                     <h4 className="font-['Cinzel'] font-bold text-sm text-white">{t.title}</h4>
-                    <p className="text-xs text-[#D9D2C5]/75 mt-1">{t.description}</p>
-                    <p className="text-[11px] text-[#D9D2C5]/50 mt-2">{t.requirement}</p>
+                    <p className="text-xs text-[#A9B8CC] mt-1">{t.description}</p>
+                    <p className="text-[11px] text-[#A9B8CC]/75 mt-2">{t.requirement}</p>
                   </div>
                   <button
                     type="button"
                     disabled={busyId === `pin-${t.id}`}
                     onClick={() => void handleTogglePin(t.id)}
-                    className={`py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 ${
+                    className={`py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 transition-all ${
                       t.pinned
-                        ? 'bg-[#C5A15A] text-[#0c0914]'
-                        : 'bg-[#161124] hover:bg-[#251638] text-[#D9D2C5] border border-white/10'
+                        ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white shadow-[0_0_16px_rgba(22,119,255,0.35)]'
+                        : 'bg-[#0A1930] hover:bg-[#16325C] text-white border border-[#1677FF]/40 hover:border-[#00D9FF]/50'
                     }`}
                   >
                     <Pin className="w-3.5 h-3.5" />
@@ -217,36 +219,36 @@ export const TrophyShowcasePanel: React.FC = () => {
       {/* 2. UNIFIED COLLECTION COMPLETION TRACKER */}
       {section === 'collection' && collectionState && (
         <div className="space-y-6">
-          <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/25 p-5 space-y-4">
+          <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 shadow-[0_12px_32px_rgba(2,8,20,0.6)] p-5 space-y-4">
             <div className="flex items-center justify-between text-xs">
               <span className="font-['Cinzel'] font-bold text-white uppercase tracking-wider">
                 Overall Vault Completion
               </span>
-              <span className="font-mono font-bold text-[#E8CF96] tabular-nums">
+              <span className="font-mono font-bold text-[#00D9FF] tabular-nums">
                 {collectionState.overallOwnedCount} / {collectionState.overallTotalCount} ({collectionState.overallPercent}%)
               </span>
             </div>
-            <div className="h-3 rounded-full bg-[#08060f] border border-[#C5A15A]/20 overflow-hidden">
+            <div className="h-3 rounded-full bg-[#061225] border border-[#1677FF]/30 overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-[#7046A5] to-[#C5A15A]"
+                className="h-full bg-gradient-to-r from-[#1677FF] to-[#00D9FF]"
                 style={{ width: `${Math.min(100, collectionState.overallPercent)}%` }}
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
               {collectionState.categories.map(cat => (
-                <div key={cat.key} className="rounded-xl bg-[#08060f] border border-white/10 p-4 space-y-2">
+                <div key={cat.key} className="rounded-xl bg-[#0A1930] border border-[#1677FF]/25 p-4 space-y-2">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-['Cinzel'] font-bold text-white">{cat.label}</span>
-                    <span className="font-mono text-[#C5A15A] tabular-nums">{cat.percent}%</span>
+                    <span className="font-mono text-[#00D9FF] tabular-nums">{cat.percent}%</span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-[#19132B] overflow-hidden">
+                  <div className="h-1.5 rounded-full bg-[#061225] overflow-hidden">
                     <div
-                      className="h-full bg-[#C5A15A]"
+                      className="h-full bg-gradient-to-r from-[#1677FF] to-[#00D9FF]"
                       style={{ width: `${Math.min(100, cat.percent)}%` }}
                     />
                   </div>
-                  <div className="flex items-center justify-between text-[11px] text-[#D9D2C5]/60 tabular-nums">
+                  <div className="flex items-center justify-between text-[11px] text-[#A9B8CC] tabular-nums">
                     <span>{cat.ownedCount} Owned</span>
                     <span>{Math.max(0, cat.totalCount - cat.ownedCount - cat.undiscoveredCount)} Unowned</span>
                     <span>{cat.undiscoveredCount} Undiscovered</span>
@@ -260,25 +262,25 @@ export const TrophyShowcasePanel: React.FC = () => {
             {collectionState.milestones.map(ms => (
               <div
                 key={ms.id}
-                className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-5 flex items-center justify-between gap-4"
+                className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 hover:border-[#00D9FF]/45 p-5 flex items-center justify-between gap-4 transition-all"
               >
                 <div>
-                  <p className="text-xs text-[#C5A15A] font-semibold tabular-nums">
+                  <p className="text-xs text-[#00D9FF] font-semibold tabular-nums">
                     {ms.thresholdPercent}% Overall Collection
                   </p>
                   <h4 className="font-['Cinzel'] font-bold text-sm text-white mt-0.5">{ms.title}</h4>
-                  <p className="text-xs text-[#D9D2C5]/75 mt-1">{ms.rewardLabel}</p>
+                  <p className="text-xs text-[#A9B8CC] mt-1">{ms.rewardLabel}</p>
                 </div>
                 <button
                   type="button"
                   disabled={!ms.unlocked || ms.claimed || busyId === ms.id}
                   onClick={() => void handleClaimCollectionMs(ms.id)}
-                  className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 ${
+                  className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
                     ms.claimed
                       ? 'bg-emerald-950/60 border border-emerald-500/40 text-emerald-300'
                       : ms.unlocked
-                      ? 'bg-[#C5A15A] hover:bg-[#d8b46d] text-[#0c0914]'
-                      : 'bg-[#161124] border border-white/10 text-[#D9D2C5]/45'
+                      ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white shadow-[0_0_16px_rgba(22,119,255,0.35)]'
+                      : 'bg-[#0A1930] border border-[#1677FF]/25 text-[#A9B8CC]/50'
                   }`}
                 >
                   {ms.claimed ? 'Claimed' : ms.unlocked ? 'Claim' : 'Locked'}
@@ -292,17 +294,17 @@ export const TrophyShowcasePanel: React.FC = () => {
       {/* 3. ADDITIVE PRESTIGE SYSTEM (ZERO RESETS) */}
       {section === 'prestige' && prestigeState && (
         <div className="space-y-6">
-          <div className="rounded-2xl bg-gradient-to-r from-[#1a112b] via-[#100D19] to-[#1e1620] border border-[#C5A15A]/35 p-6 space-y-4">
+          <div className="rounded-2xl bg-gradient-to-r from-[#0A1930] via-[#102440] to-[#0A1930] border border-[#1677FF]/35 shadow-[0_12px_32px_rgba(2,8,20,0.6)] p-6 space-y-4">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="space-y-1.5">
-                <div className="flex items-center gap-2 text-xs text-emerald-300 font-semibold">
+                <div className="flex items-center gap-2 text-xs text-[#00D9FF] font-semibold">
                   <ShieldCheck className="w-4 h-4 shrink-0" />
                   Zero Reset Guarantee · Lifetime XP, Gear & Ratings Stay Intact
                 </div>
                 <h3 className="font-['Cinzel'] font-black text-xl text-white">
                   Prestige Tier {prestigeState.prestigeTier} · {prestigeState.prestigeTitle}
                 </h3>
-                <p className="text-xs text-[#D9D2C5]/75 max-w-2xl">
+                <p className="text-xs text-[#A9B8CC] max-w-2xl">
                   {prestigeState.neverResetsGuarantee}
                 </p>
               </div>
@@ -310,10 +312,10 @@ export const TrophyShowcasePanel: React.FC = () => {
                 type="button"
                 disabled={!prestigeState.eligibleForNextPrestige || busyId === 'prestige-ascend'}
                 onClick={() => void handleAscendPrestige()}
-                className={`px-5 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 ${
+                className={`px-5 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
                   prestigeState.eligibleForNextPrestige
-                    ? 'bg-[#C5A15A] hover:bg-[#d8b46d] text-[#0c0914]'
-                    : 'bg-[#161124] border border-white/10 text-[#D9D2C5]/50'
+                    ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white shadow-[0_0_18px_rgba(22,119,255,0.4)]'
+                    : 'bg-[#0A1930] border border-[#1677FF]/25 text-[#A9B8CC]/55'
                 }`}
               >
                 {prestigeState.nextPrestigeTitle
@@ -328,18 +330,18 @@ export const TrophyShowcasePanel: React.FC = () => {
                 return (
                   <div
                     key={pt.tier}
-                    className={`rounded-xl p-3 border space-y-1 ${
+                    className={`rounded-xl p-3 border space-y-1 transition-all ${
                       achieved
-                        ? 'bg-[#251638]/80 border-[#C5A15A]/60'
-                        : 'bg-[#08060f] border-white/10'
+                        ? 'bg-[#16325C]/80 border-[#00D9FF]/55 shadow-[0_0_16px_rgba(0,217,255,0.15)]'
+                        : 'bg-[#061225] border-[#1677FF]/20'
                     }`}
                   >
                     <div className="flex items-center justify-between text-xs font-['Cinzel'] font-bold">
-                      <span className="text-[#E8CF96]">Prestige {pt.roman}</span>
-                      <span className="text-[11px] font-mono text-[#D9D2C5]/60">Lv.{pt.requiredLevel}</span>
+                      <span className="text-[#00D9FF]">Prestige {pt.roman}</span>
+                      <span className="text-[11px] font-mono text-[#A9B8CC]">Lv.{pt.requiredLevel}</span>
                     </div>
                     <p className="text-xs font-semibold text-white">{pt.title}</p>
-                    <p className="text-[11px] text-[#D9D2C5]/65">{pt.rewardLabel}</p>
+                    <p className="text-[11px] text-[#A9B8CC]">{pt.rewardLabel}</p>
                   </div>
                 );
               })}
@@ -353,25 +355,25 @@ export const TrophyShowcasePanel: React.FC = () => {
               return (
                 <div
                   key={ch.id}
-                  className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-5 flex items-center justify-between gap-4"
+                  className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 p-5 flex items-center justify-between gap-4"
                 >
                   <div>
                     <h4 className="font-['Cinzel'] font-bold text-sm text-white">{ch.title}</h4>
-                    <p className="text-xs text-[#D9D2C5]/75 mt-1">{ch.description}</p>
-                    <p className="text-xs text-[#C5A15A] font-mono tabular-nums mt-1.5">
-                      +{ch.rewardGold} Gold · +{ch.rewardFragments} Fragments
+                    <p className="text-xs text-[#A9B8CC] mt-1">{ch.description}</p>
+                    <p className="text-xs text-amber-300 font-mono tabular-nums mt-1.5">
+                      +{ch.rewardGold} Gold · <span className="text-[#00D9FF]">+{ch.rewardFragments} Fragments</span>
                     </p>
                   </div>
                   <button
                     type="button"
                     disabled={!unlocked || claimed || busyId === ch.id}
                     onClick={() => void handleClaimPrestigeChallenge(ch.id)}
-                    className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 ${
+                    className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
                       claimed
                         ? 'bg-emerald-950/60 border border-emerald-500/40 text-emerald-300'
                         : unlocked
-                        ? 'bg-[#C5A15A] hover:bg-[#d8b46d] text-[#0c0914]'
-                        : 'bg-[#161124] border border-white/10 text-[#D9D2C5]/45'
+                        ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white shadow-[0_0_16px_rgba(22,119,255,0.35)]'
+                        : 'bg-[#0A1930] border border-[#1677FF]/25 text-[#A9B8CC]/50'
                     }`}
                   >
                     {claimed ? 'Claimed' : unlocked ? 'Claim' : `Prestige ${ch.minPrestigeTier}+`}
@@ -389,31 +391,31 @@ export const TrophyShowcasePanel: React.FC = () => {
           {hiddenAchievements.map(entry => (
             <div
               key={entry.id}
-              className={`rounded-2xl p-5 border space-y-2 ${
+              className={`rounded-2xl p-5 border space-y-2 transition-all ${
                 entry.discovered
-                  ? 'bg-[#1a112b] border-[#C5A15A]/55'
-                  : 'bg-[#100D19] border-white/10'
+                  ? 'bg-[#102440] border-[#00D9FF]/55 shadow-[0_0_18px_rgba(0,217,255,0.15)]'
+                  : 'bg-[#102440]/85 border-[#1677FF]/25'
               }`}
             >
               <div className="flex items-center justify-between text-xs">
-                <span className={entry.discovered ? 'text-emerald-300 font-semibold' : 'text-purple-300'}>
+                <span className={entry.discovered ? 'text-emerald-300 font-semibold' : 'text-[#00D9FF]'}>
                   {entry.discovered ? 'Secret Discovered' : 'Mystery Concealed'}
                 </span>
-                <span className="text-[#C5A15A] font-semibold">{entry.rarity}</span>
+                <span className="text-[#00D9FF] font-semibold">{entry.rarity}</span>
               </div>
               <h4 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
                 {entry.discovered ? (
                   <CheckCircle2 className="w-4 h-4 text-emerald-300 shrink-0" />
                 ) : (
-                  <Sparkles className="w-4 h-4 text-purple-300 shrink-0" />
+                  <Sparkles className="w-4 h-4 text-[#00D9FF] shrink-0" />
                 )}
                 {entry.discovered ? entry.name : entry.maskedTitle}
               </h4>
-              <p className="text-xs text-[#D9D2C5]/75 leading-relaxed">
+              <p className="text-xs text-[#A9B8CC] leading-relaxed">
                 {entry.discovered ? entry.story || entry.maskedHint : entry.maskedHint}
               </p>
               {entry.discovered && entry.titleTag && (
-                <p className="text-[11px] text-[#E8CF96] font-semibold">
+                <p className="text-[11px] text-[#00D9FF] font-semibold">
                   Legend Title: {entry.titleTag}
                 </p>
               )}

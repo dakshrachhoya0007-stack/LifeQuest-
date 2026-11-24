@@ -8,7 +8,6 @@ import {
   Activity,
   Apple,
   Camera,
-  Dumbbell,
   Flame,
   Trophy,
   Map,
@@ -89,7 +88,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       : equippedLegendMap[user.id]
     : undefined;
 
-  // Mobile-only quick access for routes shown in TopBar on md+ screens (avoids desktop duplication)
   const mobileTopBarItems: NavItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'rivals', label: 'Rivals Arena', icon: Trophy, badge: pendingRivalsCount, highlight: true },
@@ -167,26 +165,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       <button
         key={item.id}
         onClick={() => handleSelect(item.id)}
-        className={`relative w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-colors group ${
+        className={`relative w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-all group ${
           isActive
-            ? 'bg-[#251638]/90 text-[#D9D2C5] border border-[#C5A15A]/45 shadow-sm'
-            : 'text-[#D9D2C5]/70 hover:text-[#D9D2C5] hover:bg-[#251638]/40 border border-transparent'
+            ? 'bg-gradient-to-r from-[#1677FF]/25 to-[#102440] text-[#FFFFFF] border border-[#00D9FF]/45 shadow-[0_0_16px_rgba(22,119,255,0.2)]'
+            : 'text-[#A9B8CC] hover:text-[#FFFFFF] hover:bg-[#102440]/80 border border-transparent hover:border-[#1677FF]/25'
         }`}
       >
         {isActive && (
           <span
             aria-hidden="true"
-            className="absolute left-0 top-2 bottom-2 w-0.5 rounded-r bg-[#C5A15A]"
+            className="absolute left-0 top-2 bottom-2 w-0.5 rounded-r bg-[#00D9FF]"
           />
         )}
         <div className="flex items-center gap-3 min-w-0">
           <Icon
             className={`w-4 h-4 shrink-0 transition-colors ${
               isActive
-                ? 'text-[#C5A15A]'
+                ? 'text-[#00D9FF]'
                 : item.highlight
-                ? 'text-[#C5A15A]/85'
-                : 'text-[#D9D2C5]/50 group-hover:text-[#C5A15A]'
+                ? 'text-[#1677FF]'
+                : 'text-[#A9B8CC]/70 group-hover:text-[#00D9FF]'
             }`}
           />
           <div className="min-w-0 text-left">
@@ -198,7 +196,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               {item.label}
             </span>
             {item.subtitle && (
-              <span className="block truncate text-[10px] text-[#D9D2C5]/45 font-normal">
+              <span className="block truncate text-[10px] text-[#A9B8CC]/65 font-normal">
                 {item.subtitle}
               </span>
             )}
@@ -207,7 +205,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
         <div className="flex items-center gap-1.5 shrink-0">
           {item.badge !== undefined && item.badge > 0 && (
-            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#7046A5] text-[#D9D2C5] font-bold tabular-nums">
+            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#1677FF] text-white font-bold tabular-nums shadow-[0_0_8px_rgba(22,119,255,0.45)]">
               {item.badge}
             </span>
           )}
@@ -222,24 +220,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       {isOpen && (
         <div
           onClick={onClose}
-          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-xs lg:hidden transition-opacity"
+          className="fixed inset-0 z-40 bg-[#061225]/80 backdrop-blur-xs lg:hidden transition-opacity"
         />
       )}
 
       {/* Sidebar Panel */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-64 bg-[#100D19]/96 border-r border-[#C5A15A]/18 flex flex-col transition-transform duration-200 ease-in-out lg:translate-x-0 ${
+        className={`fixed top-0 bottom-0 left-0 z-50 w-64 bg-[#0A1930]/96 backdrop-blur-xl border-r border-[#1677FF]/25 flex flex-col transition-transform duration-200 ease-in-out lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:static lg:h-[calc(100vh-65px)] lg:sticky lg:top-[65px]`}
       >
         {/* Header (Mobile Close Button) */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#C5A15A]/15 lg:hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#1677FF]/20 lg:hidden">
           <div className="flex items-center gap-2">
-            <span className="font-['Cinzel'] font-bold text-[#C5A15A] text-base tracking-wider">AETHERIA</span>
+            <span className="font-['Cinzel'] font-bold text-[#00D9FF] text-base tracking-wider">AETHERIA</span>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-[#D9D2C5]/60 hover:text-[#D9D2C5] hover:bg-[#251638]"
+            className="p-1.5 rounded-lg text-[#A9B8CC] hover:text-white hover:bg-[#102440]"
             aria-label="Close navigation"
           >
             <X className="w-5 h-5" />
@@ -248,14 +246,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
         {/* Player Mini Badge */}
         {user && (
-          <div className="p-3.5 mx-3 my-3 rounded-xl bg-gradient-to-br from-[#251638]/70 via-[#151022] to-[#100D19] border border-[#C5A15A]/22 space-y-2">
+          <div className="p-3.5 mx-3 my-3 rounded-xl bg-gradient-to-br from-[#102440] via-[#0A1930] to-[#061225] border border-[#1677FF]/35 shadow-[0_8px_24px_rgba(2,8,20,0.55)] space-y-2">
             <div className="flex items-center gap-3">
               <div className="relative shrink-0">
                 <img
                   src={getHeroArtwork(selectedHeroId, user.characterClass)}
                   alt={`${heroDef.name}`}
                   referrerPolicy="no-referrer"
-                  className="w-11 h-11 rounded-lg object-cover object-top border border-[#C5A15A]/55 shadow"
+                  className="w-11 h-11 rounded-lg object-cover object-top border border-[#00D9FF]/50 shadow"
                 />
                 <PresenceBadge
                   status={myEffectivePresence}
@@ -265,7 +263,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               </div>
               <div className="min-w-0 flex-1 space-y-0.5">
                 <div className="flex items-center justify-between gap-1.5">
-                  <p className="text-sm font-bold text-[#F5EFE6] truncate">{user.username}</p>
+                  <p className="text-sm font-bold text-[#FFFFFF] truncate">{user.username}</p>
                 </div>
                 {equippedLegend && (
                   <LegendTitleBadge
@@ -275,15 +273,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     size="xs"
                   />
                 )}
-                <p className="text-[11px] text-[#C5A15A] font-medium flex items-center gap-1 tabular-nums truncate">
-                  <Award className="w-3 h-3 text-[#C5A15A] shrink-0" />
+                <p className="text-[11px] text-[#00D9FF] font-medium flex items-center gap-1 tabular-nums truncate">
+                  <Award className="w-3 h-3 text-[#00D9FF] shrink-0" />
                   Lv.{stats.level} · {heroDef.name}
                 </p>
               </div>
             </div>
             {heroLocked ? (
-              <div className="w-full py-1 px-2.5 rounded-lg bg-[#161124]/80 border border-[#C5A15A]/20 text-[10px] font-['Cinzel'] font-semibold uppercase tracking-wider text-[#C5A15A]/75 flex items-center justify-center gap-1.5">
-                <Lock className="w-3 h-3" />
+              <div className="w-full py-1 px-2.5 rounded-lg bg-[#061225]/80 border border-[#1677FF]/25 text-[10px] font-['Cinzel'] font-semibold uppercase tracking-wider text-[#A9B8CC] flex items-center justify-center gap-1.5">
+                <Lock className="w-3 h-3 text-[#00D9FF]" />
                 Champion Bound
               </div>
             ) : (
@@ -293,7 +291,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   setShowHeroSelectModal(true);
                   onClose();
                 }}
-                className="w-full py-1.5 rounded-lg bg-[#161124] hover:bg-[#251638] border border-[#C5A15A]/30 text-[10px] font-['Cinzel'] font-bold uppercase tracking-wider text-[#C5A15A] transition-colors"
+                className="w-full py-1.5 rounded-lg bg-[#0A1930] hover:bg-[#1677FF]/25 border border-[#1677FF]/45 hover:border-[#00D9FF]/70 text-[10px] font-['Cinzel'] font-bold uppercase tracking-wider text-white transition-all"
               >
                 Choose Champion
               </button>
@@ -303,9 +301,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
         {/* Navigation List */}
         <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-4">
-          {/* Mobile-only section for TopBar routes */}
           <div className="md:hidden space-y-1">
-            <p className="px-3 text-[10px] font-['Cinzel'] font-bold uppercase tracking-widest text-[#C5A15A]/70">
+            <p className="px-3 text-[10px] font-['Cinzel'] font-bold uppercase tracking-widest text-[#00D9FF]/80">
               Realm Core
             </p>
             <div className="space-y-0.5">{mobileTopBarItems.map(renderNavButton)}</div>
@@ -313,7 +310,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
           {navGroups.map(group => (
             <div key={group.title} className="space-y-1">
-              <p className="px-3 text-[10px] font-['Cinzel'] font-bold uppercase tracking-widest text-[#C5A15A]/70">
+              <p className="px-3 text-[10px] font-['Cinzel'] font-bold uppercase tracking-widest text-[#00D9FF]/80">
                 {group.title}
               </p>
               <div className="space-y-0.5">{group.items.map(renderNavButton)}</div>
@@ -322,9 +319,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </nav>
 
         {/* Footer Info */}
-        <div className="p-4 border-t border-[#C5A15A]/15 text-[11px] text-[#D9D2C5]/45 flex items-center justify-between">
+        <div className="p-4 border-t border-[#1677FF]/20 text-[11px] text-[#A9B8CC]/70 flex items-center justify-between">
           <span>Aetheria Chronicle</span>
-          <span className="flex items-center gap-1 text-[#C5A15A]/80 font-mono">
+          <span className="flex items-center gap-1 text-[#00D9FF] font-mono">
             <Zap className="w-3 h-3" /> Realm
           </span>
         </div>

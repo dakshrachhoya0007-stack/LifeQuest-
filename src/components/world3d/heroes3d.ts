@@ -114,23 +114,23 @@ export function buildHero3DModel(heroId: PlayableHeroId): Hero3DInstance {
         ? '#20422d'
         : heroId === 'paladin'
         ? '#f0ece1'
-        : '#231736',
-      '#130a15',
-      '#c5a15a'
+        : '#0A1930',
+      '#061225',
+      '#00D9FF'
     )
   );
   const leatherTex = track(
     createLeatherTexture(
-      heroId === 'ranger' ? '#3a2a1d' : '#1d1724',
-      '#0d0a12'
+      heroId === 'ranger' ? '#3a2a1d' : '#102440',
+      '#061225'
     )
   );
-  const arcaneTex = track(createArcaneClothTexture('#261745', '#8255bf'));
+  const arcaneTex = track(createArcaneClothTexture('#0A1930', '#1677FF'));
 
   // Materials
   const steelMat = track(
     new THREE.MeshStandardMaterial({
-      color: heroId === 'paladin' ? 0xd9dee8 : heroId === 'shadowblade' ? 0x353746 : 0x8991a2,
+      color: heroId === 'paladin' ? 0xd9dee8 : heroId === 'shadowblade' ? 0x24344d : 0x8991a2,
       map: steelTex.colorMap,
       roughnessMap: steelTex.roughnessMap,
       bumpMap: steelTex.bumpMap,
@@ -143,7 +143,7 @@ export function buildHero3DModel(heroId: PlayableHeroId): Hero3DInstance {
 
   const darkIronMat = track(
     new THREE.MeshStandardMaterial({
-      color: 0x262533,
+      color: 0x16243b,
       roughnessMap: steelTex.roughnessMap,
       metalness: 0.78,
       roughness: 0.48,
@@ -162,7 +162,7 @@ export function buildHero3DModel(heroId: PlayableHeroId): Hero3DInstance {
 
   const leatherMat = track(
     new THREE.MeshStandardMaterial({
-      color: heroId === 'ranger' ? 0x4b3826 : 0x221b29,
+      color: heroId === 'ranger' ? 0x4b3826 : 0x102440,
       map: leatherTex.colorMap,
       metalness: 0.14,
       roughness: 0.76,
@@ -217,9 +217,9 @@ export function buildHero3DModel(heroId: PlayableHeroId): Hero3DInstance {
 
   const eyeColor =
     heroId === 'arcane_mage'
-      ? 0x5ee0ff
+      ? 0x00d9ff
       : heroId === 'shadowblade'
-      ? 0xc878ff
+      ? 0x38bdf8
       : heroId === 'ranger'
       ? 0x86e09f
       : heroId === 'paladin'
@@ -243,7 +243,7 @@ export function buildHero3DModel(heroId: PlayableHeroId): Hero3DInstance {
     new THREE.CircleGeometry(0.62, 24),
     track(
       new THREE.MeshBasicMaterial({
-        color: 0x07050c,
+        color: 0x040b17,
         transparent: true,
         opacity: 0.5,
         depthWrite: false,

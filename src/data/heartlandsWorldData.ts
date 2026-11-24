@@ -82,7 +82,7 @@ export const WORLD_REGIONS: WorldRegionDefinition[] = [
     description:
       'Jagged frost-locked bastions carved directly into sky-piercing glaciers where aurora light dances above silent watchfires.',
     status: 'locked',
-    paletteSummary: 'Glacial Slate · Pale Silver · Aurora Violet',
+    paletteSummary: 'Glacial Slate · Pale Silver · Aurora Cyan',
     artwork: aetheriaSkyVistaImg,
     phaseNote: 'Locked Preview — Future Phase',
   },
@@ -104,7 +104,7 @@ export const WORLD_REGIONS: WorldRegionDefinition[] = [
     description:
       'Golden marble sky-bridges suspended above starlit clouds where the highest astral observatories of Aetheria once aligned the cosmos.',
     status: 'locked',
-    paletteSummary: 'Astral Indigo · Sunfire Gold · Ivory',
+    paletteSummary: 'Astral Sapphire · Sunfire Gold · Ivory',
     artwork: aetheriaCitadelKingdomImg,
     phaseNote: 'Locked Preview — Future Phase',
   },
@@ -149,7 +149,7 @@ export const GOLDEN_TREE_STAGES: GoldenTreeStageMeta[] = [
     order: 5,
     percent: 100,
     summary: 'Full celestial majesty towering over the Heartlands as an unquenchable beacon.',
-    visualNotes: 'Transcendent golden-violet blossom aura, soaring particles, zenith radiance.',
+    visualNotes: 'Transcendent golden-cyan blossom aura, soaring particles, zenith radiance.',
   },
 ];
 
@@ -206,7 +206,7 @@ export const HEARTLANDS_LANDMARKS: LandmarkDefinition[] = [
     stageSummaries: {
       ruined: 'Crumbling merlons, weathered gate doors, and unlit courtyard sconces.',
       repaired: 'Reinforced gatehouse stone, patched curtain walls, and steady torchlight.',
-      restored: 'Rising watchtower spires, royal purple banners, and open stone courtyard.',
+      restored: 'Rising watchtower spires, electric-blue banners, and open stone courtyard.',
       flourishing: 'Gilded gate crest, bright battlements, and lush courtyard flora.',
       legendary: 'Radiant Aetheria citadel keep gleaming with golden beacons and banners.',
     },

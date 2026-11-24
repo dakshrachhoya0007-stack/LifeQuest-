@@ -84,12 +84,12 @@ export const MobileTouchControls: React.FC<MobileTouchControlsProps> = ({
           if (activeTouchIdRef.current === e.pointerId) resetStick();
         }}
         onPointerCancel={resetStick}
-        className="pointer-events-auto relative w-28 h-28 rounded-full bg-[#0e0b1a]/80 border-2 border-[#C5A15A]/45 shadow-xl touch-none flex items-center justify-center"
+        className="pointer-events-auto relative w-28 h-28 rounded-full bg-[#0A1930]/85 border-2 border-[#1677FF]/45 shadow-[0_8px_24px_rgba(2,8,20,0.6)] touch-none flex items-center justify-center backdrop-blur-md"
         aria-label="Movement Joystick"
       >
-        <div className="w-10 h-10 rounded-full border border-[#C5A15A]/25" />
+        <div className="w-10 h-10 rounded-full border border-[#00D9FF]/30" />
         <div
-          className="absolute w-11 h-11 rounded-full bg-gradient-to-br from-[#C5A15A] to-[#8a6a2a] border border-[#fff2cf]/60 shadow-lg transition-transform duration-75"
+          className="absolute w-11 h-11 rounded-full bg-gradient-to-br from-[#1677FF] to-[#00D9FF] border border-white/60 shadow-[0_0_16px_rgba(0,217,255,0.45)] transition-transform duration-75"
           style={{
             transform: `translate(${knobOffset.x}px, ${knobOffset.y}px)`,
           }}
@@ -117,7 +117,7 @@ export const MobileTouchControls: React.FC<MobileTouchControlsProps> = ({
           onPointerCancel={() => {
             camDragRef.current = null;
           }}
-          className="w-28 h-12 rounded-xl bg-[#0e0b1a]/75 border border-[#C5A15A]/35 flex items-center justify-center text-[10px] font-['Cinzel'] font-bold text-[#C5A15A]/80 touch-none"
+          className="w-28 h-12 rounded-xl bg-[#0A1930]/85 border border-[#1677FF]/40 flex items-center justify-center text-[10px] font-['Cinzel'] font-bold text-[#00D9FF] touch-none backdrop-blur-md"
         >
           DRAG LOOK
         </div>
@@ -128,7 +128,7 @@ export const MobileTouchControls: React.FC<MobileTouchControlsProps> = ({
               type="button"
               onClick={onInteract}
               title={interactLabel || 'Interact'}
-              className="px-3.5 py-2.5 rounded-xl bg-[#C5A15A] text-[#0e0b1a] font-['Cinzel'] font-black text-xs shadow-lg flex items-center gap-1.5 active:scale-95"
+              className="px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white font-['Cinzel'] font-black text-xs shadow-[0_0_16px_rgba(22,119,255,0.45)] flex items-center gap-1.5 active:scale-95 transition-all"
             >
               <Hand className="w-4 h-4" />
               Interact
@@ -138,10 +138,10 @@ export const MobileTouchControls: React.FC<MobileTouchControlsProps> = ({
           <button
             type="button"
             onClick={toggleSprint}
-            className={`w-12 h-12 rounded-full border flex flex-col items-center justify-center text-[9px] font-bold transition-colors ${
+            className={`w-12 h-12 rounded-full border flex flex-col items-center justify-center text-[9px] font-bold transition-all ${
               sprintLocked
-                ? 'bg-[#C5A15A] text-[#0e0b1a] border-[#fff0c2]'
-                : 'bg-[#0e0b1a]/85 text-[#D9D2C5] border-[#C5A15A]/45'
+                ? 'bg-gradient-to-br from-[#1677FF] to-[#0099FF] text-white border-[#00D9FF] shadow-[0_0_14px_rgba(0,217,255,0.45)]'
+                : 'bg-[#0A1930]/90 text-[#A9B8CC] border-[#1677FF]/45 hover:border-[#00D9FF]/50'
             }`}
             aria-label="Toggle Sprint"
           >
@@ -152,10 +152,10 @@ export const MobileTouchControls: React.FC<MobileTouchControlsProps> = ({
           <button
             type="button"
             onClick={onJump}
-            className="w-14 h-14 rounded-full bg-[#251638]/90 hover:bg-[#3a2257] border-2 border-[#C5A15A]/65 text-[#F5EFE6] flex flex-col items-center justify-center text-[10px] font-bold shadow-xl active:scale-95"
+            className="w-14 h-14 rounded-full bg-[#102440]/90 hover:bg-[#16325C] border-2 border-[#00D9FF]/60 text-white flex flex-col items-center justify-center text-[10px] font-bold shadow-[0_8px_24px_rgba(2,8,20,0.6)] active:scale-95 transition-all"
             aria-label="Jump"
           >
-            <ArrowUp className="w-5 h-5 text-[#C5A15A]" />
+            <ArrowUp className="w-5 h-5 text-[#00D9FF]" />
             <span>JUMP</span>
           </button>
         </div>

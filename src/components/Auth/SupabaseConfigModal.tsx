@@ -169,38 +169,38 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-      <div className="relative w-full max-w-xl bg-[#0f0c1b] border border-purple-900/80 rounded-2xl p-6 sm:p-8 shadow-2xl shadow-purple-950/70 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-[#061225]/85 backdrop-blur-md animate-in fade-in">
+      <div className="relative w-full max-w-xl bg-[#102440]/95 backdrop-blur-xl border border-[#1677FF]/45 rounded-2xl p-6 sm:p-8 shadow-[0_24px_64px_rgba(2,8,20,0.85)] max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-lg hover:bg-purple-950/40"
+          className="absolute top-4 right-4 p-2 text-[#A9B8CC] hover:text-white rounded-lg hover:bg-[#0A1930] transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-purple-900/50 border border-purple-500/50 flex items-center justify-center text-purple-300">
+          <div className="w-10 h-10 rounded-xl bg-[#1677FF]/20 border border-[#00D9FF]/45 flex items-center justify-center text-[#00D9FF]">
             <Database className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-xl font-black font-['Cinzel'] text-slate-100">
+            <h2 className="text-xl font-black font-['Cinzel'] text-white">
               SUPABASE CLOUD PERSISTENCE
             </h2>
-            <p className="text-xs text-purple-300/80">
+            <p className="text-xs text-[#A9B8CC]">
               Connect your PostgreSQL & Supabase Auth database for cross-device progression
             </p>
           </div>
         </div>
 
         {/* Tab switch */}
-        <div className="flex p-1 mb-5 bg-[#090712] rounded-xl border border-purple-950">
+        <div className="flex p-1 mb-5 bg-[#061225] rounded-xl border border-[#1677FF]/30">
           <button
             type="button"
             onClick={() => setActiveTab('credentials')}
             className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
               activeTab === 'credentials'
-                ? 'bg-purple-800/80 text-white shadow'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-[#1677FF] text-white shadow'
+                : 'text-[#A9B8CC] hover:text-white'
             }`}
           >
             Credentials & Status
@@ -210,8 +210,8 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
             onClick={() => setActiveTab('sql')}
             className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
               activeTab === 'sql'
-                ? 'bg-purple-800/80 text-white shadow'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-[#1677FF] text-white shadow'
+                : 'text-[#A9B8CC] hover:text-white'
             }`}
           >
             SQL Database Schema
@@ -220,7 +220,7 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
 
         {activeTab === 'credentials' ? (
           <div className="space-y-4">
-            <div className="p-3.5 rounded-xl bg-[#140f26] border border-purple-900/60 flex items-center justify-between">
+            <div className="p-3.5 rounded-xl bg-[#0A1930] border border-[#1677FF]/35 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 {isSupabaseConfigured() ? (
                   <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
@@ -228,10 +228,10 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
                   <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
                 )}
                 <div>
-                  <div className="text-xs font-bold text-slate-200">
+                  <div className="text-xs font-bold text-white">
                     {isSupabaseConfigured() ? 'Supabase Credentials Configured' : 'Credentials Needed'}
                   </div>
-                  <div className="text-[11px] text-slate-400">
+                  <div className="text-[11px] text-[#A9B8CC]">
                     Source: {currentConfig.source === 'env' ? 'Environment Variables (.env)' : currentConfig.source === 'storage' ? 'Custom In-App Storage' : 'Not Configured'}
                   </div>
                 </div>
@@ -241,7 +241,7 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
                 <button
                   onClick={handleTestExisting}
                   disabled={testing}
-                  className="px-3 py-1.5 rounded-lg border border-purple-700/60 bg-purple-950/60 text-purple-200 hover:bg-purple-900/60 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                  className="px-3 py-1.5 rounded-lg border border-[#1677FF]/45 bg-[#102440] text-[#00D9FF] hover:border-[#00D9FF] text-xs font-semibold flex items-center gap-1.5 transition-all"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${testing ? 'animate-spin' : ''}`} />
                   Test
@@ -268,7 +268,7 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
 
             <form onSubmit={handleSave} className="space-y-3 pt-2">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
+                <label className="block text-xs font-medium text-[#A9B8CC] mb-1">
                   Supabase Project URL (VITE_SUPABASE_URL)
                 </label>
                 <input
@@ -276,12 +276,12 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
                   value={url}
                   onChange={e => setUrl(e.target.value)}
                   placeholder="https://xyzcompany.supabase.co"
-                  className="w-full bg-[#130f24] border border-purple-900/60 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-purple-500"
+                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 rounded-xl px-3 py-2 text-xs text-white placeholder-[#A9B8CC]/50 font-mono focus:outline-none focus:border-[#00D9FF]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
+                <label className="block text-xs font-medium text-[#A9B8CC] mb-1">
                   Supabase Anon Public Key (VITE_SUPABASE_ANON_KEY)
                 </label>
                 <input
@@ -289,7 +289,7 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
                   value={anonKey}
                   onChange={e => setAnonKey(e.target.value)}
                   placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                  className="w-full bg-[#130f24] border border-purple-900/60 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-purple-500"
+                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 rounded-xl px-3 py-2 text-xs text-white placeholder-[#A9B8CC]/50 font-mono focus:outline-none focus:border-[#00D9FF]"
                 />
               </div>
 
@@ -297,7 +297,7 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
                 <button
                   type="submit"
                   disabled={testing}
-                  className="flex-1 py-2.5 rounded-xl bg-purple-700 hover:bg-purple-600 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2684FF] hover:to-[#00D9FF] border border-[#00D9FF]/45 text-white font-semibold text-xs transition-all flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(22,119,255,0.35)]"
                 >
                   {testing ? (
                     <>
@@ -324,10 +324,10 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
               </div>
             </form>
 
-            <div className="text-[11px] text-slate-400 bg-purple-950/20 border border-purple-900/30 rounded-xl p-3">
-              <span className="font-semibold text-purple-300">Tip:</span> You can also add credentials directly to your{' '}
+            <div className="text-[11px] text-[#A9B8CC] bg-[#0A1930] border border-[#1677FF]/25 rounded-xl p-3">
+              <span className="font-semibold text-[#00D9FF]">Tip:</span> You can also add credentials directly to your{' '}
               <code className="text-amber-300 font-mono">.env</code> file:
-              <pre className="mt-1.5 p-2 bg-black/60 rounded border border-purple-950 font-mono text-[10px] text-slate-300">
+              <pre className="mt-1.5 p-2 bg-[#061225] rounded border border-[#1677FF]/25 font-mono text-[10px] text-[#A9B8CC]">
                 VITE_SUPABASE_URL="https://your-project.supabase.co"{"\n"}
                 VITE_SUPABASE_ANON_KEY="your-anon-key"
               </pre>
@@ -335,13 +335,13 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="text-xs text-slate-300 leading-relaxed">
+            <div className="text-xs text-[#A9B8CC] leading-relaxed">
               Run this SQL script in your Supabase project's{' '}
-              <span className="text-purple-300 font-semibold">SQL Editor</span> to automatically provision the required tables, Row Level Security policies, and user triggers:
+              <span className="text-[#00D9FF] font-semibold">SQL Editor</span> to automatically provision the required tables, Row Level Security policies, and user triggers:
             </div>
 
             <div className="relative">
-              <div className="p-3 bg-black/70 rounded-xl border border-purple-900 font-mono text-[10px] text-purple-200 max-h-60 overflow-y-auto whitespace-pre">
+              <div className="p-3 bg-[#061225] rounded-xl border border-[#1677FF]/35 font-mono text-[10px] text-[#A9B8CC] max-h-60 overflow-y-auto whitespace-pre">
                 {`-- LIFEQUEST CLOUD SCHEMA TABLES
 1. profiles (id, username, avatar_url, updated_at)
 2. game_states (id, user_id, game_data JSONB, updated_at)
@@ -356,7 +356,7 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
               <button
                 type="button"
                 onClick={copyMigrationSql}
-                className="absolute top-2 right-2 px-3 py-1.5 rounded-lg bg-purple-900/80 hover:bg-purple-800 border border-purple-700/60 text-white text-xs font-semibold flex items-center gap-1.5 shadow"
+                className="absolute top-2 right-2 px-3 py-1.5 rounded-lg bg-[#0A1930] hover:bg-[#1677FF]/30 border border-[#1677FF]/50 text-white text-xs font-semibold flex items-center gap-1.5 shadow transition-all"
               >
                 {copiedSql ? (
                   <>
@@ -365,20 +365,20 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
                   </>
                 ) : (
                   <>
-                    <Copy className="w-3.5 h-3.5" />
+                    <Copy className="w-3.5 h-3.5 text-[#00D9FF]" />
                     Copy Full Migration SQL
                   </>
                 )}
               </button>
             </div>
 
-            <div className="flex items-center justify-between text-xs text-slate-400">
-              <span>SQL file saved locally at <code className="text-purple-300 font-mono">/supabase/schema.sql</code></span>
+            <div className="flex items-center justify-between text-xs text-[#A9B8CC]">
+              <span>SQL file saved locally at <code className="text-[#00D9FF] font-mono">/supabase/schema.sql</code></span>
               <a
                 href="https://supabase.com/dashboard"
                 target="_blank"
                 rel="noreferrer"
-                className="text-purple-400 hover:text-purple-300 flex items-center gap-1 font-semibold"
+                className="text-[#00D9FF] hover:text-white flex items-center gap-1 font-semibold"
               >
                 Open Supabase Dashboard
                 <ExternalLink className="w-3 h-3" />

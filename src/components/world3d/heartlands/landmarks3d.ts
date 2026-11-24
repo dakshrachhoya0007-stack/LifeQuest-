@@ -41,11 +41,11 @@ export function buildHeartlandsLandmarks3d(
 
   const stoneTex = track(createCastleStoneTextures(4, 4));
   const timberTex = track(createTimberTextures('#4b3322'));
-  const bannerTex = track(createClothWeaveTexture('#29183f', '#140c21', '#c5a15a'));
+  const bannerTex = track(createClothWeaveTexture('#0A1930', '#061225', '#00D9FF'));
 
   const stoneMat = track(
     new THREE.MeshStandardMaterial({
-      color: 0x6b6476,
+      color: 0x53637a,
       map: stoneTex.colorMap,
       bumpMap: stoneTex.bumpMap,
       bumpScale: 0.045,
@@ -56,7 +56,7 @@ export function buildHeartlandsLandmarks3d(
 
   const darkSlateMat = track(
     new THREE.MeshStandardMaterial({
-      color: 0x262132,
+      color: 0x102440,
       roughness: 0.72,
       metalness: 0.22,
     })
@@ -99,7 +99,7 @@ export function buildHeartlandsLandmarks3d(
 
   const ironMat = track(
     new THREE.MeshStandardMaterial({
-      color: 0x24252e,
+      color: 0x16243b,
       metalness: 0.84,
       roughness: 0.44,
     })

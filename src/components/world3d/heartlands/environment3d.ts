@@ -39,9 +39,9 @@ export function buildHeartlandsEnvironment3d(
       side: THREE.BackSide,
       depthWrite: false,
       uniforms: {
-        uTopColor: { value: new THREE.Color(0x161c36) },
-        uMidColor: { value: new THREE.Color(0x2f4354) },
-        uHorizonColor: { value: new THREE.Color(0xd7b377) },
+        uTopColor: { value: new THREE.Color(0x061225) },
+        uMidColor: { value: new THREE.Color(0x0a1930) },
+        uHorizonColor: { value: new THREE.Color(0x38bdf8) },
         uSunDir: { value: new THREE.Vector3(0.55, 0.34, -0.76).normalize() },
       },
       vertexShader: `
@@ -404,8 +404,8 @@ export function buildHeartlandsEnvironment3d(
   const cloudsGroup = new THREE.Group();
   const cloudMat = track(
     new THREE.MeshStandardMaterial({
-      color: 0xe6dcc8,
-      emissive: 0x3b3145,
+      color: 0xcbd5e1,
+      emissive: 0x0a1930,
       emissiveIntensity: 0.25,
       roughness: 1.0,
       transparent: true,

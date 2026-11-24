@@ -44,7 +44,7 @@ export const AETHER_RANK_STAGES: {
     nextPoints: 350,
     description: 'Steady habit streaks awaken explosive upper- and lower-body strength.',
     perk: '+15% Bodyweight Strike Power and sharper hand/leg form.',
-    glow: 'from-purple-600 to-violet-900',
+    glow: 'from-[#1677FF] to-[#0A1930]',
     symbol: 'ᚱ',
   },
   {
@@ -71,7 +71,7 @@ export const AETHER_RANK_STAGES: {
     nextPoints: 2000,
     description: 'The supreme pinnacle of holistic wellness and unarmed bodyweight mastery.',
     perk: '+80% All Combat Statistics and peak bodyweight conditioning.',
-    glow: 'from-fuchsia-500 via-purple-600 to-amber-500',
+    glow: 'from-[#00D9FF] via-[#1677FF] to-amber-400',
     symbol: 'ᛞ',
   },
 ];
@@ -80,14 +80,14 @@ export const getEvolutionVisual = (stage: AetherRankStage) => {
   switch (stage) {
     case 'Awakened':
       return {
-        glowColor: '#a855f7',
-        auraStyle: 'border-purple-500 shadow-purple-950/70 shadow-xl ring-2 ring-purple-500/50',
+        glowColor: '#1677FF',
+        auraStyle: 'border-[#1677FF] shadow-blue-950/70 shadow-xl ring-2 ring-[#1677FF]/50',
         runeSymbol: 'ᚱ',
         titlePrefix: 'Awakened',
       };
     case 'Ascended':
       return {
-        glowColor: '#38bdf8',
+        glowColor: '#00D9FF',
         auraStyle: 'border-cyan-400 shadow-cyan-950/70 shadow-xl ring-2 ring-cyan-400/50',
         runeSymbol: 'ᛏ',
         titlePrefix: 'Ascended',
@@ -101,8 +101,8 @@ export const getEvolutionVisual = (stage: AetherRankStage) => {
       };
     case 'Transcendent':
       return {
-        glowColor: '#ec4899',
-        auraStyle: 'border-fuchsia-400 shadow-fuchsia-950/90 shadow-2xl ring-4 ring-amber-400/80',
+        glowColor: '#00D9FF',
+        auraStyle: 'border-[#00D9FF] shadow-cyan-950/90 shadow-2xl ring-4 ring-amber-400/80',
         runeSymbol: 'ᛞ',
         titlePrefix: 'Transcendent',
       };
@@ -437,11 +437,11 @@ export const INITIAL_KINGDOMS: Kingdom[] = [
     name: 'Forest of Discipline',
     subtitle: 'Kingdom of Roots & Consistency',
     theme: 'Consistency and healthy daily habits',
-    description: 'A verdant realm of ancient purple-leafed elder trees where the Void corrupts growth through procrastination and inertia.',
+    description: 'A verdant realm of ancient sapphire-leafed elder trees where the Void corrupts growth through procrastination and inertia.',
     unlocked: true,
     cleared: false,
     loreIntro: 'Warden Sylas greets you at the Verdant Gate: "Hero, our forest withers when routines falter. Reclaim the rhythm of your days, and the ancient canopy will shield your strikes."',
-    colorGradient: 'from-emerald-950 via-slate-900 to-purple-950',
+    colorGradient: 'from-emerald-950 via-[#0A1930] to-[#061225]',
     boss: {
       id: 'boss-void-stalker',
       name: 'Void Beast Mal’Drak',
@@ -521,7 +521,7 @@ export const INITIAL_KINGDOMS: Kingdom[] = [
     unlocked: false,
     cleared: false,
     loreIntro: 'High Trainer Torin bellows from the High Foundry: "The mountain tests every muscle. Lift your heart rate, power your legs and fists, and the stones will bow to your iron will."',
-    colorGradient: 'from-amber-950 via-slate-900 to-purple-950',
+    colorGradient: 'from-amber-950 via-[#0A1930] to-[#061225]',
     boss: {
       id: 'boss-mountain-titan',
       name: 'Titan Ignar-Golgoth',
@@ -603,7 +603,7 @@ export const INITIAL_KINGDOMS: Kingdom[] = [
     unlocked: false,
     cleared: false,
     loreIntro: 'High Priestess Coralina whispers: "The tides do not rush; they nourish. Feed your temple wholesome foods, drink deep from pure waters, and your vitality will never empty."',
-    colorGradient: 'from-cyan-950 via-slate-900 to-indigo-950',
+    colorGradient: 'from-cyan-950 via-[#0A1930] to-[#061225]',
     boss: {
       id: 'boss-abyssal-hydra',
       name: 'Abyssal Hydra Thalassos',
@@ -669,7 +669,7 @@ export const INITIAL_KINGDOMS: Kingdom[] = [
           thresholdPercent: 0,
           description: 'All heads strike frantically with venomous froth (+50% ATK)!',
           attackMultiplier: 1.5,
-          auraColor: 'text-purple-400',
+          auraColor: 'text-[#00D9FF]',
         },
       ],
     },
@@ -763,7 +763,7 @@ export const INITIAL_KINGDOMS: Kingdom[] = [
     unlocked: false,
     cleared: false,
     loreIntro: 'High Archon Valerius declares: "You have walked the forest, climbed the crags, braved the tides and endured the dunes. Now take your place among the immortal Champions!"',
-    colorGradient: 'from-purple-950 via-slate-900 to-amber-950',
+    colorGradient: 'from-[#0A1930] via-[#102440] to-amber-950',
     boss: {
       id: 'boss-void-sovereign',
       name: 'Void Sovereign Malakor',
@@ -815,7 +815,7 @@ export const INITIAL_KINGDOMS: Kingdom[] = [
           thresholdPercent: 66,
           description: 'Hurls dark matter orbs and void lances.',
           attackMultiplier: 1.0,
-          auraColor: 'text-purple-400',
+          auraColor: 'text-[#1677FF]',
         },
         {
           phaseNumber: 2,
@@ -823,7 +823,7 @@ export const INITIAL_KINGDOMS: Kingdom[] = [
           thresholdPercent: 33,
           description: 'Gravitational rift pulls reality apart. ATK +30%, charges Eclipse Nova!',
           attackMultiplier: 1.3,
-          auraColor: 'text-fuchsia-400',
+          auraColor: 'text-[#00D9FF]',
         },
         {
           phaseNumber: 3,

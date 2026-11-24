@@ -222,8 +222,8 @@ export const HeartlandsWorldCanvas = forwardRef<
       renderer.domElement.addEventListener('webglcontextlost', handleContextLost);
 
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x1f2d3a);
-      scene.fog = new THREE.FogExp2(0x283845, 0.0082);
+      scene.background = new THREE.Color(0x061225);
+      scene.fog = new THREE.FogExp2(0x0a1930, 0.0082);
       sceneRef.current = scene;
 
       // Environment reflections via PMREM
@@ -236,11 +236,11 @@ export const HeartlandsWorldCanvas = forwardRef<
 
       const camera = new THREE.PerspectiveCamera(52, initW / initH, 0.2, 320);
 
-      // Cinematic Fantasy Lighting (Warm Golden Sun + Cool Emerald-Sky Bounce + Purple Rim Fill)
-      const hemi = new THREE.HemisphereLight(0x9ec4e8, 0x263826, 1.05);
+      // Cinematic Lighting (Crisp Daylight + Deep Navy Bounce + Electric Blue Rim Fill)
+      const hemi = new THREE.HemisphereLight(0x7dd3fc, 0x0a1930, 1.05);
       scene.add(hemi);
 
-      const sunLight = new THREE.DirectionalLight(0xffe1a8, 2.75);
+      const sunLight = new THREE.DirectionalLight(0xe0f2fe, 2.75);
       sunLight.position.set(48, 62, -32);
       if (!lowPerf) {
         sunLight.castShadow = true;
@@ -256,7 +256,7 @@ export const HeartlandsWorldCanvas = forwardRef<
       scene.add(sunLight);
       scene.add(sunLight.target);
 
-      const rimFill = new THREE.DirectionalLight(0x7d65c9, 0.72);
+      const rimFill = new THREE.DirectionalLight(0x1677ff, 0.85);
       rimFill.position.set(-42, 24, 48);
       scene.add(rimFill);
 

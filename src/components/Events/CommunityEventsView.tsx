@@ -61,14 +61,14 @@ export const CommunityEventsView: React.FC = () => {
   };
 
   const tabSwitcher = (
-    <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-[#100D19] border border-[#C5A15A]/20 w-fit">
+    <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-[#0A1930] border border-[#1677FF]/30 w-fit">
       <button
         type="button"
         onClick={() => setEventsSubTab('events')}
-        className={`px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 ${
+        className={`px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0 ${
           eventsSubTab === 'events'
-            ? 'bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/45'
-            : 'text-[#D9D2C5]/70 hover:text-white border border-transparent'
+            ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white shadow-[0_0_12px_rgba(22,119,255,0.3)]'
+            : 'text-[#A9B8CC] hover:text-white border border-transparent'
         }`}
       >
         <Sparkles className="w-3.5 h-3.5" />
@@ -77,10 +77,10 @@ export const CommunityEventsView: React.FC = () => {
       <button
         type="button"
         onClick={() => setEventsSubTab('decisions')}
-        className={`px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 ${
+        className={`px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0 ${
           eventsSubTab === 'decisions'
-            ? 'bg-[#251638] text-[#C5A15A] border border-[#C5A15A]/45'
-            : 'text-[#D9D2C5]/70 hover:text-white border border-transparent'
+            ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white shadow-[0_0_12px_rgba(22,119,255,0.3)]'
+            : 'text-[#A9B8CC] hover:text-white border border-transparent'
         }`}
       >
         <Vote className="w-3.5 h-3.5" />
@@ -102,7 +102,7 @@ export const CommunityEventsView: React.FC = () => {
     return (
       <div className="space-y-6 animate-in fade-in pb-12">
         {tabSwitcher}
-        <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-8 text-center text-sm text-[#D9D2C5]/70">
+        <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 p-8 text-center text-sm text-[#A9B8CC]">
           Loading Realm Community Event...
         </div>
       </div>
@@ -113,11 +113,11 @@ export const CommunityEventsView: React.FC = () => {
     return (
       <div className="space-y-6 animate-in fade-in pb-12">
         {tabSwitcher}
-        <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-8 text-center">
+        <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 p-8 text-center">
           <button
             type="button"
             onClick={() => void refreshCommunityEventState()}
-            className="px-4 py-2 rounded-lg bg-[#251638] border border-[#C5A15A]/40 text-xs font-semibold text-[#C5A15A]"
+            className="px-4 py-2 rounded-lg bg-[#0A1930] hover:bg-[#16325C] border border-[#1677FF]/40 hover:border-[#00D9FF]/50 text-xs font-semibold text-[#00D9FF] transition-all"
           >
             Reload Community Events
           </button>
@@ -138,8 +138,8 @@ export const CommunityEventsView: React.FC = () => {
 
       {/* Announcements Banner Strip */}
       {announcements.length > 0 && (
-        <div className="rounded-2xl bg-[#140E24] border border-[#C5A15A]/30 p-4 space-y-2">
-          <div className="flex items-center gap-2 text-xs font-['Cinzel'] font-bold uppercase tracking-wider text-[#C5A15A]">
+        <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 p-4 space-y-2 shadow-[0_12px_32px_rgba(2,8,20,0.6)]">
+          <div className="flex items-center gap-2 text-xs font-['Cinzel'] font-bold uppercase tracking-wider text-[#00D9FF]">
             <Megaphone className="w-4 h-4" />
             Realm Herald Announcements
           </div>
@@ -152,11 +152,11 @@ export const CommunityEventsView: React.FC = () => {
                     ? 'bg-emerald-950/35 border-emerald-700/40'
                     : ann.severity === 'alert'
                     ? 'bg-amber-950/35 border-amber-700/40'
-                    : 'bg-[#0b0816] border-purple-900/50'
+                    : 'bg-[#061225] border-[#1677FF]/30'
                 }`}
               >
                 <p className="font-bold text-white">{ann.title}</p>
-                <p className="text-[#D9D2C5]/75 mt-0.5 leading-snug">{ann.message}</p>
+                <p className="text-[#A9B8CC] mt-0.5 leading-snug">{ann.message}</p>
               </div>
             ))}
           </div>
@@ -164,24 +164,24 @@ export const CommunityEventsView: React.FC = () => {
       )}
 
       {/* Header Chronicle Card */}
-      <div className="rounded-2xl bg-gradient-to-r from-[#170e2f] via-[#100a20] to-[#1a1236] border border-[#C5A15A]/25 p-5 sm:p-6 shadow-xl space-y-4">
+      <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 p-5 sm:p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)] space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-[#1a122b] border border-[#C5A15A]/45 flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-[#0A1930] border border-[#00D9FF]/45 flex items-center justify-center shrink-0 shadow-[0_0_16px_rgba(0,217,255,0.18)]">
               <GoldenWorldTreeEmblem className="w-8 h-8" />
             </div>
             <div>
-              <div className="flex items-center gap-2 text-xs text-[#C5A15A] font-semibold uppercase tracking-widest">
+              <div className="flex items-center gap-2 text-xs text-[#00D9FF] font-semibold uppercase tracking-widest">
                 <span className="font-['Cinzel']">Realm-Wide Event</span>
-                <span className="text-[#D9D2C5]/35" aria-hidden="true">·</span>
+                <span className="text-[#A9B8CC]/40" aria-hidden="true">·</span>
                 <span className="tabular-nums">{timeLeftDays}d remaining</span>
-                <span className="text-[#D9D2C5]/35" aria-hidden="true">·</span>
+                <span className="text-[#A9B8CC]/40" aria-hidden="true">·</span>
                 <span className="tabular-nums">{evt.participantsCount} Participants</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-white mt-0.5">
                 {evt.title}
               </h1>
-              <p className="text-xs sm:text-sm text-[#D9D2C5]/75 max-w-2xl mt-1">
+              <p className="text-xs sm:text-sm text-[#A9B8CC] max-w-2xl mt-1">
                 {evt.description}
               </p>
             </div>
@@ -190,43 +190,43 @@ export const CommunityEventsView: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('fitness')}
-            className="px-4 py-2.5 rounded-xl bg-[#C5A15A] hover:bg-[#d8b46d] text-[#0c0914] font-bold text-xs whitespace-nowrap shrink-0 self-start md:self-auto"
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white shadow-[0_0_16px_rgba(22,119,255,0.35)] font-bold text-xs whitespace-nowrap shrink-0 self-start md:self-auto transition-all"
           >
             Contribute Activity
           </button>
         </div>
 
         {/* Collective Progress */}
-        <div className="space-y-2 pt-2 border-t border-[#C5A15A]/15">
+        <div className="space-y-2 pt-2 border-t border-[#1677FF]/20">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-['Cinzel'] font-bold text-[#D9D2C5]">Collective Realm Points</span>
-            <span className="font-mono font-bold text-[#C5A15A] tabular-nums">
+            <span className="font-['Cinzel'] font-bold text-white">Collective Realm Points</span>
+            <span className="font-mono font-bold text-[#00D9FF] tabular-nums">
               {evt.currentGoalPoints.toLocaleString()} / {evt.targetGoalPoints.toLocaleString()} pts ({pct.toFixed(1)}%)
             </span>
           </div>
-          <div className="h-3 w-full rounded-full bg-[#090714] border border-[#C5A15A]/20 overflow-hidden">
+          <div className="h-3 w-full rounded-full bg-[#061225] border border-[#1677FF]/30 overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-[#7046A5] via-[#9C6CE0] to-[#C5A15A] transition-all duration-700"
+              className="h-full bg-gradient-to-r from-[#1677FF] via-[#0099FF] to-[#00D9FF] transition-all duration-700"
               style={{ width: `${pct}%` }}
             />
           </div>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          <div className="rounded-xl bg-[#151022] border border-[#C5A15A]/15 p-3">
-            <span className="text-[11px] text-[#D9D2C5]/60 block">Your Event Points</span>
-            <span className="text-lg font-bold font-mono text-[#C5A15A] tabular-nums">
+          <div className="rounded-xl bg-[#061225] border border-[#1677FF]/25 p-3">
+            <span className="text-[11px] text-[#A9B8CC] block">Your Event Points</span>
+            <span className="text-lg font-bold font-mono text-[#00D9FF] tabular-nums">
               {communityEventState.playerPoints.toLocaleString()}
             </span>
           </div>
-          <div className="rounded-xl bg-[#151022] border border-[#C5A15A]/15 p-3">
-            <span className="text-[11px] text-[#D9D2C5]/60 block">Your Verified Actions</span>
+          <div className="rounded-xl bg-[#061225] border border-[#1677FF]/25 p-3">
+            <span className="text-[11px] text-[#A9B8CC] block">Your Verified Actions</span>
             <span className="text-lg font-bold font-mono text-white tabular-nums">
               {communityEventState.playerContributionsCount}
             </span>
           </div>
-          <div className="rounded-xl bg-[#151022] border border-[#C5A15A]/15 p-3 col-span-2 sm:col-span-1">
-            <span className="text-[11px] text-[#D9D2C5]/60 block">Active Champions</span>
+          <div className="rounded-xl bg-[#061225] border border-[#1677FF]/25 p-3 col-span-2 sm:col-span-1">
+            <span className="text-[11px] text-[#A9B8CC] block">Active Champions</span>
             <span className="text-lg font-bold font-mono text-emerald-300 tabular-nums">
               {evt.participantsCount}
             </span>
@@ -248,13 +248,13 @@ export const CommunityEventsView: React.FC = () => {
 
       {/* Limited-Time Event Challenges */}
       {limitedChallenges.length > 0 && (
-        <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-5 space-y-4">
+        <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 p-5 space-y-4 shadow-[0_12px_32px_rgba(2,8,20,0.6)]">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#C5A15A]" />
+              <Sparkles className="w-4 h-4 text-[#00D9FF]" />
               Limited-Time Event Challenges
             </h2>
-            <span className="text-xs text-[#D9D2C5]/60">
+            <span className="text-xs text-[#A9B8CC]">
               Verified Workouts, Habits, Study &amp; Healthy Recovery Count
             </span>
           </div>
@@ -275,21 +275,21 @@ export const CommunityEventsView: React.FC = () => {
               return (
                 <div
                   key={ch.id}
-                  className="rounded-xl bg-[#151022] border border-[#C5A15A]/20 p-4 flex flex-col justify-between gap-3"
+                  className="rounded-xl bg-[#061225] border border-[#1677FF]/25 p-4 flex flex-col justify-between gap-3"
                 >
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between text-[11px]">
-                      <span className="uppercase tracking-wider font-bold text-[#C5A15A]">
+                      <span className="uppercase tracking-wider font-bold text-[#00D9FF]">
                         {ch.metric === 'recovery_habit'
                           ? 'Rest & Recovery'
                           : ch.metric.replace(/_/g, ' ')}
                       </span>
-                      <span className="font-mono text-purple-300 tabular-nums">
+                      <span className="font-mono text-[#A9B8CC] tabular-nums">
                         +{ch.rewardXp} XP · +{ch.rewardGold}g
                       </span>
                     </div>
                     <p className="text-sm font-bold text-white">{ch.title}</p>
-                    <p className="text-xs text-[#D9D2C5]/70 leading-snug">{ch.description}</p>
+                    <p className="text-xs text-[#A9B8CC] leading-snug">{ch.description}</p>
                     {extras.length > 0 && (
                       <p className="text-[11px] font-semibold text-amber-300">
                         Bonus Unlock: {extras.join(' + ')}
@@ -299,16 +299,16 @@ export const CommunityEventsView: React.FC = () => {
 
                   <div className="space-y-2">
                     <div className="space-y-1">
-                      <div className="flex justify-between text-[11px] font-mono text-[#D9D2C5]/70 tabular-nums">
+                      <div className="flex justify-between text-[11px] font-mono text-[#A9B8CC] tabular-nums">
                         <span>Progress</span>
                         <span>
                           {Math.min(prog.current, prog.target)} / {prog.target} ({chPct}%)
                         </span>
                       </div>
-                      <div className="w-full h-1.5 rounded-full bg-[#090714] overflow-hidden">
+                      <div className="w-full h-1.5 rounded-full bg-[#0A1930] overflow-hidden">
                         <div
                           className={`h-full transition-all duration-300 ${
-                            prog.completed ? 'bg-emerald-500' : 'bg-gradient-to-r from-[#7046A5] to-[#C5A15A]'
+                            prog.completed ? 'bg-emerald-500' : 'bg-gradient-to-r from-[#1677FF] to-[#00D9FF]'
                           }`}
                           style={{ width: `${chPct}%` }}
                         />
@@ -319,12 +319,12 @@ export const CommunityEventsView: React.FC = () => {
                       type="button"
                       disabled={!prog.completed || prog.claimed || claimingId === ch.id}
                       onClick={() => void handleClaimChallenge(ch.id, ch.title)}
-                      className={`w-full py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 whitespace-nowrap ${
+                      className={`w-full py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 whitespace-nowrap transition-all ${
                         prog.claimed
                           ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-700/40'
                           : prog.completed
-                          ? 'bg-[#C5A15A] hover:bg-[#d8b46d] text-[#0c0914]'
-                          : 'bg-[#1f1833] text-[#D9D2C5]/40 cursor-not-allowed'
+                          ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white shadow-[0_0_16px_rgba(22,119,255,0.35)]'
+                          : 'bg-[#0A1930] text-[#A9B8CC]/45 border border-[#1677FF]/15 cursor-not-allowed'
                       }`}
                     >
                       {prog.claimed ? (
@@ -350,9 +350,9 @@ export const CommunityEventsView: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Milestones */}
-        <div className="lg:col-span-6 rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-5 space-y-4">
+        <div className="lg:col-span-6 rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 p-5 space-y-4 shadow-[0_12px_32px_rgba(2,8,20,0.6)]">
           <h2 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-            <Award className="w-4 h-4 text-[#C5A15A]" />
+            <Award className="w-4 h-4 text-[#00D9FF]" />
             Realm Event Milestones
           </h2>
           <div className="space-y-3">
@@ -368,11 +368,11 @@ export const CommunityEventsView: React.FC = () => {
               return (
                 <div
                   key={m.id}
-                  className="rounded-xl bg-[#151022] border border-[#C5A15A]/15 p-4 flex items-center justify-between gap-3"
+                  className="rounded-xl bg-[#061225] border border-[#1677FF]/25 p-4 flex items-center justify-between gap-3"
                 >
                   <div>
                     <p className="text-sm font-bold text-white">{m.title}</p>
-                    <p className="text-xs text-[#D9D2C5]/65 font-mono tabular-nums mt-0.5">
+                    <p className="text-xs text-[#A9B8CC] font-mono tabular-nums mt-0.5">
                       Goal: {m.targetPoints.toLocaleString()} pts · +{m.rewardXp} XP · +{m.rewardGold}g
                     </p>
                     {exclusives.length > 0 && (
@@ -385,12 +385,12 @@ export const CommunityEventsView: React.FC = () => {
                     type="button"
                     disabled={!eligible || claimed || claimingId === m.id}
                     onClick={() => void handleClaim(m.id)}
-                    className={`px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 ${
+                    className={`px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
                       claimed
                         ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-700/40'
                         : eligible
-                        ? 'bg-[#C5A15A] hover:bg-[#d8b46d] text-[#0c0914]'
-                        : 'bg-[#1f1833] text-[#D9D2C5]/40 cursor-not-allowed'
+                        ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white shadow-[0_0_16px_rgba(22,119,255,0.35)]'
+                        : 'bg-[#0A1930] text-[#A9B8CC]/45 border border-[#1677FF]/15 cursor-not-allowed'
                     }`}
                   >
                     {claimed ? 'Claimed' : eligible ? 'Claim Honor' : unlocked ? 'Contribute 1+' : 'Locked'}
@@ -402,13 +402,13 @@ export const CommunityEventsView: React.FC = () => {
         </div>
 
         {/* Top Contributors */}
-        <div className="lg:col-span-6 rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-5 space-y-4">
+        <div className="lg:col-span-6 rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 p-5 space-y-4 shadow-[0_12px_32px_rgba(2,8,20,0.6)]">
           <h2 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-            <Trophy className="w-4 h-4 text-[#C5A15A]" />
+            <Trophy className="w-4 h-4 text-[#00D9FF]" />
             Top Event Stewards
           </h2>
           {communityEventState.topContributors.length === 0 ? (
-            <p className="text-xs text-[#D9D2C5]/60">
+            <p className="text-xs text-[#A9B8CC]">
               Complete any verified workout, habit, or study session to open the festival chronicle.
             </p>
           ) : (
@@ -420,16 +420,16 @@ export const CommunityEventsView: React.FC = () => {
                     key={c.userId}
                     className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 border text-xs ${
                       isMe
-                        ? 'bg-[#251638]/70 border-[#C5A15A]/45'
-                        : 'bg-[#151022] border-[#C5A15A]/10'
+                        ? 'bg-[#0A1930] border-[#00D9FF]/50 shadow-[0_0_12px_rgba(0,217,255,0.12)]'
+                        : 'bg-[#061225] border-[#1677FF]/20'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="font-mono font-bold text-[#C5A15A] tabular-nums">
+                      <span className="font-mono font-bold text-[#00D9FF] tabular-nums">
                         #{c.rank}
                       </span>
                       <span className="font-bold text-white">
-                        {c.username} {isMe && <span className="text-[#C5A15A]">(You)</span>}
+                        {c.username} {isMe && <span className="text-[#00D9FF]">(You)</span>}
                       </span>
                     </div>
                     <span className="font-mono font-bold text-emerald-300 tabular-nums">
@@ -446,13 +446,13 @@ export const CommunityEventsView: React.FC = () => {
       {/* Upcoming Events & Past Event Archive */}
       {(upcomingEvents.length > 0 || eventHistory.length > 0) && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-5 space-y-3">
+          <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 p-5 space-y-3 shadow-[0_12px_32px_rgba(2,8,20,0.6)]">
             <h2 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-              <CalendarClock className="w-4 h-4 text-[#C5A15A]" />
+              <CalendarClock className="w-4 h-4 text-[#00D9FF]" />
               Upcoming Realm Gatherings
             </h2>
             {upcomingEvents.length === 0 ? (
-              <p className="text-xs text-[#D9D2C5]/60">
+              <p className="text-xs text-[#A9B8CC]">
                 Upcoming community schedules will be posted here ahead of the next equinox.
               </p>
             ) : (
@@ -460,29 +460,29 @@ export const CommunityEventsView: React.FC = () => {
                 {upcomingEvents.map(up => (
                   <div
                     key={up.id}
-                    className="rounded-xl bg-[#151022] border border-purple-950/80 p-3.5 space-y-1"
+                    className="rounded-xl bg-[#061225] border border-[#1677FF]/25 p-3.5 space-y-1"
                   >
                     <div className="flex items-center justify-between gap-2 text-[11px]">
-                      <span className="font-bold text-[#C5A15A] uppercase">{up.subtitle || 'Scheduled'}</span>
-                      <span className="font-mono text-[#D9D2C5]/60 tabular-nums">
+                      <span className="font-bold text-[#00D9FF] uppercase">{up.subtitle || 'Scheduled'}</span>
+                      <span className="font-mono text-[#A9B8CC] tabular-nums">
                         Starts {new Date(up.startsAt).toLocaleDateString()}
                       </span>
                     </div>
                     <p className="text-sm font-bold text-white">{up.title}</p>
-                    <p className="text-xs text-[#D9D2C5]/70">{up.description}</p>
+                    <p className="text-xs text-[#A9B8CC]">{up.description}</p>
                   </div>
                 ))}
               </div>
             )}
           </div>
 
-          <div className="rounded-2xl bg-[#100D19] border border-[#C5A15A]/20 p-5 space-y-3">
+          <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 p-5 space-y-3 shadow-[0_12px_32px_rgba(2,8,20,0.6)]">
             <h2 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-              <History className="w-4 h-4 text-purple-400" />
+              <History className="w-4 h-4 text-[#00D9FF]" />
               Past Event Archive
             </h2>
             {eventHistory.length === 0 ? (
-              <p className="text-xs text-[#D9D2C5]/60">
+              <p className="text-xs text-[#A9B8CC]">
                 Completed realm festivals and collective tallies are archived here permanently.
               </p>
             ) : (
@@ -490,7 +490,7 @@ export const CommunityEventsView: React.FC = () => {
                 {eventHistory.map(hist => (
                   <div
                     key={hist.id}
-                    className="rounded-xl bg-[#151022] border border-purple-950/80 p-3.5 space-y-1"
+                    className="rounded-xl bg-[#061225] border border-[#1677FF]/25 p-3.5 space-y-1"
                   >
                     <div className="flex items-center justify-between gap-2 text-[11px]">
                       <span className="font-bold text-white">{hist.title}</span>
@@ -498,7 +498,7 @@ export const CommunityEventsView: React.FC = () => {
                         {hist.finalPoints.toLocaleString()} / {hist.targetGoalPoints.toLocaleString()} pts
                       </span>
                     </div>
-                    <p className="text-[11px] text-[#D9D2C5]/65 tabular-nums">
+                    <p className="text-[11px] text-[#A9B8CC] tabular-nums">
                       {hist.participantsCount} champions · {hist.completedMilestonesCount} milestones · Concluded {new Date(hist.endedAt).toLocaleDateString()}
                     </p>
                   </div>

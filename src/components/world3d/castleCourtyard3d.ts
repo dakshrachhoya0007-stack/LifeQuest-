@@ -28,11 +28,11 @@ export function buildCastleCourtyard3d(
 
   const flagstoneTex = track(createCastleStoneTextures(6, 6));
   const wallStoneTex = track(createCastleStoneTextures(3, 2));
-  const bannerTex = track(createClothWeaveTexture('#251638', '#120b1c', '#c5a15a'));
+  const bannerTex = track(createClothWeaveTexture('#0A1930', '#061225', '#00D9FF'));
 
   const floorMat = track(
     new THREE.MeshStandardMaterial({
-      color: 0x3b3648,
+      color: 0x24344d,
       map: flagstoneTex.colorMap,
       bumpMap: flagstoneTex.bumpMap,
       bumpScale: 0.035,
@@ -43,7 +43,7 @@ export function buildCastleCourtyard3d(
 
   const stoneWallMat = track(
     new THREE.MeshStandardMaterial({
-      color: 0x524b5d,
+      color: 0x344966,
       map: wallStoneTex.colorMap,
       bumpMap: wallStoneTex.bumpMap,
       bumpScale: 0.04,
@@ -54,7 +54,7 @@ export function buildCastleCourtyard3d(
 
   const darkSlateMat = track(
     new THREE.MeshStandardMaterial({
-      color: 0x262133,
+      color: 0x102440,
       roughness: 0.78,
       metalness: 0.18,
     })
@@ -62,16 +62,18 @@ export function buildCastleCourtyard3d(
 
   const antiqueGoldMat = track(
     new THREE.MeshStandardMaterial({
-      color: 0xc5a15a,
-      metalness: 0.88,
-      roughness: 0.28,
+      color: 0x1677ff,
+      emissive: 0x0066cc,
+      emissiveIntensity: 0.35,
+      metalness: 0.85,
+      roughness: 0.25,
       envMapIntensity: 1.25,
     })
   );
 
   const ironMat = track(
     new THREE.MeshStandardMaterial({
-      color: 0x22232c,
+      color: 0x16243b,
       metalness: 0.85,
       roughness: 0.42,
     })
@@ -92,7 +94,7 @@ export function buildCastleCourtyard3d(
     new THREE.CircleGeometry(36, 36),
     track(
       new THREE.MeshStandardMaterial({
-        color: 0x161221,
+        color: 0x061225,
         roughness: 0.96,
         metalness: 0.04,
       })
@@ -190,7 +192,7 @@ export function buildCastleCourtyard3d(
   // Subtle recessed dark portal inside gatehouse
   const portalVoid = new THREE.Mesh(
     new THREE.PlaneGeometry(2.2, keepHeight - 0.2),
-    track(new THREE.MeshBasicMaterial({ color: 0x090611 }))
+    track(new THREE.MeshBasicMaterial({ color: 0x040b17 }))
   );
   portalVoid.position.set(0, (keepHeight - 0.2) / 2, wallZ - 0.35);
   root.add(portalVoid);
@@ -229,13 +231,13 @@ export function buildCastleCourtyard3d(
       tower.add(spire);
     }
 
-    // Warm lit arrow-slit window glow
+    // Cool electric-blue arrow-slit window glow
     const windowGlow = new THREE.Mesh(
       new THREE.BoxGeometry(0.18, 0.55, 0.12),
       track(
         new THREE.MeshStandardMaterial({
-          color: 0xffc773,
-          emissive: 0xe6953e,
+          color: 0x60a5fa,
+          emissive: 0x1677ff,
           emissiveIntensity: 1.5,
         })
       )
@@ -316,10 +318,10 @@ export function buildCastleCourtyard3d(
 
   const flameMat = track(
     new THREE.MeshStandardMaterial({
-      color: 0xffaa44,
-      emissive: 0xff7722,
-      emissiveIntensity: 2.6,
-      roughness: 0.3,
+      color: 0x00d9ff,
+      emissive: 0x1677ff,
+      emissiveIntensity: 2.4,
+      roughness: 0.25,
     })
   );
 
@@ -343,7 +345,7 @@ export function buildCastleCourtyard3d(
     flameCores.push(flame);
 
     if (!options.lowPerfMode || idx === 0) {
-      const fireLight = new THREE.PointLight(0xff9f48, 4.8, 11, 1.55);
+      const fireLight = new THREE.PointLight(0x00d9ff, 4.4, 11, 1.55);
       fireLight.position.set(bx, 1.48, bz);
       root.add(fireLight);
       brazierLights.push(fireLight);
@@ -353,7 +355,7 @@ export function buildCastleCourtyard3d(
   // 6. Distant Mountain Silhouette Ridge Framing the Horizon
   const mountainMat = track(
     new THREE.MeshStandardMaterial({
-      color: 0x171226,
+      color: 0x0a1930,
       roughness: 0.95,
       metalness: 0.04,
     })
@@ -384,9 +386,9 @@ export function buildCastleCourtyard3d(
     }
   });
 
-  // Fine concentric floor inlays catch the warm key light around the hero.
+  // Fine concentric floor inlays catch the electric-blue & cyan light around the hero.
   const inlayMat = track(new THREE.MeshStandardMaterial({
-    color: 0xb68a43, metalness: 0.82, roughness: 0.32,
+    color: 0x00d9ff, emissive: 0x1677ff, emissiveIntensity: 0.55, metalness: 0.8, roughness: 0.28,
     transparent: true, opacity: 0.72
   }));
   [1.82, 2.08, 3.05].forEach((radius, idx) => {
@@ -459,7 +461,7 @@ export function buildCastleCourtyard3d(
   moteGeom.setAttribute('position', new THREE.BufferAttribute(motePositions, 3));
   const moteMat = track(
     new THREE.PointsMaterial({
-      color: 0xe6c37a,
+      color: 0x00d9ff,
       size: 0.055,
       transparent: true,
       opacity: 0.62,

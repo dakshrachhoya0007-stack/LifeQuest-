@@ -2842,7 +2842,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           particleCount: 95,
           spread: 75,
           origin: { y: 0.55 },
-          colors: ['#a855f7', '#ec4899', '#f59e0b', '#38bdf8'],
+          colors: ['#00D9FF', '#1677FF', '#FFFFFF', '#38BDF8'],
         });
       }
       return {
@@ -3097,7 +3097,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       particleCount: 50,
       spread: 60,
       origin: { y: 0.7 },
-      colors: ['#9333ea', '#c084fc', '#f59e0b'],
+      colors: ['#1677FF', '#00D9FF', '#FFFFFF'],
     });
 
     setQuests(prev => prev.map(item => (item.id === questId ? { ...item, claimed: true } : item)));
@@ -3161,7 +3161,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       particleCount: 70,
       spread: 65,
       origin: { y: 0.6 },
-      colors: ['#fbbf24', '#a855f7', '#38bdf8'],
+      colors: ['#00D9FF', '#1677FF', '#FFFFFF'],
     });
 
     return { success: true };
@@ -3621,7 +3621,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         particleCount: 110,
         spread: 85,
         origin: { y: 0.5 },
-        colors: ['#a855f7', '#3b82f6', '#10b981', '#f59e0b'],
+        colors: ['#00D9FF', '#1677FF', '#34D399', '#FFFFFF'],
       });
 
       const vic = await completeBossVictoryServer(kingdomId);
@@ -4699,7 +4699,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       particleCount: 90,
       spread: 70,
       origin: { y: 0.5 },
-      colors: ['#a855f7', '#fbbf24', '#38bdf8'],
+      colors: ['#00D9FF', '#1677FF', '#FFFFFF'],
     });
     return { success: true };
   };
@@ -4902,7 +4902,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     sound.playVictory();
-    confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 }, colors: ['#C5A15A', '#7046A5', '#D9D2C5'] });
+    confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 }, colors: ['#00D9FF', '#1677FF', '#FFFFFF'] });
 
     setReclaimHonorQuest(prev => ({
       ...prev,
@@ -5007,7 +5007,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     sound.playVictory();
-    confetti({ particleCount: 80, spread: 75, origin: { y: 0.6 }, colors: ['#C5A15A', '#7046A5', '#D9D2C5'] });
+    confetti({ particleCount: 80, spread: 75, origin: { y: 0.6 }, colors: ['#00D9FF', '#1677FF', '#FFFFFF'] });
 
     const nextIdx = CAMPAIGN_CHAPTERS.findIndex(c => c.id === ch.id) + 1;
     const nextChapterId = CAMPAIGN_CHAPTERS[nextIdx]?.id || ch.id;
@@ -5336,7 +5336,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       particleCount: q.isSpecialChallenge ? 95 : 55,
       spread: 70,
       origin: { y: 0.65 },
-      colors: ['#C5A15A', '#7046A5', '#34D399'],
+      colors: ['#00D9FF', '#1677FF', '#34D399'],
     });
 
     setDynamicDailyQuests(prev =>
@@ -6336,7 +6336,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         particleCount: 45,
         spread: 60,
         origin: { y: 0.65 },
-        colors: ['#C5A15A', '#7046A5', '#34D399'],
+        colors: ['#00D9FF', '#1677FF', '#34D399'],
       });
       void archiveSkillNodeMuseumServer(uid, nodeId).then(() => refreshMuseumRecords());
       return { success: true };
@@ -6420,7 +6420,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           particleCount: 90,
           spread: 75,
           origin: { y: 0.55 },
-          colors: ['#C5A15A', '#7046A5', '#38bdf8'],
+          colors: ['#00D9FF', '#1677FF', '#FFFFFF'],
         });
       }
       return {
@@ -6969,7 +6969,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (res.ok && res.state) {
       setIdentityState(res.state);
       sound.playVictory();
-      confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 }, colors: ['#C5A15A', '#7046A5', '#FB7185'] });
+      confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 }, colors: ['#00D9FF', '#1677FF', '#FFFFFF'] });
       void refreshNotificationsState();
       return { success: true };
     }
@@ -7081,7 +7081,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (res.ok && res.data) {
       setSeasonState(res.data);
       sound.playVictory();
-      confetti({ particleCount: 75, spread: 70, origin: { y: 0.6 }, colors: ['#C5A15A', '#7046A5', '#34D399'] });
+      confetti({ particleCount: 75, spread: 70, origin: { y: 0.6 }, colors: ['#00D9FF', '#1677FF', '#34D399'] });
       void refreshIdentityState();
       void refreshCosmeticsState();
       void refreshCardsState();
@@ -7702,7 +7702,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (res.ok && res.state) {
       setPrestigeState(res.state);
       sound.playVictory();
-      confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 }, colors: ['#C5A15A', '#7046A5', '#FBBF24'] });
+      confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 }, colors: ['#00D9FF', '#1677FF', '#FFFFFF'] });
       void refreshIdentityState();
       void refreshCosmeticsState();
       return { success: true };

@@ -113,8 +113,8 @@ export const AetheriaCourtyardCanvas: React.FC<AetheriaCourtyardCanvasProps> = (
     host.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x100d19);
-    scene.fog = new THREE.FogExp2(0x100d19, 0.026);
+    scene.background = new THREE.Color(0x061225);
+    scene.fog = new THREE.FogExp2(0x061225, 0.026);
     sceneRef.current = scene;
 
     // Neutral PBR Environment Reflections via RoomEnvironment
@@ -147,11 +147,11 @@ export const AetheriaCourtyardCanvas: React.FC<AetheriaCourtyardCanvasProps> = (
     };
     controls.addEventListener('start', handleControlStart);
 
-    // Three-point twilight key + moonlight fill + ground bounce
-    const hemiLight = new THREE.HemisphereLight(0x9b8bd0, 0x24182e, 1.15);
+    // Three-point futuristic midnight key + electric-blue rim + cyan fill
+    const hemiLight = new THREE.HemisphereLight(0x5b8fd9, 0x0a1930, 1.15);
     scene.add(hemiLight);
 
-    const keyLight = new THREE.DirectionalLight(0xffe2b5, 2.8);
+    const keyLight = new THREE.DirectionalLight(0xe0f2fe, 2.75);
     keyLight.position.set(5.5, 9.5, 6.2);
     if (!isSoftwareGl) {
       keyLight.castShadow = true;
@@ -166,15 +166,15 @@ export const AetheriaCourtyardCanvas: React.FC<AetheriaCourtyardCanvasProps> = (
     }
     scene.add(keyLight);
 
-    const rimLight = new THREE.DirectionalLight(0x9874ed, 1.45);
+    const rimLight = new THREE.DirectionalLight(0x1677ff, 1.55);
     rimLight.position.set(-6.0, 5.2, -5.0);
     scene.add(rimLight);
 
-    const moonFill = new THREE.DirectionalLight(0x718bd8, 0.72);
+    const moonFill = new THREE.DirectionalLight(0x00d9ff, 0.72);
     moonFill.position.set(5.5, 3.0, -7.5);
     scene.add(moonFill);
 
-    const gateBounce = new THREE.PointLight(0xffbd73, 1.25, 16, 1.8);
+    const gateBounce = new THREE.PointLight(0x38bdf8, 1.25, 16, 1.8);
     gateBounce.position.set(0, 3.0, -4.2);
     scene.add(gateBounce);
 
