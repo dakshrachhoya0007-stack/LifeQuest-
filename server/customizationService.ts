@@ -271,7 +271,7 @@ export function createCustomizationService(
     loadouts: u.loadouts,
     activeLoadoutId: u.activeLoadoutId,
     competitionLoadoutId: u.competitionLoadoutId,
-    maxLoadoutSlots: computeMaxLoadoutSlots(userId, u.unlockedIds.length),
+    unlockedLoadoutSlots: computeMaxLoadoutSlots(userId, u.unlockedIds.length),
   });
 
   const validateOwnedAppearance = (

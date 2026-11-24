@@ -1,10 +1,10 @@
-import {
+import type {
   GlobalAchievementCategory,
   GlobalAchievementRarity,
   GlobalExclusiveAchievement,
   GlobalRequirementType,
   GlobalTitleStyle,
-} from '../types/game';
+} from '../types/game.ts';
 
 export const GLOBAL_LEGEND_CATEGORIES: Array<{
   id: GlobalAchievementCategory;
@@ -964,7 +964,7 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     name: 'Spring of the Still Mind',
     story: 'Completed 30 Daily Hydration targets, proving calm recovery fuels endurance.',
     category: 'special_hidden_achievements',
-    rarity: 'Epic',
+    rarity: 'Legendary',
     difficulty: 'Secret',
     titleTag: 'WELLSPRING',
     titleStyle: 'emerald',
@@ -982,7 +982,7 @@ export const GLOBAL_EXCLUSIVE_ACHIEVEMENTS: GlobalExclusiveAchievement[] = [
     name: 'Scribe of Thirty Mornings',
     story: 'Generated 30 AI Daily Reports to learn from balanced victories and rest.',
     category: 'special_hidden_achievements',
-    rarity: 'Epic',
+    rarity: 'Legendary',
     difficulty: 'Secret',
     titleTag: 'DAWN SCRIBE',
     titleStyle: 'arcane',
