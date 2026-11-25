@@ -11,9 +11,7 @@ import {
   PlayerStats,
   AetherRankStage,
   ShopItem,
-  Weapon,
 } from '../types/game';
-import { createExpandedCategoryAbilities } from './weaponArsenal';
 import {
   aetheriaForegroundTerraceImg,
   bossVoidStalkerImg,
@@ -46,7 +44,7 @@ export const AETHER_RANK_STAGES: {
     nextPoints: 350,
     description: 'Steady habit streaks awaken explosive upper- and lower-body strength.',
     perk: '+15% Bodyweight Strike Power and sharper hand/leg form.',
-    glow: 'from-[#6D28D9] to-[#141420]',
+    glow: 'from-[#1677FF] to-[#0A1930]',
     symbol: 'ᚱ',
   },
   {
@@ -55,7 +53,7 @@ export const AETHER_RANK_STAGES: {
     nextPoints: 650,
     description: 'Infused with stamina and athleticism from consistent physical training.',
     perk: '+30% Attack/Defense, +10% Critical strike chance in bodyweight combat.',
-    glow: 'from-[#8B5CF6] to-[#38BDF8]',
+    glow: 'from-cyan-500 to-blue-900',
     symbol: 'ᛏ',
   },
   {
@@ -73,7 +71,7 @@ export const AETHER_RANK_STAGES: {
     nextPoints: 2000,
     description: 'The supreme pinnacle of holistic wellness and unarmed bodyweight mastery.',
     perk: '+80% All Combat Statistics and peak bodyweight conditioning.',
-    glow: 'from-[#8B5CF6] via-[#D6A84B] to-[#FBBF24]',
+    glow: 'from-[#00D9FF] via-[#1677FF] to-amber-400',
     symbol: 'ᛞ',
   },
 ];
@@ -82,29 +80,29 @@ export const getEvolutionVisual = (stage: AetherRankStage) => {
   switch (stage) {
     case 'Awakened':
       return {
-        glowColor: '#8B5CF6',
-        auraStyle: 'border-[#8B5CF6] shadow-[#6D28D9]/45 shadow-xl ring-2 ring-[#8B5CF6]/50',
+        glowColor: '#1677FF',
+        auraStyle: 'border-[#1677FF] shadow-blue-950/70 shadow-xl ring-2 ring-[#1677FF]/50',
         runeSymbol: 'ᚱ',
         titlePrefix: 'Awakened',
       };
     case 'Ascended':
       return {
-        glowColor: '#38BDF8',
-        auraStyle: 'border-[#38BDF8] shadow-sky-950/70 shadow-xl ring-2 ring-[#38BDF8]/50',
+        glowColor: '#00D9FF',
+        auraStyle: 'border-cyan-400 shadow-cyan-950/70 shadow-xl ring-2 ring-cyan-400/50',
         runeSymbol: 'ᛏ',
         titlePrefix: 'Ascended',
       };
     case 'Mythic':
       return {
-        glowColor: '#FBBF24',
-        auraStyle: 'border-[#FBBF24] shadow-amber-950/80 shadow-2xl ring-2 ring-[#FBBF24] animate-pulse',
+        glowColor: '#f59e0b',
+        auraStyle: 'border-amber-400 shadow-amber-950/80 shadow-2xl ring-2 ring-amber-400 animate-pulse',
         runeSymbol: 'ᛟ',
         titlePrefix: 'Mythic',
       };
     case 'Transcendent':
       return {
-        glowColor: '#D6A84B',
-        auraStyle: 'border-[#D6A84B] shadow-[#6D28D9]/60 shadow-2xl ring-4 ring-[#8B5CF6]/75',
+        glowColor: '#00D9FF',
+        auraStyle: 'border-[#00D9FF] shadow-cyan-950/90 shadow-2xl ring-4 ring-amber-400/80',
         runeSymbol: 'ᛞ',
         titlePrefix: 'Transcendent',
       };
@@ -443,7 +441,7 @@ export const INITIAL_KINGDOMS: Kingdom[] = [
     unlocked: true,
     cleared: false,
     loreIntro: 'Warden Sylas greets you at the Verdant Gate: "Hero, our forest withers when routines falter. Reclaim the rhythm of your days, and the ancient canopy will shield your strikes."',
-    colorGradient: 'from-emerald-950 via-[#141420] to-[#090910]',
+    colorGradient: 'from-emerald-950 via-[#0A1930] to-[#061225]',
     boss: {
       id: 'boss-void-stalker',
       name: 'Void Beast Mal’Drak',
@@ -523,7 +521,7 @@ export const INITIAL_KINGDOMS: Kingdom[] = [
     unlocked: false,
     cleared: false,
     loreIntro: 'High Trainer Torin bellows from the High Foundry: "The mountain tests every muscle. Lift your heart rate, power your legs and fists, and the stones will bow to your iron will."',
-    colorGradient: 'from-amber-950 via-[#141420] to-[#090910]',
+    colorGradient: 'from-amber-950 via-[#0A1930] to-[#061225]',
     boss: {
       id: 'boss-mountain-titan',
       name: 'Titan Ignar-Golgoth',
@@ -605,7 +603,7 @@ export const INITIAL_KINGDOMS: Kingdom[] = [
     unlocked: false,
     cleared: false,
     loreIntro: 'High Priestess Coralina whispers: "The tides do not rush; they nourish. Feed your temple wholesome foods, drink deep from pure waters, and your vitality will never empty."',
-    colorGradient: 'from-sky-950 via-[#141420] to-[#090910]',
+    colorGradient: 'from-cyan-950 via-[#0A1930] to-[#061225]',
     boss: {
       id: 'boss-abyssal-hydra',
       name: 'Abyssal Hydra Thalassos',
@@ -655,7 +653,7 @@ export const INITIAL_KINGDOMS: Kingdom[] = [
           thresholdPercent: 66,
           description: 'Alternating strikes between left, right, and center heads.',
           attackMultiplier: 1.0,
-          auraColor: 'text-[#38BDF8]',
+          auraColor: 'text-cyan-400',
         },
         {
           phaseNumber: 2,
@@ -663,7 +661,7 @@ export const INITIAL_KINGDOMS: Kingdom[] = [
           thresholdPercent: 33,
           description: 'Ocean depths darken into tempest. ATK +25%, charges Tsunami Vortex!',
           attackMultiplier: 1.25,
-          auraColor: 'text-blue-400',
+          auraColor: 'text-blue-500',
         },
         {
           phaseNumber: 3,
@@ -671,7 +669,7 @@ export const INITIAL_KINGDOMS: Kingdom[] = [
           thresholdPercent: 0,
           description: 'All heads strike frantically with venomous froth (+50% ATK)!',
           attackMultiplier: 1.5,
-          auraColor: 'text-[#8B5CF6]',
+          auraColor: 'text-[#00D9FF]',
         },
       ],
     },
@@ -765,7 +763,7 @@ export const INITIAL_KINGDOMS: Kingdom[] = [
     unlocked: false,
     cleared: false,
     loreIntro: 'High Archon Valerius declares: "You have walked the forest, climbed the crags, braved the tides and endured the dunes. Now take your place among the immortal Champions!"',
-    colorGradient: 'from-[#141420] via-[#241645] to-amber-950',
+    colorGradient: 'from-[#0A1930] via-[#102440] to-amber-950',
     boss: {
       id: 'boss-void-sovereign',
       name: 'Void Sovereign Malakor',
@@ -817,7 +815,7 @@ export const INITIAL_KINGDOMS: Kingdom[] = [
           thresholdPercent: 66,
           description: 'Hurls dark matter orbs and void lances.',
           attackMultiplier: 1.0,
-          auraColor: 'text-[#8B5CF6]',
+          auraColor: 'text-[#1677FF]',
         },
         {
           phaseNumber: 2,
@@ -825,7 +823,7 @@ export const INITIAL_KINGDOMS: Kingdom[] = [
           thresholdPercent: 33,
           description: 'Gravitational rift pulls reality apart. ATK +30%, charges Eclipse Nova!',
           attackMultiplier: 1.3,
-          auraColor: 'text-[#FB7185]',
+          auraColor: 'text-[#00D9FF]',
         },
         {
           phaseNumber: 3,
@@ -987,9 +985,5 @@ export const INITIAL_SHOP_ITEMS: ShopItem[] = [
     metadata: { buffId: 'buff-3', uses: 2, lore: 'Distilled sapphire essence for unwavering training clarity.' },
   },
 ];
-
-export const INITIAL_WEAPONS: Weapon[] = [];
-
-export const createAbilitiesForCategory = createExpandedCategoryAbilities;
 
 

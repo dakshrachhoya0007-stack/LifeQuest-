@@ -13,9 +13,7 @@ import { CharacterView } from './components/Character/CharacterView';
 import { FitnessView } from './components/Fitness/FitnessView';
 import { NutritionView } from './components/Nutrition/NutritionView';
 import { AetherVisionView } from './components/AetherVision/AetherVisionView';
-import { ArmoryView } from './components/Armory/ArmoryView';
 import { StoreView } from './components/Store/StoreView';
-import { BuffsView } from './components/ActiveBuffs/BuffsView';
 import { BossBattleView } from './components/BossBattle/BossBattleView';
 import { StorylineView } from './components/Storyline/StorylineView';
 import { SocialHubView } from './components/Social/SocialHubView';
@@ -62,16 +60,16 @@ const MainAppContent: React.FC = () => {
   // 1. Loading gate while verifying existing Supabase session (prevents dashboard flash)
   if (isAuthLoading) {
     return (
-      <div className="min-h-screen bg-[#090910] text-[#F8FAFC] flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-[#061225] text-[#FFFFFF] flex flex-col items-center justify-center p-6">
         <div className="flex flex-col items-center gap-4 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#8B5CF6]/25 to-[#D6A84B]/15 border border-[#D6A84B]/50 flex items-center justify-center shadow-[0_0_28px_rgba(139,92,246,0.32)]">
-            <div className="w-6 h-6 border-2 border-[#D6A84B] border-t-transparent rounded-full animate-spin" />
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#1677FF]/25 to-[#00D9FF]/15 border border-[#00D9FF]/45 flex items-center justify-center shadow-[0_0_28px_rgba(22,119,255,0.28)]">
+            <div className="w-6 h-6 border-2 border-[#00D9FF] border-t-transparent rounded-full animate-spin" />
           </div>
           <div>
-            <h1 className="font-['Cinzel'] font-black tracking-widest text-xl text-[#F8FAFC]">
+            <h1 className="font-['Cinzel'] font-black tracking-widest text-xl text-[#FFFFFF]">
               LIFEQUEST
             </h1>
-            <p className="text-xs text-[#A1A1B8] mt-1 tracking-wide">
+            <p className="text-xs text-[#A9B8CC] mt-1 tracking-wide">
               Verifying Realm Session...
             </p>
           </div>
@@ -148,11 +146,9 @@ const MainAppContent: React.FC = () => {
       case 'fitness': return <FitnessView />;
       case 'nutrition': return <NutritionView />;
       case 'aether-vision': return <AetherVisionView />;
-      case 'armory': return <ArmoryView />;
       case 'store':
       case 'marketplace':
         return <StoreView />;
-      case 'buffs': return <BuffsView />;
       case 'boss-battles': return <BossBattleView />;
       case 'storyline': return <StorylineView />;
       case 'social':
@@ -181,10 +177,10 @@ const MainAppContent: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen bg-[#090910] text-[#F8FAFC] flex flex-col antialiased selection:bg-[#8B5CF6] selection:text-white"
+      className="min-h-screen bg-[#061225] text-[#FFFFFF] flex flex-col antialiased selection:bg-[#1677FF] selection:text-white"
       style={{
         backgroundImage:
-          'radial-gradient(ellipse 85% 45% at 50% -10%, rgba(139, 92, 246, 0.14), transparent 70%), radial-gradient(ellipse 55% 35% at 88% 12%, rgba(214, 168, 75, 0.08), transparent 65%), radial-gradient(ellipse 45% 30% at 10% 80%, rgba(109, 40, 217, 0.09), transparent 70%)',
+          'radial-gradient(ellipse 85% 45% at 50% -10%, rgba(22, 119, 255, 0.14), transparent 70%), radial-gradient(ellipse 60% 35% at 85% 15%, rgba(0, 217, 255, 0.06), transparent 65%)',
       }}
     >
       {/* Top Header */}

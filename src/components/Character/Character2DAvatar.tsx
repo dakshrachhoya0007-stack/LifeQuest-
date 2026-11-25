@@ -60,10 +60,10 @@ export const Character2DAvatar: React.FC<Character2DAvatarProps> = ({
     : null;
 
   const dims = SIZE_MAP[size];
-  const frameColor = frameItem?.accentHex || '#8B5CF6';
-  const frameSecondary = frameItem?.primaryHex || '#141420';
-  const auraColor = auraItem?.primaryHex || '#D6A84B';
-  const colorAccent = colorItem?.accentHex || outfitItem?.accentHex || '#8B5CF6';
+  const frameColor = frameItem?.accentHex || '#1677FF';
+  const frameSecondary = frameItem?.primaryHex || '#0A1930';
+  const auraColor = auraItem?.primaryHex || '#00D9FF';
+  const colorAccent = colorItem?.accentHex || outfitItem?.accentHex || '#00D9FF';
   const romanTier = prestigeTier > 0 ? PRESTIGE_ROMANS[Math.min(5, prestigeTier)] || `P${prestigeTier}` : null;
 
   return (
@@ -107,10 +107,10 @@ export const Character2DAvatar: React.FC<Character2DAvatarProps> = ({
       )}
 
       <div
-        className={`relative overflow-hidden ${dims.box} ${dims.radius} bg-[#090910] shadow-xl`}
+        className={`relative overflow-hidden ${dims.box} ${dims.radius} bg-[#061225] shadow-xl`}
         style={{
           border: `2px solid ${frameColor}`,
-          boxShadow: `0 0 0 1px ${frameSecondary}, 0 10px 25px -8px ${auraItem ? `${auraColor}55` : 'rgba(9,9,16,0.8)'}`,
+          boxShadow: `0 0 0 1px ${frameSecondary}, 0 10px 25px -8px ${auraItem ? `${auraColor}55` : 'rgba(2,8,20,0.75)'}`,
         }}
       >
         {colorItem && (
@@ -183,7 +183,7 @@ export const Character2DAvatar: React.FC<Character2DAvatarProps> = ({
       {romanTier && (
         <span
           title={`Prestige Tier ${romanTier}`}
-          className="absolute -top-2 -left-2 z-20 px-1.5 py-0.5 rounded-md bg-[#141420] border border-[#D6A84B]/70 font-['Cinzel'] font-black text-[10px] text-[#D6A84B] shadow-[0_0_12px_rgba(214,168,75,0.35)] tabular-nums"
+          className="absolute -top-2 -left-2 z-20 px-1.5 py-0.5 rounded-md bg-[#0A1930] border border-[#00D9FF]/65 font-['Cinzel'] font-black text-[10px] text-[#00D9FF] shadow-[0_0_10px_rgba(0,217,255,0.28)] tabular-nums"
         >
           {romanTier}
         </span>
@@ -203,13 +203,18 @@ export const Character2DAvatar: React.FC<Character2DAvatarProps> = ({
 interface CollectibleCardArtworkProps {
   card: CollectibleCardDef;
   size?: 'sm' | 'md' | 'lg';
+  compact?: boolean;
+  className?: string;
 }
 
 export const CollectibleCardArtwork: React.FC<CollectibleCardArtworkProps> = ({
   card,
   size = 'md',
+  compact = false,
+  className = '',
 }) => {
-  const h = size === 'sm' ? 'h-20' : size === 'lg' ? 'h-44' : 'h-32';
+  const effectiveSize = compact ? 'sm' : size;
+  const h = effectiveSize === 'sm' ? 'h-20' : effectiveSize === 'lg' ? 'h-44' : 'h-32';
   const renderMotif = () => {
     switch (card.motif) {
       case 'crown':
@@ -222,22 +227,20 @@ export const CollectibleCardArtwork: React.FC<CollectibleCardArtworkProps> = ({
             strokeLinejoin="round"
           />
         );
-      case 'blade':
+      case 'fist':
         return (
-          <g stroke={card.accentHex} strokeWidth="3" strokeLinecap="round" fill="none">
-            <path d="M60 18 L66 64 L60 72 L54 64 Z" />
-            <path d="M44 68 H76" />
-            <path d="M60 72 V84" />
+          <g stroke={card.accentHex} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none">
+            <rect x="40" y="34" width="40" height="32" rx="8" />
+            <path d="M50 34 V48 M60 34 V48 M70 34 V48 M46 66 V78 H74 V66" />
           </g>
         );
-      case 'shield':
+      case 'stride':
         return (
-          <path
-            d="M60 20 L86 30 V54 C86 70 72 80 60 86 C48 80 34 70 34 54 V30 Z"
-            fill="none"
-            stroke={card.accentHex}
-            strokeWidth="3"
-          />
+          <g stroke={card.accentHex} strokeWidth="3" strokeLinecap="round" fill="none">
+            <path d="M30 70 Q52 28 90 36" />
+            <path d="M36 80 Q58 50 88 58" />
+            <circle cx="88" cy="36" r="4" fill={card.accentHex} />
+          </g>
         );
       case 'flame':
         return (
@@ -271,22 +274,6 @@ export const CollectibleCardArtwork: React.FC<CollectibleCardArtworkProps> = ({
             <path d="M44 46 L56 52 M76 46 L64 52 M48 66 H72" />
           </g>
         );
-      case 'fist':
-        return (
-          <g stroke={card.accentHex} strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="38" y="34" width="44" height="32" rx="8" />
-            <path d="M49 34 V46 M60 34 V46 M71 34 V46" />
-            <path d="M46 66 L44 82 H76 L74 66" />
-          </g>
-        );
-      case 'stride':
-        return (
-          <g stroke={card.accentHex} strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M26 70 L50 54 L62 62 L88 30" />
-            <path d="M74 30 H88 V44" />
-            <path d="M26 78 H92" opacity="0.5" />
-          </g>
-        );
       case 'star':
       default:
         return (
@@ -303,7 +290,7 @@ export const CollectibleCardArtwork: React.FC<CollectibleCardArtworkProps> = ({
 
   return (
     <div
-      className={`relative w-full ${h} rounded-xl overflow-hidden flex items-center justify-center border`}
+      className={`relative w-full ${h} rounded-xl overflow-hidden flex items-center justify-center border ${className}`.trim()}
       style={{
         borderColor: `${card.accentHex}55`,
         background: `radial-gradient(circle at 50% 35%, ${card.accentHex}26, transparent 62%), linear-gradient(160deg, ${card.primaryHex}, ${card.secondaryHex})`,

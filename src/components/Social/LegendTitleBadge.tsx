@@ -13,7 +13,6 @@ import {
   Flame,
   Gem,
   GraduationCap,
-  Hammer,
   Heart,
   HeartHandshake,
   Library,
@@ -27,7 +26,6 @@ import {
   Sparkles,
   Star,
   Sun,
-  Swords,
   Trophy,
   Users,
   Wind,
@@ -50,7 +48,7 @@ export const LegendEmblemIcon: React.FC<{
     case 'Crown':
       return <Crown className={className} />;
     case 'Swords':
-      return <Swords className={className} />;
+      return <Dumbbell className={className} />;
     case 'Gem':
       return <Gem className={className} />;
     case 'BookOpen':
@@ -92,7 +90,7 @@ export const LegendEmblemIcon: React.FC<{
     case 'Map':
       return <MapIcon className={className} />;
     case 'Hammer':
-      return <Hammer className={className} />;
+      return <Award className={className} />;
     case 'Users':
       return <Users className={className} />;
     case 'HeartHandshake':

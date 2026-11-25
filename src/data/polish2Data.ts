@@ -31,16 +31,16 @@ export const IDENTITY_RARITY_STYLE: Record<
     hex: '#38BDF8',
   },
   Epic: {
-    border: 'border-[#8B5CF6]/65',
-    text: 'text-[#C4B5FD]',
-    bg: 'bg-[#1D1536]',
-    hex: '#8B5CF6',
+    border: 'border-[#1677FF]/60',
+    text: 'text-[#70B5FF]',
+    bg: 'bg-[#0A1930]',
+    hex: '#1677FF',
   },
   Legendary: {
-    border: 'border-[#D6A84B]/75',
-    text: 'text-[#FBBF24]',
-    bg: 'bg-[#261D0D]',
-    hex: '#D6A84B',
+    border: 'border-[#00D9FF]/70',
+    text: 'text-[#00D9FF]',
+    bg: 'bg-[#0A1930]',
+    hex: '#00D9FF',
   },
   Mythic: {
     border: 'border-rose-400/75',
@@ -198,7 +198,7 @@ export const PLAYER_TITLES_CATALOG: PlayerTitleDefinition[] = [
     id: 'title_vault_seeker',
     name: 'Vault Seeker',
     rarity: 'Rare',
-    description: 'Catalogued 25% of Aetheria’s trophies, relics, cards, and cosmetics.',
+    description: 'Catalogued 25% of Aetheria’s trophies, cards, titles, and cosmetics.',
     unlockRequirement: 'Reach 25% Overall Collection Completion',
     category: 'collection',
     conditionType: 'collection_percent',
@@ -412,7 +412,7 @@ export const RARE_BADGES_CATALOG: RareBadgeDefinition[] = [
     id: 'badge_raid_striker',
     name: 'Citadel Striker',
     rarity: 'Epic',
-    iconName: 'Swords',
+    iconName: 'Flame',
     description: 'Delivered substantial verified damage in Weekly Boss Battles.',
     unlockRequirement: 'Deal 500+ total Weekly Boss damage',
     conditionType: 'boss_damage_total',
@@ -604,7 +604,7 @@ export const buildBattlePassTiers = (seasonNumber: number = 1) => {
     const tier = idx + 6; // 6..50
     const requiredSeasonXp = 1000 + (tier - 5) * 320; // Ends cleanly at 15,400 XP for Tier 50
 
-    // Assign rich alternating rewards across cards, titles, relics, cosmetics, fragments, and gold
+    // Assign rich alternating rewards across cards, titles, cosmetics, fragments, and gold
     if (tier === 10) {
       return {
         tier,
@@ -681,7 +681,7 @@ export const buildBattlePassTiers = (seasonNumber: number = 1) => {
         rewardGold: 90,
         track: 'free' as const,
         eliteRewardType: 'cosmetic_crest' as const,
-        eliteRewardLabel: 'Emberforge Crimson Palette',
+        eliteRewardLabel: 'Emberstone Crimson Palette',
         eliteCosmeticId: 'color_crimson_forge',
       };
     }
@@ -689,12 +689,12 @@ export const buildBattlePassTiers = (seasonNumber: number = 1) => {
       return {
         tier,
         id: `${prefix}${tier}`,
-        title: `Tier ${tier}: Sovereign Relic`,
+        title: `Tier ${tier}: Sovereign Cache`,
         requiredSeasonXp,
-        rewardType: 'relic' as const,
-        rewardLabel: 'Seasonal Armory Relic Unlock Token + 75 Fragments',
-        rewardRelicId: 'obsidian_sunblade',
-        rewardFragments: 75,
+        rewardType: 'fragments' as const,
+        rewardLabel: '125 Cosmetic Fragments + 120 Gold',
+        rewardFragments: 125,
+        rewardGold: 120,
         track: 'free' as const,
         eliteRewardType: 'cosmetic_crest' as const,
         eliteRewardLabel: 'Astral Crown-Locks',

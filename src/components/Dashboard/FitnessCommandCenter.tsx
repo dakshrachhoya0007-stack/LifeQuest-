@@ -27,18 +27,17 @@ const DAILY_TARGET_MINUTES_BY_LEVEL: Record<string, number> = {
 const KCAL_PER_MIN_BY_TYPE: Record<ExerciseType, number> = {
   walking: 4.0,
   yoga: 3.2,
+  plank: 4.2,
+  bicep_curl: 4.8,
+  shoulder_press: 5.2,
   squat: 6.5,
   pushup: 6.8,
-  situp: 5.5,
   lunge: 6.5,
-  knee_raise: 6.0,
+  knee_raise: 7.5,
   jumping_jack: 8.0,
   gym: 7.0,
   cycling: 8.2,
   running: 9.8,
-  bicep_curl: 5.5,
-  plank: 4.5,
-  shoulder_press: 5.8,
 };
 
 const getLocalDateKey = (dateInput: Date | string, timeZone?: string): string => {
@@ -273,15 +272,15 @@ export const FitnessCommandCenter: React.FC = () => {
   return (
     <section
       aria-label="Fitness Command Center"
-      className="rounded-2xl bg-[#141420]/90 backdrop-blur-md border border-[#8B5CF6]/28 shadow-[0_12px_32px_rgba(4,4,10,0.65)] overflow-hidden"
+      className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/28 shadow-[0_12px_32px_rgba(2,8,20,0.6)] overflow-hidden"
     >
       {/* Header Bar */}
-      <div className="px-5 sm:px-7 py-5 border-b border-[#8B5CF6]/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="px-5 sm:px-7 py-5 border-b border-[#1677FF]/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <span className="text-[11px] font-['Cinzel'] font-bold uppercase tracking-widest text-[#34D399] block">
+          <span className="text-[11px] font-['Cinzel'] font-bold uppercase tracking-widest text-[#00D9FF] block">
             Physical Conditioning &amp; Real-Life Progression
           </span>
-          <h2 className="font-['Cinzel'] font-black text-lg sm:text-xl text-[#F8FAFC] mt-0.5">
+          <h2 className="font-['Cinzel'] font-black text-lg sm:text-xl text-white mt-0.5">
             Fitness Command Center
           </h2>
         </div>
@@ -290,15 +289,15 @@ export const FitnessCommandCenter: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowLogModal(true)}
-            className="px-4 py-2 rounded-lg bg-[#0E0E17] hover:bg-[#1B1B2B] border border-[#34D399]/40 hover:border-[#34D399]/70 text-xs font-semibold text-[#F8FAFC] flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0"
+            className="px-4 py-2 rounded-lg bg-[#0A1930] hover:bg-[#16325C] border border-[#1677FF]/40 hover:border-[#00D9FF]/50 text-xs font-semibold text-white flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0"
           >
-            <Plus className="w-3.5 h-3.5 text-[#34D399]" />
+            <Plus className="w-3.5 h-3.5 text-[#00D9FF]" />
             Log Workout
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('aether-vision')}
-            className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#0284C7] to-[#38BDF8] hover:from-[#0369A1] hover:to-[#7DD3FC] text-[#090910] text-xs font-bold flex items-center gap-1.5 shadow-[0_0_18px_rgba(56,189,248,0.3)] transition-all whitespace-nowrap shrink-0"
+            className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white text-xs font-semibold flex items-center gap-1.5 shadow-[0_0_18px_rgba(22,119,255,0.35)] transition-all whitespace-nowrap shrink-0"
           >
             <Camera className="w-3.5 h-3.5" />
             Aether Vision Training
@@ -310,8 +309,8 @@ export const FitnessCommandCenter: React.FC = () => {
         <div
           className={`mx-5 sm:mx-7 mt-4 p-3 rounded-lg border text-xs ${
             notice.type === 'error'
-              ? 'bg-rose-950/70 border-[#FB7185]/60 text-rose-200'
-              : 'bg-emerald-950/70 border-[#34D399]/60 text-emerald-200'
+              ? 'bg-rose-950/70 border-rose-700/70 text-rose-200'
+              : 'bg-emerald-950/70 border-emerald-700/70 text-emerald-200'
           }`}
         >
           {notice.text}
@@ -319,15 +318,15 @@ export const FitnessCommandCenter: React.FC = () => {
       )}
 
       {/* Main 3-Zone Fitness Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-[#8B5CF6]/20">
+      <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-[#1677FF]/20">
         {/* ZONE 1 (4 cols): Daily Activity Ring & Genuine Today Metrics */}
         <div className="lg:col-span-4 p-5 sm:p-6 space-y-5">
           <div className="flex items-center justify-between">
-            <h3 className="font-['Cinzel'] font-bold text-xs tracking-wider uppercase text-[#F8FAFC] flex items-center gap-2">
-              <Activity className="w-4 h-4 text-[#34D399]" />
+            <h3 className="font-['Cinzel'] font-bold text-xs tracking-wider uppercase text-white flex items-center gap-2">
+              <Activity className="w-4 h-4 text-[#00D9FF]" />
               Today’s Activity
             </h3>
-            <span className="text-[11px] font-mono text-[#A1A1B8] capitalize tabular-nums">
+            <span className="text-[11px] font-mono text-[#A9B8CC] capitalize tabular-nums">
               Target {dailyGoalMinutes} min
             </span>
           </div>
@@ -338,8 +337,8 @@ export const FitnessCommandCenter: React.FC = () => {
               <svg className="w-full h-full -rotate-90" viewBox="0 0 132 132">
                 <defs>
                   <linearGradient id="fitnessRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#10B981" />
-                    <stop offset="100%" stopColor="#34D399" />
+                    <stop offset="0%" stopColor="#1677FF" />
+                    <stop offset="100%" stopColor="#00D9FF" />
                   </linearGradient>
                 </defs>
                 <circle
@@ -347,7 +346,7 @@ export const FitnessCommandCenter: React.FC = () => {
                   cy="66"
                   r={ringRadius}
                   fill="none"
-                  stroke="#090910"
+                  stroke="#0A1930"
                   strokeWidth="9"
                 />
                 <circle
@@ -364,13 +363,13 @@ export const FitnessCommandCenter: React.FC = () => {
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                <span className="font-mono font-black text-2xl text-[#F8FAFC] tabular-nums leading-none">
+                <span className="font-mono font-black text-2xl text-white tabular-nums leading-none">
                   {todayMinutes}
                 </span>
-                <span className="text-[10px] text-[#34D399] uppercase tracking-wider mt-1">
+                <span className="text-[10px] text-[#00D9FF] uppercase tracking-wider mt-1">
                   of {dailyGoalMinutes} min
                 </span>
-                <span className="text-[10px] font-mono text-[#A1A1B8] tabular-nums mt-0.5">
+                <span className="text-[10px] font-mono text-[#A9B8CC] tabular-nums mt-0.5">
                   {dailyGoalPercent}%
                 </span>
               </div>
@@ -378,11 +377,11 @@ export const FitnessCommandCenter: React.FC = () => {
 
             <div className="min-w-0 flex-1 space-y-2.5 text-xs">
               <div>
-                <span className="text-[11px] text-[#A1A1B8] block">Workouts Today</span>
-                <span className="font-mono font-bold text-sm text-[#F8FAFC] tabular-nums">
+                <span className="text-[11px] text-[#A9B8CC] block">Workouts Today</span>
+                <span className="font-mono font-bold text-sm text-white tabular-nums">
                   {todaySessions.length} {todaySessions.length === 1 ? 'session' : 'sessions'}
                   {todayVerifiedCount > 0 && (
-                    <span className="text-[11px] text-[#38BDF8] font-normal ml-1.5">
+                    <span className="text-[11px] text-[#00D9FF] font-normal ml-1.5">
                       ({todayVerifiedCount} Vision)
                     </span>
                   )}
@@ -390,8 +389,8 @@ export const FitnessCommandCenter: React.FC = () => {
               </div>
 
               <div>
-                <span className="text-[11px] text-[#A1A1B8] block">Reps &amp; Distance Today</span>
-                <span className="font-mono font-semibold text-[#F8FAFC] tabular-nums">
+                <span className="text-[11px] text-[#A9B8CC] block">Reps &amp; Distance Today</span>
+                <span className="font-mono font-semibold text-white tabular-nums">
                   {todayReps > 0 ? `${todayReps} reps` : '0 reps'}
                   {todayDistanceKm > 0 && (
                     <>
@@ -405,8 +404,8 @@ export const FitnessCommandCenter: React.FC = () => {
               </div>
 
               <div>
-                <span className="text-[11px] text-[#A1A1B8] block">Exercise Burn (Est.)</span>
-                <span className="font-mono font-semibold text-[#34D399] tabular-nums">
+                <span className="text-[11px] text-[#A9B8CC] block">Exercise Burn (Est.)</span>
+                <span className="font-mono font-semibold text-[#00D9FF] tabular-nums">
                   {todayCaloriesBurned > 0
                     ? `${todayCaloriesBurned.toLocaleString()} kcal`
                     : '0 kcal (log workout)'}
@@ -416,13 +415,13 @@ export const FitnessCommandCenter: React.FC = () => {
           </div>
 
           {/* Transparent Real Measurements List */}
-          <div className="pt-4 border-t border-[#8B5CF6]/20 space-y-2.5 text-xs">
+          <div className="pt-4 border-t border-[#1677FF]/20 space-y-2.5 text-xs">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[#A1A1B8] flex items-center gap-1.5">
-                <Footprints className="w-3.5 h-3.5 text-[#34D399]" />
+              <span className="text-[#A9B8CC] flex items-center gap-1.5">
+                <Footprints className="w-3.5 h-3.5 text-[#00D9FF]" />
                 Steps
               </span>
-              <span className="font-mono text-[#F8FAFC] tabular-nums text-right">
+              <span className="font-mono text-white tabular-nums text-right">
                 {todayEstimatedSteps !== null
                   ? `~${todayEstimatedSteps.toLocaleString()} (from distance)`
                   : 'Log walk or run distance'}
@@ -430,18 +429,18 @@ export const FitnessCommandCenter: React.FC = () => {
             </div>
 
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[#A1A1B8] flex items-center gap-1.5">
-                <Droplets className="w-3.5 h-3.5 text-[#38BDF8]" />
+              <span className="text-[#A9B8CC] flex items-center gap-1.5">
+                <Droplets className="w-3.5 h-3.5 text-[#00D9FF]" />
                 Hydration Today
               </span>
               <div className="flex items-center gap-2">
-                <span className="font-mono font-semibold text-[#38BDF8] tabular-nums">
+                <span className="font-mono font-semibold text-[#00D9FF] tabular-nums">
                   {waterGlasses} / 8 glasses
                 </span>
                 <button
                   type="button"
                   onClick={addWaterGlass}
-                  className="px-2 py-0.5 rounded bg-[#0E0E17] hover:bg-[#38BDF8]/20 border border-[#38BDF8]/40 text-[11px] font-semibold text-[#38BDF8] transition-colors"
+                  className="px-2 py-0.5 rounded bg-[#0A1930] hover:bg-[#1677FF]/25 border border-[#00D9FF]/40 text-[11px] font-semibold text-[#00D9FF] transition-colors"
                   title="Record 1 glass of water"
                 >
                   +1
@@ -456,15 +455,15 @@ export const FitnessCommandCenter: React.FC = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between gap-2">
               <div>
-                <h3 className="font-['Cinzel'] font-bold text-xs tracking-wider uppercase text-[#F8FAFC] flex items-center gap-2">
-                  <Flame className="w-4 h-4 text-[#FBBF24]" />
+                <h3 className="font-['Cinzel'] font-bold text-xs tracking-wider uppercase text-white flex items-center gap-2">
+                  <Flame className="w-4 h-4 text-[#00D9FF]" />
                   Weekly Activity Overview
                 </h3>
-                <p className="text-[11px] text-[#A1A1B8] mt-0.5">
+                <p className="text-[11px] text-[#A9B8CC] mt-0.5">
                   Rolling 7-day active minutes from logged workouts
                 </p>
               </div>
-              <span className="font-mono text-xs font-bold text-[#34D399] tabular-nums">
+              <span className="font-mono text-xs font-bold text-[#00D9FF] tabular-nums">
                 {weeklyTotalMinutes} min · {weeklyActiveDays}/7 days
               </span>
             </div>
@@ -491,27 +490,27 @@ export const FitnessCommandCenter: React.FC = () => {
                       <span
                         className={`text-[10px] font-mono tabular-nums transition-opacity ${
                           isSelected || day.minutes > 0
-                            ? 'text-[#34D399] opacity-100'
-                            : 'text-[#A1A1B8]/50 opacity-70 group-hover:opacity-100'
+                            ? 'text-[#00D9FF] opacity-100'
+                            : 'text-[#A9B8CC]/50 opacity-70 group-hover:opacity-100'
                         }`}
                       >
                         {day.minutes > 0 ? `${day.minutes}m` : '0'}
                       </span>
-                      <div className="w-full max-w-[34px] flex-1 bg-[#090910] rounded-t-md flex items-end overflow-hidden border border-[#8B5CF6]/20">
+                      <div className="w-full max-w-[34px] flex-1 bg-[#061225] rounded-t-md flex items-end overflow-hidden border border-[#1677FF]/20">
                         <div
                           className={`w-full rounded-t-md transition-all duration-500 ${
                             hasActivity
                               ? isSelected
-                                ? 'bg-gradient-to-t from-[#10B981] to-[#34D399] shadow-[0_0_12px_rgba(52,211,153,0.4)]'
-                                : 'bg-gradient-to-t from-[#064E3B] to-[#34D399]/80 group-hover:to-[#34D399]'
-                              : 'bg-[#141420]'
+                                ? 'bg-gradient-to-t from-[#1677FF] to-[#00D9FF] shadow-[0_0_12px_rgba(0,217,255,0.4)]'
+                                : 'bg-gradient-to-t from-[#102440] to-[#1677FF] group-hover:to-[#00D9FF]'
+                              : 'bg-[#0A1930]'
                           }`}
                           style={{ height: `${barHeightPct}%` }}
                         />
                       </div>
                       <span
                         className={`text-[10px] font-medium whitespace-nowrap ${
-                          isSelected ? 'text-[#F8FAFC] font-bold' : 'text-[#A1A1B8]'
+                          isSelected ? 'text-white font-bold' : 'text-[#A9B8CC]'
                         }`}
                       >
                         {day.label}
@@ -522,14 +521,14 @@ export const FitnessCommandCenter: React.FC = () => {
               </div>
 
               {/* Selected Day Detail Readout */}
-              <div className="mt-3 pt-2.5 border-t border-[#8B5CF6]/15 flex items-center justify-between text-[11px] text-[#A1A1B8] tabular-nums">
+              <div className="mt-3 pt-2.5 border-t border-[#1677FF]/15 flex items-center justify-between text-[11px] text-[#A9B8CC] tabular-nums">
                 <span>
-                  <strong className="text-[#F8FAFC]">{selectedDay.label}</strong>
+                  <strong className="text-white">{selectedDay.label}</strong>
                   {' · '}
                   {selectedDay.sessions.length}{' '}
                   {selectedDay.sessions.length === 1 ? 'workout' : 'workouts'}
                 </span>
-                <span className="truncate max-w-[220px] text-[#34D399]">
+                <span className="truncate max-w-[220px] text-[#00D9FF]">
                   {selectedDay.sessions.length > 0
                     ? selectedDay.sessions.map(s => s.exerciseName).join(', ')
                     : 'No sessions recorded'}
@@ -539,23 +538,23 @@ export const FitnessCommandCenter: React.FC = () => {
           </div>
 
           {/* Exercise Consistency KPI Strip & Daily Fitness Habits */}
-          <div className="space-y-3 pt-3 border-t border-[#8B5CF6]/20">
+          <div className="space-y-3 pt-3 border-t border-[#1677FF]/20">
             <div className="grid grid-cols-3 gap-2 text-center font-mono">
-              <div className="p-2 rounded-lg bg-[#0E0E17] border border-[#FBBF24]/20">
-                <span className="text-[10px] text-[#A1A1B8] uppercase block">Streak</span>
-                <span className="text-sm font-bold text-[#FBBF24] tabular-nums">
+              <div className="p-2 rounded-lg bg-[#0A1930] border border-[#1677FF]/20">
+                <span className="text-[10px] text-[#A9B8CC] uppercase block">Streak</span>
+                <span className="text-sm font-bold text-[#00D9FF] tabular-nums">
                   {stats.currentStreak}d
                 </span>
               </div>
-              <div className="p-2 rounded-lg bg-[#0E0E17] border border-[#34D399]/20">
-                <span className="text-[10px] text-[#A1A1B8] uppercase block">Total Sessions</span>
-                <span className="text-sm font-bold text-[#34D399] tabular-nums">
+              <div className="p-2 rounded-lg bg-[#0A1930] border border-[#1677FF]/20">
+                <span className="text-[10px] text-[#A9B8CC] uppercase block">Total Sessions</span>
+                <span className="text-sm font-bold text-white tabular-nums">
                   {stats.totalWorkoutsCompleted}
                 </span>
               </div>
-              <div className="p-2 rounded-lg bg-[#0E0E17] border border-[#38BDF8]/20">
-                <span className="text-[10px] text-[#A1A1B8] uppercase block">Vision Reps</span>
-                <span className="text-sm font-bold text-[#38BDF8] tabular-nums">
+              <div className="p-2 rounded-lg bg-[#0A1930] border border-[#1677FF]/20">
+                <span className="text-[10px] text-[#A9B8CC] uppercase block">Vision Reps</span>
+                <span className="text-sm font-bold text-white tabular-nums">
                   {stats.totalVerifiedReps.toLocaleString()}
                 </span>
               </div>
@@ -563,7 +562,7 @@ export const FitnessCommandCenter: React.FC = () => {
 
             {fitnessHabits.length > 0 && (
               <div data-tutorial-id="habits-panel" className="space-y-1.5 pt-1">
-                <span className="text-[10px] font-['Cinzel'] font-bold uppercase tracking-wider text-[#A1A1B8] block">
+                <span className="text-[10px] font-['Cinzel'] font-bold uppercase tracking-wider text-[#A9B8CC] block">
                   Physical Consistency Habits
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
@@ -578,21 +577,21 @@ export const FitnessCommandCenter: React.FC = () => {
                         onClick={() => handleToggleFitnessHabit(habit.id)}
                         className={`px-2.5 py-2 rounded-lg border text-left text-xs flex items-center justify-between gap-2 transition-colors ${
                           claimed
-                            ? 'bg-[#0E0E17]/70 border-[#34D399]/40 text-[#A1A1B8] cursor-default'
-                            : 'bg-[#0E0E17] hover:bg-[#1B1B2B] border-[#8B5CF6]/25 hover:border-[#34D399]/50 text-[#F8FAFC]'
+                            ? 'bg-[#0A1930]/60 border-emerald-500/35 text-[#A9B8CC] cursor-default'
+                            : 'bg-[#0A1930] hover:bg-[#16325C] border-[#1677FF]/25 hover:border-[#00D9FF]/50 text-white'
                         }`}
                       >
                         <span className="flex items-center gap-1.5 min-w-0">
                           {claimed ? (
-                            <CheckCircle2 className="w-3.5 h-3.5 text-[#34D399] shrink-0" />
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                           ) : (
-                            <Circle className="w-3.5 h-3.5 text-[#34D399]/75 shrink-0" />
+                            <Circle className="w-3.5 h-3.5 text-[#00D9FF]/75 shrink-0" />
                           )}
                           <span className={`truncate ${claimed ? 'line-through' : ''}`}>
                             {habit.name}
                           </span>
                         </span>
-                        <span className="text-[10px] font-mono text-[#FBBF24] shrink-0 tabular-nums">
+                        <span className="text-[10px] font-mono text-[#00D9FF] shrink-0 tabular-nums">
                           {habit.streak}d
                         </span>
                       </button>
@@ -608,12 +607,12 @@ export const FitnessCommandCenter: React.FC = () => {
         <div className="lg:col-span-3 p-5 sm:p-6 space-y-5 flex flex-col justify-between">
           {/* Personal Fitness Goals */}
           <div className="space-y-2.5">
-            <h3 className="font-['Cinzel'] font-bold text-xs tracking-wider uppercase text-[#F8FAFC] flex items-center gap-2">
-              <Target className="w-4 h-4 text-[#34D399]" />
+            <h3 className="font-['Cinzel'] font-bold text-xs tracking-wider uppercase text-white flex items-center gap-2">
+              <Target className="w-4 h-4 text-[#00D9FF]" />
               Fitness Goals
             </h3>
-            <p className="text-[11px] text-[#A1A1B8]">
-              Pace: <span className="text-[#34D399] capitalize font-medium">{(user?.activityLevel || 'moderate').replace('_', ' ')}</span>
+            <p className="text-[11px] text-[#A9B8CC]">
+              Pace: <span className="text-[#00D9FF] capitalize font-medium">{(user?.activityLevel || 'moderate').replace('_', ' ')}</span>
               {' · '}
               {dailyGoalMinutes} min/day target
             </p>
@@ -622,24 +621,24 @@ export const FitnessCommandCenter: React.FC = () => {
                 {user.personalGoals.slice(0, 4).map(goal => (
                   <li
                     key={goal}
-                    className="text-xs text-[#A1A1B8] py-1 border-b border-[#8B5CF6]/15 last:border-b-0"
+                    className="text-xs text-[#A9B8CC] py-1 border-b border-[#1677FF]/15 last:border-b-0"
                   >
                     {goal}
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-xs text-[#A1A1B8]/80 leading-relaxed">
+              <p className="text-xs text-[#A9B8CC]/80 leading-relaxed">
                 No personal fitness goals saved yet. Set your focus in Settings.
               </p>
             )}
           </div>
 
           {/* Fitness-Related Quest Progress Only */}
-          <div className="space-y-3 pt-4 border-t border-[#8B5CF6]/20">
+          <div className="space-y-3 pt-4 border-t border-[#1677FF]/20">
             <div className="flex items-center justify-between gap-2">
-              <h4 className="font-['Cinzel'] font-bold text-xs tracking-wider uppercase text-[#F8FAFC] flex items-center gap-1.5">
-                <Zap className="w-3.5 h-3.5 text-[#FBBF24]" />
+              <h4 className="font-['Cinzel'] font-bold text-xs tracking-wider uppercase text-white flex items-center gap-1.5">
+                <Zap className="w-3.5 h-3.5 text-[#00D9FF]" />
                 Physical Quests
               </h4>
               <button
@@ -648,14 +647,14 @@ export const FitnessCommandCenter: React.FC = () => {
                   setProgressionSubTab('quests');
                   setActiveTab('progression');
                 }}
-                className="text-[11px] text-[#D6A84B] hover:text-[#F8FAFC] font-medium transition-colors whitespace-nowrap"
+                className="text-[11px] text-[#00D9FF] hover:text-white font-medium transition-colors whitespace-nowrap"
               >
                 Progression →
               </button>
             </div>
 
             {fitnessQuests.length === 0 ? (
-              <div className="py-4 text-xs text-[#A1A1B8] space-y-2">
+              <div className="py-4 text-xs text-[#A9B8CC] space-y-2">
                 <p>No active physical quests yet today.</p>
                 <button
                   type="button"
@@ -663,7 +662,7 @@ export const FitnessCommandCenter: React.FC = () => {
                     setProgressionSubTab('quests');
                     setActiveTab('progression');
                   }}
-                  className="text-[#D6A84B] hover:underline font-medium"
+                  className="text-[#00D9FF] hover:underline font-medium"
                 >
                   Generate daily quests →
                 </button>
@@ -678,16 +677,16 @@ export const FitnessCommandCenter: React.FC = () => {
                   return (
                     <div key={q.id} className="space-y-1.5">
                       <div className="flex items-start justify-between gap-2 text-xs">
-                        <span className="font-semibold text-[#F8FAFC] line-clamp-1">
+                        <span className="font-semibold text-white line-clamp-1">
                           {q.title}
                         </span>
-                        <span className="font-mono text-[11px] text-[#34D399] shrink-0 tabular-nums">
+                        <span className="font-mono text-[11px] text-[#00D9FF] shrink-0 tabular-nums">
                           {q.progress}/{q.maxProgress}
                         </span>
                       </div>
-                      <div className="w-full h-1.5 rounded-full bg-[#090910] overflow-hidden border border-[#34D399]/25">
+                      <div className="w-full h-1.5 rounded-full bg-[#061225] overflow-hidden border border-[#1677FF]/20">
                         <div
-                          className="h-full bg-gradient-to-r from-[#10B981] to-[#34D399] transition-all duration-500"
+                          className="h-full bg-gradient-to-r from-[#1677FF] to-[#00D9FF] transition-all duration-500"
                           style={{ width: `${pct}%` }}
                         />
                       </div>
@@ -702,7 +701,7 @@ export const FitnessCommandCenter: React.FC = () => {
                           Claim {q.rewardLabel}
                         </button>
                       ) : (
-                        <p className="text-[10px] text-[#A1A1B8]/80 font-mono">
+                        <p className="text-[10px] text-[#A9B8CC]/80 font-mono">
                           {q.claimed ? 'Completed & claimed' : `Reward: ${q.rewardLabel}`}
                         </p>
                       )}
@@ -718,24 +717,24 @@ export const FitnessCommandCenter: React.FC = () => {
       {/* Inline Manual Workout Logger Modal */}
       {showLogModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#090910]/85 backdrop-blur-md animate-in fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#061225]/85 backdrop-blur-md animate-in fade-in"
           onClick={() => setShowLogModal(false)}
           role="dialog"
           aria-modal="true"
           aria-label="Log Workout Session"
         >
           <div
-            className="w-full max-w-md bg-[#141420] border border-[#8B5CF6]/40 rounded-2xl p-6 shadow-[0_24px_64px_rgba(4,4,10,0.85)] space-y-4"
+            className="w-full max-w-md bg-[#102440] border border-[#1677FF]/40 rounded-2xl p-6 shadow-[0_24px_64px_rgba(2,8,20,0.85)] space-y-4"
             onClick={e => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-[#8B5CF6]/20 pb-3">
-              <h3 className="font-['Cinzel'] font-bold text-base text-[#F8FAFC]">
+            <div className="flex items-center justify-between border-b border-[#1677FF]/20 pb-3">
+              <h3 className="font-['Cinzel'] font-bold text-base text-white">
                 Record Workout Session
               </h3>
               <button
                 type="button"
                 onClick={() => setShowLogModal(false)}
-                className="p-1.5 rounded-lg text-[#A1A1B8] hover:text-white"
+                className="p-1.5 rounded-lg text-[#A9B8CC] hover:text-white"
                 aria-label="Close workout modal"
               >
                 <X className="w-4 h-4" />
@@ -744,7 +743,7 @@ export const FitnessCommandCenter: React.FC = () => {
 
             <form onSubmit={handleLogWorkout} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-[#A1A1B8] mb-1.5">
+                <label className="block text-xs font-medium text-[#A9B8CC] mb-1.5">
                   Activity Type
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -758,8 +757,8 @@ export const FitnessCommandCenter: React.FC = () => {
                       }}
                       className={`px-3 py-2 rounded-lg border text-xs font-medium text-left transition-colors ${
                         exerciseType === opt.type
-                          ? 'bg-[#34D399]/20 border-[#34D399]/70 text-white'
-                          : 'bg-[#0E0E17] border-[#8B5CF6]/25 text-[#A1A1B8] hover:text-white'
+                          ? 'bg-[#1677FF]/25 border-[#00D9FF]/70 text-white'
+                          : 'bg-[#0A1930] border-[#1677FF]/25 text-[#A9B8CC] hover:text-white'
                       }`}
                     >
                       {opt.label}
@@ -769,20 +768,20 @@ export const FitnessCommandCenter: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#A1A1B8] mb-1">
+                <label className="block text-xs font-medium text-[#A9B8CC] mb-1">
                   Session Name
                 </label>
                 <input
                   type="text"
                   value={exerciseName}
                   onChange={e => setExerciseName(e.target.value)}
-                  className="w-full bg-[#0E0E17] border border-[#8B5CF6]/30 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#34D399]"
+                  className="w-full bg-[#0A1930] border border-[#1677FF]/30 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00D9FF]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-[#A1A1B8] mb-1">
+                  <label className="block text-xs font-medium text-[#A9B8CC] mb-1">
                     Duration (Minutes)
                   </label>
                   <input
@@ -791,11 +790,11 @@ export const FitnessCommandCenter: React.FC = () => {
                     max={300}
                     value={durationMinutes}
                     onChange={e => setDurationMinutes(Number(e.target.value))}
-                    className="w-full bg-[#0E0E17] border border-[#8B5CF6]/30 rounded-lg px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-[#34D399]"
+                    className="w-full bg-[#0A1930] border border-[#1677FF]/30 rounded-lg px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-[#00D9FF]"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-[#A1A1B8] mb-1">
+                  <label className="block text-xs font-medium text-[#A9B8CC] mb-1">
                     {isImperial ? 'Distance (mi optional)' : 'Distance (km optional)'}
                   </label>
                   <input
@@ -805,13 +804,13 @@ export const FitnessCommandCenter: React.FC = () => {
                     placeholder={isImperial ? 'e.g. 2.0' : 'e.g. 3.2'}
                     value={distanceInput}
                     onChange={e => setDistanceInput(e.target.value)}
-                    className="w-full bg-[#0E0E17] border border-[#8B5CF6]/30 rounded-lg px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-[#34D399]"
+                    className="w-full bg-[#0A1930] border border-[#1677FF]/30 rounded-lg px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-[#00D9FF]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#A1A1B8] mb-1">
+                <label className="block text-xs font-medium text-[#A9B8CC] mb-1">
                   Notes (Optional)
                 </label>
                 <input
@@ -819,7 +818,7 @@ export const FitnessCommandCenter: React.FC = () => {
                   value={notes}
                   onChange={e => setNotes(e.target.value)}
                   placeholder="How did the session feel?"
-                  className="w-full bg-[#0E0E17] border border-[#8B5CF6]/30 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#34D399]"
+                  className="w-full bg-[#0A1930] border border-[#1677FF]/30 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00D9FF]"
                 />
               </div>
 
@@ -827,13 +826,13 @@ export const FitnessCommandCenter: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowLogModal(false)}
-                  className="px-4 py-2 rounded-lg text-xs text-[#A1A1B8] hover:text-white"
+                  className="px-4 py-2 rounded-lg text-xs text-[#A9B8CC] hover:text-white"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-lg bg-gradient-to-r from-[#10B981] to-[#34D399] hover:from-[#059669] hover:to-[#6EE7B7] text-[#090910] text-xs font-bold shadow-[0_0_18px_rgba(52,211,153,0.3)] transition-all"
+                  className="px-5 py-2 rounded-lg bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white text-xs font-semibold shadow-[0_0_18px_rgba(22,119,255,0.35)] transition-all"
                 >
                   Save Workout
                 </button>

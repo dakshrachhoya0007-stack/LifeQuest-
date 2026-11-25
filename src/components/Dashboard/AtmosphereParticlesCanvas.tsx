@@ -88,9 +88,9 @@ export const AtmosphereParticlesCanvas: React.FC<AtmosphereParticlesCanvasProps>
         const a = p.alpha * flicker;
 
         if (p.isEmber) {
-          ctx.fillStyle = `rgba(214, 168, 75, ${a.toFixed(3)})`;
+          ctx.fillStyle = `rgba(0, 217, 255, ${a.toFixed(3)})`;
         } else {
-          ctx.fillStyle = `rgba(139, 92, 246, ${a.toFixed(3)})`;
+          ctx.fillStyle = `rgba(169, 184, 204, ${a.toFixed(3)})`;
         }
 
         ctx.beginPath();

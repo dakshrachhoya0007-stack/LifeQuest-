@@ -5,7 +5,6 @@ import {
   PlayerStats,
   Habit,
   Quest,
-  Weapon,
   Buff,
   Kingdom,
   FitnessSession,
@@ -22,9 +21,6 @@ import {
   FriendRecord,
   ChampionSummary,
   AppNotification,
-  EquippedGear,
-  EquipmentSlotType,
-  WeaponCategory,
   ProfileVisibility,
   PublicPlayerProfile,
   BlockedUserSummary,
@@ -54,8 +50,6 @@ import {
   CompetitiveMatchVisibility,
   CompetitiveLeaderboardEntry,
   CompetitiveRivalMatch,
-  DuelExerciseId,
-  RivalryScoreEntry,
   PlayerSkillTreeState,
   SkillActivityAwardResult,
   SkillActivityType,
@@ -120,7 +114,6 @@ import {
   cancelRivalsQueueServer,
   claimCommunityMilestoneServer,
   claimWeeklyBossRewardServer,
-  concedeRivalDuelServer,
   dispatchVerifiedEcosystemActivityServer,
   disputeRivalMatchServer,
   endActiveRivalryServer,
@@ -133,7 +126,6 @@ import {
   fetchWeeklyBossStateServer,
   inviteRivalServer,
   joinRivalsQueueServer,
-  readyRivalDuelServer,
   reconcileMuseumServer,
   reconcileSkillTreeServer,
   rematchRivalServer,
@@ -141,7 +133,6 @@ import {
   respondRivalInviteServer,
   sendAiMentorMessageServer,
   sendDirectRivalChallengeServer,
-  submitVerifiedDuelRepServer,
   syncMuseumPrivacyServer,
   updateRivalsPrivacyServer,
   type MuseumQueryResponse,
@@ -221,7 +212,6 @@ import {
   sendSpectatorCheerServer,
   toggleFollowCompetitorServer,
   fetchCollectionCompletionServer,
-  syncCollectionRelicsServer,
   claimCollectionMilestoneServer,
   giveEndorsementServer,
   reportEndorsementAbuseServer,
@@ -244,7 +234,6 @@ import {
 } from '../data/globalLegendsData';
 import {
   INITIAL_PLAYER_STATS,
-  INITIAL_WEAPONS,
   INITIAL_HABITS,
   INITIAL_QUESTS,
   INITIAL_BUFFS,
@@ -252,14 +241,7 @@ import {
   INITIAL_ACHIEVEMENTS,
   INITIAL_SHOP_ITEMS,
   AETHER_RANK_STAGES,
-  getEvolutionVisual,
-  createAbilitiesForCategory,
 } from '../data/initialData';
-import {
-  findBlueprintByWeaponId,
-  LEGACY_WEAPON_EVOLUTION_OVERRIDES,
-  getMasteryPathForCategory,
-} from '../data/weaponArsenal';
 import { getRarityStyle } from '../utils/rarityStyles';
 import { sound } from '../utils/audio';
 import { characterWarriorAvatarImg, getHeroArtwork, getRpgAvatarForClass } from '../assets/images';
@@ -290,12 +272,6 @@ import {
   claimAchievementServer,
   fetchShopCatalogServer,
   purchaseShopItemServer,
-  equipWeaponServer,
-  upgradeWeaponServer,
-  trainWeaponMasteryServer,
-  evolveWeaponServer,
-  unlockProgressionWeaponServer,
-  ascendWeaponRarityServer,
   toggleBuffServer,
   discoverBossWeaknessServer,
   startBossEncounterServer,
@@ -371,7 +347,6 @@ interface GameContextType {
   stats: PlayerStats;
   habits: Habit[];
   quests: Quest[];
-  weapons: Weapon[];
   buffs: Buff[];
   kingdoms: Kingdom[];
   fitnessSessions: FitnessSession[];
@@ -396,8 +371,8 @@ interface GameContextType {
   ) => void;
   characterSubTab: 'overview' | 'customization' | 'cards' | 'trophies';
   setCharacterSubTab: (subTab: 'overview' | 'customization' | 'cards' | 'trophies') => void;
-  storeSubTab: 'bazaar' | 'relics' | 'marketplace';
-  setStoreSubTab: (subTab: 'bazaar' | 'relics' | 'marketplace') => void;
+  storeSubTab: 'bazaar' | 'marketplace';
+  setStoreSubTab: (subTab: 'bazaar' | 'marketplace') => void;
   guildsSubTab: 'directory' | 'territory-wars';
   setGuildsSubTab: (subTab: 'directory' | 'territory-wars') => void;
   eventsSubTab: 'events' | 'decisions';
@@ -603,41 +578,15 @@ interface GameContextType {
   claimWeeklyBossReward: (
     claimType: 'mission' | 'milestone' | 'participation' | 'defeat' | 'top_contributor',
     claimId: string
-  ) => Promise<{ success: boolean; error?: string; rewards?: { xp: number; forgeXp: number; gold: number } }>;
+  ) => Promise<{ success: boolean; error?: string; rewards?: { xp: number; gold: number } }>;
   // Phase 2 (Competitive Arena): Independent Rivals Platform
   rivalsState: RivalsStateResponse | null;
   rivalsLoading: boolean;
-  rivalsServerClockOffsetMs: number;
   refreshRivalsState: () => Promise<void>;
   joinRivalsQueue: (
-    opts?: CompetitiveRivalMode | { durationSeconds?: number; mode?: CompetitiveRivalMode }
+    mode: CompetitiveRivalMode
   ) => Promise<{ success: boolean; matched?: boolean; match?: CompetitiveRivalMatch | null; error?: string }>;
   cancelRivalsQueue: () => Promise<{ success: boolean; error?: string }>;
-  readyRivalDuel: (params: {
-    matchId: string;
-    ready: boolean;
-    cameraReady: boolean;
-  }) => Promise<{ success: boolean; match?: CompetitiveRivalMatch; launchedNow?: boolean; error?: string }>;
-  submitVerifiedDuelRep: (params: {
-    matchId: string;
-    eventId: string;
-    repSeq: number;
-    exercise: DuelExerciseId;
-    peakAngleDeg: number;
-    resetAngleDeg: number;
-    durationMs: number;
-    confidence: number;
-    landmarksVisible: boolean;
-    cameraStable: boolean;
-  }) => Promise<{
-    success: boolean;
-    status?: number;
-    pointsAwarded?: number;
-    duplicate?: boolean;
-    match?: CompetitiveRivalMatch;
-    error?: string;
-  }>;
-  concedeRivalDuel: (matchId: string) => Promise<{ success: boolean; match?: CompetitiveRivalMatch; error?: string }>;
   sendDirectRivalChallenge: (params: {
     opponentId: string;
     opponentName: string;
@@ -732,8 +681,6 @@ interface GameContextType {
   dismissGlobalUnlockCelebration: () => void;
   showAuthModal: boolean;
   authMode: 'login' | 'register';
-  equippedWeapon: Weapon;
-  equippedGear: EquippedGear;
   activeBuffs: Buff[];
   selectedHeroId: PlayableHeroId;
   heroLocked: boolean;
@@ -743,7 +690,6 @@ interface GameContextType {
   selectPlayableHero: (heroId: PlayableHeroId) => Promise<{ success: boolean; error?: string }>;
   rpgAttributes: RpgAttributes;
   reclaimHonorQuest: ReclaimHonorQuestState;
-  recordEquipmentInspected: () => void;
   claimReclaimHonorReward: () => Promise<{ success: boolean; error?: string }>;
   campaignProgress: CampaignProgressState;
   evaluateChapterRequirements: (chapterId: string) => { met: boolean; missing: string[] };
@@ -771,43 +717,13 @@ interface GameContextType {
   isHabitClaimedForCurrentPeriod: (habit: Habit) => boolean;
   // Quest Actions
   claimQuest: (questId: string) => Promise<{ success: boolean; error?: string }>;
-  // Armory, Shop & Weapon Evolution Actions
-  equipWeapon: (weaponId: string) => void;
-  equipGearSlot: (itemId: string, slot?: EquipmentSlotType) => void;
-  getDefaultSlotForCategory: (category: WeaponCategory) => EquipmentSlotType;
-  upgradeWeapon: (weaponId: string) => Promise<{
-    success: boolean;
-    updatedWeapon?: Weapon;
-    previousLevel?: number;
-    previousAttack?: number;
-    previousDefense?: number;
-    error?: string;
-  }>;
+  // Shop Actions
   purchaseShopItem: (itemId: string) => Promise<{ success: boolean; error?: string }>;
-  trainWeaponMastery: (
-    weaponId: string,
-    gainedXP?: number
-  ) => Promise<{ success: boolean; newLevel: number; abilityUnlocked?: string; error?: string }>;
-  evolveWeapon: (weaponId: string) => Promise<{ success: boolean; newStage?: AetherRankStage; updatedWeapon?: Weapon; error?: string }>;
-  unlockProgressionWeapon: (
-    weaponId: string
-  ) => Promise<{ success: boolean; weapon?: Weapon; error?: string }>;
-  ascendWeaponRarity: (
-    weaponId: string
-  ) => Promise<{
-    success: boolean;
-    previousWeaponId?: string;
-    updatedWeapon?: Weapon;
-    previousAttack?: number;
-    previousDefense?: number;
-    previousLevel?: number;
-    error?: string;
-  }>;
   // Buff Actions
   activateBuff: (buffId: string) => void;
   // Fitness Actions
   logFitnessSession: (
-    session: Omit<FitnessSession, 'id' | 'timestamp' | 'playerXpEarned' | 'forgeXpEarned'> & {
+    session: Omit<FitnessSession, 'id' | 'timestamp' | 'playerXpEarned'> & {
       idempotencyKey?: string;
     }
   ) => Promise<{
@@ -817,7 +733,6 @@ interface GameContextType {
     dailyCapReached?: boolean;
     rewards?: {
       playerXp: number;
-      forgeXp: number;
       gold: number;
       aetherPoints: number;
       buffActivated: boolean;
@@ -833,7 +748,6 @@ interface GameContextType {
     dailyCapReached?: boolean;
     rewards?: {
       playerXp: number;
-      forgeXp: number;
       gold: number;
       aetherPoints: number;
     };
@@ -971,8 +885,6 @@ const ROUTE_TO_TAB: Record<string, string> = {
   '/fitness': 'fitness',
   '/nutrition': 'nutrition',
   '/aether-vision': 'aether-vision',
-  '/armory': 'armory',
-  '/buffs': 'buffs',
   '/boss-battles': 'boss-battles',
   '/weekly-boss': 'boss-battles',
   '/storyline': 'storyline',
@@ -1052,54 +964,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   });
 
-  const [weapons, setWeapons] = useState<Weapon[]>(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY_PREFIX + 'weapons');
-      if (stored) {
-        const parsed: Weapon[] = JSON.parse(stored);
-        return parsed.map(w => {
-          const fallback = INITIAL_WEAPONS.find(iw => iw.id === w.id);
-          const bp = findBlueprintByWeaponId(w.id);
-          const legacyOv = LEGACY_WEAPON_EVOLUTION_OVERRIDES[w.id];
-          const stage = w.evolutionStage || fallback?.evolutionStage || 'Dormant';
-          const masteryLevel = w.masteryLevel || fallback?.masteryLevel || (bp?.awakened ? 4 : 1);
-          const category = w.category || fallback?.category || bp?.category || 'Swords';
-          const abilities = (w.abilities && w.abilities.length > 0)
-            ? w.abilities
-            : createAbilitiesForCategory(category, masteryLevel);
-          return {
-            ...fallback,
-            ...legacyOv,
-            ...w,
-            critChance: w.critChance ?? bp?.critChance ?? legacyOv?.critChance ?? fallback?.critChance ?? 5,
-            critDamage: w.critDamage ?? bp?.critDamage ?? legacyOv?.critDamage ?? fallback?.critDamage ?? 180,
-            speed: w.speed ?? bp?.speed ?? legacyOv?.speed ?? fallback?.speed ?? 65,
-            element: w.element ?? bp?.element ?? legacyOv?.element ?? fallback?.element ?? 'Physical',
-            abilityPower: w.abilityPower ?? bp?.abilityPower ?? legacyOv?.abilityPower ?? fallback?.abilityPower ?? 5,
-            specialAbilityName: w.specialAbilityName ?? bp?.specialAbilityName ?? legacyOv?.specialAbilityName,
-            specialAbilitySummary: w.specialAbilitySummary ?? bp?.specialAbilitySummary ?? legacyOv?.specialAbilitySummary,
-            combatIntegrationStatus: w.combatIntegrationStatus ?? bp?.combatIntegrationStatus ?? legacyOv?.combatIntegrationStatus ?? 'active_in_combat',
-            obtainMethod: w.obtainMethod ?? bp?.obtainMethod ?? legacyOv?.obtainMethod ?? 'starter',
-            unlockRequirement: w.unlockRequirement ?? bp?.unlockRequirement,
-            evolutionPath: w.evolutionPath ?? bp?.evolutionPath ?? legacyOv?.evolutionPath,
-            awakened: w.awakened ?? bp?.awakened ?? false,
-            awakeningLevel: w.awakeningLevel ?? bp?.awakeningLevel ?? 0,
-            evolutionStage: stage,
-            masteryLevel,
-            masteryXP: typeof w.masteryXP === 'number' ? w.masteryXP : 0,
-            masteryXPNextLevel: w.masteryXPNextLevel || 100,
-            masteryPath: w.masteryPath || fallback?.masteryPath || getMasteryPathForCategory(category),
-            abilities,
-            evolutionVisual: w.evolutionVisual || getEvolutionVisual(stage),
-          };
-        });
-      }
-      return INITIAL_WEAPONS;
-    } catch {
-      return INITIAL_WEAPONS;
-    }
-  });
-
   const [buffs, setBuffs] = useState<Buff[]>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY_PREFIX + 'buffs');
@@ -1157,7 +1021,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           verifiedWithAetherVision: true,
           timestamp: new Date(Date.now() - 86400000).toISOString(),
           playerXpEarned: 40,
-          forgeXpEarned: 50,
         },
       ];
     } catch {
@@ -1201,13 +1064,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const stored = localStorage.getItem(STORAGE_KEY_PREFIX + 'tx');
       return stored ? JSON.parse(stored) : [
         {
-          id: 'tx-1',
-          type: 'FORGE_XP',
-          source: 'Initial Blacksmith Starter Grant',
-          amount: 120,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        },
-        {
           id: 'tx-2',
           type: 'PLAYER_XP',
           source: 'Morning Sleep Recovery Habit',
@@ -1221,30 +1077,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   const [shopItems, setShopItems] = useState<ShopItem[]>(INITIAL_SHOP_ITEMS);
-  const [equippedGear, setEquippedGear] = useState<EquippedGear>(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY_PREFIX + 'equipped_gear');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        return {
-          mainWeaponId: parsed.mainWeaponId || 'w-sword-1',
-          offHandId: parsed.offHandId ?? 'w-shield-1',
-          armourId: parsed.armourId ?? null,
-          helmetId: parsed.helmetId ?? null,
-          accessoryId: parsed.accessoryId ?? null,
-        };
-      }
-    } catch {
-      // ignore storage failure
-    }
-    return {
-      mainWeaponId: 'w-sword-1',
-      offHandId: 'w-shield-1',
-      armourId: null,
-      helmetId: null,
-      accessoryId: null,
-    };
-  });
   const [friends, setFriends] = useState<FriendRecord[]>([]);
   const [blockedUsers, setBlockedUsers] = useState<BlockedUserSummary[]>([]);
   const [guildInvites, setGuildInvites] = useState<MyGuildInviteRecord[]>([]);
@@ -1259,7 +1091,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [characterSubTab, setCharacterSubTabState] = useState<
     'overview' | 'customization' | 'cards' | 'trophies'
   >('overview');
-  const [storeSubTab, setStoreSubTabState] = useState<'bazaar' | 'relics' | 'marketplace'>('bazaar');
+  const [storeSubTab, setStoreSubTabState] = useState<'bazaar' | 'marketplace'>('bazaar');
   const [guildsSubTab, setGuildsSubTabState] = useState<'directory' | 'territory-wars'>('directory');
   const [eventsSubTab, setEventsSubTabState] = useState<'events' | 'decisions'>('events');
   const [progressionSubTab, setProgressionSubTabState] = useState<
@@ -1310,7 +1142,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [weeklyBossLoading, setWeeklyBossLoading] = useState<boolean>(false);
   const [rivalsState, setRivalsState] = useState<RivalsStateResponse | null>(null);
   const [rivalsLoading, setRivalsLoading] = useState<boolean>(false);
-  const [rivalsServerClockOffsetMs, setRivalsServerClockOffsetMs] = useState<number>(0);
   const [mentorMessages, setMentorMessages] = useState<MentorChatMessage[]>([]);
   const [mentorQuests, setMentorQuests] = useState<MentorRecommendedQuest[]>([]);
   const [mentorWeeklyAnalysis, setMentorWeeklyAnalysis] = useState<MentorWeeklyAnalysis | null>(null);
@@ -1329,8 +1160,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const DEFAULT_RECLAIM_HONOR: ReclaimHonorQuestState = {
     objectives: {
-      visit_armory: false,
-      inspect_equipment: false,
+      visit_fitness: false,
       visit_shop: false,
       open_quest_board: false,
       view_attributes: false,
@@ -1388,7 +1218,21 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [reclaimHonorQuest, setReclaimHonorQuest] = useState<ReclaimHonorQuestState>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_PREFIX + 'reclaim_honor');
-      if (saved) return { ...DEFAULT_RECLAIM_HONOR, ...JSON.parse(saved) };
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          ...DEFAULT_RECLAIM_HONOR,
+          ...parsed,
+          objectives: {
+            visit_fitness: Boolean(parsed?.objectives?.visit_fitness),
+            visit_shop: Boolean(parsed?.objectives?.visit_shop),
+            open_quest_board: Boolean(parsed?.objectives?.open_quest_board),
+            view_attributes: Boolean(parsed?.objectives?.view_attributes),
+            complete_habit: Boolean(parsed?.objectives?.complete_habit),
+            return_castle: Boolean(parsed?.objectives?.return_castle),
+          },
+        };
+      }
     } catch {
       // ignore
     }
@@ -1537,7 +1381,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCharacterSubTabState(subTab);
   };
 
-  const setStoreSubTab = (subTab: 'bazaar' | 'relics' | 'marketplace') => {
+  const setStoreSubTab = (subTab: 'bazaar' | 'marketplace') => {
     sound.playClick();
     setStoreSubTabState(subTab);
   };
@@ -1621,20 +1465,19 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     // Genuine interactive navigation tracking for "Reclaim Your Honor"
-    if (tab === 'armory') updateReclaimHonorObjective('visit_armory');
+    if (tab === 'fitness' || tab === 'aether-vision') updateReclaimHonorObjective('visit_fitness');
     if (tab === 'store') updateReclaimHonorObjective('visit_shop');
     if (tab === 'quests') updateReclaimHonorObjective('open_quest_board');
     if (tab === 'character') updateReclaimHonorObjective('view_attributes');
     if (tab === 'dashboard') {
       setReclaimHonorQuest(prev => {
-        const priorSixMet =
-          prev.objectives.visit_armory &&
-          prev.objectives.inspect_equipment &&
+        const priorFiveMet =
+          prev.objectives.visit_fitness &&
           prev.objectives.visit_shop &&
           prev.objectives.open_quest_board &&
           prev.objectives.view_attributes &&
           prev.objectives.complete_habit;
-        if (!priorSixMet || prev.objectives.return_castle) return prev;
+        if (!priorFiveMet || prev.objectives.return_castle) return prev;
         const nextObj = { ...prev.objectives, return_castle: true };
         return {
           ...prev,
@@ -1673,7 +1516,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       'stats',
       'habits',
       'quests',
-      'weapons',
       'buffs',
       'kingdoms',
       'fitness',
@@ -1683,7 +1525,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       'guilds',
       'chat',
       'tx',
-      'equipped_gear',
       'selected_hero_id',
       'hero_locked',
       'hero_selected_at',
@@ -1704,14 +1545,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setStats(INITIAL_PLAYER_STATS);
     setHabits(INITIAL_HABITS);
     setQuests(INITIAL_QUESTS);
-    setWeapons(INITIAL_WEAPONS);
-    setEquippedGear({
-      mainWeaponId: 'w-sword-1',
-      offHandId: 'w-shield-1',
-      armourId: null,
-      helmetId: null,
-      accessoryId: null,
-    });
     setBuffs(INITIAL_BUFFS);
     setKingdoms(INITIAL_KINGDOMS);
     setFitnessSessions([]);
@@ -1791,7 +1624,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       level: typeof prof.level === 'number' ? prof.level : prev.level,
       playerXP: typeof prof.player_xp === 'number' ? prof.player_xp : prev.playerXP,
       playerXPNextLevel: typeof prof.player_xp_next_level === 'number' ? prof.player_xp_next_level : prev.playerXPNextLevel,
-      forgeXP: typeof prof.forge_xp === 'number' ? prof.forge_xp : prev.forgeXP,
       gold: typeof prof.gold_balance === 'number' ? prof.gold_balance : prev.gold,
       aetherRank: (prof.aether_rank || prev.aetherRank) as AetherRankStage,
       aetherPoints: typeof prof.aether_points === 'number' ? prof.aether_points : prev.aetherPoints,
@@ -1800,79 +1632,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       totalWorkoutsCompleted: typeof prof.total_workouts_completed === 'number' ? prof.total_workouts_completed : prev.totalWorkoutsCompleted,
       totalVerifiedReps: typeof prof.total_verified_reps === 'number' ? prof.total_verified_reps : prev.totalVerifiedReps,
       totalBossesDefeated: typeof prof.total_bosses_defeated === 'number' ? prof.total_bosses_defeated : prev.totalBossesDefeated,
-      equippedWeaponId: prof.equipped_weapon_id || prev.equippedWeaponId,
       currentKingdomId: prof.current_kingdom_id || prev.currentKingdomId,
     }));
-  };
-
-  const mapServerWeapon = (row: any): Weapon => {
-    const id = row.weapon_id || row.id;
-    const base = INITIAL_WEAPONS.find(iw => iw.id === id);
-    const bp = findBlueprintByWeaponId(id);
-    const legacyOv = LEGACY_WEAPON_EVOLUTION_OVERRIDES[id];
-    const shopMatch = INITIAL_SHOP_ITEMS.find(si => si.metadata?.weaponId === id || si.id === id);
-    const category = (row.category || base?.category || bp?.category || shopMatch?.metadata?.category || 'Swords') as Weapon['category'];
-    const stage = (row.evolution_stage || base?.evolutionStage || (bp?.awakened ? 'Awakened' : 'Dormant')) as AetherRankStage;
-    const masteryLevel = typeof row.mastery_level === 'number' ? row.mastery_level : (base?.masteryLevel || (bp?.awakened ? 4 : 1));
-    const rawAbilities = Array.isArray(row.abilities) && row.abilities.length > 0
-      ? row.abilities
-      : base?.abilities || createAbilitiesForCategory(category, masteryLevel);
-    const resolvedRarity = (row.rarity === 'Mythical' ? 'Mythic' : row.rarity) || base?.rarity || bp?.rarity || shopMatch?.rarity || 'Common';
-
-    return {
-      id,
-      name: row.name || base?.name || bp?.name || shopMatch?.name || 'Forged Weapon',
-      category,
-      rarity: resolvedRarity as Weapon['rarity'],
-      level: typeof row.level === 'number' ? row.level : 1,
-      maxLevel: typeof row.max_level === 'number' ? row.max_level : (base?.maxLevel || bp?.maxLevel || shopMatch?.metadata?.maxLevel || 10),
-      baseAttack: typeof row.base_attack === 'number' ? row.base_attack : (base?.baseAttack || bp?.baseAttack || shopMatch?.metadata?.baseAttack || 15),
-      attackPerLevel: typeof row.attack_per_level === 'number' ? row.attack_per_level : (base?.attackPerLevel || bp?.attackPerLevel || shopMatch?.metadata?.attackPerLevel || 4),
-      baseDefense: typeof row.base_defense === 'number' ? row.base_defense : (base?.baseDefense || bp?.baseDefense || shopMatch?.metadata?.baseDefense || 2),
-      defensePerLevel: typeof row.defense_per_level === 'number' ? row.defense_per_level : (base?.defensePerLevel || bp?.defensePerLevel || shopMatch?.metadata?.defensePerLevel || 1),
-      critChance: typeof row.crit_chance === 'number' ? row.crit_chance : (bp?.critChance ?? legacyOv?.critChance ?? base?.critChance ?? Number(shopMatch?.metadata?.critChance ?? 6)),
-      critDamage: typeof row.crit_damage === 'number' ? row.crit_damage : (bp?.critDamage ?? legacyOv?.critDamage ?? base?.critDamage ?? Number(shopMatch?.metadata?.critDamage ?? 180)),
-      speed: typeof row.speed === 'number' ? row.speed : (bp?.speed ?? legacyOv?.speed ?? base?.speed ?? Number(shopMatch?.metadata?.speed ?? 65)),
-      element: (row.element || bp?.element || legacyOv?.element || base?.element || shopMatch?.metadata?.element || 'Physical') as Weapon['element'],
-      abilityPower: typeof row.ability_power === 'number' ? row.ability_power : (bp?.abilityPower ?? legacyOv?.abilityPower ?? base?.abilityPower ?? Number(shopMatch?.metadata?.abilityPower ?? 8)),
-      specialAbilityName: bp?.specialAbilityName ?? legacyOv?.specialAbilityName ?? base?.specialAbilityName ?? (shopMatch?.metadata?.specialAbilityName as string | undefined),
-      specialAbilitySummary: bp?.specialAbilitySummary ?? legacyOv?.specialAbilitySummary ?? base?.specialAbilitySummary ?? (shopMatch?.metadata?.specialAbilitySummary as string | undefined),
-      combatIntegrationStatus: bp?.combatIntegrationStatus ?? legacyOv?.combatIntegrationStatus ?? base?.combatIntegrationStatus ?? 'active_in_combat',
-      obtainMethod: (row.unlock_source || bp?.obtainMethod || legacyOv?.obtainMethod || base?.obtainMethod || 'shop') as Weapon['obtainMethod'],
-      unlockRequirement: bp?.unlockRequirement ?? base?.unlockRequirement,
-      evolutionPath: bp?.evolutionPath ?? legacyOv?.evolutionPath ?? base?.evolutionPath ?? (shopMatch?.metadata?.evolutionPath as Weapon['evolutionPath'] | undefined),
-      awakened: typeof row.awakened === 'boolean' ? row.awakened : (bp?.awakened ?? base?.awakened ?? false),
-      awakeningLevel: typeof row.awakening_level === 'number' ? row.awakening_level : (bp?.awakeningLevel ?? base?.awakeningLevel ?? 0),
-      upgradeForgeCost: typeof row.upgrade_forge_cost === 'number' ? row.upgrade_forge_cost : (base?.upgradeForgeCost || bp?.upgradeForgeCost || shopMatch?.metadata?.upgradeForgeCost || 30),
-      unlocked: row.unlocked ?? true,
-      equipped: Boolean(row.equipped),
-      description: base?.description || bp?.description || shopMatch?.description || 'A finely forged artifact of Aetheria.',
-      lore: base?.lore || bp?.lore || shopMatch?.metadata?.lore || 'Tempered through disciplined real-world training.',
-      illustration: base?.illustration,
-      evolutionStage: stage,
-      masteryLevel,
-      masteryXP: typeof row.mastery_xp === 'number' ? row.mastery_xp : 0,
-      masteryXPNextLevel: typeof row.mastery_xp_next_level === 'number' ? row.mastery_xp_next_level : 100,
-      masteryPath: (row.mastery_path || base?.masteryPath || getMasteryPathForCategory(category)) as Weapon['masteryPath'],
-      abilities: rawAbilities.map((ab: any) => ({
-        ...ab,
-        unlocked: Boolean(ab.unlocked) || masteryLevel >= (ab.unlockMasteryLevel || 1),
-      })),
-      evolutionVisual: getEvolutionVisual(stage),
-    };
-  };
-
-  const syncWeaponsFromServer = async (uid: string) => {
-    const supabase = getSupabase();
-    if (!supabase) return;
-    const { data, error } = await supabase
-      .from('player_weapons')
-      .select('*')
-      .eq('user_id', uid)
-      .order('equipped', { ascending: false });
-    if (!error && Array.isArray(data) && data.length > 0) {
-      setWeapons(data.map(mapServerWeapon));
-    }
   };
 
   const refreshSocialAndShopData = async (uid: string) => {
@@ -2061,7 +1822,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
           if (cloudRes.gameState.habits) setHabits(cloudRes.gameState.habits);
           if (cloudRes.gameState.quests) setQuests(cloudRes.gameState.quests);
-          if (cloudRes.gameState.weapons) setWeapons(cloudRes.gameState.weapons);
           if (cloudRes.gameState.buffs) setBuffs(cloudRes.gameState.buffs);
           if (cloudRes.gameState.kingdoms) setKingdoms(cloudRes.gameState.kingdoms);
           if (typeof cloudRes.gameState.waterGlasses === 'number')
@@ -2099,17 +1859,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUser(prev => buildUserFromProfile(boot.data.profile, prev));
             if (typeof boot.data.profile.sound_enabled === 'boolean') {
               setStats(prev => ({ ...prev, soundEnabled: boot.data.profile.sound_enabled }));
-            }
-            const srvGear = boot.data.profile.client_preferences?.equippedGear || cloudRes.clientPreferences?.equippedGear;
-            const srvMainId = boot.data.profile.equipped_weapon_id;
-            if (srvGear || srvMainId) {
-              setEquippedGear(prev => ({
-                mainWeaponId: srvMainId || srvGear?.mainWeaponId || prev.mainWeaponId,
-                offHandId: srvGear?.offHandId !== undefined ? srvGear.offHandId : prev.offHandId,
-                armourId: srvGear?.armourId !== undefined ? srvGear.armourId : prev.armourId,
-                helmetId: srvGear?.helmetId !== undefined ? srvGear.helmetId : prev.helmetId,
-                accessoryId: srvGear?.accessoryId !== undefined ? srvGear.accessoryId : prev.accessoryId,
-              }));
             }
 
             // Hydrate Hero Identity, One-Time Permanent Lock, Tutorial, Reclaim Your Honor & Campaign Progress
@@ -2226,7 +1975,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   frequency: freq,
                   iconName: h.icon_name || 'Sparkles',
                   playerXpReward: h.player_xp_reward ?? 15,
-                  forgeXpReward: h.forge_xp_reward ?? 20,
                   goldReward: h.gold_reward ?? 15,
                   completedToday: claimedNow,
                   streak: h.streak ?? 0,
@@ -2236,14 +1984,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 };
               })
             );
-          }
-          if (Array.isArray(boot.data.weapons) && boot.data.weapons.length > 0) {
-            const mappedWeapons = boot.data.weapons.map(mapServerWeapon);
-            setWeapons(mappedWeapons);
-            const srvEquipped = mappedWeapons.find((w: Weapon) => w.equipped);
-            if (srvEquipped) {
-              setEquippedGear(prev => ({ ...prev, mainWeaponId: srvEquipped.id }));
-            }
           }
           if (Array.isArray(boot.data.buffs) && boot.data.buffs.length > 0) {
             setBuffs(
@@ -2427,10 +2167,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setWeeklyBossState(bossRes.data);
         }
         if (rivalRes.ok && rivalRes.data) {
-          if (rivalRes.data.serverNow) {
-            const parsedNow = Date.parse(rivalRes.data.serverNow);
-            if (Number.isFinite(parsedNow)) setRivalsServerClockOffsetMs(parsedNow - Date.now());
-          }
           setRivalsState(rivalRes.data);
         }
         if (mentorRes.ok && mentorRes.data) {
@@ -2477,9 +2213,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         // Hydrate Expansion 3.0 + AAA-15 server states in background without blocking initial login
         const initialGold = Number(srvProf?.gold_balance ?? gsStats?.gold ?? 0);
-        const unlockedWeaponIds = (cloudRes.gameState?.weapons || INITIAL_WEAPONS)
-          .filter((w: any) => w.unlocked)
-          .map((w: any) => w.id);
         void Promise.all([
           syncInitialWalletGoldServer(sbUser.id, initialGold).then(r => {
             if (r.ok && r.wallet) {
@@ -2500,7 +2233,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           fetchMarketplaceStateServer(sbUser.id).then(r => {
             if (r.ok && r.state) setMarketplaceState(r.state);
           }),
-          syncCollectionRelicsServer(sbUser.id, unlockedWeaponIds).then(r => {
+          fetchCollectionCompletionServer(sbUser.id).then(r => {
             if (r.ok && r.state) setCollectionState(r.state);
           }),
           fetchTrophiesAndHiddenServer(sbUser.id).then(r => {
@@ -2924,7 +2657,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await saveClientPreferencesServer({
         soundEnabled: stats.soundEnabled,
         activeTab,
-        equippedGear,
         selectedHeroId,
         heroLocked,
         heroSelectedAt,
@@ -2961,7 +2693,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [
     stats.soundEnabled,
     activeTab,
-    equippedGear,
     selectedHeroId,
     heroLocked,
     heroSelectedAt,
@@ -3063,11 +2794,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     if (!isAuthenticated || !user) return;
-    localStorage.setItem(STORAGE_KEY_PREFIX + 'weapons', JSON.stringify(weapons));
-  }, [weapons, isAuthenticated, user]);
-
-  useEffect(() => {
-    if (!isAuthenticated || !user) return;
     localStorage.setItem(STORAGE_KEY_PREFIX + 'buffs', JSON.stringify(buffs));
   }, [buffs, isAuthenticated, user]);
 
@@ -3101,13 +2827,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem(STORAGE_KEY_PREFIX + 'tx', JSON.stringify(transactions));
   }, [transactions, isAuthenticated, user]);
 
-  useEffect(() => {
-    if (!isAuthenticated || !user) return;
-    localStorage.setItem(STORAGE_KEY_PREFIX + 'equipped_gear', JSON.stringify(equippedGear));
-  }, [equippedGear, isAuthenticated, user]);
-
   // Derived Values
-  const equippedWeapon = weapons.find(w => w.equipped) || weapons[0];
   const activeBuffs = buffs.filter(b => b.active);
 
   // Helper to apply authoritative server profile and trigger level/rank celebration if promoted
@@ -3122,7 +2842,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           particleCount: 95,
           spread: 75,
           origin: { y: 0.55 },
-          colors: ['#8B5CF6', '#D6A84B', '#FBBF24', '#34D399'],
+          colors: ['#00D9FF', '#1677FF', '#FFFFFF', '#38BDF8'],
         });
       }
       return {
@@ -3130,7 +2850,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         level: nextLevel,
         playerXP: typeof prof.player_xp === 'number' ? prof.player_xp : prev.playerXP,
         playerXPNextLevel: typeof prof.player_xp_next_level === 'number' ? prof.player_xp_next_level : prev.playerXPNextLevel,
-        forgeXP: typeof prof.forge_xp === 'number' ? prof.forge_xp : prev.forgeXP,
         gold: typeof prof.gold_balance === 'number' ? prof.gold_balance : prev.gold,
         aetherRank: nextStage,
         aetherPoints: typeof prof.aether_points === 'number' ? prof.aether_points : prev.aetherPoints,
@@ -3139,266 +2858,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         totalWorkoutsCompleted: typeof prof.total_workouts_completed === 'number' ? prof.total_workouts_completed : prev.totalWorkoutsCompleted,
         totalVerifiedReps: typeof prof.total_verified_reps === 'number' ? prof.total_verified_reps : prev.totalVerifiedReps,
         totalBossesDefeated: typeof prof.total_bosses_defeated === 'number' ? prof.total_bosses_defeated : prev.totalBossesDefeated,
-        equippedWeaponId: prof.equipped_weapon_id || prev.equippedWeaponId,
         currentKingdomId: prof.current_kingdom_id || prev.currentKingdomId,
       };
     });
-  };
-
-  // Server-authoritative Weapon Mastery Drill (15 Gold, 10m cooldown, +40 XP fixed on server)
-  const trainWeaponMastery = async (
-    weaponId: string,
-    gainedXP: number = 40
-  ): Promise<{ success: boolean; newLevel: number; abilityUnlocked?: string; error?: string }> => {
-    const prevWeapon = weapons.find(w => w.id === weaponId);
-    if (!prevWeapon) return { success: false, newLevel: 1, error: 'Weapon not found.' };
-    if (!unifiedBackendReady) {
-      return { success: false, newLevel: prevWeapon.masteryLevel, error: 'Unable to connect to realm services right now. Please try again shortly.' };
-    }
-
-    const res = await trainWeaponMasteryServer(weaponId, gainedXP);
-    if (!res.ok || res.data?.success === false) {
-      return {
-        success: false,
-        newLevel: prevWeapon.masteryLevel,
-        error: res.data?.error || res.error || 'Could not train weapon mastery.',
-      };
-    }
-
-    if (res.data?.profile) syncProfileWithCelebration(res.data.profile);
-
-    let abilityUnlocked: string | undefined;
-    let finalLevel = prevWeapon.masteryLevel;
-
-    if (res.data?.weapon) {
-      const mapped = mapServerWeapon(res.data.weapon);
-      finalLevel = mapped.masteryLevel;
-      const newly = mapped.abilities.find(ab => {
-        const old = prevWeapon.abilities.find(o => o.id === ab.id);
-        return ab.unlocked && (!old || !old.unlocked);
-      });
-      if (newly) {
-        abilityUnlocked = newly.name;
-        sound.playQuestComplete();
-        confetti({
-          particleCount: 75,
-          spread: 60,
-          origin: { y: 0.6 },
-          colors: ['#38bdf8', '#a855f7', '#fbbf24'],
-        });
-      } else {
-        sound.playForgeUpgrade();
-      }
-      setWeapons(prev => prev.map(w => (w.id === weaponId ? mapped : w)));
-    }
-
-    setTransactions(prev => [
-      {
-        id: 'tx-' + Date.now(),
-        type: 'GOLD',
-        source: `Mastery Drill: ${prevWeapon.name} (+40 Mastery XP)`,
-        amount: -15,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      },
-      ...prev.slice(0, 49),
-    ]);
-
-    return { success: true, newLevel: finalLevel, abilityUnlocked };
-  };
-
-  // Server-authoritative Weapon Evolution
-  const evolveWeapon = async (
-    weaponId: string
-  ): Promise<{ success: boolean; newStage?: AetherRankStage; updatedWeapon?: Weapon; error?: string }> => {
-    const target = weapons.find(w => w.id === weaponId);
-    if (!target) return { success: false, error: 'Weapon not found.' };
-    if (!unifiedBackendReady) {
-      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
-    }
-
-    const res = await evolveWeaponServer(weaponId);
-    if (!res.ok || res.data?.success === false) {
-      return {
-        success: false,
-        error: res.data?.error || res.error || 'Unable to complete weapon evolution right now.',
-      };
-    }
-
-    const newStage = (res.data?.newStage || res.data?.weapon?.evolution_stage || target.evolutionStage) as AetherRankStage;
-    let updatedWeapon: Weapon | undefined;
-    if (res.data?.profile) syncProfileWithCelebration(res.data.profile);
-    if (res.data?.weapon) {
-      updatedWeapon = mapServerWeapon(res.data.weapon);
-      setWeapons(prev => prev.map(w => (w.id === weaponId ? updatedWeapon! : w)));
-    }
-
-    sound.playForgeUpgrade();
-    confetti({
-      particleCount: 120,
-      spread: 90,
-      origin: { y: 0.55 },
-      colors: ['#a855f7', '#fbbf24', '#38bdf8', '#ec4899'],
-    });
-
-    const forgeCostMap: Record<AetherRankStage, number> = {
-      Dormant: 0,
-      Awakened: 50,
-      Ascended: 100,
-      Mythic: 200,
-      Transcendent: 350,
-    };
-    setTransactions(prev => [
-      {
-        id: 'tx-' + Date.now(),
-        type: 'FORGE_XP',
-        source: `Weapon Evolution: ${target.name} -> ${newStage}`,
-        amount: -(forgeCostMap[newStage] || 0),
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      },
-      ...prev.slice(0, 49),
-    ]);
-
-    return { success: true, newStage, updatedWeapon };
-  };
-
-  // Server-authoritative Unlock of Pinnacle Progression Relics (Ascendant -> Eternal)
-  const unlockProgressionWeapon = async (
-    weaponId: string
-  ): Promise<{ success: boolean; weapon?: Weapon; error?: string }> => {
-    if (!unifiedBackendReady || !user) {
-      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
-    }
-
-    const res = await unlockProgressionWeaponServer(weaponId);
-    if (!res.ok || res.data?.success === false) {
-      return {
-        success: false,
-        error: res.data?.error || res.error || 'Progression requirements have not been met yet.',
-      };
-    }
-
-    if (res.data?.profile) syncProfileWithCelebration(res.data.profile);
-
-    let unlockedWeapon: Weapon | undefined;
-    if (res.data?.weapon) {
-      unlockedWeapon = mapServerWeapon(res.data.weapon);
-      setWeapons(prev => {
-        if (prev.some(w => w.id === unlockedWeapon!.id)) {
-          return prev.map(w => (w.id === unlockedWeapon!.id ? unlockedWeapon! : w));
-        }
-        return [unlockedWeapon!, ...prev];
-      });
-    } else {
-      await syncWeaponsFromServer(user.id);
-    }
-
-    const rarity = unlockedWeapon?.rarity || findBlueprintByWeaponId(weaponId)?.rarity || 'Ascendant';
-    const rStyle = getRarityStyle(rarity);
-    sound.playRarityAscension(rarity);
-    confetti({
-      particleCount: 150,
-      spread: 100,
-      origin: { y: 0.52 },
-      colors: [rStyle.accentHex, rStyle.secondaryHex, '#fbbf24', '#ffffff'],
-    });
-
-    const bp = findBlueprintByWeaponId(weaponId);
-    const forgeCost = bp?.unlockRequirement?.forgeXpCost || 0;
-    setTransactions(prev => [
-      {
-        id: 'tx-relic-' + Date.now(),
-        type: 'FORGE_XP',
-        source: `Pinnacle Relic Unlocked: ${unlockedWeapon?.name || bp?.name || weaponId}`,
-        amount: -forgeCost,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      },
-      ...prev.slice(0, 49),
-    ]);
-
-    return { success: true, weapon: unlockedWeapon };
-  };
-
-  // Server-authoritative Weapon Rarity Ascension (Mythic -> Ascendant -> Divine -> Celestial -> Eternal)
-  const ascendWeaponRarity = async (
-    weaponId: string
-  ): Promise<{
-    success: boolean;
-    previousWeaponId?: string;
-    updatedWeapon?: Weapon;
-    previousAttack?: number;
-    previousDefense?: number;
-    previousLevel?: number;
-    error?: string;
-  }> => {
-    const target = weapons.find(w => w.id === weaponId);
-    if (!target) return { success: false, error: 'Source weapon not found in armory.' };
-    if (!unifiedBackendReady || !user) {
-      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
-    }
-
-    const previousAttack = target.baseAttack;
-    const previousDefense = target.baseDefense;
-    const previousLevel = target.level;
-
-    const res = await ascendWeaponRarityServer(weaponId);
-    if (!res.ok || res.data?.success === false) {
-      return {
-        success: false,
-        error: res.data?.error || res.error || 'Unable to complete rarity ascension right now.',
-      };
-    }
-
-    if (res.data?.profile) syncProfileWithCelebration(res.data.profile);
-
-    let updatedWeapon: Weapon | undefined;
-    if (res.data?.weapon) {
-      updatedWeapon = mapServerWeapon(res.data.weapon);
-      setWeapons(prev => prev.map(w => (w.id === weaponId ? updatedWeapon! : w)));
-      if (updatedWeapon.equipped || equippedGear.mainWeaponId === weaponId) {
-        setStats(prev => ({ ...prev, equippedWeaponId: updatedWeapon!.id }));
-        setEquippedGear(prev => ({
-          ...prev,
-          mainWeaponId: prev.mainWeaponId === weaponId ? updatedWeapon!.id : prev.mainWeaponId,
-          offHandId: prev.offHandId === weaponId ? updatedWeapon!.id : prev.offHandId,
-          armourId: prev.armourId === weaponId ? updatedWeapon!.id : prev.armourId,
-          helmetId: prev.helmetId === weaponId ? updatedWeapon!.id : prev.helmetId,
-          accessoryId: prev.accessoryId === weaponId ? updatedWeapon!.id : prev.accessoryId,
-        }));
-      }
-    } else {
-      await syncWeaponsFromServer(user.id);
-    }
-
-    const nextRarity = updatedWeapon?.rarity || 'Ascendant';
-    const rStyle = getRarityStyle(nextRarity);
-    sound.playRarityAscension(nextRarity);
-    confetti({
-      particleCount: 165,
-      spread: 110,
-      origin: { y: 0.5 },
-      colors: [rStyle.accentHex, rStyle.secondaryHex, '#fbbf24', '#ffffff'],
-    });
-
-    const evoPath = target.evolutionPath;
-    setTransactions(prev => [
-      {
-        id: 'tx-asc-' + Date.now(),
-        type: 'FORGE_XP',
-        source: `Rarity Ascension (${nextRarity}): ${target.name} -> ${updatedWeapon?.name || 'Ascended Form'}`,
-        amount: -(evoPath?.forgeXpCost || 0),
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      },
-      ...prev.slice(0, 49),
-    ]);
-
-    return {
-      success: true,
-      previousWeaponId: weaponId,
-      updatedWeapon,
-      previousAttack,
-      previousDefense,
-      previousLevel,
-    };
   };
 
   // Anti-Exploit Habit Period Helper (Daily, Weekly Mon-Sun, One-Time)
@@ -3505,8 +2967,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ...prev.slice(0, 47),
     ]);
 
-    void syncWeaponsFromServer(user.id);
-
     if (newStreak >= 3) {
       setAchievements(achList =>
         achList.map(a => (a.id === 'ach-2' ? { ...a, progress: Math.max(a.progress, newStreak), unlocked: true } : a))
@@ -3579,7 +3039,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       frequency: newHabit.frequency,
       iconName: newHabit.iconName,
       playerXpReward: newHabit.playerXpReward,
-      forgeXpReward: newHabit.forgeXpReward ?? 0,
       goldReward: newHabit.goldReward ?? 15,
     });
 
@@ -3599,7 +3058,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       frequency: row.frequency,
       iconName: row.icon_name || newHabit.iconName,
       playerXpReward: row.player_xp_reward ?? newHabit.playerXpReward,
-      forgeXpReward: row.forge_xp_reward ?? newHabit.forgeXpReward,
       goldReward: row.gold_reward ?? (newHabit.goldReward ?? 15),
       completedToday: false,
       streak: 0,
@@ -3639,7 +3097,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       particleCount: 50,
       spread: 60,
       origin: { y: 0.7 },
-      colors: ['#8B5CF6', '#D6A84B', '#34D399'],
+      colors: ['#1677FF', '#00D9FF', '#FFFFFF'],
     });
 
     setQuests(prev => prev.map(item => (item.id === questId ? { ...item, claimed: true } : item)));
@@ -3658,133 +3116,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { success: true };
   };
 
-  // Armory & Shop Actions
-  const getDefaultSlotForCategory = (category: WeaponCategory): EquipmentSlotType => {
-    if (category === 'Shields') return 'offHand';
-    if (category === 'Armour') return 'armour';
-    if (category === 'Helmets') return 'helmet';
-    if (category === 'Accessories') return 'accessory';
-    return 'mainWeapon';
-  };
-
-  const equipWeapon = (weaponId: string) => {
-    if (!unifiedBackendReady) return;
-    sound.playClick();
-    setWeapons(prev =>
-      prev.map(w => ({
-        ...w,
-        equipped: w.id === weaponId,
-      }))
-    );
-    setStats(prev => ({ ...prev, equippedWeaponId: weaponId }));
-    setEquippedGear(prev => ({ ...prev, mainWeaponId: weaponId }));
-    void equipWeaponServer(weaponId);
-  };
-
-  const equipGearSlot = (itemId: string, explicitSlot?: EquipmentSlotType) => {
-    const item = weapons.find(w => w.id === itemId);
-    if (!item) return;
-    const slot = explicitSlot || getDefaultSlotForCategory(item.category);
-    sound.playClick();
-    if (slot === 'mainWeapon') {
-      equipWeapon(itemId);
-      return;
-    }
-    setEquippedGear(prev => {
-      const next: EquippedGear = {
-        ...prev,
-        offHandId: slot === 'offHand' ? (prev.offHandId === itemId ? null : itemId) : prev.offHandId,
-        armourId: slot === 'armour' ? (prev.armourId === itemId ? null : itemId) : prev.armourId,
-        helmetId: slot === 'helmet' ? (prev.helmetId === itemId ? null : itemId) : prev.helmetId,
-        accessoryId: slot === 'accessory' ? (prev.accessoryId === itemId ? null : itemId) : prev.accessoryId,
-      };
-      if (unifiedBackendReady) {
-        void saveClientPreferencesServer({
-          soundEnabled: stats.soundEnabled,
-          activeTab,
-          equippedGear: next,
-          selectedHeroId,
-          reclaimHonor: reclaimHonorQuest,
-          campaignProgress,
-          attributeBonuses,
-          tutorialState: {
-            completed: tutorialState.completed,
-            skipped: tutorialState.skipped,
-          },
-          savedAt: new Date().toISOString(),
-        });
-      }
-      return next;
-    });
-  };
-
-  const upgradeWeapon = async (
-    weaponId: string
-  ): Promise<{
-    success: boolean;
-    updatedWeapon?: Weapon;
-    previousLevel?: number;
-    previousAttack?: number;
-    previousDefense?: number;
-    error?: string;
-  }> => {
-    const weapon = weapons.find(w => w.id === weaponId);
-    if (!weapon) return { success: false, error: 'Weapon not found.' };
-    if (!unifiedBackendReady) {
-      return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
-    }
-
-    const previousLevel = weapon.level;
-    const previousAttack = weapon.baseAttack;
-    const previousDefense = weapon.baseDefense;
-
-    const res = await upgradeWeaponServer(weaponId);
-    if (!res.ok || res.data?.success === false) {
-      return { success: false, error: res.data?.error || res.error || 'Weapon upgrade failed.' };
-    }
-
-    if (res.data?.profile) syncProfileWithCelebration(res.data.profile);
-    let updatedWeapon: Weapon | undefined;
-    if (res.data?.weapon) {
-      updatedWeapon = mapServerWeapon(res.data.weapon);
-      setWeapons(prev => prev.map(w => (w.id === weaponId ? updatedWeapon! : w)));
-    }
-
-    sound.playForgeUpgrade();
-    confetti({
-      particleCount: 65,
-      spread: 60,
-      origin: { y: 0.65 },
-      colors: ['#f59e0b', '#fbbf24', '#a855f7'],
-    });
-
-    setTransactions(prev => [
-      {
-        id: 'tx-' + Date.now(),
-        type: 'FORGE_XP',
-        source: `Blacksmith Upgrade: ${weapon.name} to Lv.${(updatedWeapon?.level ?? weapon.level + 1)}`,
-        amount: -weapon.upgradeForgeCost,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      },
-      ...prev.slice(0, 49),
-    ]);
-
-    setAchievements(achList =>
-      achList.map(a => (a.id === 'ach-3' ? { ...a, progress: 1, unlocked: true } : a))
-    );
-    setQuests(qList =>
-      qList.map(q => (q.id === 'q-5' ? { ...q, progress: 1, completed: true } : q))
-    );
-
-    return {
-      success: true,
-      updatedWeapon,
-      previousLevel,
-      previousAttack,
-      previousDefense,
-    };
-  };
-
+  // Shop Actions
   const purchaseShopItem = async (itemId: string): Promise<{ success: boolean; error?: string }> => {
     const item = shopItems.find(i => i.id === itemId);
     if (!item) return { success: false, error: 'Shop item not found.' };
@@ -3802,16 +3134,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     const meta = item.metadata || {};
-    if (
-      (item.itemType === 'weapon' ||
-        item.itemType === 'shield' ||
-        item.itemType === 'armour' ||
-        item.itemType === 'helmet' ||
-        item.itemType === 'accessory') &&
-      user
-    ) {
-      await syncWeaponsFromServer(user.id);
-    } else if ((item.itemType === 'elixir' || item.itemType === 'buff') && meta.buffId) {
+    if ((item.itemType === 'elixir' || item.itemType === 'buff') && meta.buffId) {
       setBuffs(prev =>
         prev.map(b =>
           b.id === meta.buffId
@@ -3833,12 +3156,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ...prev.slice(0, 49),
     ]);
 
-    sound.playForgeUpgrade();
+    sound.playVictory();
     confetti({
       particleCount: 70,
       spread: 65,
       origin: { y: 0.6 },
-      colors: ['#8B5CF6', '#D6A84B', '#FBBF24'],
+      colors: ['#00D9FF', '#1677FF', '#FFFFFF'],
     });
 
     return { success: true };
@@ -3864,7 +3187,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Fitness Logging (Strictly Server-Authoritative & Idempotent)
   const logFitnessSession = async (
-    session: Omit<FitnessSession, 'id' | 'timestamp' | 'playerXpEarned' | 'forgeXpEarned'> & {
+    session: Omit<FitnessSession, 'id' | 'timestamp' | 'playerXpEarned'> & {
       idempotencyKey?: string;
     }
   ) => {
@@ -3898,7 +3221,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const srv = res.data.session;
     const isVerified = sessionPayload.verifiedWithAetherVision;
     const playerXp = Number(srv?.xp_awarded ?? 0);
-    const forgeXp = Number(srv?.forge_xp_awarded ?? 0);
     const gold = Number(srv?.gold_awarded ?? 0);
     const aetherPoints = Number(srv?.aether_points_awarded ?? 0);
 
@@ -3907,7 +3229,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       id: srv?.id || 'fit-' + Date.now(),
       timestamp: srv?.created_at || new Date().toISOString(),
       playerXpEarned: playerXp,
-      forgeXpEarned: forgeXp,
       goldEarned: gold,
       aetherPointsEarned: aetherPoints,
     };
@@ -3916,7 +3237,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (prev.some(s => s.id === savedSession.id)) return prev;
       return [savedSession, ...prev];
     });
-    void syncWeaponsFromServer(user.id);
 
     if (!deduplicated) {
       if (isVerified) {
@@ -3928,7 +3248,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         );
       }
 
-      if (!dailyCapReached && (playerXp > 0 || forgeXp > 0 || gold > 0)) {
+      if (!dailyCapReached && (playerXp > 0 || gold > 0)) {
         const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         setTransactions(prev => [
           ...(gold > 0
@@ -3938,17 +3258,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   type: 'GOLD' as const,
                   source: `Workout: ${sessionPayload.exerciseName}`,
                   amount: gold,
-                  timestamp: nowTime,
-                },
-              ]
-            : []),
-          ...(forgeXp > 0
-            ? [
-                {
-                  id: 'tx-w-fxp-' + Date.now(),
-                  type: 'FORGE_XP' as const,
-                  source: `Workout: ${sessionPayload.exerciseName}`,
-                  amount: forgeXp,
                   timestamp: nowTime,
                 },
               ]
@@ -4022,7 +3331,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       dailyCapReached,
       rewards: {
         playerXp,
-        forgeXp,
         gold,
         aetherPoints,
         buffActivated: isVerified,
@@ -4062,7 +3370,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const srv = res.data.meal;
     const playerXp = Number(srv?.xp_awarded ?? 0);
-    const forgeXp = Number(srv?.forge_xp_awarded ?? 0);
     const gold = Number(srv?.gold_awarded ?? 0);
     const aetherPoints = Number(srv?.aether_points_awarded ?? 0);
 
@@ -4080,7 +3387,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (prev.some(m => m.id === savedMeal.id)) return prev;
       return [savedMeal, ...prev];
     });
-    void syncWeaponsFromServer(user.id);
 
     if (!deduplicated) {
       if (!dailyCapReached && (playerXp > 0 || gold > 0)) {
@@ -4139,7 +3445,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       dailyCapReached,
       rewards: {
         playerXp,
-        forgeXp,
         gold,
         aetherPoints,
       },
@@ -4169,7 +3474,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           });
         }
         if (res.data.profile) syncProfileWithCelebration(res.data.profile);
-        void syncWeaponsFromServer(user.id);
         advanceDynamicQuestsByEvidence(['water_glasses'], 1);
       }
     });
@@ -4317,7 +3621,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         particleCount: 110,
         spread: 85,
         origin: { y: 0.5 },
-        colors: ['#8B5CF6', '#D6A84B', '#34D399', '#FBBF24'],
+        colors: ['#00D9FF', '#1677FF', '#34D399', '#FFFFFF'],
       });
 
       const vic = await completeBossVictoryServer(kingdomId);
@@ -5195,7 +4499,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       stats,
       habits,
       quests,
-      weapons,
       buffs,
       kingdoms,
       waterGlasses,
@@ -5360,14 +4663,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
       }
 
-      // Ensure starter progression, starter weapons & initial habits are bootstrapped idempotently
+      // Ensure starter progression & initial habits are bootstrapped idempotently
       const boot = await bootstrapUnifiedPlayerState();
       if (boot.ok && boot.data) {
         setUnifiedBackendReady(true);
         if (boot.data.profile) applyServerProfileToStats(boot.data.profile);
-        if (Array.isArray(boot.data.weapons) && boot.data.weapons.length > 0) {
-          setWeapons(boot.data.weapons.map(mapServerWeapon));
-        }
       }
     }
 
@@ -5381,7 +4681,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       void saveClientPreferencesServer({
         soundEnabled: soundChoice,
         activeTab: 'dashboard',
-        equippedGear,
         selectedHeroId: derivedHero,
         heroLocked: false,
         heroSelectionPending: true,
@@ -5400,14 +4699,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       particleCount: 90,
       spread: 70,
       origin: { y: 0.5 },
-      colors: ['#8B5CF6', '#D6A84B', '#FBBF24'],
+      colors: ['#00D9FF', '#1677FF', '#FFFFFF'],
     });
     return { success: true };
   };
 
   // --- HERO SELECTION, SIX ATTRIBUTES, CAMPAIGN & TUTORIAL HANDLERS ---
   const heroDef = getHeroById(selectedHeroId);
-  const equippedWeaponSafe = weapons.find(w => w.id === stats.equippedWeaponId || w.equipped) || weapons[0] || INITIAL_WEAPONS[0];
 
   const claimedPeriodHabitsCount = habits.filter(h => isHabitClaimedForCurrentPeriod(h)).length;
   const rpgAttributes: RpgAttributes = {
@@ -5444,14 +4742,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     agility:
       5 +
       fitnessSessions.filter(s => ['running', 'walking', 'cycling', 'jumping_jack', 'lunge'].includes(s.exerciseType)).length * 2 +
-      Math.max(0, Math.floor(((equippedWeaponSafe?.speed ?? 60) - 50) / 10)) +
+      Math.floor(stats.totalWorkoutsCompleted / 2) +
       (heroDef.id === 'shadowblade' || heroDef.id === 'ranger' ? 2 : 0) +
       attributeBonuses.agility,
     resilience:
       5 +
       stats.currentStreak * 2 +
       stats.totalBossesDefeated * 3 +
-      Math.floor((equippedWeaponSafe?.baseDefense ?? 0) / 8) +
+      Math.floor(stats.level / 2) +
       (heroDef.id === 'paladin' || heroDef.id === 'fallen_knight' ? 2 : 0) +
       attributeBonuses.resilience,
   };
@@ -5509,7 +4807,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await saveClientPreferencesServer({
           soundEnabled: stats.soundEnabled,
           activeTab,
-          equippedGear,
           selectedHeroId: def.id,
           heroLocked: true,
           heroSelectedAt: lockedTimestamp,
@@ -5559,27 +4856,21 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { success: true };
   };
 
-  const recordEquipmentInspected = () => {
-    updateReclaimHonorObjective('inspect_equipment');
-  };
-
   const claimReclaimHonorReward = async (): Promise<{ success: boolean; error?: string }> => {
     if (!reclaimHonorQuest.completed) {
-      return { success: false, error: 'Complete all 7 Reclaim Your Honor objectives first.' };
+      return { success: false, error: 'Complete all 6 Reclaim Your Honor objectives first.' };
     }
     if (reclaimHonorQuest.claimed) {
       return { success: false, error: 'Starter quest reward has already been claimed.' };
     }
 
     const rewardPx = 120;
-    const rewardForge = 75;
     const rewardGold = 100;
 
     if (unifiedBackendReady) {
       const rpcRes = await claimStoryRewardServer({
         rewardKey: 'reclaim-honor-starter-v1',
         playerXp: rewardPx,
-        forgeXp: rewardForge,
         gold: rewardGold,
         description: 'Quest Completed: Reclaim Your Honor',
       });
@@ -5604,7 +4895,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             level: nextLevel,
             playerXP: nextXp,
             playerXPNextLevel: nextReq,
-            forgeXP: (prev.forgeXP ?? 0) + rewardForge,
             gold: prev.gold + rewardGold,
           };
         });
@@ -5612,7 +4902,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     sound.playVictory();
-    confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 }, colors: ['#8B5CF6', '#D6A84B', '#FBBF24'] });
+    confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 }, colors: ['#00D9FF', '#1677FF', '#FFFFFF'] });
 
     setReclaimHonorQuest(prev => ({
       ...prev,
@@ -5690,7 +4980,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const rpcRes = await claimStoryRewardServer({
         rewardKey: `campaign-${ch.id}`,
         playerXp: ch.rewards.playerXp,
-        forgeXp: ch.rewards.forgeXp,
         gold: ch.rewards.gold,
         description: `Campaign Completed: ${ch.title}`,
       });
@@ -5711,7 +5000,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             level: nextLevel,
             playerXP: nextXp,
             playerXPNextLevel: nextReq,
-            forgeXP: (prev.forgeXP ?? 0) + ch.rewards.forgeXp,
             gold: prev.gold + ch.rewards.gold,
           };
         });
@@ -5719,7 +5007,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     sound.playVictory();
-    confetti({ particleCount: 80, spread: 75, origin: { y: 0.6 }, colors: ['#8B5CF6', '#D6A84B', '#34D399'] });
+    confetti({ particleCount: 80, spread: 75, origin: { y: 0.6 }, colors: ['#00D9FF', '#1677FF', '#FFFFFF'] });
 
     const nextIdx = CAMPAIGN_CHAPTERS.findIndex(c => c.id === ch.id) + 1;
     const nextChapterId = CAMPAIGN_CHAPTERS[nextIdx]?.id || ch.id;
@@ -5859,7 +5147,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (existingToday.length > 0) {
       return {
         success: false,
-        error: 'Today’s AI quests have already been forged. Complete them before the daily reset!',
+        error: 'Today’s AI quests have already been crafted. Complete them before the daily reset!',
       };
     }
 
@@ -6037,7 +5325,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           level: nextLevel,
           playerXP: nextXp,
           playerXPNextLevel: nextReq,
-          forgeXP: (prev.forgeXP ?? 0) + (q.forgeXpReward ?? 0),
           gold: prev.gold + q.goldReward,
         };
       });
@@ -6049,7 +5336,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       particleCount: q.isSpecialChallenge ? 95 : 55,
       spread: 70,
       origin: { y: 0.65 },
-      colors: ['#8B5CF6', '#D6A84B', '#34D399'],
+      colors: ['#00D9FF', '#1677FF', '#34D399'],
     });
 
     setDynamicDailyQuests(prev =>
@@ -6068,7 +5355,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           completed: true,
           claimed: true,
           playerXpReward: q.playerXpReward,
-          forgeXpReward: q.forgeXpReward,
           goldReward: q.goldReward,
           evidenceNote: q.evidenceNote,
           recordedAt: claimedAt,
@@ -6131,9 +5417,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const yPlayerXp =
         yesterdayWorkouts.reduce((acc, w) => acc + (w.playerXpEarned || 0), 0) +
         yHist.reduce((acc, q) => acc + (q.claimed ? q.playerXpReward : 0), 0);
-      const yForgeXp =
-        yesterdayWorkouts.reduce((acc, w) => acc + (w.forgeXpEarned || 0), 0) +
-        yHist.reduce((acc, q) => acc + (q.claimed ? q.forgeXpReward : 0), 0);
       const yGold =
         yesterdayWorkouts.reduce((acc, w) => acc + (w.goldEarned || 0), 0) +
         yHist.reduce((acc, q) => acc + (q.claimed ? q.goldReward : 0), 0);
@@ -6164,7 +5447,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           yesterdayWorkouts: yesterdayWorkouts.length,
           yesterdayMeals: yesterdayMeals.length,
           yesterdayPlayerXp: yPlayerXp,
-          yesterdayForgeXp: yForgeXp,
           yesterdayGold: yGold,
           yesterdayAchievements: 0,
           consistencyScore,
@@ -6264,14 +5546,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         serverLegendMetrics?.normal_achievements_unlocked ?? 0,
         achievements.filter(a => a.unlocked).length
       ),
-      unlockedWeaponsCount: Math.max(
-        serverLegendMetrics?.unlocked_weapons_count ?? 0,
-        weapons.filter(w => w.unlocked).length
-      ),
-      maxWeaponLevel: Math.max(
-        serverLegendMetrics?.max_weapon_level ?? 1,
-        weapons.reduce((mx, w) => Math.max(mx, w.level || 1), 1)
-      ),
       friendsCount: Math.max(serverLegendMetrics?.friends_count ?? 0, acceptedFriends),
       guildJoined: Math.max(serverLegendMetrics?.guild_joined ?? 0, inGuild),
       guildLeader: Math.max(serverLegendMetrics?.guild_leader ?? 0, isGuildLeader),
@@ -6293,7 +5567,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         aiMentorMemory.reportsGeneratedCount || (dailyReport ? 1 : 0)
       ),
       goldBalance: Math.max(serverLegendMetrics?.gold_balance ?? 0, stats.gold),
-      forgeXpBalance: Math.max(serverLegendMetrics?.forge_xp_balance ?? 0, stats.forgeXP ?? 0),
     };
   };
 
@@ -6384,10 +5657,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (res.data.profile) {
       syncProfileWithCelebration(res.data.profile);
     } else if (res.data.isFallbackLedger) {
-      // Phase 4 Rule: Global Exclusive Achievements grant Prestige + Forge XP + Gold ONLY (zero Leaderboard XP)
+      // Phase 4 Rule: Global Exclusive Achievements grant Prestige + Gold ONLY (zero Leaderboard XP)
       setStats(prev => ({
         ...prev,
-        forgeXP: (prev.forgeXP ?? 0) + (entry.rewardForgeXp ?? 0),
         gold: prev.gold + entry.rewardGold,
       }));
     }
@@ -6626,43 +5898,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
               void refreshTerritoryWars();
             } else if (msg.type === 'community_moment:update') {
               void refreshCommunityEventState();
-            } else if (
-              (msg.type === 'rivals:match_found' ||
-                msg.type === 'rivals:match_updated' ||
-                msg.type === 'rivals:match_settled') &&
-              msg.payload?.match
-            ) {
-              const incomingMatch = msg.payload.match as CompetitiveRivalMatch;
-              const lastEntry = msg.payload.lastScoreEntry as RivalryScoreEntry | undefined;
-              if (typeof msg.payload.serverNow === 'string') {
-                const parsedNow = Date.parse(msg.payload.serverNow);
-                if (Number.isFinite(parsedNow)) setRivalsServerClockOffsetMs(parsedNow - Date.now());
-              }
-              setRivalsState(prev => {
-                if (!prev) return prev;
-                const existingMatches = Array.isArray(prev.matches) ? prev.matches : [];
-                const exists = existingMatches.some(m => m.id === incomingMatch.id);
-                const nextMatches = exists
-                  ? existingMatches.map(m => (m.id === incomingMatch.id ? incomingMatch : m))
-                  : [incomingMatch, ...existingMatches];
-                const existingEvents = Array.isArray(prev.events) ? prev.events : [];
-                const nextEvents =
-                  lastEntry && !existingEvents.some(e => e.id === lastEntry.id)
-                    ? [lastEntry, ...existingEvents].slice(0, 120)
-                    : existingEvents;
-                return {
-                  ...prev,
-                  matches: nextMatches,
-                  events: nextEvents,
-                  queueEntry: msg.type === 'rivals:match_found' ? null : prev.queueEntry,
-                };
-              });
-              if (msg.type === 'rivals:match_found') {
-                sound.playQuestComplete();
-              } else if (msg.type === 'rivals:match_settled') {
-                sound.playQuestComplete();
-                void refreshRivalsState();
-              }
             }
           } catch {
             // ignore malformed frame
@@ -6938,7 +6173,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setStats(INITIAL_PLAYER_STATS);
     setHabits(INITIAL_HABITS);
     setQuests(INITIAL_QUESTS);
-    setWeapons(INITIAL_WEAPONS);
     setBuffs(INITIAL_BUFFS);
     setKingdoms(INITIAL_KINGDOMS);
     setFitnessSessions([]);
@@ -6961,7 +6195,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         stats,
         habits,
         quests,
-        weapons,
         buffs,
         kingdoms,
         fitnessSessions,
@@ -7103,7 +6336,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         particleCount: 45,
         spread: 60,
         origin: { y: 0.65 },
-        colors: ['#8B5CF6', '#D6A84B', '#34D399'],
+        colors: ['#00D9FF', '#1677FF', '#34D399'],
       });
       void archiveSkillNodeMuseumServer(uid, nodeId).then(() => refreshMuseumRecords());
       return { success: true };
@@ -7170,8 +6403,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const dismissSkillAwardBanner = () => setLastSkillAwardBanner(null);
 
   // --- CENTRAL REWARD CREDITING HELPER (NO DUPLICATE XP SYSTEMS) ---
-  const applyCentralRewardGrant = (sourceLabel: string, xp: number, forgeXp: number, gold: number) => {
-    if (xp <= 0 && forgeXp <= 0 && gold <= 0) return;
+  const applyCentralRewardGrant = (sourceLabel: string, xp: number, gold: number) => {
+    if (xp <= 0 && gold <= 0) return;
     setStats(prev => {
       let nextLevel = prev.level;
       let nextXp = prev.playerXP + xp;
@@ -7187,7 +6420,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           particleCount: 90,
           spread: 75,
           origin: { y: 0.55 },
-          colors: ['#8B5CF6', '#D6A84B', '#FBBF24'],
+          colors: ['#00D9FF', '#1677FF', '#FFFFFF'],
         });
       }
       return {
@@ -7195,14 +6428,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         level: nextLevel,
         playerXP: nextXp,
         playerXPNextLevel: nextThreshold,
-        forgeXP: (prev.forgeXP ?? 0) + forgeXp,
         gold: prev.gold + gold,
       };
     });
     const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     setTransactions(prev => [
       ...(xp > 0 ? [{ id: `tx-pxp-${Date.now()}`, type: 'PLAYER_XP' as const, source: sourceLabel, amount: xp, timestamp: nowTime }] : []),
-      ...(forgeXp > 0 ? [{ id: `tx-fxp-${Date.now() + 1}`, type: 'FORGE_XP' as const, source: sourceLabel, amount: forgeXp, timestamp: nowTime }] : []),
       ...(gold > 0 ? [{ id: `tx-g-${Date.now() + 2}`, type: 'GOLD' as const, source: sourceLabel, amount: gold, timestamp: nowTime }] : []),
       ...prev.slice(0, 46),
     ]);
@@ -7238,7 +6469,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         applyCentralRewardGrant(
           `Weekly Raid (${claimType.replace('_', ' ')})`,
           res.rewards.xp || 0,
-          res.rewards.forgeXp || 0,
           res.rewards.gold || 0
         );
       }
@@ -7249,41 +6479,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // --- PHASE 2 (COMPETITIVE ARENA): INDEPENDENT RIVALS PLATFORM ---
-  const applyRivalsStatePayload = (data: RivalsStateResponse | undefined) => {
-    if (!data) return;
-    if (data.serverNow) {
-      const parsedNow = Date.parse(data.serverNow);
-      if (Number.isFinite(parsedNow)) setRivalsServerClockOffsetMs(parsedNow - Date.now());
-    }
-    setRivalsState(data);
-  };
-
-  const applySingleDuelMatchUpdate = (updatedMatch?: CompetitiveRivalMatch, serverNow?: string, scoreEntry?: RivalryScoreEntry) => {
-    if (serverNow) {
-      const parsedNow = Date.parse(serverNow);
-      if (Number.isFinite(parsedNow)) setRivalsServerClockOffsetMs(parsedNow - Date.now());
-    }
-    if (!updatedMatch) return;
-    setRivalsState(prev => {
-      if (!prev) return prev;
-      const existing = Array.isArray(prev.matches) ? prev.matches : [];
-      const exists = existing.some(m => m.id === updatedMatch.id);
-      const nextMatches = exists
-        ? existing.map(m => (m.id === updatedMatch.id ? updatedMatch : m))
-        : [updatedMatch, ...existing];
-      const existingEvents = Array.isArray(prev.events) ? prev.events : [];
-      const nextEvents =
-        scoreEntry && !existingEvents.some(e => e.id === scoreEntry.id)
-          ? [scoreEntry, ...existingEvents].slice(0, 120)
-          : existingEvents;
-      return {
-        ...prev,
-        matches: nextMatches,
-        events: nextEvents,
-      };
-    });
-  };
-
   const refreshRivalsState = async () => {
     const uid = activeSessionUserIdRef.current || user?.id;
     if (!uid) return;
@@ -7296,30 +6491,25 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         level: stats.level,
       });
       if (res.ok && res.data) {
-        applyRivalsStatePayload(res.data);
+        setRivalsState(res.data);
       }
     } finally {
       setRivalsLoading(false);
     }
   };
 
-  const joinRivalsQueue = async (
-    opts?: CompetitiveRivalMode | { durationSeconds?: number; mode?: CompetitiveRivalMode }
-  ) => {
+  const joinRivalsQueue = async (mode: CompetitiveRivalMode) => {
     const uid = activeSessionUserIdRef.current || user?.id;
     if (!uid || !user) return { success: false, error: 'Authentication required.' };
-    const durationSeconds = typeof opts === 'object' ? opts?.durationSeconds : undefined;
-    const mode = typeof opts === 'string' ? opts : opts?.mode;
     const res = await joinRivalsQueueServer({
       userId: uid,
-      durationSeconds,
       mode,
       username: user.username,
       characterClass: user.characterClass,
       level: stats.level,
     });
     if (res.ok) {
-      applyRivalsStatePayload(res.data);
+      if (res.data) setRivalsState(res.data);
       if (res.matched) sound.playQuestComplete();
       else sound.playClick();
       return { success: true, matched: res.matched, match: res.match || null };
@@ -7332,79 +6522,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!uid) return { success: false, error: 'Authentication required.' };
     const res = await cancelRivalsQueueServer(uid);
     if (res.ok) {
-      applyRivalsStatePayload(res.data);
+      if (res.data) setRivalsState(res.data);
       sound.playClick();
       return { success: true };
-    }
-    return { success: false, error: res.error };
-  };
-
-  const readyRivalDuel = async (params: {
-    matchId: string;
-    ready: boolean;
-    cameraReady: boolean;
-  }) => {
-    const uid = activeSessionUserIdRef.current || user?.id;
-    if (!uid) return { success: false, error: 'Authentication required.' };
-    const res = await readyRivalDuelServer({
-      userId: uid,
-      matchId: params.matchId,
-      ready: params.ready,
-      cameraReady: params.cameraReady,
-    });
-    if (res.ok) {
-      applyRivalsStatePayload(res.data);
-      if (res.launchedNow) sound.playQuestComplete();
-      else sound.playClick();
-      return { success: true, match: res.match, launchedNow: res.launchedNow };
-    }
-    return { success: false, error: res.error };
-  };
-
-  const submitVerifiedDuelRep = async (params: {
-    matchId: string;
-    eventId: string;
-    repSeq: number;
-    exercise: DuelExerciseId;
-    peakAngleDeg: number;
-    resetAngleDeg: number;
-    durationMs: number;
-    confidence: number;
-    landmarksVisible: boolean;
-    cameraStable: boolean;
-  }) => {
-    const uid = activeSessionUserIdRef.current || user?.id;
-    if (!uid) return { success: false, error: 'Authentication required.' };
-    const res = await submitVerifiedDuelRepServer({
-      userId: uid,
-      ...params,
-    });
-    if (res.ok) {
-      applySingleDuelMatchUpdate(res.match, res.serverNow, res.scoreEntry);
-      if (!res.duplicate) sound.playRepCount();
-      return {
-        success: true,
-        status: res.status,
-        pointsAwarded: res.pointsAwarded,
-        duplicate: res.duplicate,
-        match: res.match,
-      };
-    }
-    if (res.serverNow) {
-      const parsedNow = Date.parse(res.serverNow);
-      if (Number.isFinite(parsedNow)) setRivalsServerClockOffsetMs(parsedNow - Date.now());
-    }
-    return { success: false, status: res.status, error: res.error };
-  };
-
-  const concedeRivalDuel = async (matchId: string) => {
-    const uid = activeSessionUserIdRef.current || user?.id;
-    if (!uid) return { success: false, error: 'Authentication required.' };
-    const res = await concedeRivalDuelServer({ userId: uid, matchId });
-    if (res.ok) {
-      applyRivalsStatePayload(res.data);
-      sound.playClick();
-      return { success: true, match: res.match };
     }
     return { success: false, error: res.error };
   };
@@ -7654,7 +6774,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       unitLabel: q.unitLabel,
       estimatedMinutes: q.estimatedMinutes,
       playerXpReward: q.playerXpReward,
-      forgeXpReward: q.forgeXpReward,
       goldReward: q.goldReward,
       isSpecialChallenge: false,
       personalizationReason: `AI Mentor Guidance: ${q.rationale}`,
@@ -7693,7 +6812,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         applyCentralRewardGrant(
           'Community Event Milestone',
           res.rewards.xp || 0,
-          0,
           res.rewards.gold || 0
         );
       }
@@ -7851,7 +6969,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (res.ok && res.state) {
       setIdentityState(res.state);
       sound.playVictory();
-      confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 }, colors: ['#8B5CF6', '#D6A84B', '#FB7185'] });
+      confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 }, colors: ['#00D9FF', '#1677FF', '#FFFFFF'] });
       void refreshNotificationsState();
       return { success: true };
     }
@@ -7963,7 +7081,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (res.ok && res.data) {
       setSeasonState(res.data);
       sound.playVictory();
-      confetti({ particleCount: 75, spread: 70, origin: { y: 0.6 }, colors: ['#8B5CF6', '#D6A84B', '#34D399'] });
+      confetti({ particleCount: 75, spread: 70, origin: { y: 0.6 }, colors: ['#00D9FF', '#1677FF', '#34D399'] });
       void refreshIdentityState();
       void refreshCosmeticsState();
       void refreshCardsState();
@@ -8584,7 +7702,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (res.ok && res.state) {
       setPrestigeState(res.state);
       sound.playVictory();
-      confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 }, colors: ['#8B5CF6', '#D6A84B', '#FBBF24'] });
+      confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 }, colors: ['#00D9FF', '#1677FF', '#FFFFFF'] });
       void refreshIdentityState();
       void refreshCosmeticsState();
       return { success: true };
@@ -8843,7 +7961,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         stats,
         habits,
         quests,
-        weapons,
         buffs,
         kingdoms,
         fitnessSessions,
@@ -8995,13 +8112,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         claimWeeklyBossReward,
         rivalsState,
         rivalsLoading,
-        rivalsServerClockOffsetMs,
         refreshRivalsState,
         joinRivalsQueue,
         cancelRivalsQueue,
-        readyRivalDuel,
-        submitVerifiedDuelRep,
-        concedeRivalDuel,
         sendDirectRivalChallenge,
         sendRivalInvite,
         respondRivalInvite,
@@ -9054,8 +8167,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         dismissGlobalUnlockCelebration,
         showAuthModal,
         authMode,
-        equippedWeapon,
-        equippedGear,
         activeBuffs,
         selectedHeroId,
         heroLocked,
@@ -9065,7 +8176,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         selectPlayableHero,
         rpgAttributes,
         reclaimHonorQuest,
-        recordEquipmentInspected,
         claimReclaimHonorReward,
         campaignProgress,
         evaluateChapterRequirements,
@@ -9104,15 +8214,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         deleteHabit,
         isHabitClaimedForCurrentPeriod,
         claimQuest,
-        equipWeapon,
-        equipGearSlot,
-        getDefaultSlotForCategory,
-        upgradeWeapon,
         purchaseShopItem,
-        trainWeaponMastery,
-        evolveWeapon,
-        unlockProgressionWeapon,
-        ascendWeaponRarity,
         activateBuff,
         logFitnessSession,
         logMeal,

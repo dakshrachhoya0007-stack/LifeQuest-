@@ -28,7 +28,6 @@ interface StoredClaimRecord {
   userId: string;
   claimKey: string;
   xpAwarded: number;
-  forgeXpAwarded: number;
   goldAwarded: number;
   claimedAt: string;
 }
@@ -515,7 +514,6 @@ export function createWeeklyBossService(rootDir: string) {
         const summary = buildPlayerSummary(event, userId, ledger, todayBucket);
         let claimKey = '';
         let xpAwarded = 0;
-        let forgeXpAwarded = 0;
         let goldAwarded = 0;
         let bonusBossDamage = 0;
 
@@ -555,7 +553,6 @@ export function createWeeklyBossService(rootDir: string) {
           }
           claimKey = 'defeat:reward';
           xpAwarded = event.rewards.defeatXp;
-          forgeXpAwarded = event.rewards.defeatForgeXp;
           goldAwarded = event.rewards.defeatGold;
         } else if (claimType === 'top_contributor') {
           if (event.status !== 'defeated' && event.status !== 'resolved') {
@@ -596,7 +593,6 @@ export function createWeeklyBossService(rootDir: string) {
           userId,
           claimKey,
           xpAwarded,
-          forgeXpAwarded,
           goldAwarded,
           claimedAt: new Date().toISOString(),
         });
@@ -607,7 +603,7 @@ export function createWeeklyBossService(rootDir: string) {
           payload: {
             success: true,
             claimKey,
-            rewards: { xp: xpAwarded, forgeXp: forgeXpAwarded, gold: goldAwarded },
+            rewards: { xp: xpAwarded, gold: goldAwarded },
             bonusBossDamage,
           },
         };

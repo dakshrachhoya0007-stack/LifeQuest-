@@ -23,7 +23,7 @@ export const PresenceBadge: React.FC<PresenceBadgeProps> = ({
   if (!showLabel) {
     return (
       <span
-        className={`inline-block rounded-full shrink-0 border border-[#090910] ${dotSize} ${className}`}
+        className={`inline-block rounded-full shrink-0 border border-[#061225] ${dotSize} ${className}`}
         style={{
           backgroundColor: meta.dotColor,
           boxShadow: meta.glowShadow,

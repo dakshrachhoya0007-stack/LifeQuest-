@@ -8,7 +8,6 @@ import type {
   CompetitiveMatchVisibility,
   CompetitiveRivalMatch,
   CompetitiveRivalMode,
-  DuelExerciseId,
   MentorChatMessage,
   MentorRecommendedQuest,
   MentorWeeklyAnalysis,
@@ -61,7 +60,7 @@ export const claimWeeklyBossRewardServer = async (params: {
   timezone?: string;
 }): Promise<{
   ok: boolean;
-  rewards?: { xp: number; forgeXp: number; gold: number };
+  rewards?: { xp: number; gold: number };
   state?: WeeklyBossStatePayload;
   error?: string;
 }> => {
@@ -166,8 +165,7 @@ export const fetchRivalsLeaderboardServer = async (params: {
 
 export const joinRivalsQueueServer = async (params: {
   userId: string;
-  durationSeconds?: number;
-  mode?: CompetitiveRivalMode;
+  mode: CompetitiveRivalMode;
   username?: string;
   characterClass?: CharacterClass;
   level?: number;
@@ -184,7 +182,6 @@ export const joinRivalsQueueServer = async (params: {
       method: 'POST',
       headers,
       body: JSON.stringify({
-        durationSeconds: params.durationSeconds,
         mode: params.mode,
         username: params.username,
         characterClass: params.characterClass,
@@ -319,135 +316,6 @@ export const endActiveRivalryServer = async (params: {
     return { ok: true, data: parsed.data as RivalsStateResponse };
   } catch (err: any) {
     return { ok: false, error: err?.message || 'Network error.' };
-  }
-};
-
-export const readyRivalDuelServer = async (params: {
-  userId: string;
-  matchId: string;
-  ready: boolean;
-  cameraReady: boolean;
-}): Promise<{
-  ok: boolean;
-  match?: CompetitiveRivalMatch;
-  launchedNow?: boolean;
-  data?: RivalsStateResponse;
-  error?: string;
-}> => {
-  try {
-    const headers = await getLifequestAuthHeaders(params.userId, true);
-    const res = await fetch('/api/rivals/duel/ready', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        matchId: params.matchId,
-        ready: params.ready,
-        cameraReady: params.cameraReady,
-      }),
-    });
-    const parsed = await safeJson(res);
-    if (!parsed.ok) {
-      return { ok: false, error: parsed.data?.error || 'Could not update duel readiness.' };
-    }
-    return {
-      ok: true,
-      match: parsed.data?.match as CompetitiveRivalMatch,
-      launchedNow: Boolean(parsed.data?.launchedNow),
-      data: parsed.data as RivalsStateResponse,
-    };
-  } catch (err: any) {
-    return { ok: false, error: err?.message || 'Network error updating readiness.' };
-  }
-};
-
-export const submitVerifiedDuelRepServer = async (params: {
-  userId: string;
-  matchId: string;
-  eventId: string;
-  repSeq: number;
-  exercise: DuelExerciseId;
-  peakAngleDeg: number;
-  resetAngleDeg: number;
-  durationMs: number;
-  confidence: number;
-  landmarksVisible: boolean;
-  cameraStable: boolean;
-}): Promise<{
-  ok: boolean;
-  status?: number;
-  pointsAwarded?: number;
-  duplicate?: boolean;
-  match?: CompetitiveRivalMatch;
-  scoreEntry?: RivalryScoreEntry;
-  serverNow?: string;
-  error?: string;
-}> => {
-  try {
-    const headers = await getLifequestAuthHeaders(params.userId, true);
-    const res = await fetch('/api/rivals/duel/rep', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        matchId: params.matchId,
-        eventId: params.eventId,
-        repSeq: params.repSeq,
-        exercise: params.exercise,
-        peakAngleDeg: params.peakAngleDeg,
-        resetAngleDeg: params.resetAngleDeg,
-        durationMs: params.durationMs,
-        confidence: params.confidence,
-        landmarksVisible: params.landmarksVisible,
-        cameraStable: params.cameraStable,
-      }),
-    });
-    const parsed = await safeJson(res);
-    if (!parsed.ok) {
-      return {
-        ok: false,
-        status: parsed.status,
-        serverNow: parsed.data?.serverNow,
-        error: parsed.data?.error || 'Repetition failed server verification.',
-      };
-    }
-    return {
-      ok: true,
-      status: parsed.status,
-      pointsAwarded: Number(parsed.data?.pointsAwarded || 0),
-      duplicate: Boolean(parsed.data?.duplicate),
-      match: parsed.data?.match as CompetitiveRivalMatch,
-      scoreEntry: parsed.data?.scoreEntry as RivalryScoreEntry,
-      serverNow: parsed.data?.serverNow,
-    };
-  } catch (err: any) {
-    return { ok: false, status: 0, error: err?.message || 'Network error submitting repetition.' };
-  }
-};
-
-export const concedeRivalDuelServer = async (params: {
-  userId: string;
-  matchId: string;
-}): Promise<{
-  ok: boolean;
-  match?: CompetitiveRivalMatch;
-  data?: RivalsStateResponse;
-  error?: string;
-}> => {
-  try {
-    const headers = await getLifequestAuthHeaders(params.userId, true);
-    const res = await fetch('/api/rivals/duel/concede', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ matchId: params.matchId }),
-    });
-    const parsed = await safeJson(res);
-    if (!parsed.ok) return { ok: false, error: parsed.data?.error || 'Could not stop duel.' };
-    return {
-      ok: true,
-      match: parsed.data?.match as CompetitiveRivalMatch,
-      data: parsed.data as RivalsStateResponse,
-    };
-  } catch (err: any) {
-    return { ok: false, error: err?.message || 'Network error stopping duel.' };
   }
 };
 

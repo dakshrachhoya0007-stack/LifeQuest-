@@ -31,31 +31,31 @@ export const AuthErrorScreen: React.FC<AuthErrorScreenProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#090910] text-[#FFFFFF] flex items-center justify-center p-4 sm:p-6">
-      <div className="w-full max-w-md bg-[#141420]/95 backdrop-blur-xl border border-[#FB7185]/45 rounded-2xl p-6 sm:p-8 shadow-[0_24px_60px_rgba(9,9,16,0.9)]">
+    <div className="min-h-screen bg-[#061225] text-[#FFFFFF] flex items-center justify-center p-4 sm:p-6">
+      <div className="w-full max-w-md bg-[#102440]/90 backdrop-blur-xl border border-rose-500/45 rounded-2xl p-6 sm:p-8 shadow-[0_24px_60px_rgba(2,8,20,0.8)]">
         <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0E0E17] border border-[#D6A84B]/40 text-[#D6A84B] text-[10px] font-bold uppercase tracking-widest mb-3">
-            <Shield className="w-3 h-3 text-[#8B5CF6]" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0A1930] border border-[#1677FF]/45 text-[#00D9FF] text-[10px] font-bold uppercase tracking-widest mb-3">
+            <Shield className="w-3 h-3" />
             <span>LIFEQUEST · World of Aetheria</span>
           </div>
-          <div className="w-12 h-12 mx-auto rounded-xl bg-[#FB7185]/15 border border-[#FB7185]/50 flex items-center justify-center text-[#FB7185] mb-3">
+          <div className="w-12 h-12 mx-auto rounded-xl bg-rose-950/60 border border-rose-500/50 flex items-center justify-center text-rose-300 mb-3">
             <AlertTriangle className="w-6 h-6" />
           </div>
           <h1 className="text-xl font-black font-['Cinzel'] text-[#FFFFFF] tracking-wide">
             AUTHENTICATION INTERRUPTED
           </h1>
-          <p className="text-xs text-[#A1A1B8] mt-1">
+          <p className="text-xs text-[#A9B8CC] mt-1">
             We could not finalize your sign-in session.
           </p>
         </div>
 
-        <div className="p-3.5 mb-5 rounded-xl bg-[#FB7185]/10 border border-[#FB7185]/45 text-xs text-rose-200 leading-relaxed">
+        <div className="p-3.5 mb-5 rounded-xl bg-rose-950/50 border border-rose-800/60 text-xs text-rose-200 leading-relaxed">
           {retryError || message}
         </div>
 
-        <div className="p-3.5 mb-6 rounded-xl bg-[#0E0E17] border border-[#8B5CF6]/30 text-[11px] text-[#A1A1B8] space-y-1.5">
-          <div className="font-semibold text-[#D6A84B]">What you can do:</div>
-          <ul className="list-disc pl-4 space-y-1 text-[#A1A1B8]">
+        <div className="p-3.5 mb-6 rounded-xl bg-[#0A1930] border border-[#1677FF]/30 text-[11px] text-[#A9B8CC] space-y-1.5">
+          <div className="font-semibold text-[#00D9FF]">What you can do:</div>
+          <ul className="list-disc pl-4 space-y-1 text-[#A9B8CC]">
             <li>Try signing in with Google again if consent was cancelled or timed out.</li>
             <li>Ensure cookies and storage are enabled in this browser tab.</li>
             <li>Sign in with your realm email and password instead.</li>
@@ -83,9 +83,9 @@ export const AuthErrorScreen: React.FC<AuthErrorScreenProps> = ({
             type="button"
             onClick={onBackToLogin}
             disabled={isRetrying}
-            className="w-full py-2.5 px-4 rounded-xl bg-[#0E0E17] hover:bg-[#8B5CF6]/20 border border-[#8B5CF6]/45 hover:border-[#D6A84B]/70 text-white font-semibold text-xs flex items-center justify-center gap-2 transition-all"
+            className="w-full py-2.5 px-4 rounded-xl bg-[#0A1930] hover:bg-[#1677FF]/25 border border-[#1677FF]/45 hover:border-[#00D9FF]/70 text-white font-semibold text-xs flex items-center justify-center gap-2 transition-all"
           >
-            <ArrowLeft className="w-3.5 h-3.5 text-[#D6A84B]" />
+            <ArrowLeft className="w-3.5 h-3.5 text-[#00D9FF]" />
             <span>Back to Sign In</span>
           </button>
         </div>

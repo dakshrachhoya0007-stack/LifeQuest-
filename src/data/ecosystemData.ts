@@ -1,7 +1,5 @@
 import type {
   CommunityEvent,
-  DuelExerciseDefinition,
-  DuelExerciseId,
   MentorRecommendedQuest,
   MuseumCategory,
   MuseumLockedMilestone,
@@ -55,7 +53,7 @@ export const createDefaultWeeklyBossEvent = (now: Date = new Date()): WeeklyBoss
     bossName: 'Malakor, Titan of the Obsidian Gate',
     bossTitle: 'Weekly Community Raid Boss',
     bossDescription:
-      'An armored colossus forged from stagnation and missed promises. Every verified workout, study session, consistency habit, and mindful recovery strike weakens its obsidian plating.',
+      'A towering colossus born from stagnation and missed promises. Every verified workout, study session, consistency habit, and mindful recovery effort weakens its obsidian plating.',
     artworkKey: 'weekly_boss_titan',
     difficulty: 'Mythic',
     totalHealth: 10000,
@@ -132,7 +130,6 @@ export const createDefaultWeeklyBossEvent = (now: Date = new Date()): WeeklyBoss
       participationXp: 45,
       participationGold: 35,
       defeatXp: 150,
-      defeatForgeXp: 110,
       defeatGold: 120,
       topContributorBonusXp: 90,
       topContributorBonusGold: 80,
@@ -202,12 +199,12 @@ export const calculateSafeBossDamage = (
       break;
     case 'comeback_activity':
       rawDamage = 75;
-      actionLabel = 'Phoenix Comeback Cleave';
+      actionLabel = 'Phoenix Comeback Surge';
       break;
     case 'recovery_habit':
-      // Balanced recovery & rest never penalized; grants supportive shield-piercing strike
+      // Balanced recovery & rest never penalized; grants supportive barrier-piercing impact
       rawDamage = 55;
-      actionLabel = 'Sanctuary Restoration Ward';
+      actionLabel = 'Sanctuary Restoration Surge';
       break;
   }
 
@@ -221,208 +218,72 @@ export const calculateSafeBossDamage = (
   };
 };
 
-// --- PHASE 2 (COMPETITIVE ARENA): REAL-LIFE 1v1 SAME-EXERCISE DUEL CONFIG ---
+// --- PHASE 2 (COMPETITIVE ARENA): INDEPENDENT RIVALS CONFIG & RATING ENGINE ---
 
-export const DEFAULT_DUEL_DURATION_SECONDS = 180; // 3 minutes default
-export const MIN_DUEL_DURATION_SECONDS = 60;      // 1 minute minimum
-export const MAX_DUEL_DURATION_SECONDS = 300;     // 5 minutes absolute maximum
-
-export const DUEL_EXERCISE_IDS: DuelExerciseId[] = [
-  'pushup',
-  'squat',
-  'situp',
-  'jumping_jack',
-  'lunge',
-  'knee_raise',
+export const COMPETITIVE_RIVAL_MODES: Array<{
+  id: 'strength' | 'endurance' | 'consistency' | 'discipline' | 'overall_fitness' | 'custom';
+  title: string;
+  subtitle: string;
+  description: string;
+  legacyChallengeType: RivalChallengeType;
+  defaultDurationDays: number;
+  defaultTargetScore: number;
+}> = [
+  {
+    id: 'overall_fitness',
+    title: 'Overall Fitness Duel',
+    subtitle: 'Full-spectrum athleticism & consistency',
+    description: 'Balanced competitive match scoring verified workouts, habits, study focus, and active recovery.',
+    legacyChallengeType: 'weekly_activity_score',
+    defaultDurationDays: 7,
+    defaultTargetScore: 500,
+  },
+  {
+    id: 'strength',
+    title: 'Strength Duel',
+    subtitle: 'Resistance & bodyweight output',
+    description: 'Focused head-to-head match rewarding verified strength workouts and healthy recovery support.',
+    legacyChallengeType: 'strength_milestones',
+    defaultDurationDays: 7,
+    defaultTargetScore: 450,
+  },
+  {
+    id: 'endurance',
+    title: 'Endurance Duel',
+    subtitle: 'Cardio pacing, running & stamina',
+    description: 'Distance and sustained aerobic training duel rewarding verified walks, runs, and cycling.',
+    legacyChallengeType: 'endurance_achievements',
+    defaultDurationDays: 7,
+    defaultTargetScore: 450,
+  },
+  {
+    id: 'consistency',
+    title: 'Consistency Duel',
+    subtitle: 'Steady daily rhythm & rest respect',
+    description: 'Rewards unbroken daily workouts and restorative recovery habits without rewarding burnout.',
+    legacyChallengeType: 'workout_consistency',
+    defaultDurationDays: 7,
+    defaultTargetScore: 420,
+  },
+  {
+    id: 'discipline',
+    title: 'Discipline Duel',
+    subtitle: 'Habits, hydration & focus rituals',
+    description: 'Competitive duel built around verified daily routines, hydration, and mindful study.',
+    legacyChallengeType: 'habit_completion',
+    defaultDurationDays: 7,
+    defaultTargetScore: 420,
+  },
+  {
+    id: 'custom',
+    title: 'Custom Challenge',
+    subtitle: 'Tailored duration & win conditions',
+    description: 'Custom competitive match (3–14 days, ranked or unranked, custom target score).',
+    legacyChallengeType: 'weekly_activity_score',
+    defaultDurationDays: 5,
+    defaultTargetScore: 350,
+  },
 ];
-
-export const DUEL_EXERCISES_CATALOG: Record<DuelExerciseId, DuelExerciseDefinition> = {
-  pushup: {
-    id: 'pushup',
-    name: 'Push-ups',
-    shortTag: '3 pts / rep',
-    pointsPerRep: 3,
-    minRepIntervalMs: 620,
-    maxRepsPerMinute: 55,
-    description:
-      'Lower your chest steadily in a straight plank line until elbows bend cleanly, then press back to full extension.',
-    cameraSetupTip: 'Place your camera at floor or low-table height angled 45° to show shoulders, elbows, hips, and knees.',
-    warmupGuidance: 'Warm up with 15–20 seconds of shoulder circles, wrist rolls, and 3 slow practice push-ups.',
-    accessibleModification: 'Knees-down or wall/incline push-ups with full elbow flexion are valid and welcome.',
-    formCues: [
-      'Keep your core braced and torso aligned.',
-      'Reach ~98° or deeper elbow bend at the bottom.',
-      'Lock out arms smoothly at the top to credit each rep.',
-    ],
-  },
-  squat: {
-    id: 'squat',
-    name: 'Squats',
-    shortTag: '2 pts / rep',
-    pointsPerRep: 2,
-    minRepIntervalMs: 700,
-    maxRepsPerMinute: 50,
-    description:
-      'Stand shoulder-width apart, hinge hips back with chest lifted until knees bend cleanly, then drive back to standing.',
-    cameraSetupTip: 'Step back 1.8–2.5m so your head, hips, knees, and ankles fit inside the frame.',
-    warmupGuidance: 'Warm up with 20 seconds of hip circles, ankle tilts, and 3 gentle bodyweight quarter-squats.',
-    accessibleModification: 'Chair-touch or box squats at a comfortable knee angle count cleanly.',
-    formCues: [
-      'Keep heels planted and chest tall.',
-      'Lower until knees bend past ~112°.',
-      'Return fully upright (~152°+) between repetitions.',
-    ],
-  },
-  situp: {
-    id: 'situp',
-    name: 'Sit-ups',
-    shortTag: '2 pts / rep',
-    pointsPerRep: 2,
-    minRepIntervalMs: 750,
-    maxRepsPerMinute: 45,
-    description:
-      'Lie back with knees bent and feet planted, curl your torso upward smoothly toward your knees, and lower with control.',
-    cameraSetupTip: 'Position the camera to your side at mat level so shoulder, hip, and knee angles are clearly visible.',
-    warmupGuidance: 'Warm up with gentle cat-cow spine mobility and 2–3 controlled half-crunches before starting.',
-    accessibleModification: 'Avoid pulling on your neck—crisp arms-crossed crunches or partial curls count safely.',
-    formCues: [
-      'Keep knees bent throughout every rep.',
-      'Flex torso toward knees (~82° or less hip angle).',
-      'Lower shoulder blades back toward the mat (~118°+) to reset.',
-    ],
-  },
-  jumping_jack: {
-    id: 'jumping_jack',
-    name: 'Jumping Jacks',
-    shortTag: '1 pt / rep',
-    pointsPerRep: 1,
-    minRepIntervalMs: 400,
-    maxRepsPerMinute: 85,
-    description:
-      'Sweep both arms cleanly overhead while stepping or jumping wide, then bring arms back beside your thighs.',
-    cameraSetupTip: 'Face the camera straight-on with overhead arm clearance visible in frame.',
-    warmupGuidance: 'Start with 15 seconds of easy arm swings and calf raises to warm ankles and shoulders.',
-    accessibleModification: 'Low-impact side step-jacks with full overhead arm sweeps track accurately without jumping.',
-    formCues: [
-      'Raise both arms clearly overhead (~118°+ abduction).',
-      'Return arms cleanly down beside your sides (<52°).',
-      'Maintain steady rhythmic breathing.',
-    ],
-  },
-  lunge: {
-    id: 'lunge',
-    name: 'Lunges',
-    shortTag: '3 pts / rep',
-    pointsPerRep: 3,
-    minRepIntervalMs: 750,
-    maxRepsPerMinute: 45,
-    description:
-      'Step into a balanced split stance, lower hips with control until your lead knee bends cleanly, then drive back upright.',
-    cameraSetupTip: 'Stand at a slight 45° angle 2m from the camera so both legs remain unclipped.',
-    warmupGuidance: 'Take 20 seconds for hip flexor stretches and 2 light alternating step-backs per leg.',
-    accessibleModification: 'Hold near a wall or chair for balance and use a comfortable split depth.',
-    formCues: [
-      'Keep your torso tall over your hips.',
-      'Bend knee smoothly past ~116°.',
-      'Press back to tall standing posture (~152°+) between reps.',
-    ],
-  },
-  knee_raise: {
-    id: 'knee_raise',
-    name: 'High Knees',
-    shortTag: '1 pt / rep',
-    pointsPerRep: 1,
-    minRepIntervalMs: 320,
-    maxRepsPerMinute: 100,
-    description:
-      'Drive alternating knees briskly toward hip height with upright posture and controlled rhythm.',
-    cameraSetupTip: 'Stand 2m back facing or slightly angled toward the camera with full legs visible.',
-    warmupGuidance: 'Begin with 15 seconds of gentle marching and ankle circles.',
-    accessibleModification: 'Crisp standing marches without hopping count every full knee drive safely.',
-    formCues: [
-      'Keep spine tall without leaning backward.',
-      'Lift knee above ~108° flexion angle.',
-      'Return foot to standing (~150°+) before the next drive.',
-    ],
-  },
-};
-
-export const pickAutoDuelExercise = (avoidExercise?: DuelExerciseId | null): DuelExerciseId => {
-  const pool = avoidExercise
-    ? DUEL_EXERCISE_IDS.filter(id => id !== avoidExercise)
-    : DUEL_EXERCISE_IDS;
-  const idx = Math.floor(Math.random() * pool.length);
-  return pool[idx] || 'squat';
-};
-
-export const validateServerDuelRep = (params: {
-  exerciseId: DuelExerciseId;
-  peakAngleDeg: number;
-  resetAngleDeg: number;
-  durationMs: number;
-  confidence: number;
-  landmarksVisible: boolean;
-  cameraStable: boolean;
-  msSinceLastRep: number;
-  elapsedSeconds: number;
-  currentRepCount: number;
-}): { valid: boolean; reason?: string } => {
-  const def = DUEL_EXERCISES_CATALOG[params.exerciseId];
-  if (!def) return { valid: false, reason: 'Unsupported duel exercise.' };
-  if (!params.landmarksVisible) return { valid: false, reason: 'Pose landmarks were not visible.' };
-  if (!params.cameraStable) return { valid: false, reason: 'Camera feed was unstable.' };
-  if (params.confidence < 60) return { valid: false, reason: 'Pose tracking confidence too low.' };
-
-  if (params.msSinceLastRep < def.minRepIntervalMs) {
-    return { valid: false, reason: 'Repetition interval faster than safe biomechanical minimum.' };
-  }
-  if (params.durationMs < Math.min(240, Math.floor(def.minRepIntervalMs * 0.6))) {
-    return { valid: false, reason: 'Movement duration too brief to represent full range.' };
-  }
-
-  // Physiological rate bound over elapsed match time (with small 3-rep burst allowance at start)
-  const allowedByPace = Math.ceil((Math.max(10, params.elapsedSeconds) / 60) * def.maxRepsPerMinute) + 3;
-  if (params.currentRepCount + 1 > allowedByPace) {
-    return { valid: false, reason: 'Repetition pace exceeds safe physiological ceiling.' };
-  }
-
-  const peak = Number(params.peakAngleDeg);
-  const reset = Number(params.resetAngleDeg);
-  if (!Number.isFinite(peak) || !Number.isFinite(reset)) {
-    return { valid: false, reason: 'Missing valid joint angle telemetry.' };
-  }
-
-  switch (params.exerciseId) {
-    case 'pushup':
-      if (peak > 112 || reset < 135) {
-        return { valid: false, reason: 'Incomplete push-up elbow range of motion.' };
-      }
-      break;
-    case 'squat':
-    case 'lunge':
-      if (peak > 125 || reset < 142) {
-        return { valid: false, reason: 'Incomplete knee flexion/extension depth.' };
-      }
-      break;
-    case 'situp':
-      if (peak > 92 || reset < 110) {
-        return { valid: false, reason: 'Incomplete sit-up hip flexion range.' };
-      }
-      break;
-    case 'jumping_jack':
-      if (peak < 105 || reset > 62) {
-        return { valid: false, reason: 'Incomplete overhead arm sweep range.' };
-      }
-      break;
-    case 'knee_raise':
-      if (peak > 120 || reset < 140) {
-        return { valid: false, reason: 'Incomplete high-knee lift range.' };
-      }
-      break;
-  }
-
-  return { valid: true };
-};
 
 export const COMPETITIVE_TIERS: Array<{
   tier: 'Bronze' | 'Silver' | 'Gold' | 'Platinum' | 'Diamond' | 'Master' | 'Grandmaster' | 'Legendary';
@@ -668,7 +529,7 @@ export const createDefaultCommunityEvent = (now: Date = new Date()): CommunityEv
     subtitle: 'Realm-Wide Wellness & Restoration Chronicle',
     description:
       'Every champion across Aetheria contributes verified workouts, mindful study, balanced meals, and daily habits to rekindle the Golden World Tree.',
-    themeColor: '#D6A84B',
+    themeColor: '#1677FF',
     status: 'active',
     startsAt,
     endsAt,
@@ -790,7 +651,6 @@ export const validateMentorRecommendedQuest = (
 
   // Server-bounded central rewards (AI can NEVER dictate arbitrary/unbounded rewards)
   const playerXpReward = difficulty === 'challenging' ? 55 : difficulty === 'medium' ? 40 : 25;
-  const forgeXpReward = difficulty === 'challenging' ? 40 : difficulty === 'medium' ? 28 : 18;
   const goldReward = difficulty === 'challenging' ? 45 : difficulty === 'medium' ? 30 : 20;
 
   return {
@@ -806,7 +666,6 @@ export const validateMentorRecommendedQuest = (
       maxProgress,
       unitLabel,
       playerXpReward,
-      forgeXpReward,
       goldReward,
       rationale: rationale || 'Tailored safely to your recent progression and recovery rhythm.',
     },

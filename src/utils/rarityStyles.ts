@@ -1,4 +1,4 @@
-import { WeaponCategory, WeaponRarity } from '../types/game';
+import { ItemRarity } from '../types/game';
 
 export interface RarityVisualStyle {
   tierIndex: number;
@@ -18,7 +18,7 @@ export interface RarityVisualStyle {
   unlockTierHint: string;
 }
 
-export const RARITY_ORDER: WeaponRarity[] = [
+export const RARITY_ORDER: ItemRarity[] = [
   'Common',
   'Uncommon',
   'Rare',
@@ -31,41 +31,7 @@ export const RARITY_ORDER: WeaponRarity[] = [
   'Eternal',
 ];
 
-export const WEAPON_CATEGORIES_ORDER: WeaponCategory[] = [
-  'Swords',
-  'Greatswords',
-  'Daggers',
-  'Dual Blades',
-  'Bows',
-  'Crossbows',
-  'Magic Staffs',
-  'Wands',
-  'Spears',
-  'Axes',
-  'War Hammers',
-  'Scythes',
-  'Shields',
-  'Armour',
-  'Helmets',
-  'Accessories',
-];
-
-export const MAIN_HAND_WEAPON_CATEGORIES: WeaponCategory[] = [
-  'Swords',
-  'Greatswords',
-  'Daggers',
-  'Dual Blades',
-  'Bows',
-  'Crossbows',
-  'Magic Staffs',
-  'Wands',
-  'Spears',
-  'Axes',
-  'War Hammers',
-  'Scythes',
-];
-
-export const RARITY_STYLE_MAP: Record<WeaponRarity, RarityVisualStyle> = {
+export const RARITY_STYLE_MAP: Record<ItemRarity, RarityVisualStyle> = {
   Common: {
     tierIndex: 1,
     label: 'Common',
@@ -115,24 +81,24 @@ export const RARITY_STYLE_MAP: Record<WeaponRarity, RarityVisualStyle> = {
     pipActive: 'bg-blue-400 border-blue-200 text-slate-950',
     orb: 'bg-blue-500/25',
     frameAnimationClass: '',
-    unlockTierHint: 'Treasury & Realm Skirmishes',
+    unlockTierHint: 'Treasury & Realm Trials',
   },
   Epic: {
     tierIndex: 4,
     label: 'Epic',
     shortTag: 'IV',
     isBeyondMythic: false,
-    border: 'border-[#8B5CF6]/85',
-    ringClass: 'ring-1 ring-[#8B5CF6]/45',
-    badge: 'bg-[#1D1536] text-[#C4B5FD] border border-[#8B5CF6]/80',
-    text: 'text-[#C4B5FD]',
-    accentHex: '#8B5CF6',
-    secondaryHex: '#6D28D9',
-    cardGlow: 'shadow-[#6D28D9]/30',
-    pipActive: 'bg-[#8B5CF6] border-[#C4B5FD] text-white',
-    orb: 'bg-[#8B5CF6]/30',
+    border: 'border-[#1677FF]/85',
+    ringClass: 'ring-1 ring-[#1677FF]/40',
+    badge: 'bg-[#0A1930] text-[#70B5FF] border border-[#1677FF]/80',
+    text: 'text-[#70B5FF]',
+    accentHex: '#1677FF',
+    secondaryHex: '#0099FF',
+    cardGlow: 'shadow-[#1677FF]/25',
+    pipActive: 'bg-[#1677FF] border-[#70B5FF] text-white',
+    orb: 'bg-[#1677FF]/30',
     frameAnimationClass: '',
-    unlockTierHint: 'Masterwork Forge & Treasury',
+    unlockTierHint: 'Masterwork Vault & Treasury',
   },
   Legendary: {
     tierIndex: 5,
@@ -173,15 +139,15 @@ export const RARITY_STYLE_MAP: Record<WeaponRarity, RarityVisualStyle> = {
     label: 'Ascendant',
     shortTag: 'VII · RUNED',
     isBeyondMythic: true,
-    border: 'border-[#34D399]/95',
-    ringClass: 'ring-2 ring-[#34D399]/45 shadow-[0_0_22px_rgba(52,211,153,0.28)]',
-    badge: 'bg-gradient-to-r from-[#0A251E] via-[#141420] to-[#0D3326] text-[#6EE7B7] border border-[#34D399]/85',
-    text: 'text-[#34D399]',
-    accentHex: '#34D399',
-    secondaryHex: '#059669',
-    cardGlow: 'shadow-emerald-950/80',
-    pipActive: 'bg-[#34D399] border-emerald-100 text-[#090910]',
-    orb: 'bg-[#34D399]/35',
+    border: 'border-teal-400/95',
+    ringClass: 'ring-2 ring-teal-400/50 shadow-[0_0_22px_rgba(45,212,191,0.3)]',
+    badge: 'bg-gradient-to-r from-teal-950 via-cyan-950 to-emerald-950 text-teal-200 border border-teal-400/90',
+    text: 'text-teal-300',
+    accentHex: '#2dd4bf',
+    secondaryHex: '#06b6d4',
+    cardGlow: 'shadow-teal-950/80',
+    pipActive: 'bg-teal-300 border-teal-100 text-slate-950',
+    orb: 'bg-teal-400/35',
     frameAnimationClass: 'animate-ascendant-pulse',
     unlockTierHint: 'Progression & Runic Evolution Only',
   },
@@ -190,15 +156,15 @@ export const RARITY_STYLE_MAP: Record<WeaponRarity, RarityVisualStyle> = {
     label: 'Divine',
     shortTag: 'VIII · SACRED',
     isBeyondMythic: true,
-    border: 'border-[#FBBF24]',
-    ringClass: 'ring-2 ring-[#D6A84B]/60 shadow-[0_0_26px_rgba(251,191,36,0.32)]',
-    badge: 'bg-gradient-to-r from-[#2A1D0A] via-[#3A280D] to-[#1D1408] text-[#FDE68A] border border-[#FBBF24]',
-    text: 'text-[#FBBF24]',
-    accentHex: '#FBBF24',
-    secondaryHex: '#D6A84B',
-    cardGlow: 'shadow-amber-950/85',
-    pipActive: 'bg-[#FBBF24] border-white text-[#090910]',
-    orb: 'bg-[#FBBF24]/35',
+    border: 'border-yellow-300',
+    ringClass: 'ring-2 ring-yellow-300/60 shadow-[0_0_26px_rgba(253,224,71,0.34)]',
+    badge: 'bg-gradient-to-r from-amber-900 via-yellow-900 to-amber-950 text-yellow-200 border border-yellow-300',
+    text: 'text-yellow-200',
+    accentHex: '#fde047',
+    secondaryHex: '#f59e0b',
+    cardGlow: 'shadow-yellow-950/85',
+    pipActive: 'bg-yellow-300 border-white text-slate-950',
+    orb: 'bg-yellow-300/35',
     frameAnimationClass: '',
     unlockTierHint: 'Boss Trials & Sacred Ascension Only',
   },
@@ -207,15 +173,15 @@ export const RARITY_STYLE_MAP: Record<WeaponRarity, RarityVisualStyle> = {
     label: 'Celestial',
     shortTag: 'IX · ASTRAL',
     isBeyondMythic: true,
-    border: 'border-[#38BDF8]',
-    ringClass: 'ring-2 ring-[#38BDF8]/60 shadow-[0_0_28px_rgba(56,189,248,0.34)]',
-    badge: 'bg-gradient-to-r from-[#141420] via-[#1D1736] to-[#0C2538] text-[#BAE6FD] border border-[#38BDF8]/85',
-    text: 'text-[#38BDF8]',
-    accentHex: '#38BDF8',
-    secondaryHex: '#8B5CF6',
+    border: 'border-sky-400',
+    ringClass: 'ring-2 ring-sky-400/65 shadow-[0_0_28px_rgba(56,189,248,0.4)]',
+    badge: 'bg-gradient-to-r from-[#0A1930] via-[#102440] to-sky-950 text-sky-100 border border-sky-300/90',
+    text: 'text-sky-200',
+    accentHex: '#38bdf8',
+    secondaryHex: '#1677FF',
     cardGlow: 'shadow-sky-950/90',
-    pipActive: 'bg-[#38BDF8] border-sky-200 text-[#090910]',
-    orb: 'bg-[#38BDF8]/40',
+    pipActive: 'bg-sky-300 border-cyan-200 text-slate-950',
+    orb: 'bg-sky-500/40',
     frameAnimationClass: 'animate-celestial-drift',
     unlockTierHint: 'Citadel Conquest & Starlight Ascension',
   },
@@ -224,15 +190,15 @@ export const RARITY_STYLE_MAP: Record<WeaponRarity, RarityVisualStyle> = {
     label: 'Eternal',
     shortTag: 'X · TIMELESS',
     isBeyondMythic: true,
-    border: 'border-[#D6A84B]',
-    ringClass: 'ring-2 ring-[#D6A84B]/75 shadow-[0_0_34px_rgba(214,168,75,0.42)]',
-    badge: 'bg-gradient-to-r from-[#141420] via-[#2A1B4E] to-[#2B1F0E] text-[#FDE68A] border border-[#D6A84B]',
-    text: 'text-transparent bg-clip-text bg-gradient-to-r from-[#D6A84B] via-[#FDE68A] to-[#8B5CF6]',
-    accentHex: '#D6A84B',
-    secondaryHex: '#8B5CF6',
-    cardGlow: 'shadow-[#6D28D9]/50',
-    pipActive: 'bg-gradient-to-r from-[#D6A84B] to-[#8B5CF6] border-white text-[#090910]',
-    orb: 'bg-[#D6A84B]/40',
+    border: 'border-[#00D9FF]',
+    ringClass: 'ring-2 ring-[#00D9FF]/75 shadow-[0_0_34px_rgba(0,217,255,0.45)]',
+    badge: 'bg-gradient-to-r from-[#061225] via-[#102440] to-cyan-950 text-cyan-100 border border-[#00D9FF]',
+    text: 'text-transparent bg-clip-text bg-gradient-to-r from-[#00D9FF] via-sky-200 to-amber-200',
+    accentHex: '#00D9FF',
+    secondaryHex: '#1677FF',
+    cardGlow: 'shadow-cyan-950/95',
+    pipActive: 'bg-gradient-to-r from-[#00D9FF] to-[#1677FF] border-white text-slate-950',
+    orb: 'bg-[#00D9FF]/40',
     frameAnimationClass: 'animate-eternal-shift',
     unlockTierHint: 'Apex Aetheria Mastery & Cosmic Ascension',
   },
@@ -241,7 +207,7 @@ export const RARITY_STYLE_MAP: Record<WeaponRarity, RarityVisualStyle> = {
 export const getRarityStyle = (rarity?: string): RarityVisualStyle => {
   if (!rarity) return RARITY_STYLE_MAP.Common;
   if (rarity === 'Mythical') return RARITY_STYLE_MAP.Mythic;
-  return RARITY_STYLE_MAP[rarity as WeaponRarity] || RARITY_STYLE_MAP.Common;
+  return RARITY_STYLE_MAP[rarity as ItemRarity] || RARITY_STYLE_MAP.Common;
 };
 
 export const isBeyondMythicRarity = (rarity?: string): boolean => {

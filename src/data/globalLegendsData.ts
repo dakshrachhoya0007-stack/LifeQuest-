@@ -92,23 +92,23 @@ export const TITLE_STYLE_META: Record<
     accentHex: '#34D399',
   },
   arcane: {
-    badgeBg: 'bg-gradient-to-r from-[#141420] via-[#241645] to-[#141420]',
-    badgeBorder: 'border-[#8B5CF6]/75',
-    badgeText: 'text-[#C4B5FD]',
-    glowShadow: 'shadow-[0_0_16px_rgba(139,92,246,0.34)]',
-    accentHex: '#8B5CF6',
+    badgeBg: 'bg-gradient-to-r from-[#0A1930] via-[#102440] to-[#0A1930]',
+    badgeBorder: 'border-[#00D9FF]/75',
+    badgeText: 'text-[#00D9FF]',
+    glowShadow: 'shadow-[0_0_16px_rgba(0,217,255,0.3)]',
+    accentHex: '#00D9FF',
   },
   prismatic: {
-    badgeBg: 'bg-gradient-to-r from-[#141420] via-[#2A1B4E] to-[#231910]',
-    badgeBorder: 'border-[#D6A84B]/80',
-    badgeText: 'text-[#F8FAFC]',
-    glowShadow: 'shadow-[0_0_20px_rgba(214,168,75,0.36)]',
-    accentHex: '#D6A84B',
+    badgeBg: 'bg-gradient-to-r from-[#0A1930] via-[#102440] to-[#16325C]',
+    badgeBorder: 'border-[#00D9FF]/85',
+    badgeText: 'text-white',
+    glowShadow: 'shadow-[0_0_20px_rgba(22,119,255,0.4)]',
+    accentHex: '#00D9FF',
   },
 };
 
 export const RARITY_FRAME_META: Record<
-  GlobalAchievementRarity | 'Epic',
+  GlobalAchievementRarity,
   {
     textClass: string;
     borderClass: string;
@@ -116,34 +116,34 @@ export const RARITY_FRAME_META: Record<
   }
 > = {
   Epic: {
-    textClass: 'text-[#A78BFA]',
-    borderClass: 'border-[#8B5CF6]/55',
-    cardGlow: 'shadow-[#6D28D9]/35',
+    textClass: 'text-[#70B5FF]',
+    borderClass: 'border-[#1677FF]/55',
+    cardGlow: 'shadow-blue-950/35',
   },
   Legendary: {
-    textClass: 'text-[#FBBF24]',
-    borderClass: 'border-[#D6A84B]/55',
-    cardGlow: 'shadow-amber-950/35',
+    textClass: 'text-amber-300',
+    borderClass: 'border-amber-500/45',
+    cardGlow: 'shadow-amber-950/30',
   },
   Mythic: {
-    textClass: 'text-[#C4B5FD]',
-    borderClass: 'border-[#8B5CF6]/60',
-    cardGlow: 'shadow-[#6D28D9]/40',
+    textClass: 'text-[#00D9FF]',
+    borderClass: 'border-[#00D9FF]/55',
+    cardGlow: 'shadow-cyan-950/35',
   },
   Ascendant: {
-    textClass: 'text-[#38BDF8]',
-    borderClass: 'border-[#38BDF8]/50',
+    textClass: 'text-sky-300',
+    borderClass: 'border-sky-400/45',
     cardGlow: 'shadow-sky-950/35',
   },
   Celestial: {
-    textClass: 'text-[#34D399]',
-    borderClass: 'border-[#34D399]/50',
+    textClass: 'text-emerald-300',
+    borderClass: 'border-emerald-400/45',
     cardGlow: 'shadow-emerald-950/35',
   },
   Eternal: {
-    textClass: 'text-[#FB7185]',
-    borderClass: 'border-[#D6A84B]/70',
-    cardGlow: 'shadow-rose-950/40',
+    textClass: 'text-rose-200',
+    borderClass: 'border-amber-300/65',
+    cardGlow: 'shadow-amber-900/40',
   },
 };
 
@@ -1053,8 +1053,6 @@ export interface GlobalMetricSnapshot {
   dynamicPersonalGrowthClaimed: number;
   dynamicSocialClaimed: number;
   normalAchievementsUnlocked: number;
-  unlockedWeaponsCount?: number;
-  maxWeaponLevel?: number;
   friendsCount: number;
   guildJoined: number;
   guildLeader: number;
@@ -1064,7 +1062,6 @@ export interface GlobalMetricSnapshot {
   honorReclaimed: number;
   dailyReportsGenerated: number;
   goldBalance: number;
-  forgeXpBalance?: number;
 }
 
 export const getMetricValueForRequirement = (
@@ -1110,10 +1107,6 @@ export const getMetricValueForRequirement = (
       return snapshot.dynamicSocialClaimed;
     case 'normal_achievements_unlocked':
       return snapshot.normalAchievementsUnlocked;
-    case 'unlocked_weapons_count':
-      return snapshot.unlockedWeaponsCount ?? 0;
-    case 'max_weapon_level':
-      return snapshot.maxWeaponLevel ?? 1;
     case 'friends_count':
       return snapshot.friendsCount;
     case 'guild_joined':
@@ -1132,8 +1125,6 @@ export const getMetricValueForRequirement = (
       return snapshot.dailyReportsGenerated;
     case 'gold_balance':
       return snapshot.goldBalance;
-    case 'forge_xp_balance':
-      return snapshot.forgeXpBalance ?? 0;
     default:
       return 0;
   }

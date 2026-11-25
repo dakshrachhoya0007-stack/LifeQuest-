@@ -72,15 +72,15 @@ export const HeroSelectionModal: React.FC<HeroSelectionModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-[#090910] text-[#FFFFFF] flex flex-col overflow-y-auto"
+      className="fixed inset-0 z-50 bg-[#061225] text-[#FFFFFF] flex flex-col overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-label="Permanent Champion Selection"
     >
       {/* Top Bar */}
-      <header className="px-5 py-3.5 border-b border-[#8B5CF6]/25 bg-[#0E0E17] flex items-center justify-between gap-4 shrink-0">
+      <header className="px-5 py-3.5 border-b border-[#1677FF]/25 bg-[#0A1930] flex items-center justify-between gap-4 shrink-0">
         <div>
-          <span className="text-[10px] font-['Cinzel'] uppercase tracking-widest text-[#D6A84B] block">
+          <span className="text-[10px] font-['Cinzel'] uppercase tracking-widest text-[#00D9FF] block">
             The Great Fall · One-Time Oath of Aetheria
           </span>
           <h2 className="text-lg sm:text-xl font-black font-['Cinzel'] text-[#FFFFFF]">
@@ -89,7 +89,7 @@ export const HeroSelectionModal: React.FC<HeroSelectionModalProps> = ({
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="hidden md:inline-flex items-center gap-1.5 text-[11px] text-[#D6A84B] font-medium">
+          <span className="hidden md:inline-flex items-center gap-1.5 text-[11px] text-[#00D9FF] font-medium">
             <Lock className="w-3.5 h-3.5" />
             Permanent One-Time Selection · Cannot Be Changed Later
           </span>
@@ -97,7 +97,7 @@ export const HeroSelectionModal: React.FC<HeroSelectionModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-2 rounded-lg bg-[#141420] hover:bg-[#8B5CF6]/25 border border-[#8B5CF6]/40 text-white"
+              className="p-2 rounded-lg bg-[#102440] hover:bg-[#1677FF]/25 border border-[#1677FF]/40 text-white"
               aria-label="Close hero selection"
             >
               <X className="w-4 h-4" />
@@ -109,7 +109,7 @@ export const HeroSelectionModal: React.FC<HeroSelectionModalProps> = ({
       {/* Main Content */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 min-h-0">
         {/* Left / Center: High-Resolution Character Artwork Showcase */}
-        <div className="lg:col-span-6 relative min-h-[420px] sm:min-h-[520px] bg-[#090910] border-b lg:border-b-0 lg:border-r border-[#8B5CF6]/25 flex flex-col justify-between overflow-hidden">
+        <div className="lg:col-span-6 relative min-h-[420px] sm:min-h-[520px] bg-[#061225] border-b lg:border-b-0 lg:border-r border-[#1677FF]/25 flex flex-col justify-between overflow-hidden">
           {/* Atmospheric Citadel Backdrop */}
           <div className="absolute inset-0 pointer-events-none">
             <img
@@ -122,7 +122,7 @@ export const HeroSelectionModal: React.FC<HeroSelectionModalProps> = ({
             <div
               className="absolute inset-0"
               style={{
-                background: `radial-gradient(circle at 50% 42%, ${focusedHero.accentHex}28 0%, rgba(14, 14, 23, 0.86) 64%, #090910 100%)`,
+                background: `radial-gradient(circle at 50% 42%, ${focusedHero.accentHex}24 0%, rgba(10, 25, 48, 0.85) 64%, #061225 100%)`,
               }}
             />
             <AtmosphereParticlesCanvas qualityMode="rich" reducedMotion={false} />
@@ -131,9 +131,9 @@ export const HeroSelectionModal: React.FC<HeroSelectionModalProps> = ({
           {/* Framed Full-Body Hero Illustration */}
           <div className="relative z-10 flex-1 flex items-center justify-center p-5 sm:p-8">
             <div
-              className="relative w-full max-w-[360px] sm:max-w-[410px] aspect-[3/4] rounded-2xl overflow-hidden border border-[#D6A84B]/45 shadow-2xl bg-[#141420]"
+              className="relative w-full max-w-[360px] sm:max-w-[410px] aspect-[3/4] rounded-2xl overflow-hidden border border-[#00D9FF]/45 shadow-2xl bg-[#102440]"
               style={{
-                boxShadow: `0 25px 60px -15px rgba(9, 9, 16, 0.92), 0 0 40px -12px ${focusedHero.accentHex}45`,
+                boxShadow: `0 25px 60px -15px rgba(2, 8, 20, 0.9), 0 0 40px -12px ${focusedHero.accentHex}45`,
               }}
             >
               <img
@@ -143,7 +143,7 @@ export const HeroSelectionModal: React.FC<HeroSelectionModalProps> = ({
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover object-top transition-transform duration-500"
               />
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#090910] via-[#090910]/70 to-transparent" />
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#061225] via-[#061225]/70 to-transparent" />
 
               <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-2">
                 <div>
@@ -157,7 +157,7 @@ export const HeroSelectionModal: React.FC<HeroSelectionModalProps> = ({
                     {focusedHero.name}
                   </h3>
                 </div>
-                <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded bg-[#0E0E17]/90 border border-[#D6A84B]/40 text-[#D6A84B] shrink-0">
+                <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded bg-[#0A1930]/90 border border-[#00D9FF]/35 text-[#00D9FF] shrink-0">
                   {focusedHero.introFlourishLabel}
                 </span>
               </div>
@@ -165,7 +165,7 @@ export const HeroSelectionModal: React.FC<HeroSelectionModalProps> = ({
           </div>
 
           {/* Hero Artwork Thumb Strip for Quick Preview */}
-          <div className="relative z-10 px-4 py-3 bg-[#0E0E17]/95 border-t border-[#8B5CF6]/25 flex items-center justify-center gap-2.5 overflow-x-auto">
+          <div className="relative z-10 px-4 py-3 bg-[#0A1930]/95 border-t border-[#1677FF]/25 flex items-center justify-center gap-2.5 overflow-x-auto">
             {PLAYABLE_HEROES.map(hero => {
               const active = hero.id === focusedHeroId;
               return (
@@ -179,21 +179,21 @@ export const HeroSelectionModal: React.FC<HeroSelectionModalProps> = ({
                   }}
                   className={`group flex items-center gap-2 px-2.5 py-1.5 rounded-xl border transition-all shrink-0 ${
                     active
-                      ? 'bg-[#141420] border-[#D6A84B] shadow-[0_0_16px_rgba(214,168,75,0.25)]'
-                      : 'bg-[#090910] border-[#8B5CF6]/25 hover:border-[#8B5CF6]/60 opacity-80 hover:opacity-100'
+                      ? 'bg-[#102440] border-[#00D9FF] shadow-[0_0_16px_rgba(0,217,255,0.22)]'
+                      : 'bg-[#061225] border-[#1677FF]/25 hover:border-[#00D9FF]/50 opacity-80 hover:opacity-100'
                   }`}
                 >
                   <img
                     src={getHeroArtwork(hero.id)}
                     alt={hero.name}
                     referrerPolicy="no-referrer"
-                    className="w-8 h-10 rounded-lg object-cover object-top border border-[#8B5CF6]/40"
+                    className="w-8 h-10 rounded-lg object-cover object-top border border-[#1677FF]/40"
                   />
                   <div className="text-left hidden sm:block">
                     <span className="text-[11px] font-['Cinzel'] font-bold text-[#FFFFFF] block leading-tight">
                       {hero.name.replace(/^The\s+/, '')}
                     </span>
-                    <span className="text-[9px] text-[#D6A84B] block leading-tight">
+                    <span className="text-[9px] text-[#00D9FF] block leading-tight">
                       {hero.mappedClass}
                     </span>
                   </div>
@@ -204,11 +204,11 @@ export const HeroSelectionModal: React.FC<HeroSelectionModalProps> = ({
         </div>
 
         {/* Right: Hero Dossier, Abilities, Strengths & Permanent Confirmation */}
-        <div className="lg:col-span-6 p-5 sm:p-6 lg:p-8 bg-[#0E0E17] flex flex-col justify-between gap-5 overflow-y-auto">
+        <div className="lg:col-span-6 p-5 sm:p-6 lg:p-8 bg-[#0A1930] flex flex-col justify-between gap-5 overflow-y-auto">
           <div className="space-y-5">
             {/* Hero Roster Picker Cards */}
             <div>
-              <span className="text-[10px] uppercase tracking-widest text-[#D6A84B] font-semibold block mb-2">
+              <span className="text-[10px] uppercase tracking-widest text-[#00D9FF] font-semibold block mb-2">
                 Preview All 5 Champions Before Binding Your Account
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
@@ -225,19 +225,19 @@ export const HeroSelectionModal: React.FC<HeroSelectionModalProps> = ({
                       }}
                       className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between gap-2 ${
                         selected
-                          ? 'bg-[#141420] border-[#D6A84B] shadow-[0_0_16px_rgba(214,168,75,0.22)]'
-                          : 'bg-[#090910] border-[#8B5CF6]/25 hover:border-[#8B5CF6]/55'
+                          ? 'bg-[#102440] border-[#00D9FF] shadow-[0_0_16px_rgba(0,217,255,0.18)]'
+                          : 'bg-[#061225] border-[#1677FF]/25 hover:border-[#00D9FF]/50'
                       }`}
                     >
                       <div className="min-w-0">
                         <span className="text-xs font-['Cinzel'] font-bold text-[#FFFFFF] block truncate">
                           {hero.name}
                         </span>
-                        <span className="text-[10px] text-[#A1A1B8] block truncate">
+                        <span className="text-[10px] text-[#A9B8CC] block truncate">
                           {hero.archetype}
                         </span>
                       </div>
-                      {selected && <Check className="w-4 h-4 text-[#D6A84B] shrink-0" />}
+                      {selected && <Check className="w-4 h-4 text-[#00D9FF] shrink-0" />}
                     </button>
                   );
                 })}
@@ -246,29 +246,29 @@ export const HeroSelectionModal: React.FC<HeroSelectionModalProps> = ({
 
             {errorMsg && (
               <div className="p-3 rounded-xl bg-rose-950/75 border border-rose-700/70 text-xs text-rose-200 flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-[#FB7185] shrink-0" />
+                <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
                 <span>{errorMsg}</span>
               </div>
             )}
 
             {/* Selected Hero Lore, Abilities, Strengths & Loadout */}
-            <div className="p-5 rounded-2xl bg-[#141420]/95 border border-[#8B5CF6]/35 space-y-4">
-              <div className="flex items-start justify-between gap-2 flex-wrap border-b border-[#8B5CF6]/25 pb-3">
+            <div className="p-5 rounded-2xl bg-[#102440]/90 border border-[#1677FF]/35 space-y-4">
+              <div className="flex items-start justify-between gap-2 flex-wrap border-b border-[#1677FF]/25 pb-3">
                 <div>
                   <h3 className="font-['Cinzel'] font-black text-xl text-[#FFFFFF]">
                     {focusedHero.name}
                   </h3>
-                  <p className="text-xs text-[#D6A84B] font-medium mt-0.5">
+                  <p className="text-xs text-[#00D9FF] font-medium mt-0.5">
                     {focusedHero.title}
                   </p>
                 </div>
-                <span className="text-[11px] font-mono uppercase tracking-wider text-[#8B5CF6] font-bold">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-[#00D9FF] font-bold">
                   {focusedHero.mappedClass} Class
                 </span>
               </div>
 
               <div className="space-y-1.5">
-                <span className="text-[10px] uppercase tracking-widest text-[#A1A1B8] font-semibold block">
+                <span className="text-[10px] uppercase tracking-widest text-[#A9B8CC] font-semibold block">
                   Origin After The Great Fall
                 </span>
                 <p className="text-xs text-[#FFFFFF]/90 leading-relaxed">
@@ -276,25 +276,25 @@ export const HeroSelectionModal: React.FC<HeroSelectionModalProps> = ({
                 </p>
               </div>
 
-              <p className="text-xs text-[#A1A1B8] leading-relaxed border-t border-[#8B5CF6]/20 pt-3">
+              <p className="text-xs text-[#A9B8CC] leading-relaxed border-t border-[#1677FF]/20 pt-3">
                 {focusedHero.roleSummary}
               </p>
 
               {/* Signature Abilities */}
               <div className="space-y-2 pt-1">
-                <span className="text-[10px] uppercase tracking-wider text-[#D6A84B] font-bold flex items-center gap-1.5">
+                <span className="text-[10px] uppercase tracking-wider text-[#00D9FF] font-bold flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5" /> Signature Abilities
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {focusedHero.abilities.map(ab => (
                     <div
                       key={ab.name}
-                      className="p-3 rounded-xl bg-[#0E0E17] border border-[#8B5CF6]/35 space-y-1"
+                      className="p-3 rounded-xl bg-[#0A1930] border border-[#1677FF]/35 space-y-1"
                     >
                       <span className="text-xs font-['Cinzel'] font-bold text-[#FFFFFF] block">
                         {ab.name}
                       </span>
-                      <p className="text-[11px] text-[#A1A1B8] leading-snug">
+                      <p className="text-[11px] text-[#A9B8CC] leading-snug">
                         {ab.description}
                       </p>
                     </div>
@@ -304,27 +304,27 @@ export const HeroSelectionModal: React.FC<HeroSelectionModalProps> = ({
 
               {/* Hero Bodyweight Combat & Attribute Focus */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                <div className="p-3 rounded-xl bg-[#0E0E17] border border-[#34D399]/35 space-y-1.5">
-                  <span className="text-[10px] uppercase tracking-wider text-[#34D399] font-bold flex items-center gap-1">
+                <div className="p-3 rounded-xl bg-[#0A1930] border border-[#1677FF]/35 space-y-1.5">
+                  <span className="text-[10px] uppercase tracking-wider text-[#00D9FF] font-bold flex items-center gap-1">
                     <Dumbbell className="w-3 h-3" /> Bodyweight Combat
                   </span>
                   <ul className="space-y-1">
                     <li className="text-[11px] text-[#FFFFFF]/90 flex items-center gap-1.5">
-                      <Hand className="w-2.5 h-2.5 text-[#34D399] shrink-0" />
+                      <Hand className="w-2.5 h-2.5 text-[#00D9FF] shrink-0" />
                       <span>Hands: {focusedHero.bodyweightDisciplines.handsFocus}</span>
                     </li>
                     <li className="text-[11px] text-[#FFFFFF]/90 flex items-center gap-1.5">
-                      <Footprints className="w-2.5 h-2.5 text-[#34D399] shrink-0" />
+                      <Footprints className="w-2.5 h-2.5 text-[#00D9FF] shrink-0" />
                       <span>Legs: {focusedHero.bodyweightDisciplines.legsFocus}</span>
                     </li>
                   </ul>
-                  <p className="text-[10px] text-[#A1A1B8] leading-snug pt-0.5">
+                  <p className="text-[10px] text-[#A9B8CC] leading-snug pt-0.5">
                     {focusedHero.bodyweightDisciplines.conditioningStyle}
                   </p>
                 </div>
 
-                <div className="p-3 rounded-xl bg-[#0E0E17] border border-[#FBBF24]/35 space-y-1.5">
-                  <span className="text-[10px] uppercase tracking-wider text-[#FBBF24] font-bold flex items-center gap-1">
+                <div className="p-3 rounded-xl bg-[#0A1930] border border-[#1677FF]/35 space-y-1.5">
+                  <span className="text-[10px] uppercase tracking-wider text-[#00D9FF] font-bold flex items-center gap-1">
                     <Sparkles className="w-3 h-3" /> Attribute Focus
                   </span>
                   <div className="space-y-1">
@@ -333,7 +333,7 @@ export const HeroSelectionModal: React.FC<HeroSelectionModalProps> = ({
                       return (
                         <div key={attrKey} className="text-[11px] flex items-center justify-between">
                           <span className="text-[#FFFFFF]/90 font-medium">{meta?.label || attrKey}</span>
-                          <span className="font-mono text-[10px] text-[#FBBF24]">{meta?.shortLabel} +Focus</span>
+                          <span className="font-mono text-[10px] text-[#00D9FF]">{meta?.shortLabel} +Focus</span>
                         </div>
                       );
                     })}
@@ -342,14 +342,14 @@ export const HeroSelectionModal: React.FC<HeroSelectionModalProps> = ({
               </div>
 
               {/* Key Strengths List */}
-              <div className="p-3 rounded-xl bg-[#0E0E17] border border-[#8B5CF6]/25 space-y-1.5">
-                <span className="text-[10px] uppercase tracking-wider text-[#D6A84B] font-bold block">
+              <div className="p-3 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 space-y-1.5">
+                <span className="text-[10px] uppercase tracking-wider text-[#00D9FF] font-bold block">
                   Champion Strengths
                 </span>
                 <ul className="space-y-1">
                   {focusedHero.strengths.map(s => (
-                    <li key={s} className="text-[11px] text-[#A1A1B8] flex items-start gap-1.5">
-                      <Check className="w-3 h-3 text-[#34D399] shrink-0 mt-0.5" />
+                    <li key={s} className="text-[11px] text-[#A9B8CC] flex items-start gap-1.5">
+                      <Check className="w-3 h-3 text-[#00D9FF] shrink-0 mt-0.5" />
                       <span>{s}</span>
                     </li>
                   ))}
@@ -362,10 +362,10 @@ export const HeroSelectionModal: React.FC<HeroSelectionModalProps> = ({
           <div className="pt-2 space-y-3">
             {!confirmingFinalLock ? (
               <>
-                <div className="p-3 rounded-xl bg-[#141420] border border-[#8B5CF6]/35 flex items-start gap-2.5 text-xs text-[#A1A1B8]">
-                  <Lock className="w-4 h-4 text-[#D6A84B] shrink-0 mt-0.5" />
+                <div className="p-3 rounded-xl bg-[#102440] border border-[#1677FF]/35 flex items-start gap-2.5 text-xs text-[#A9B8CC]">
+                  <Lock className="w-4 h-4 text-[#00D9FF] shrink-0 mt-0.5" />
                   <span>
-                    <strong className="text-[#D6A84B]">One-Time Account Oath:</strong>{' '}
+                    <strong className="text-[#00D9FF]">One-Time Account Oath:</strong>{' '}
                     You may preview every hero freely here, but once confirmed, your chosen hero is permanently bound to your account and cannot be changed afterward.
                   </span>
                 </div>
@@ -373,21 +373,21 @@ export const HeroSelectionModal: React.FC<HeroSelectionModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setConfirmingFinalLock(true)}
-                  className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-[#6D28D9] via-[#8B5CF6] to-[#D6A84B] hover:brightness-110 border border-[#D6A84B]/50 text-white font-['Cinzel'] font-black text-sm tracking-wider shadow-[0_8px_24px_rgba(139,92,246,0.4)] hover:shadow-[0_0_28px_rgba(214,168,75,0.45)] transition-all"
+                  className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2684FF] hover:to-[#00D9FF] border border-[#00D9FF]/45 text-white font-['Cinzel'] font-black text-sm tracking-wider shadow-[0_6px_22px_rgba(22,119,255,0.4)] hover:shadow-[0_0_24px_rgba(0,217,255,0.5)] transition-all"
                 >
                   CHOOSE {focusedHero.name.toUpperCase()}
                 </button>
               </>
             ) : (
-              <div className="p-4 rounded-2xl bg-[#141420] border-2 border-[#D6A84B] space-y-3 shadow-[0_0_32px_rgba(214,168,75,0.22)]">
+              <div className="p-4 rounded-2xl bg-[#102440] border-2 border-[#00D9FF] space-y-3 shadow-[0_0_32px_rgba(0,217,255,0.2)]">
                 <div className="flex items-start gap-2.5">
-                  <AlertTriangle className="w-5 h-5 text-[#D6A84B] shrink-0 mt-0.5" />
+                  <AlertTriangle className="w-5 h-5 text-[#00D9FF] shrink-0 mt-0.5" />
                   <div>
                     <h4 className="font-['Cinzel'] font-black text-sm text-[#FFFFFF]">
                       FINAL CONFIRMATION: LOCK {focusedHero.name.toUpperCase()}?
                     </h4>
-                    <p className="text-xs text-[#A1A1B8] mt-1 leading-relaxed">
-                      Once locked, <strong className="text-[#D6A84B]">{focusedHero.name}</strong> ({focusedHero.mappedClass}) becomes your permanent champion for this account and <strong className="text-[#FFFFFF]">cannot be changed afterward</strong>.
+                    <p className="text-xs text-[#A9B8CC] mt-1 leading-relaxed">
+                      Once locked, <strong className="text-[#00D9FF]">{focusedHero.name}</strong> ({focusedHero.mappedClass}) becomes your permanent champion for this account and <strong className="text-[#FFFFFF]">cannot be changed afterward</strong>.
                     </p>
                   </div>
                 </div>
@@ -397,7 +397,7 @@ export const HeroSelectionModal: React.FC<HeroSelectionModalProps> = ({
                     type="button"
                     disabled={saving}
                     onClick={() => setConfirmingFinalLock(false)}
-                    className="sm:w-1/2 py-3 px-4 rounded-xl bg-[#0E0E17] hover:bg-[#1B1B2B] border border-[#8B5CF6]/45 hover:border-[#D6A84B]/70 text-xs font-semibold text-white flex items-center justify-center gap-1.5 transition-all"
+                    className="sm:w-1/2 py-3 px-4 rounded-xl bg-[#0A1930] hover:bg-[#102440] border border-[#1677FF]/45 hover:border-[#00D9FF]/70 text-xs font-semibold text-white flex items-center justify-center gap-1.5 transition-all"
                   >
                     <ArrowLeft className="w-3.5 h-3.5" />
                     Go Back &amp; Preview
@@ -406,7 +406,7 @@ export const HeroSelectionModal: React.FC<HeroSelectionModalProps> = ({
                     type="button"
                     disabled={saving}
                     onClick={handleFinalConfirm}
-                    className="sm:w-1/2 py-3 px-4 rounded-xl bg-gradient-to-r from-[#6D28D9] via-[#8B5CF6] to-[#D6A84B] hover:brightness-110 disabled:opacity-60 border border-[#D6A84B]/50 text-white font-['Cinzel'] font-black text-xs tracking-wider shadow-[0_6px_20px_rgba(139,92,246,0.4)] transition-all flex items-center justify-center gap-1.5"
+                    className="sm:w-1/2 py-3 px-4 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2684FF] hover:to-[#00D9FF] disabled:opacity-60 border border-[#00D9FF]/50 text-white font-['Cinzel'] font-black text-xs tracking-wider shadow-[0_6px_20px_rgba(22,119,255,0.4)] transition-all flex items-center justify-center gap-1.5"
                   >
                     <Lock className="w-3.5 h-3.5" />
                     {saving ? 'BINDING OATH...' : 'CONFIRM PERMANENT HERO'}

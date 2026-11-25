@@ -122,8 +122,10 @@ export function createIdentityService(
     }) => Promise<boolean>;
     creditGold?: (userId: string, amount: number, source: string, key?: string) => Promise<any>;
     creditFragments?: (userId: string, amount: number, source: string, key?: string) => Promise<any>;
+    getUniqueCardCount?: (userId: string) => number;
     getCollectionPercent?: (userId: string) => number;
     getMaxFriendshipLevel?: (userId: string) => number;
+    getMarketplaceUnlockCount?: (userId: string) => number;
     isPairBlocked?: (a: string, b: string) => boolean;
   }
 ) {
@@ -328,8 +330,12 @@ export function createIdentityService(
     }
 
     const syncedProfile = socialLedger?.profiles?.[userId];
-    const cardsCollected = Object.keys(ecoCardsLedger?.cards?.[userId]?.owned || {}).length;
-    const marketplaceUnlockCount = Array.isArray(ecoCardsLedger?.marketplace?.[userId]?.ownedItemIds)
+    const cardsCollected = opts?.getUniqueCardCount
+      ? opts.getUniqueCardCount(userId)
+      : Object.keys(ecoCardsLedger?.cards?.[userId]?.owned || {}).length;
+    const marketplaceUnlockCount = opts?.getMarketplaceUnlockCount
+      ? opts.getMarketplaceUnlockCount(userId)
+      : Array.isArray(ecoCardsLedger?.marketplace?.[userId]?.ownedItemIds)
       ? ecoCardsLedger.marketplace[userId].ownedItemIds.length
       : 0;
     const collectionPercent = opts?.getCollectionPercent ? opts.getCollectionPercent(userId) : 0;

@@ -3,15 +3,12 @@ import path from 'path';
 import type { Express, Request, Response } from 'express';
 import { resolveVerifiedCaller } from './authGuard.ts';
 import {
-  DEFAULT_DUEL_DURATION_SECONDS,
-  DUEL_EXERCISES_CATALOG,
-  DUEL_EXERCISE_IDS,
-  MAX_DUEL_DURATION_SECONDS,
-  MIN_DUEL_DURATION_SECONDS,
+  COMPETITIVE_RIVAL_MODES,
   calculateCompetitiveRatingChange,
+  calculateSafeRivalScoreDelta,
   computeCompetitiveTier,
-  pickAutoDuelExercise,
-  validateServerDuelRep,
+  mapLegacyTypeToRivalMode,
+  mapRivalModeToLegacyType,
 } from '../src/data/ecosystemData.ts';
 import {
   DEMOTION_SHIELD_MATCHES,
@@ -29,11 +26,12 @@ import type {
   CompetitiveMatchStatus,
   CompetitiveMatchVisibility,
   CompetitiveRivalMatch,
+  CompetitiveRivalMode,
   CompetitiveRivalProfile,
-  DuelExerciseId,
   MatchmakingQueueEntry,
   PresenceStatus,
   RankedDivisionName,
+  RivalChallengeType,
   RivalryRecord,
   RivalryScoreEntry,
   RivalryStatsSummary,
@@ -78,9 +76,7 @@ interface RivalsLedgerFile {
   spectatorCheers: StoredSpectatorCheer[];
   followedCompetitors: Record<string, string[]>;
   claimedDivisionRewards: Record<string, string[]>;
-  lastRepTimestamps?: Record<string, number>;
   legacyMigrated?: boolean;
-  optionAMigrated?: boolean;
 }
 
 export interface RivalScoreUpdateResult {
@@ -90,17 +86,50 @@ export interface RivalScoreUpdateResult {
   resolvedMatches: CompetitiveRivalMatch[];
 }
 
-const VALID_DUEL_EXERCISES = new Set<DuelExerciseId>(DUEL_EXERCISE_IDS);
+const VALID_MODES = new Set<CompetitiveRivalMode>([
+  'strength',
+  'endurance',
+  'consistency',
+  'discipline',
+  'overall_fitness',
+  'custom',
+]);
+
+const VALID_LEGACY_CHALLENGES = new Set<RivalChallengeType>([
+  'weekly_activity_score',
+  'workout_consistency',
+  'strength_milestones',
+  'endurance_achievements',
+  'habit_completion',
+]);
+
 const VALID_VISIBILITIES = new Set<CompetitiveMatchVisibility>(['friends', 'public', 'private']);
 const VALID_SPECTATOR_EMOJIS = new Set<string>(['🔥', '⚔️', '🏆', '💪', '👏']);
 const CHEER_MAX_PER_MIN = 5;
-const READY_STAGE_TIMEOUT_MS = 180_000; // 3 min to calibrate camera & ready up
-const COUNTDOWN_MS = 5_000; // 5 sec synchronized countdown
 
 const getDivisionIndex = (rating: number): number => {
   const div = computeRankedDivision(rating);
   const idx = RANKED_DIVISIONS_CATALOG.findIndex(d => d.division === div);
   return idx >= 0 ? idx : 1;
+};
+
+const getTodayBucket = (timezone?: string): string => {
+  const tz = typeof timezone === 'string' && timezone.trim() ? timezone.trim() : 'UTC';
+  try {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: tz,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(new Date());
+    const y = parts.find(p => p.type === 'year')?.value;
+    const m = parts.find(p => p.type === 'month')?.value;
+    const d = parts.find(p => p.type === 'day')?.value;
+    if (y && m && d) return `${y}-${m}-${d}`;
+  } catch {
+    // fallback
+  }
+  return new Date().toISOString().slice(0, 10);
 };
 
 const createDefaultProfile = (
@@ -132,6 +161,11 @@ const createDefaultProfile = (
   currentDivisionIndex: getDivisionIndex(1200),
   updatedAt: new Date().toISOString(),
 });
+
+const getModeTitle = (mode: CompetitiveRivalMode): string => {
+  const found = COMPETITIVE_RIVAL_MODES.find(m => m.id === mode);
+  return found?.title || 'Competitive Duel';
+};
 
 const matchToLegacyRecord = (m: CompetitiveRivalMatch): RivalryRecord => ({
   id: m.id,
@@ -192,7 +226,6 @@ const buildTournamentBracket = (
 export function createRivalService(
   rootDir: string,
   opts?: {
-    onBroadcast?: (eventType: string, payload: unknown, targetUserIds?: string[]) => void;
     onRivalryCompleted?: (rivalry: RivalryRecord) => Promise<void> | void;
     getPresenceStatus?: (targetUserId: string, viewerId: string | null) => PresenceStatus;
     isFriendsWith?: (userA: string, userB: string) => boolean;
@@ -225,50 +258,6 @@ export function createRivalService(
     }
   };
 
-  const normalizeDuelMatch = (raw: any): CompetitiveRivalMatch => {
-    const rawEx = String(raw?.duelExercise || raw?.rules?.exerciseId || '') as DuelExerciseId;
-    const hasOptionAExercise = VALID_DUEL_EXERCISES.has(rawEx);
-    const fallbackEx: DuelExerciseId = hasOptionAExercise ? rawEx : 'squat';
-    const def = DUEL_EXERCISES_CATALOG[fallbackEx];
-
-    const durSec = Math.min(
-      MAX_DUEL_DURATION_SECONDS,
-      Math.max(
-        MIN_DUEL_DURATION_SECONDS,
-        Number(raw?.durationSeconds || raw?.rules?.durationSeconds || DEFAULT_DUEL_DURATION_SECONDS)
-      )
-    );
-
-    let status: CompetitiveMatchStatus = raw?.status || 'expired';
-    // Retire legacy multi-day non-Option-A active/pending challenges cleanly so only real-time 1v1 duels run
-    if (!hasOptionAExercise && (status === 'active' || status === 'accepted' || status === 'pending')) {
-      status = 'expired';
-    }
-
-    return {
-      ...raw,
-      duelExercise: fallbackEx,
-      exerciseName: raw?.exerciseName || (hasOptionAExercise ? def.name : raw?.challengeTitle || def.name),
-      pointsPerRep: Number(raw?.pointsPerRep || raw?.rules?.pointsPerRep || def.pointsPerRep),
-      durationSeconds: durSec,
-      challengerReps: Number(raw?.challengerReps || 0),
-      opponentReps: Number(raw?.opponentReps || 0),
-      challengerReady: Boolean(raw?.challengerReady),
-      opponentReady: Boolean(raw?.opponentReady),
-      challengerCameraReady: Boolean(raw?.challengerCameraReady),
-      opponentCameraReady: Boolean(raw?.opponentCameraReady),
-      countdownEndsAt: raw?.countdownEndsAt ?? null,
-      forfeitByUserId: raw?.forfeitByUserId ?? null,
-      status,
-      rules: {
-        exerciseId: fallbackEx,
-        pointsPerRep: Number(raw?.pointsPerRep || raw?.rules?.pointsPerRep || def.pointsPerRep),
-        durationSeconds: durSec,
-        ranked: raw?.isRanked !== false,
-      },
-    };
-  };
-
   const readLedger = (): RivalsLedgerFile => {
     try {
       if (fs.existsSync(LEDGER_PATH)) {
@@ -277,12 +266,7 @@ export function createRivalService(
           const profiles: Record<string, CompetitiveRivalProfile> =
             parsed.profiles && typeof parsed.profiles === 'object' ? parsed.profiles : {};
           const scores: RivalryScoreEntry[] = Array.isArray(parsed.scores) ? parsed.scores : [];
-          const rawQueue: MatchmakingQueueEntry[] = Array.isArray(parsed.queue) ? parsed.queue : [];
-          const queue: MatchmakingQueueEntry[] = rawQueue.map(q =>
-            q.status === 'searching' && q.mode !== ('duel' as any) && !VALID_DUEL_EXERCISES.has(q.mode as DuelExerciseId)
-              ? { ...q, status: 'expired' }
-              : q
-          );
+          const queue: MatchmakingQueueEntry[] = Array.isArray(parsed.queue) ? parsed.queue : [];
           const blocks: BlockEntry[] = Array.isArray(parsed.blocks) ? parsed.blocks : [];
           const notifications: RivalNotificationEvent[] = Array.isArray(parsed.notifications)
             ? parsed.notifications
@@ -301,13 +285,57 @@ export function createRivalService(
             parsed.claimedDivisionRewards && typeof parsed.claimedDivisionRewards === 'object'
               ? parsed.claimedDivisionRewards
               : {};
-          const lastRepTimestamps: Record<string, number> =
-            parsed.lastRepTimestamps && typeof parsed.lastRepTimestamps === 'object'
-              ? parsed.lastRepTimestamps
-              : {};
 
-          const rawMatches = Array.isArray(parsed.matches) ? parsed.matches : [];
-          const matches: CompetitiveRivalMatch[] = rawMatches.map(normalizeDuelMatch);
+          const matches: CompetitiveRivalMatch[] = Array.isArray(parsed.matches) ? parsed.matches : [];
+
+          if (Array.isArray(parsed.rivalries) && !parsed.legacyMigrated) {
+            const existingIds = new Set(matches.map(m => m.id));
+            for (const r of parsed.rivalries as RivalryRecord[]) {
+              if (!r?.id || existingIds.has(r.id) || r.challengerId === r.opponentId) continue;
+              const mode = mapLegacyTypeToRivalMode(r.challengeType);
+              const status: CompetitiveMatchStatus =
+                r.status === 'declined' ? 'cancelled' : (r.status as CompetitiveMatchStatus);
+              matches.push({
+                id: r.id,
+                challengerId: r.challengerId,
+                challengerName: r.challengerName,
+                opponentId: r.opponentId,
+                opponentName: r.opponentName,
+                mode,
+                challengeType: r.challengeType,
+                challengeTitle: r.challengeTitle || getModeTitle(mode),
+                rules: {
+                  durationDays: 7,
+                  targetScore: 500,
+                  allowRestDays: true,
+                  ranked: false,
+                },
+                visibility: 'friends',
+                status,
+                isRanked: false,
+                challengerScore: Number(r.challengerScore || 0),
+                opponentScore: Number(r.opponentScore || 0),
+                winnerId: r.winnerId || null,
+                isTie: Boolean(r.isTie),
+                startsAt: r.startsAt,
+                endsAt: r.endsAt,
+                createdAt: r.createdAt,
+                resolvedAt: r.resolvedAt || null,
+              });
+              existingIds.add(r.id);
+
+              if (!profiles[r.challengerId]) {
+                profiles[r.challengerId] = createDefaultProfile(r.challengerId, {
+                  username: r.challengerName,
+                });
+              }
+              if (!profiles[r.opponentId]) {
+                profiles[r.opponentId] = createDefaultProfile(r.opponentId, {
+                  username: r.opponentName,
+                });
+              }
+            }
+          }
 
           return {
             profiles,
@@ -320,9 +348,7 @@ export function createRivalService(
             spectatorCheers,
             followedCompetitors,
             claimedDivisionRewards,
-            lastRepTimestamps,
             legacyMigrated: true,
-            optionAMigrated: true,
           };
         }
       }
@@ -340,9 +366,7 @@ export function createRivalService(
       spectatorCheers: [],
       followedCompetitors: {},
       claimedDivisionRewards: {},
-      lastRepTimestamps: {},
       legacyMigrated: true,
-      optionAMigrated: true,
     };
   };
 
@@ -353,17 +377,15 @@ export function createRivalService(
         {
           profiles: data.profiles,
           matches: data.matches,
-          scores: data.scores.slice(0, 3000),
-          queue: data.queue.slice(0, 300),
+          scores: data.scores,
+          queue: data.queue,
           blocks: data.blocks,
           notifications: data.notifications,
           tournaments: data.tournaments,
           spectatorCheers: data.spectatorCheers.slice(0, 600),
           followedCompetitors: data.followedCompetitors,
           claimedDivisionRewards: data.claimedDivisionRewards,
-          lastRepTimestamps: data.lastRepTimestamps || {},
           legacyMigrated: true,
-          optionAMigrated: true,
         },
         null,
         2
@@ -472,48 +494,17 @@ export function createRivalService(
     p.tier = computeCompetitiveTier(p.rating);
   };
 
-  const broadcastMatchEvent = (
-    eventType: 'rivals:match_found' | 'rivals:match_updated' | 'rivals:match_settled',
-    match: CompetitiveRivalMatch,
-    extra?: Record<string, any>
-  ) => {
-    if (!opts?.onBroadcast) return;
-    opts.onBroadcast(
-      eventType,
-      {
-        serverNow: new Date().toISOString(),
-        match,
-        ...(extra || {}),
-      },
-      [match.challengerId, match.opponentId]
-    );
-  };
-
   const settleCompletedMatch = (
     ledger: RivalsLedgerFile,
     m: CompetitiveRivalMatch,
-    nowMs: number,
-    optsSettle?: { forfeitByUserId?: string }
+    nowMs: number
   ) => {
     m.status = 'completed';
     m.resolvedAt = new Date(nowMs).toISOString();
 
-    if (optsSettle?.forfeitByUserId) {
-      m.forfeitByUserId = optsSettle.forfeitByUserId;
-      m.winnerId =
-        optsSettle.forfeitByUserId === m.challengerId ? m.opponentId : m.challengerId;
-      m.isTie = false;
-    } else if (m.challengerScore === m.opponentScore) {
-      if (m.challengerReps > m.opponentReps) {
-        m.winnerId = m.challengerId;
-        m.isTie = false;
-      } else if (m.opponentReps > m.challengerReps) {
-        m.winnerId = m.opponentId;
-        m.isTie = false;
-      } else {
-        m.winnerId = null;
-        m.isTie = true;
-      }
+    if (m.challengerScore === m.opponentScore) {
+      m.winnerId = null;
+      m.isTie = true;
     } else if (m.challengerScore > m.opponentScore) {
       m.winnerId = m.challengerId;
       m.isTie = false;
@@ -526,11 +517,10 @@ export function createRivalService(
     const pOp = ensureProfile(ledger, m.opponentId, { username: m.opponentName });
 
     const totalCombinedScore = m.challengerScore + m.opponentScore;
-    const countForRecords = totalCombinedScore > 0 || Boolean(optsSettle?.forfeitByUserId);
     m.challengerRatingBefore = pCh.rating;
     m.opponentRatingBefore = pOp.rating;
 
-    if (countForRecords) {
+    if (totalCombinedScore > 0) {
       if (m.isTie) {
         pCh.ties += 1;
         pOp.ties += 1;
@@ -618,10 +608,10 @@ export function createRivalService(
       ? ` Rating shift: ${m.challengerName} (${m.challengerRatingDelta! >= 0 ? '+' : ''}${m.challengerRatingDelta}), ${m.opponentName} (${m.opponentRatingDelta! >= 0 ? '+' : ''}${m.opponentRatingDelta}).`
       : '';
     const outcomeText = m.isTie
-      ? `Your ${m.exerciseName} duel ended in a draw (${m.challengerScore} - ${m.opponentScore} pts).${deltaDesc}`
-      : `${m.winnerId === m.challengerId ? m.challengerName : m.opponentName} won the ${m.exerciseName} duel (${m.challengerScore} vs ${m.opponentScore} pts)!${deltaDesc}`;
-    pushNotif(ledger, m.challengerId, 'rivalry_completed', 'Rivals Duel Concluded', outcomeText, m.id);
-    pushNotif(ledger, m.opponentId, 'rivalry_completed', 'Rivals Duel Concluded', outcomeText, m.id);
+      ? `Your ${m.challengeTitle} ended in a draw (${m.challengerScore} - ${m.opponentScore} pts).${deltaDesc}`
+      : `${m.winnerId === m.challengerId ? m.challengerName : m.opponentName} won the ${m.challengeTitle} (${m.challengerScore} vs ${m.opponentScore} pts)!${deltaDesc}`;
+    pushNotif(ledger, m.challengerId, 'rivalry_completed', 'Rivals Match Concluded', outcomeText, m.id);
+    pushNotif(ledger, m.opponentId, 'rivalry_completed', 'Rivals Match Concluded', outcomeText, m.id);
   };
 
   const resolveExpiredMatches = (ledger: RivalsLedgerFile): CompetitiveRivalMatch[] => {
@@ -631,14 +621,9 @@ export function createRivalService(
 
     for (const m of ledger.matches) {
       const endMs = Date.parse(m.endsAt);
-      if (m.status === 'active' && !Number.isNaN(endMs) && now >= endMs) {
+      if ((m.status === 'active' || m.status === 'accepted') && !Number.isNaN(endMs) && now >= endMs) {
         settleCompletedMatch(ledger, m, now);
         resolved.push({ ...m });
-        changed = true;
-      } else if (m.status === 'accepted' && !Number.isNaN(endMs) && now >= endMs) {
-        // Readiness window timed out before both players clicked Ready
-        m.status = 'expired';
-        m.resolvedAt = new Date(now).toISOString();
         changed = true;
       } else if (m.status === 'pending' && !Number.isNaN(endMs) && now >= endMs) {
         m.status = 'expired';
@@ -649,7 +634,7 @@ export function createRivalService(
           m.challengerId,
           'rivalry_expired',
           'Rivals Challenge Expired',
-          `Your pending ${m.exerciseName} duel invite to ${m.opponentName} expired.`,
+          `Your pending ${m.challengeTitle} challenge to ${m.opponentName} expired.`,
           m.id
         );
       }
@@ -670,7 +655,8 @@ export function createRivalService(
           if (tm.status !== 'completed') {
             tm.status = 'completed';
             if (tm.playerBId) {
-              tm.winnerId = tm.playerAScore >= tm.playerBScore ? tm.playerAId : tm.playerBId;
+              tm.winnerId =
+                tm.playerAScore >= tm.playerBScore ? tm.playerAId : tm.playerBId;
             }
           }
         }
@@ -799,7 +785,7 @@ export function createRivalService(
     if (modeFilter || scope === 'weekly') {
       for (const m of ledger.matches) {
         if (m.status !== 'completed') continue;
-        if (modeFilter && m.duelExercise !== modeFilter && m.mode !== modeFilter) continue;
+        if (modeFilter && m.mode !== modeFilter) continue;
         if (scope === 'weekly' && Date.parse(m.resolvedAt || m.endsAt) < weeklyCutoff) continue;
 
         for (const uid of [m.challengerId, m.opponentId]) {
@@ -891,7 +877,7 @@ export function createRivalService(
       opponentLoadoutSummary: opts?.getCompetitorLoadoutSummary
         ? opts.getCompetitorLoadoutSummary(m.opponentId)
         : opProf?.characterClass || 'Warrior',
-      targetScore: m.durationSeconds,
+      targetScore: m.rules?.targetScore || 500,
       endsAt: m.endsAt,
       cheerCounts,
       recentCheers: cheersForMatch.slice(0, 12).map(c => ({
@@ -930,7 +916,6 @@ export function createRivalService(
     if (resolved.length === 0) return;
     await Promise.all(
       resolved.map(async m => {
-        broadcastMatchEvent('rivals:match_settled', m);
         if (opts?.onRivalryCompleted) {
           await Promise.resolve(opts.onRivalryCompleted(matchToLegacyRecord(m))).catch(() => {});
         }
@@ -952,43 +937,116 @@ export function createRivalService(
     );
   };
 
-  // Real-time duel timer monitor: settles expired active duels promptly on the server
-  const settlementInterval = setInterval(() => {
-    void (async () => {
-      const resolved = await withLock(() => {
-        const ledger = readLedger();
-        const hasPendingOrLive = ledger.matches.some(
-          m => m.status === 'active' || m.status === 'accepted' || m.status === 'pending'
-        );
-        if (!hasPendingOrLive) return [] as CompetitiveRivalMatch[];
-        return resolveExpiredMatches(ledger);
-      });
-      if (resolved.length > 0) {
-        await notifyCompleted(resolved);
-      }
-    })().catch(() => {});
-  }, 1500);
-  if (typeof settlementInterval.unref === 'function') {
-    settlementInterval.unref();
-  }
-
-  /**
-   * Preserved interface for ecosystemDispatcher.ts.
-   * Option A strictly forbids passive habit/background logs from scoring inside live 1v1 PvP duels.
-   */
-  const applyVerifiedRivalScore = async (_params: {
+  const applyVerifiedRivalScore = async (params: {
     userId: string;
     activityType: SkillActivityType;
     idempotencyKey: string;
     metadata?: VerifiedActivityMetadata;
     timezone?: string;
   }): Promise<RivalScoreUpdateResult> => {
-    return {
-      updatedCount: 0,
-      pointsAwardedTotal: 0,
-      resolvedRivalries: [],
-      resolvedMatches: [],
-    };
+    const { userId, activityType, idempotencyKey, metadata = {}, timezone } = params;
+    const todayBucket = getTodayBucket(timezone);
+
+    const { result, resolved } = await withLock(() => {
+      const ledger = readLedger();
+      const resolvedList = resolveExpiredMatches(ledger);
+      const activeMatches = ledger.matches.filter(
+        m =>
+          (m.status === 'active' || m.status === 'accepted') &&
+          (m.challengerId === userId || m.opponentId === userId)
+      );
+
+      let updatedCount = 0;
+      let pointsAwardedTotal = 0;
+      let tournamentChanged = false;
+
+      for (const m of activeMatches) {
+        const dup = ledger.scores.find(
+          s => s.rivalryId === m.id && s.userId === userId && s.idempotencyKey === idempotencyKey
+        );
+        if (dup) continue;
+
+        const currentDailyScore = ledger.scores
+          .filter(
+            s =>
+              s.rivalryId === m.id &&
+              s.userId === userId &&
+              s.createdAt.slice(0, 10) === todayBucket
+          )
+          .reduce((sum, s) => sum + s.pointsAwarded, 0);
+
+        const calc = calculateSafeRivalScoreDelta(
+          m.mode || m.challengeType,
+          activityType,
+          metadata,
+          currentDailyScore
+        );
+
+        if (calc.pointsAwarded <= 0) continue;
+
+        if (m.challengerId === userId) {
+          m.challengerScore += calc.pointsAwarded;
+        } else {
+          m.opponentScore += calc.pointsAwarded;
+        }
+
+        ledger.scores.unshift({
+          id: `rs-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          rivalryId: m.id,
+          userId,
+          idempotencyKey,
+          activityType,
+          label: calc.label,
+          pointsAwarded: calc.pointsAwarded,
+          safetyCapped: calc.safetyCapped,
+          createdAt: new Date().toISOString(),
+        });
+
+        updatedCount += 1;
+        pointsAwardedTotal += calc.pointsAwarded;
+      }
+
+      // Advance live Community Tournament bracket scores strictly from verified activities
+      for (const t of ledger.tournaments) {
+        if (t.status !== 'active') continue;
+        for (const tm of t.matches) {
+          if (tm.status !== 'live') continue;
+          if (tm.playerAId === userId || tm.playerBId === userId) {
+            const calc = calculateSafeRivalScoreDelta(t.mode, activityType, metadata, 0);
+            if (calc.pointsAwarded > 0) {
+              if (tm.playerAId === userId) tm.playerAScore += calc.pointsAwarded;
+              else if (tm.playerBId === userId) tm.playerBScore += calc.pointsAwarded;
+              tournamentChanged = true;
+            }
+          }
+        }
+      }
+
+      if (ledger.scores.length > 3000) {
+        ledger.scores = ledger.scores.slice(0, 3000);
+      }
+
+      if (updatedCount > 0 || tournamentChanged) {
+        writeLedger(ledger);
+      }
+
+      const mineResolved = resolvedList.filter(
+        m => m.challengerId === userId || m.opponentId === userId
+      );
+
+      return {
+        resolved: resolvedList,
+        result: {
+          updatedCount,
+          pointsAwardedTotal,
+          resolvedRivalries: mineResolved.map(matchToLegacyRecord),
+          resolvedMatches: mineResolved,
+        },
+      };
+    });
+
+    await notifyCompleted(resolved);
+    return result;
   };
 
   const getStateForUser = async (
@@ -1006,7 +1064,7 @@ export function createRivalService(
         .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
 
       const myMatchIds = new Set(myMatches.map(m => m.id));
-      const events = ledger.scores.filter(s => myMatchIds.has(s.rivalryId)).slice(0, 50);
+      const events = ledger.scores.filter(s => myMatchIds.has(s.rivalryId)).slice(0, 40);
       const myNotifications = ledger.notifications
         .filter(n => n.userId === userId)
         .slice(0, 20);
@@ -1038,7 +1096,6 @@ export function createRivalService(
       return {
         resolved: resolvedList,
         state: {
-          serverNow: new Date().toISOString(),
           profile,
           queueEntry: activeQueueEntry,
           matches: myMatches,
@@ -1191,7 +1248,6 @@ export function createRivalService(
       res.status(outcome.status).json(outcome.payload);
     });
 
-    // FIND A RIVAL — Option A Elo Matchmaking (Auto-selects ONE verified exercise, 3-min default / 5-min max)
     app.post('/api/rivals/queue/join', async (req: Request, res: Response) => {
       const auth = await resolveVerifiedCaller(req);
       if (!auth.ok || !auth.userId) {
@@ -1200,12 +1256,11 @@ export function createRivalService(
       }
       const userId = auth.userId;
       const body = req.body && typeof req.body === 'object' ? req.body : {};
-
-      const requestedDur = Number(body.durationSeconds || DEFAULT_DUEL_DURATION_SECONDS);
-      const durationSeconds = Math.min(
-        MAX_DUEL_DURATION_SECONDS,
-        Math.max(MIN_DUEL_DURATION_SECONDS, Math.round(requestedDur || DEFAULT_DUEL_DURATION_SECONDS))
-      );
+      const mode = String(body.mode || 'overall_fitness') as CompetitiveRivalMode;
+      if (!VALID_MODES.has(mode)) {
+        res.status(400).json({ success: false, error: 'Invalid competitive mode.' });
+        return;
+      }
 
       const username = String(body.username || 'Champion').trim().slice(0, 48);
       const characterClass = body.characterClass as CharacterClass | undefined;
@@ -1213,30 +1268,26 @@ export function createRivalService(
 
       const outcome = await withLock(() => {
         const ledger = readLedger();
-        const resolved = resolveExpiredMatches(ledger);
+        resolveExpiredMatches(ledger);
         const myProf = ensureProfile(ledger, userId, { username, characterClass, level });
 
-        // Cancel existing queue search for this user cleanly
         for (const q of ledger.queue) {
           if (q.userId === userId && q.status === 'searching') {
             q.status = 'cancelled';
           }
         }
 
-        const liveMatch = ledger.matches.find(
+        const activeCount = ledger.matches.filter(
           m =>
             (m.status === 'active' || m.status === 'accepted') &&
             (m.challengerId === userId || m.opponentId === userId)
-        );
-        if (liveMatch) {
+        ).length;
+        if (activeCount >= 5) {
           return {
             status: 409,
-            resolved,
             payload: {
               success: false,
-              error: `You already have an active ${liveMatch.exerciseName} duel with ${
-                liveMatch.challengerId === userId ? liveMatch.opponentName : liveMatch.challengerName
-              }. Finish or concede it before searching again.`,
+              error: 'Maximum of 5 concurrent active Rivals matches reached.',
             },
           };
         }
@@ -1245,14 +1296,17 @@ export function createRivalService(
         const waiting = ledger.queue.filter(q => {
           if (q.status !== 'searching') return false;
           if (q.userId === userId) return false;
+          if (q.mode !== mode) return false;
           if (isPairBlocked(ledger, userId, q.userId)) return false;
 
-          const alreadyBusy = ledger.matches.some(
+          const alreadyFighting = ledger.matches.some(
             m =>
-              (m.status === 'active' || m.status === 'accepted') &&
-              (m.challengerId === q.userId || m.opponentId === q.userId)
+              (m.status === 'pending' || m.status === 'active' || m.status === 'accepted') &&
+              m.mode === mode &&
+              ((m.challengerId === userId && m.opponentId === q.userId) ||
+                (m.challengerId === q.userId && m.opponentId === userId))
           );
-          if (alreadyBusy) return false;
+          if (alreadyFighting) return false;
 
           const waitSec = Math.max(0, (nowMs - Date.parse(q.createdAt)) / 1000);
           const expandedHalfWindow = 150 + Math.floor(waitSec / 10) * 75;
@@ -1285,16 +1339,10 @@ export function createRivalService(
         const matchedQueueItem = waiting[0];
         if (matchedQueueItem) {
           const opProf = ensureProfile(ledger, matchedQueueItem.userId);
-          const lastDuel = ledger.matches.find(
-            m =>
-              m.status === 'completed' &&
-              ((m.challengerId === userId && m.opponentId === opProf.userId) ||
-                (m.challengerId === opProf.userId && m.opponentId === userId))
-          );
-
-          // Server automatically selects ONE verified exercise for both players
-          const duelExercise = pickAutoDuelExercise(lastDuel?.duelExercise || null);
-          const exDef = DUEL_EXERCISES_CATALOG[duelExercise];
+          const durationDays =
+            COMPETITIVE_RIVAL_MODES.find(m => m.id === mode)?.defaultDurationDays || 7;
+          const targetScore =
+            COMPETITIVE_RIVAL_MODES.find(m => m.id === mode)?.defaultTargetScore || 500;
 
           const newMatch: CompetitiveRivalMatch = {
             id: `riv-${nowMs}-${Math.random().toString(36).slice(2, 7)}`,
@@ -1306,38 +1354,26 @@ export function createRivalService(
             opponentName: myProf.username,
             opponentRatingSnapshot: myProf.rating,
             opponentTierSnapshot: myProf.tier,
-            mode: duelExercise,
-            duelExercise,
-            exerciseName: exDef.name,
-            pointsPerRep: exDef.pointsPerRep,
-            durationSeconds,
-            challengeType: 'weekly_activity_score',
-            challengeTitle: `${exDef.name} 1v1 Duel`,
+            mode,
+            challengeType: mapRivalModeToLegacyType(mode),
+            challengeTitle: getModeTitle(mode),
             rules: {
-              exerciseId: duelExercise,
-              pointsPerRep: exDef.pointsPerRep,
-              durationSeconds,
+              durationDays,
+              targetScore,
+              allowRestDays: true,
               ranked: true,
             },
             visibility: 'public',
-            status: 'accepted',
+            status: 'active',
             isRanked: true,
             challengerScore: 0,
             opponentScore: 0,
-            challengerReps: 0,
-            opponentReps: 0,
-            challengerReady: false,
-            opponentReady: false,
-            challengerCameraReady: false,
-            opponentCameraReady: false,
-            countdownEndsAt: null,
-            forfeitByUserId: null,
             winnerId: null,
             isTie: false,
             rematchOfMatchId: null,
             disputeReason: null,
             startsAt: new Date(nowMs).toISOString(),
-            endsAt: new Date(nowMs + READY_STAGE_TIMEOUT_MS).toISOString(),
+            endsAt: new Date(nowMs + durationDays * 86400000).toISOString(),
             createdAt: new Date(nowMs).toISOString(),
             resolvedAt: null,
           };
@@ -1350,24 +1386,22 @@ export function createRivalService(
             ledger,
             opProf.userId,
             'rivalry_matched',
-            'Rival Found!',
-            `Matched with ${myProf.username} (${myProf.rating} ${myProf.tier}) for a ${exDef.name} duel!`,
+            'Matchmaking Opponent Found!',
+            `You were matched with ${myProf.username} (${myProf.rating} ${myProf.tier}) in ${newMatch.challengeTitle}.`,
             newMatch.id
           );
           pushNotif(
             ledger,
             userId,
             'rivalry_matched',
-            'Rival Found!',
-            `Matched with ${opProf.username} (${opProf.rating} ${opProf.tier}) for a ${exDef.name} duel!`,
+            'Matchmaking Opponent Found!',
+            `You were matched with ${opProf.username} (${opProf.rating} ${opProf.tier}) in ${newMatch.challengeTitle}.`,
             newMatch.id
           );
 
           writeLedger(ledger);
           return {
             status: 201,
-            resolved,
-            matchedMatch: newMatch,
             payload: {
               success: true,
               matched: true,
@@ -1380,7 +1414,7 @@ export function createRivalService(
         const queueEntry: MatchmakingQueueEntry = {
           id: `rq-${nowMs}-${Math.random().toString(36).slice(2, 7)}`,
           userId,
-          mode: 'squat', // queue matches across unified Option A single-exercise pool
+          mode,
           ratingSnapshot: myProf.rating,
           minRating: Math.max(100, myProf.rating - 150),
           maxRating: Math.min(4000, myProf.rating + 150),
@@ -1394,8 +1428,6 @@ export function createRivalService(
 
         return {
           status: 200,
-          resolved,
-          matchedMatch: null,
           payload: {
             success: true,
             matched: false,
@@ -1403,11 +1435,6 @@ export function createRivalService(
           },
         };
       });
-
-      await notifyCompleted(outcome.resolved);
-      if (outcome.matchedMatch) {
-        broadcastMatchEvent('rivals:match_found', outcome.matchedMatch);
-      }
 
       const state = await getStateForUser(userId, { username, characterClass, level });
       res.status(outcome.status).json({ ...state, ...outcome.payload });
@@ -1434,7 +1461,6 @@ export function createRivalService(
       res.json({ success: true, ...state });
     });
 
-    // Direct Friend / Arena Challenge (Strict Option A: auto-selected 1 exercise, 3m default, max 5m)
     const handleDirectChallenge = async (req: Request, res: Response) => {
       const auth = await resolveVerifiedCaller(req);
       if (!auth.ok || !auth.userId) {
@@ -1447,6 +1473,19 @@ export function createRivalService(
       const opponentId = String(body.opponentId || '').trim();
       const opponentName = String(body.opponentName || 'Companion').trim().slice(0, 48);
       const challengerName = String(body.challengerName || 'Champion').trim().slice(0, 48);
+
+      let mode: CompetitiveRivalMode;
+      if (body.mode && VALID_MODES.has(String(body.mode) as CompetitiveRivalMode)) {
+        mode = String(body.mode) as CompetitiveRivalMode;
+      } else if (
+        body.challengeType &&
+        VALID_LEGACY_CHALLENGES.has(String(body.challengeType) as RivalChallengeType)
+      ) {
+        mode = mapLegacyTypeToRivalMode(String(body.challengeType));
+      } else {
+        mode = 'overall_fitness';
+      }
+
       const areFriends = body.isFriend !== false;
 
       if (!opponentId) {
@@ -1459,14 +1498,20 @@ export function createRivalService(
       }
 
       const rawRules = body.rules && typeof body.rules === 'object' ? body.rules : {};
-      const requestedDuration = Number(
-        rawRules.durationSeconds || body.durationSeconds || DEFAULT_DUEL_DURATION_SECONDS
+      const durationDays = Math.min(
+        14,
+        Math.max(1, Math.round(Number(rawRules.durationDays || body.durationDays || 7)))
       );
-      const durationSeconds = Math.min(
-        MAX_DUEL_DURATION_SECONDS,
-        Math.max(MIN_DUEL_DURATION_SECONDS, Math.round(requestedDuration || DEFAULT_DUEL_DURATION_SECONDS))
+      const targetScore = Math.min(
+        5000,
+        Math.max(50, Math.round(Number(rawRules.targetScore || 500)))
       );
       const ranked = typeof rawRules.ranked === 'boolean' ? rawRules.ranked : true;
+      const allowRestDays = typeof rawRules.allowRestDays === 'boolean' ? rawRules.allowRestDays : true;
+      const customFocusNote =
+        typeof rawRules.customFocusNote === 'string'
+          ? rawRules.customFocusNote.trim().slice(0, 120)
+          : undefined;
 
       const visibility: CompetitiveMatchVisibility = VALID_VISIBILITIES.has(body.visibility)
         ? body.visibility
@@ -1501,6 +1546,7 @@ export function createRivalService(
         const duplicate = ledger.matches.find(
           m =>
             (m.status === 'pending' || m.status === 'active' || m.status === 'accepted') &&
+            m.mode === mode &&
             ((m.challengerId === userId && m.opponentId === opponentId) ||
               (m.challengerId === opponentId && m.opponentId === userId))
         );
@@ -1509,14 +1555,21 @@ export function createRivalService(
             status: 409,
             payload: {
               success: false,
-              error: `An active or pending ${duplicate.exerciseName} duel already exists with this opponent.`,
+              error: `An active or pending ${duplicate.challengeTitle} already exists with this opponent.`,
             },
           };
         }
 
         const nowMs = Date.now();
-        const duelExercise = pickAutoDuelExercise();
-        const exDef = DUEL_EXERCISES_CATALOG[duelExercise];
+        const customEndsMs = body.endsAt ? Date.parse(String(body.endsAt)) : NaN;
+        const endsIso = !Number.isNaN(customEndsMs)
+          ? new Date(customEndsMs).toISOString()
+          : new Date(nowMs + durationDays * 86400000).toISOString();
+
+        const challengeTitle =
+          mode === 'custom' && customFocusNote
+            ? `Custom Duel: ${customFocusNote.slice(0, 32)}`
+            : getModeTitle(mode);
 
         const match: CompetitiveRivalMatch = {
           id: `riv-${nowMs}-${Math.random().toString(36).slice(2, 7)}`,
@@ -1528,39 +1581,28 @@ export function createRivalService(
           opponentName: opProf.username,
           opponentRatingSnapshot: opProf.rating,
           opponentTierSnapshot: opProf.tier,
-          mode: duelExercise,
-          duelExercise,
-          exerciseName: exDef.name,
-          pointsPerRep: exDef.pointsPerRep,
-          durationSeconds,
-          challengeType: 'weekly_activity_score',
-          challengeTitle: `${exDef.name} 1v1 Duel`,
+          mode,
+          challengeType: mapRivalModeToLegacyType(mode),
+          challengeTitle,
           rules: {
-            exerciseId: duelExercise,
-            pointsPerRep: exDef.pointsPerRep,
-            durationSeconds,
+            durationDays,
+            targetScore,
+            allowRestDays,
             ranked,
+            customFocusNote,
           },
           visibility,
           status: 'pending',
           isRanked: ranked,
           challengerScore: 0,
           opponentScore: 0,
-          challengerReps: 0,
-          opponentReps: 0,
-          challengerReady: false,
-          opponentReady: false,
-          challengerCameraReady: false,
-          opponentCameraReady: false,
-          countdownEndsAt: null,
-          forfeitByUserId: null,
           winnerId: null,
           isTie: false,
           rematchOfMatchId:
             typeof body.rematchOfMatchId === 'string' ? body.rematchOfMatchId : null,
           disputeReason: null,
           startsAt: new Date(nowMs).toISOString(),
-          endsAt: new Date(nowMs + 15 * 60_000).toISOString(), // 15m invite expiration
+          endsAt: endsIso,
           createdAt: new Date(nowMs).toISOString(),
           resolvedAt: null,
         };
@@ -1570,14 +1612,13 @@ export function createRivalService(
           ledger,
           opponentId,
           'rivalry_invite',
-          'New Live Exercise Duel Invite',
-          `${myProf.username} (${myProf.rating} ${myProf.tier}) challenged you to a ${Math.round(durationSeconds / 60)}-min ${exDef.name} duel!`,
+          'New Competitive Rivals Challenge',
+          `${myProf.username} (${myProf.rating} ${myProf.tier}) challenged you to a ${durationDays}-day ${match.challengeTitle}!`,
           match.id
         );
         writeLedger(ledger);
         return {
           status: 201,
-          createdMatch: match,
           payload: {
             success: true,
             match,
@@ -1585,10 +1626,6 @@ export function createRivalService(
           },
         };
       });
-
-      if (outcome.createdMatch) {
-        broadcastMatchEvent('rivals:match_updated', outcome.createdMatch);
-      }
 
       const state = await getStateForUser(userId, { username: challengerName });
       res.status(outcome.status).json({ ...state, ...outcome.payload });
@@ -1637,18 +1674,17 @@ export function createRivalService(
         }
 
         if (decision === 'accept') {
+          const durationMs = Math.max(60000, Date.parse(m.endsAt) - Date.parse(m.startsAt));
           const now = Date.now();
-          m.status = 'accepted';
-          m.challengerReady = false;
-          m.opponentReady = false;
+          m.status = 'active';
           m.startsAt = new Date(now).toISOString();
-          m.endsAt = new Date(now + READY_STAGE_TIMEOUT_MS).toISOString();
+          m.endsAt = new Date(now + durationMs).toISOString();
           pushNotif(
             ledger,
             m.challengerId,
             'rivalry_accepted',
-            'Duel Accepted — Step Into Frame!',
-            `${m.opponentName} accepted your ${m.exerciseName} duel. Ready up with camera calibration!`,
+            'Rivals Match Accepted',
+            `${m.opponentName} accepted your ${m.challengeTitle}!`,
             m.id
           );
         } else if (decision === 'decline') {
@@ -1659,7 +1695,7 @@ export function createRivalService(
             m.challengerId,
             'rivalry_declined',
             'Rivals Challenge Declined',
-            `${m.opponentName} declined your ${m.exerciseName} duel invitation.`,
+            `${m.opponentName} declined your ${m.challengeTitle} invitation.`,
             m.id
           );
         } else {
@@ -1672,285 +1708,12 @@ export function createRivalService(
         writeLedger(ledger);
         return {
           status: 200,
-          updatedMatch: m,
           payload: { success: true, match: m, rivalry: matchToLegacyRecord(m) },
         };
       });
 
-      if (outcome.updatedMatch) {
-        broadcastMatchEvent('rivals:match_updated', outcome.updatedMatch);
-      }
-
       const state = await getStateForUser(userId);
       res.status(outcome.status).json({ ...state, ...outcome.payload });
-    });
-
-    // Stage 2 -> Stage 3: Ready up & launch synchronized 5s countdown + 3m..5m duel clock
-    app.post('/api/rivals/duel/ready', async (req: Request, res: Response) => {
-      const auth = await resolveVerifiedCaller(req);
-      if (!auth.ok || !auth.userId) {
-        res.status(auth.status || 401).json({ success: false, error: auth.error || 'Authentication required.' });
-        return;
-      }
-      const userId = auth.userId;
-      const body = req.body && typeof req.body === 'object' ? req.body : {};
-      const matchId = String(body.matchId || '').trim();
-      const ready = body.ready !== false;
-      const cameraReady = Boolean(body.cameraReady);
-
-      const outcome = await withLock(() => {
-        const ledger = readLedger();
-        resolveExpiredMatches(ledger);
-        const m = ledger.matches.find(item => item.id === matchId);
-        if (!m) return { status: 404, payload: { success: false, error: 'Duel not found.' } };
-        if (m.challengerId !== userId && m.opponentId !== userId) {
-          return { status: 403, payload: { success: false, error: 'Forbidden.' } };
-        }
-        if (m.status !== 'accepted' && m.status !== 'active') {
-          return { status: 400, payload: { success: false, error: `Duel is ${m.status}.` } };
-        }
-        if (ready && !cameraReady) {
-          return {
-            status: 400,
-            payload: {
-              success: false,
-              error: 'Live Aether Vision camera tracking must be active before marking Ready.',
-            },
-          };
-        }
-
-        if (m.challengerId === userId) {
-          m.challengerReady = ready;
-          m.challengerCameraReady = cameraReady;
-        } else {
-          m.opponentReady = ready;
-          m.opponentCameraReady = cameraReady;
-        }
-
-        let launchedNow = false;
-        if (m.status === 'accepted' && m.challengerReady && m.opponentReady) {
-          const nowMs = Date.now();
-          const durMs = Math.min(
-            MAX_DUEL_DURATION_SECONDS,
-            Math.max(MIN_DUEL_DURATION_SECONDS, m.durationSeconds || DEFAULT_DUEL_DURATION_SECONDS)
-          ) * 1000;
-          const startMs = nowMs + COUNTDOWN_MS;
-          m.status = 'active';
-          m.countdownEndsAt = new Date(startMs).toISOString();
-          m.startsAt = new Date(startMs).toISOString();
-          m.endsAt = new Date(startMs + durMs).toISOString();
-          launchedNow = true;
-        }
-
-        writeLedger(ledger);
-        return {
-          status: 200,
-          updatedMatch: m,
-          launchedNow,
-          payload: { success: true, match: m, launchedNow },
-        };
-      });
-
-      if (outcome.updatedMatch) {
-        broadcastMatchEvent('rivals:match_updated', outcome.updatedMatch);
-      }
-
-      const state = await getStateForUser(userId);
-      res.status(outcome.status).json({ ...state, ...outcome.payload });
-    });
-
-    // Stage 3: Server-Authoritative Live Rep Verification Endpoint
-    app.post('/api/rivals/duel/rep', async (req: Request, res: Response) => {
-      const auth = await resolveVerifiedCaller(req);
-      if (!auth.ok || !auth.userId) {
-        res.status(auth.status || 401).json({ success: false, error: auth.error || 'Authentication required.' });
-        return;
-      }
-      const userId = auth.userId;
-      const body = req.body && typeof req.body === 'object' ? req.body : {};
-
-      // Strictly reject untrusted score/point overrides from client
-      if (
-        'points' in body ||
-        'score' in body ||
-        'pointsAwarded' in body ||
-        'challengerScore' in body ||
-        'opponentScore' in body ||
-        'winnerId' in body
-      ) {
-        res.status(400).json({
-          success: false,
-          error: 'Untrusted score or point overrides are strictly rejected.',
-        });
-        return;
-      }
-
-      const matchId = String(body.matchId || '').trim();
-      const eventId = String(body.eventId || '').trim();
-      const exercise = String(body.exercise || '').trim() as DuelExerciseId;
-      const repSeq = Number(body.repSeq || 0);
-      const peakAngleDeg = Number(body.peakAngleDeg);
-      const resetAngleDeg = Number(body.resetAngleDeg);
-      const durationMs = Number(body.durationMs || 0);
-      const confidence = Number(body.confidence || 0);
-      const landmarksVisible = Boolean(body.landmarksVisible);
-      const cameraStable = Boolean(body.cameraStable);
-
-      if (!matchId || eventId.length < 4 || !VALID_DUEL_EXERCISES.has(exercise)) {
-        res.status(400).json({ success: false, error: 'Invalid repetition verification payload.' });
-        return;
-      }
-
-      const outcome = await withLock(() => {
-        const ledger = readLedger();
-        const resolved = resolveExpiredMatches(ledger);
-        const m = ledger.matches.find(item => item.id === matchId);
-        if (!m) {
-          return { status: 404, resolved, payload: { success: false, error: 'Duel not found.' } };
-        }
-        if (m.challengerId !== userId && m.opponentId !== userId) {
-          return { status: 403, resolved, payload: { success: false, error: 'Forbidden.' } };
-        }
-        if (m.status !== 'active') {
-          return {
-            status: 409,
-            resolved,
-            payload: { success: false, error: `Duel is ${m.status}; repetitions cannot be recorded.` },
-          };
-        }
-        if (exercise !== m.duelExercise) {
-          return {
-            status: 400,
-            resolved,
-            payload: {
-              success: false,
-              error: `Exercise mismatch: this duel requires ${m.exerciseName}.`,
-            },
-          };
-        }
-
-        const nowMs = Date.now();
-        const startMs = Date.parse(m.startsAt);
-        const endMs = Date.parse(m.endsAt);
-        if (nowMs < startMs - 500) {
-          return {
-            status: 400,
-            resolved,
-            payload: { success: false, error: 'Wait for the countdown to reach GO before scoring reps.' },
-          };
-        }
-        if (nowMs > endMs + 1500) {
-          return {
-            status: 409,
-            resolved,
-            payload: { success: false, error: 'Duel timer has already expired.' },
-          };
-        }
-
-        // Duplicate / replay protection
-        const dup = ledger.scores.find(
-          s => s.rivalryId === m.id && s.userId === userId && s.idempotencyKey === eventId
-        );
-        if (dup) {
-          return {
-            status: 200,
-            resolved,
-            duplicate: true,
-            updatedMatch: m,
-            payload: { success: true, duplicate: true, match: m },
-          };
-        }
-
-        const isChallenger = m.challengerId === userId;
-        const currentReps = isChallenger ? m.challengerReps : m.opponentReps;
-        if (!Number.isInteger(repSeq) || repSeq <= currentReps) {
-          return {
-            status: 409,
-            resolved,
-            payload: { success: false, error: 'Out-of-order or replayed repetition sequence.' },
-          };
-        }
-
-        const repTsKey = `${m.id}:${userId}`;
-        if (!ledger.lastRepTimestamps) ledger.lastRepTimestamps = {};
-        const lastServerRepMs = Number(ledger.lastRepTimestamps[repTsKey] || 0);
-        const msSinceLastRep = lastServerRepMs > 0 ? nowMs - lastServerRepMs : 10_000;
-        const elapsedSeconds = Math.max(1, (nowMs - startMs) / 1000);
-
-        const check = validateServerDuelRep({
-          exerciseId: m.duelExercise,
-          peakAngleDeg,
-          resetAngleDeg,
-          durationMs,
-          confidence,
-          landmarksVisible,
-          cameraStable,
-          msSinceLastRep,
-          elapsedSeconds,
-          currentRepCount: currentReps,
-        });
-
-        if (!check.valid) {
-          return {
-            status: 422,
-            resolved,
-            payload: { success: false, error: check.reason || 'Repetition failed biomechanical validation.' },
-          };
-        }
-
-        const pointsEarned = DUEL_EXERCISES_CATALOG[m.duelExercise].pointsPerRep;
-        ledger.lastRepTimestamps[repTsKey] = nowMs;
-
-        if (isChallenger) {
-          m.challengerReps += 1;
-          m.challengerScore += pointsEarned;
-        } else {
-          m.opponentReps += 1;
-          m.opponentScore += pointsEarned;
-        }
-
-        const scoreEntry: RivalryScoreEntry = {
-          id: `rs-${nowMs}-${Math.random().toString(36).slice(2, 7)}`,
-          rivalryId: m.id,
-          userId,
-          idempotencyKey: eventId,
-          activityType: 'strength_workout',
-          exercise: m.duelExercise,
-          repSeq: isChallenger ? m.challengerReps : m.opponentReps,
-          confidence: Math.round(confidence),
-          label: `${m.exerciseName} Rep #${isChallenger ? m.challengerReps : m.opponentReps}`,
-          pointsAwarded: pointsEarned,
-          safetyCapped: false,
-          createdAt: new Date(nowMs).toISOString(),
-        };
-        ledger.scores.unshift(scoreEntry);
-
-        writeLedger(ledger);
-        return {
-          status: 200,
-          resolved,
-          updatedMatch: m,
-          scoreEntry,
-          payload: {
-            success: true,
-            pointsAwarded: pointsEarned,
-            match: m,
-            scoreEntry,
-          },
-        };
-      });
-
-      await notifyCompleted(outcome.resolved);
-      if (outcome.updatedMatch && !outcome.duplicate) {
-        broadcastMatchEvent('rivals:match_updated', outcome.updatedMatch, {
-          lastScoreEntry: outcome.scoreEntry,
-        });
-      }
-
-      res.status(outcome.status).json({
-        serverNow: new Date().toISOString(),
-        ...outcome.payload,
-      });
     });
 
     app.post('/api/rivals/cancel', async (req: Request, res: Response) => {
@@ -1986,20 +1749,15 @@ export function createRivalService(
         writeLedger(ledger);
         return {
           status: 200,
-          updatedMatch: m,
           payload: { success: true, match: m, rivalry: matchToLegacyRecord(m) },
         };
       });
-
-      if (outcome.updatedMatch) {
-        broadcastMatchEvent('rivals:match_updated', outcome.updatedMatch);
-      }
 
       const state = await getStateForUser(userId);
       res.status(outcome.status).json({ ...state, ...outcome.payload });
     });
 
-    const handleConcedeOrEnd = async (req: Request, res: Response) => {
+    app.post('/api/rivals/end', async (req: Request, res: Response) => {
       const auth = await resolveVerifiedCaller(req);
       if (!auth.ok || !auth.userId) {
         res.status(auth.status || 401).json({ success: false, error: auth.error || 'Authentication required.' });
@@ -2018,56 +1776,30 @@ export function createRivalService(
         if (m.status !== 'active' && m.status !== 'accepted') {
           return {
             status: 400,
-            payload: { success: false, error: 'Only active or setup-stage duels can be stopped.' },
+            payload: { success: false, error: 'Only active matches can be ended early.' },
           };
         }
-
-        const nowMs = Date.now();
-        const hasActivity = m.challengerReps + m.opponentReps > 0;
-        const otherId = m.challengerId === userId ? m.opponentId : m.challengerId;
-
-        if (m.status === 'active' && hasActivity) {
-          // Safe early stop mid-duel after reps started -> clean forfeit victory to opponent
-          settleCompletedMatch(ledger, m, nowMs, { forfeitByUserId: userId });
-          writeLedger(ledger);
-          return {
-            status: 200,
-            settledMatch: m,
-            payload: { success: true, match: m, rivalry: matchToLegacyRecord(m) },
-          };
-        }
-
-        // Stopped during camera calibration or 0-rep start -> cancel safely without Elo penalty
         m.status = 'cancelled';
-        m.resolvedAt = new Date(nowMs).toISOString();
+        m.resolvedAt = new Date().toISOString();
+        const otherId = m.challengerId === userId ? m.opponentId : m.challengerId;
         pushNotif(
           ledger,
           otherId,
           'rivalry_ended',
-          'Duel Stopped Safely',
-          `${m.challengerId === userId ? m.challengerName : m.opponentName} stepped out of the ${m.exerciseName} duel safely (no rating shift).`,
+          'Rivals Match Ended',
+          `The active ${m.challengeTitle} was cancelled without rating changes.`,
           m.id
         );
         writeLedger(ledger);
         return {
           status: 200,
-          updatedMatch: m,
           payload: { success: true, match: m, rivalry: matchToLegacyRecord(m) },
         };
       });
 
-      if (outcome.settledMatch) {
-        await notifyCompleted([outcome.settledMatch]);
-      } else if (outcome.updatedMatch) {
-        broadcastMatchEvent('rivals:match_updated', outcome.updatedMatch);
-      }
-
       const state = await getStateForUser(userId);
       res.status(outcome.status).json({ ...state, ...outcome.payload });
-    };
-
-    app.post('/api/rivals/end', handleConcedeOrEnd);
-    app.post('/api/rivals/duel/concede', handleConcedeOrEnd);
+    });
 
     app.post('/api/rivals/rematch', async (req: Request, res: Response) => {
       const auth = await resolveVerifiedCaller(req);
@@ -2094,7 +1826,8 @@ export function createRivalService(
         }
         const dup = ledger.matches.find(
           m =>
-            (m.status === 'pending' || m.status === 'active' || m.status === 'accepted') &&
+            (m.status === 'pending' || m.status === 'active') &&
+            m.mode === src.mode &&
             ((m.challengerId === userId && m.opponentId === opponentId) ||
               (m.challengerId === opponentId && m.opponentId === userId))
         );
@@ -2103,7 +1836,7 @@ export function createRivalService(
             status: 409,
             payload: {
               success: false,
-              error: 'An active or pending duel already exists with this rival.',
+              error: 'An active or pending rematch already exists.',
             },
           };
         }
@@ -2111,12 +1844,7 @@ export function createRivalService(
         const myProf = ensureProfile(ledger, userId);
         const opProf = ensureProfile(ledger, opponentId);
         const nowMs = Date.now();
-        const duelExercise = pickAutoDuelExercise(src.duelExercise);
-        const exDef = DUEL_EXERCISES_CATALOG[duelExercise];
-        const durationSeconds = Math.min(
-          MAX_DUEL_DURATION_SECONDS,
-          Math.max(MIN_DUEL_DURATION_SECONDS, src.durationSeconds || DEFAULT_DUEL_DURATION_SECONDS)
-        );
+        const durationDays = Math.max(1, Number(src.rules?.durationDays || 7));
 
         const rematch: CompetitiveRivalMatch = {
           id: `riv-${nowMs}-${Math.random().toString(36).slice(2, 7)}`,
@@ -2128,38 +1856,21 @@ export function createRivalService(
           opponentName: opProf.username,
           opponentRatingSnapshot: opProf.rating,
           opponentTierSnapshot: opProf.tier,
-          mode: duelExercise,
-          duelExercise,
-          exerciseName: exDef.name,
-          pointsPerRep: exDef.pointsPerRep,
-          durationSeconds,
-          challengeType: 'weekly_activity_score',
-          challengeTitle: `${exDef.name} 1v1 Duel`,
-          rules: {
-            exerciseId: duelExercise,
-            pointsPerRep: exDef.pointsPerRep,
-            durationSeconds,
-            ranked: src.isRanked,
-          },
+          mode: src.mode,
+          challengeType: src.challengeType,
+          challengeTitle: src.challengeTitle,
+          rules: { ...src.rules },
           visibility: src.visibility,
           status: 'pending',
           isRanked: src.isRanked,
           challengerScore: 0,
           opponentScore: 0,
-          challengerReps: 0,
-          opponentReps: 0,
-          challengerReady: false,
-          opponentReady: false,
-          challengerCameraReady: false,
-          opponentCameraReady: false,
-          countdownEndsAt: null,
-          forfeitByUserId: null,
           winnerId: null,
           isTie: false,
           rematchOfMatchId: src.id,
           disputeReason: null,
           startsAt: new Date(nowMs).toISOString(),
-          endsAt: new Date(nowMs + 15 * 60_000).toISOString(),
+          endsAt: new Date(nowMs + durationDays * 86400000).toISOString(),
           createdAt: new Date(nowMs).toISOString(),
           resolvedAt: null,
         };
@@ -2169,20 +1880,15 @@ export function createRivalService(
           opponentId,
           'rivalry_rematch',
           'Rematch Challenge Received',
-          `${myProf.username} requested a ${exDef.name} rematch!`,
+          `${myProf.username} requested a rematch in ${rematch.challengeTitle}!`,
           rematch.id
         );
         writeLedger(ledger);
         return {
           status: 201,
-          createdMatch: rematch,
           payload: { success: true, match: rematch, rivalry: matchToLegacyRecord(rematch) },
         };
       });
-
-      if (outcome.createdMatch) {
-        broadcastMatchEvent('rivals:match_updated', outcome.createdMatch);
-      }
 
       const state = await getStateForUser(userId);
       res.status(outcome.status).json({ ...state, ...outcome.payload });
@@ -2253,16 +1959,12 @@ export function createRivalService(
           otherId,
           'rivalry_disputed',
           'Match Placed Under Review',
-          `${m.exerciseName} duel was flagged for fair-play review and rating adjustment was paused.`,
+          `${m.challengeTitle} was flagged for fair-play review and rating adjustment was paused.`,
           m.id
         );
         writeLedger(ledger);
-        return { status: 200, updatedMatch: m, payload: { success: true, match: m } };
+        return { status: 200, payload: { success: true, match: m } };
       });
-
-      if (outcome.updatedMatch) {
-        broadcastMatchEvent('rivals:match_updated', outcome.updatedMatch);
-      }
 
       const state = await getStateForUser(userId);
       res.status(outcome.status).json({ ...state, ...outcome.payload });
@@ -2333,7 +2035,7 @@ export function createRivalService(
       res.json({ success: true, ...state });
     });
 
-    // --- COMMUNITY TOURNAMENTS (SINGLE-EXERCISE BRACKETS ONLY) ---
+    // --- AAA 13: COMMUNITY TOURNAMENTS (STRICTLY REAL COMPETITORS, ZERO BOTS) ---
     app.get('/api/tournaments/state', async (req: Request, res: Response) => {
       const auth = await resolveVerifiedCaller(req);
       if (!auth.ok || !auth.userId) {
@@ -2356,11 +2058,10 @@ export function createRivalService(
       }
       const body = req.body && typeof req.body === 'object' ? req.body : {};
       const title = String(body.title || '').trim().slice(0, 64);
-      const subtitle = String(body.subtitle || 'Single-Exercise Bracket').trim().slice(0, 96);
-      const rawEx = String(body.mode || '') as DuelExerciseId;
-      const mode: DuelExerciseId = VALID_DUEL_EXERCISES.has(rawEx)
-        ? rawEx
-        : pickAutoDuelExercise();
+      const subtitle = String(body.subtitle || 'Open Community Bracket').trim().slice(0, 96);
+      const mode = (VALID_MODES.has(String(body.mode) as CompetitiveRivalMode)
+        ? String(body.mode)
+        : 'overall_fitness') as CompetitiveRivalMode;
       const username = String(body.username || 'Champion').trim().slice(0, 48);
 
       if (title.length < 3) {
@@ -2427,6 +2128,7 @@ export function createRivalService(
             payload: { success: false, error: 'You are already registered in this tournament.' },
           };
         }
+        // Prevent joining alongside a mutually blocked user
         if (t.participants.some(p => isPairBlocked(ledger, auth.userId!, p.userId))) {
           return {
             status: 403,
@@ -2458,7 +2160,7 @@ export function createRivalService(
       res.status(outcome.status).json(outcome.payload);
     });
 
-    // --- READ-ONLY SPECTATOR MODE ---
+    // --- AAA 13: READ-ONLY SPECTATOR MODE & RATE-LIMITED RECOGNITION ---
     app.get('/api/spectator/matches', async (req: Request, res: Response) => {
       const auth = await resolveVerifiedCaller(req);
       if (!auth.ok || !auth.userId) {
@@ -2519,6 +2221,7 @@ export function createRivalService(
         return;
       }
       const body = req.body && typeof req.body === 'object' ? req.body : {};
+      // Spectator mode is strictly read-only: reject score/damage overrides
       if ('score' in body || 'points' in body || 'rating' in body) {
         res.status(403).json({
           success: false,
@@ -2537,6 +2240,7 @@ export function createRivalService(
         return;
       }
 
+      // Sliding window rate limit: <= 5 cheers per minute
       const nowMs = Date.now();
       const recent = (cheerTimestampsByUser.get(auth.userId) || []).filter(
         ts => nowMs - ts < 60_000

@@ -3,7 +3,6 @@ import {
   PlayerStats,
   Habit,
   Quest,
-  Weapon,
   Buff,
   Kingdom,
   FitnessSession,
@@ -12,14 +11,12 @@ import {
   Guild,
   ChatMessage,
   Transaction,
-  UserAccount,
 } from '../types/game';
 
 export interface CloudFullGameState {
   stats: PlayerStats;
   habits: Habit[];
   quests: Quest[];
-  weapons: Weapon[];
   buffs: Buff[];
   kingdoms: Kingdom[];
   waterGlasses: number;
@@ -42,7 +39,6 @@ export interface CloudLoadResult {
     player_xp?: number;
     player_xp_next_level?: number;
     total_xp?: number;
-    forge_xp?: number;
     gold_balance?: number;
     aether_rank?: string;
     aether_points?: number;
@@ -52,7 +48,6 @@ export interface CloudLoadResult {
     total_verified_reps?: number;
     total_bosses_defeated?: number;
     current_kingdom_id?: string;
-    equipped_weapon_id?: string;
     preferred_units?: string;
     age_years?: number | null;
     age_group?: string | null;
