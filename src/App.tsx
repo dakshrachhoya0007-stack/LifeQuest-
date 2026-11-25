@@ -20,6 +20,7 @@ import { SocialHubView } from './components/Social/SocialHubView';
 import { PublicProfileModal } from './components/Social/PublicProfileModal';
 import { GuildsView } from './components/Guilds/GuildsView';
 import { ProgressionHubView } from './components/Progression/ProgressionHubView';
+import { HallOfLegendsView } from './components/Achievements/HallOfLegendsView';
 import { SettingsView } from './components/Settings/SettingsView';
 import { HeroSelectionModal } from './components/HeroSelect/HeroSelectionModal';
 import { InteractiveTutorialOverlay } from './components/Tutorial/InteractiveTutorialOverlay';
@@ -131,13 +132,13 @@ const MainAppContent: React.FC = () => {
       case 'dashboard': return <DashboardView />;
       case 'progression':
       case 'quests':
-      case 'daily-report':
       case 'achievements':
-      case 'hall-of-legends':
       case 'skill-tree':
       case 'seasons':
       case 'daily-calendar':
         return <ProgressionHubView />;
+      case 'hall-of-legends':
+        return <HallOfLegendsView />;
       case 'character':
       case 'customization':
       case 'cards':

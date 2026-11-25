@@ -386,10 +386,7 @@ export const CharacterView: React.FC = () => {
                 })}
                 <button
                   type="button"
-                  onClick={() => {
-                    setProgressionSubTab('hall-of-legends');
-                    setActiveTab('progression');
-                  }}
+                  onClick={() => setActiveTab('hall-of-legends')}
                   className="text-[11px] text-[#00D9FF]/85 hover:text-[#00D9FF] underline ml-1"
                 >
                   Hall of Legends

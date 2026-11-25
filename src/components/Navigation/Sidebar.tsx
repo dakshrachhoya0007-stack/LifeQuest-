@@ -76,7 +76,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     h => h.eligibleToClaim && h.status !== 'claimed'
   ).length;
   const claimableProgressionCount =
-    claimableQuestsCount + claimableAiQuestsCount + claimableAchievementsCount + eligibleLegendsCount;
+    claimableQuestsCount + claimableAiQuestsCount + claimableAchievementsCount;
 
   const equippedLegend = user
     ? user.legendTitle
@@ -103,7 +103,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         {
           id: 'progression',
           label: 'PROGRESSION',
-          subtitle: 'Quests, Skill Tree, Battle Pass & Calendar',
+          subtitle: 'Quest Board, Skill Tree & Battle Pass',
           icon: Crown,
           badge: claimableProgressionCount,
         },
@@ -146,6 +146,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           label: 'Notifications',
           icon: Bell,
           badge: unreadNotificationsCount,
+        },
+        {
+          id: 'hall-of-legends',
+          label: 'Hall of Legends',
+          icon: Crown,
+          badge: eligibleLegendsCount,
         },
         { id: 'settings', label: 'Settings & Privacy', icon: Settings },
       ],

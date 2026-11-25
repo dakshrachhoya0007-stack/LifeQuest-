@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import type { Express, Request, Response } from 'express';
+import { resolveVerifiedCaller } from './authGuard.ts';
 import { DEFAULT_SERVER_NOTIFICATION_PREFS } from '../src/data/polish2Data.ts';
 import type {
   AppNotification,
@@ -84,25 +85,24 @@ export function createNotificationService(rootDir: string) {
     };
   };
 
-  const resolveCallerUserId = (
+  const resolveCallerUserId = async (
     req: Request
-  ): { userId: string | null; status?: number; error?: string } => {
-    const headerUid = String(req.headers['x-lifequest-user-id'] || '').trim();
-    if (!headerUid) {
-      return { userId: null, status: 401, error: 'Authentication required.' };
-    }
+  ): Promise<{ userId: string | null; status?: number; error?: string }> => {
     const targetParam =
       (typeof req.query.userId === 'string' && req.query.userId.trim()) ||
       (req.body && typeof req.body.userId === 'string' && req.body.userId.trim()) ||
       '';
-    if (targetParam && targetParam !== headerUid) {
+    const auth = await resolveVerifiedCaller(req, {
+      expectedOwnerId: targetParam || undefined,
+    });
+    if (!auth.ok || !auth.userId) {
       return {
         userId: null,
-        status: 403,
-        error: 'Forbidden: players can only access or modify their own notifications.',
+        status: auth.status || 401,
+        error: auth.error || 'Authentication required.',
       };
     }
-    return { userId: headerUid };
+    return { userId: auth.userId };
   };
 
   const emitNotification = async (input: {
@@ -170,7 +170,7 @@ export function createNotificationService(rootDir: string) {
 
   const registerRoutes = (app: Express) => {
     app.get('/api/notifications/state', async (req: Request, res: Response) => {
-      const auth = resolveCallerUserId(req);
+      const auth = await resolveCallerUserId(req);
       if (!auth.userId) {
         res.status(auth.status || 401).json({ success: false, error: auth.error });
         return;
@@ -222,7 +222,7 @@ export function createNotificationService(rootDir: string) {
     });
 
     app.get('/api/notifications/preferences', async (req: Request, res: Response) => {
-      const auth = resolveCallerUserId(req);
+      const auth = await resolveCallerUserId(req);
       if (!auth.userId) {
         res.status(auth.status || 401).json({ success: false, error: auth.error });
         return;
@@ -232,7 +232,7 @@ export function createNotificationService(rootDir: string) {
     });
 
     app.post('/api/notifications/preferences', async (req: Request, res: Response) => {
-      const auth = resolveCallerUserId(req);
+      const auth = await resolveCallerUserId(req);
       if (!auth.userId) {
         res.status(auth.status || 401).json({ success: false, error: auth.error });
         return;
@@ -262,7 +262,7 @@ export function createNotificationService(rootDir: string) {
     });
 
     app.post('/api/notifications/read', async (req: Request, res: Response) => {
-      const auth = resolveCallerUserId(req);
+      const auth = await resolveCallerUserId(req);
       if (!auth.userId) {
         res.status(auth.status || 401).json({ success: false, error: auth.error });
         return;
@@ -297,7 +297,7 @@ export function createNotificationService(rootDir: string) {
     });
 
     app.post('/api/notifications/read-all', async (req: Request, res: Response) => {
-      const auth = resolveCallerUserId(req);
+      const auth = await resolveCallerUserId(req);
       if (!auth.userId) {
         res.status(auth.status || 401).json({ success: false, error: auth.error });
         return;
@@ -323,7 +323,7 @@ export function createNotificationService(rootDir: string) {
     });
 
     app.post('/api/notifications/dismiss', async (req: Request, res: Response) => {
-      const auth = resolveCallerUserId(req);
+      const auth = await resolveCallerUserId(req);
       if (!auth.userId) {
         res.status(auth.status || 401).json({ success: false, error: auth.error });
         return;

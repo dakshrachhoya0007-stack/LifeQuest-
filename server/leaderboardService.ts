@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import type { Express, Request, Response } from 'express';
+import { resolveVerifiedCaller } from './authGuard.ts';
 import { getCurrentWeekKey } from '../src/data/ecosystemData.ts';
 import { PLAYER_TITLES_CATALOG } from '../src/data/polish2Data.ts';
 import type {
@@ -424,11 +425,12 @@ export function createLeaderboardService(rootDir: string) {
 
   const registerRoutes = (app: Express) => {
     app.post('/api/leaderboards/query', async (req: Request, res: Response) => {
-      const callerId = String(req.headers['x-lifequest-user-id'] || '').trim();
-      if (!callerId) {
-        res.status(401).json({ success: false, error: 'Authentication required.' });
+      const auth = await resolveVerifiedCaller(req);
+      if (!auth.ok || !auth.userId) {
+        res.status(auth.status || 401).json({ success: false, error: auth.error || 'Authentication required.' });
         return;
       }
+      const callerId = auth.userId;
 
       const body = req.body && typeof req.body === 'object' ? req.body : {};
       // Anti-cheat guard: reject untrusted client score or rank injections

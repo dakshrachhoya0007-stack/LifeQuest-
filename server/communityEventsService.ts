@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import type { Express, Request, Response } from 'express';
-import { resolveVerifiedCaller } from './authGuard.ts';
+import { resolveVerifiedCaller, verifyAdminHeader } from './authGuard.ts';
 import {
   calculateSafeCommunityPoints,
   createDefaultCommunityEvent,
@@ -510,9 +510,7 @@ export function createCommunityEventsService(rootDir: string, deps?: CommunityEv
   };
 
   const requireAdminKey = (req: Request, res: Response): boolean => {
-    const expectedKey = process.env.LIFEQUEST_ADMIN_KEY || 'lifequest-local-admin';
-    const providedKey = String(req.headers['x-lifequest-admin-key'] || '').trim();
-    if (!providedKey || providedKey !== expectedKey) {
+    if (!verifyAdminHeader(req, ['LIFEQUEST_ADMIN_KEY', 'LIFEQUEST_ADMIN_SECRET'])) {
       res.status(403).json({
         success: false,
         error: 'Forbidden: Steward admin authorization key required.',

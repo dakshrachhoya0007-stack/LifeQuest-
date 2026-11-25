@@ -1,14 +1,10 @@
 import React from 'react';
 import { useGame } from '../../context/GameContext';
 import { QuestsView } from '../Quests/QuestsView';
-import { DailyQuestReportView } from '../Quests/DailyQuestReportView';
-import { AchievementsView } from '../Achievements/AchievementsView';
-import { HallOfLegendsView } from '../Achievements/HallOfLegendsView';
 import { SkillTreeView } from '../SkillTree/SkillTreeView';
 import { SeasonalProgressionView } from '../Seasons/SeasonalProgressionView';
-import { DailyCalendarView } from './DailyCalendarView';
 import { SKILL_TREE_ATTRIBUTES, evaluateSkillNodeStatus } from '../../data/skillTreeData';
-import { Scroll, ScrollText, Award, Crown, GitBranch, Calendar, CalendarCheck } from 'lucide-react';
+import { Scroll, GitBranch, Calendar } from 'lucide-react';
 import { getPeriodKeyForFrequency, getUserTimezone } from '../../services/unifiedBackendService';
 
 export const ProgressionHubView: React.FC = () => {
@@ -19,23 +15,24 @@ export const ProgressionHubView: React.FC = () => {
     quests,
     dynamicDailyQuests,
     achievements,
-    hallOfLegends,
     skillTreeState,
     seasonState,
     dailyCalendarState,
   } = useGame();
 
   const todayKey = getPeriodKeyForFrequency('daily', user?.timezone || getUserTimezone());
-  const todaysAi = dynamicDailyQuests.filter(q => q.periodKey === todayKey);
+  const todaysDaily = dynamicDailyQuests.filter(q => q.periodKey === todayKey);
 
   const claimableClassicQuests = quests.filter(q => q.completed && !q.claimed).length;
-  const claimableAiQuests = todaysAi.filter(q => q.completed && !q.claimed).length;
-  const claimableQuestsCount = claimableClassicQuests + claimableAiQuests;
-  const activeQuestsCount =
-    quests.filter(q => !q.claimed).length + todaysAi.filter(q => !q.claimed).length;
+  const claimableDailyQuests = todaysDaily.filter(q => q.completed && !q.claimed).length;
   const claimableAchievementsCount = achievements.filter(a => a.unlocked && !a.claimed).length;
+  const claimableCalendarCount = dailyCalendarState && !dailyCalendarState.claimedToday ? 1 : 0;
+  const questBoardBadge =
+    claimableClassicQuests + claimableDailyQuests + claimableAchievementsCount + claimableCalendarCount;
+
+  const activeQuestsCount =
+    quests.filter(q => !q.claimed).length + todaysDaily.filter(q => !q.claimed).length;
   const unlockedAchievementsCount = achievements.filter(a => a.unlocked).length;
-  const readyLegendsCount = hallOfLegends.filter(h => h.eligibleToClaim).length;
 
   let readySkillNodesCount = 0;
   for (const attr of SKILL_TREE_ATTRIBUTES) {
@@ -59,30 +56,14 @@ export const ProgressionHubView: React.FC = () => {
     : 0;
 
   const tabs: Array<{
-    id:
-      | 'quests'
-      | 'daily-report'
-      | 'achievements'
-      | 'hall-of-legends'
-      | 'skill-tree'
-      | 'seasons'
-      | 'daily-calendar';
+    id: 'quests' | 'skill-tree' | 'seasons';
     label: string;
     icon: React.ComponentType<{ className?: string }>;
     badge?: number;
   }> = [
-    { id: 'quests', label: 'Quest Board', icon: Scroll, badge: claimableQuestsCount },
+    { id: 'quests', label: 'Quest Board', icon: Scroll, badge: questBoardBadge },
     { id: 'skill-tree', label: 'Skill Tree', icon: GitBranch, badge: readySkillNodesCount },
     { id: 'seasons', label: 'Battle Pass', icon: Calendar, badge: claimableSeasonCount },
-    {
-      id: 'daily-calendar',
-      label: 'Daily Calendar',
-      icon: CalendarCheck,
-      badge: dailyCalendarState && !dailyCalendarState.claimedToday ? 1 : 0,
-    },
-    { id: 'daily-report', label: 'Daily Report', icon: ScrollText },
-    { id: 'achievements', label: 'Achievements', icon: Award, badge: claimableAchievementsCount },
-    { id: 'hall-of-legends', label: 'Hall of Legends', icon: Crown, badge: readyLegendsCount },
   ];
 
   return (
@@ -108,11 +89,11 @@ export const ProgressionHubView: React.FC = () => {
               PROGRESSION
             </h1>
             <p className="text-xs sm:text-sm text-[#A9B8CC] max-w-2xl mt-1">
-              Forge personalized AI daily quests, review your Daily Progression Report, earn heroic achievements, and compete for 52 one-of-one Worldwide Titles in the Hall of Legends.
+              Plan daily quests, track calendar consistency, master six real-life attributes, and advance your seasonal Battle Pass.
             </p>
           </div>
 
-          {/* Unified Hub Tabs */}
+          {/* 3-Tab Progression Switcher */}
           <div
             role="tablist"
             aria-label="Progression sections"
@@ -153,10 +134,6 @@ export const ProgressionHubView: React.FC = () => {
         {progressionSubTab === 'quests' && <QuestsView embedded />}
         {progressionSubTab === 'skill-tree' && <SkillTreeView />}
         {progressionSubTab === 'seasons' && <SeasonalProgressionView />}
-        {progressionSubTab === 'daily-calendar' && <DailyCalendarView />}
-        {progressionSubTab === 'daily-report' && <DailyQuestReportView />}
-        {progressionSubTab === 'achievements' && <AchievementsView embedded />}
-        {progressionSubTab === 'hall-of-legends' && <HallOfLegendsView />}
       </div>
     </div>
   );

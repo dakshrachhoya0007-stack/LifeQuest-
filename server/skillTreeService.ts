@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import type { Express, Request, Response } from 'express';
+import { resolveVerifiedCaller } from './authGuard.ts';
 import {
   ACTIVITY_TO_ATTRIBUTE_MAP,
   SKILL_ATTRIBUTE_IDS,
@@ -196,31 +197,23 @@ const buildPlayerStateResponse = (
   };
 };
 
-const resolveAuthenticatedUserId = (
+const resolveAuthenticatedUserId = async (
   req: Request
-): { userId: string | null; error?: string; status?: number } => {
-  const headerUid = String(req.headers['x-lifequest-user-id'] || '').trim();
+): Promise<{ userId: string | null; error?: string; status?: number }> => {
   const bodyUid =
     req.body && typeof req.body === 'object' ? String(req.body.userId || '').trim() : '';
   const queryUid = typeof req.query.userId === 'string' ? req.query.userId.trim() : '';
-
-  if (!headerUid) {
+  const auth = await resolveVerifiedCaller(req, {
+    expectedOwnerId: bodyUid || queryUid || undefined,
+  });
+  if (!auth.ok || !auth.userId) {
     return {
       userId: null,
-      status: 401,
-      error: 'Authentication required: missing verified player identity.',
+      status: auth.status || 401,
+      error: auth.error || 'Authentication required: missing verified player identity.',
     };
   }
-
-  if ((bodyUid && bodyUid !== headerUid) || (queryUid && queryUid !== headerUid)) {
-    return {
-      userId: null,
-      status: 403,
-      error: 'Forbidden: you can only access and modify your own skill progression.',
-    };
-  }
-
-  return { userId: headerUid };
+  return { userId: auth.userId };
 };
 
 export function registerSkillTreeRoutes(app: Express, rootDir: string) {
@@ -415,7 +408,7 @@ export function registerSkillTreeRoutes(app: Express, rootDir: string) {
   };
 
   app.get('/api/skill-tree/state', async (req: Request, res: Response) => {
-    const auth = resolveAuthenticatedUserId(req);
+    const auth = await resolveAuthenticatedUserId(req);
     if (!auth.userId) {
       res.status(auth.status || 401).json({ success: false, error: auth.error });
       return;
@@ -433,7 +426,7 @@ export function registerSkillTreeRoutes(app: Express, rootDir: string) {
   });
 
   app.post('/api/skill-tree/award-activity', async (req: Request, res: Response) => {
-    const auth = resolveAuthenticatedUserId(req);
+    const auth = await resolveAuthenticatedUserId(req);
     if (!auth.userId) {
       res.status(auth.status || 401).json({ success: false, error: auth.error });
       return;
@@ -526,7 +519,7 @@ export function registerSkillTreeRoutes(app: Express, rootDir: string) {
 
   // Idempotent historical reconciliation endpoint from existing workouts & habit logs
   app.post('/api/skill-tree/reconcile', async (req: Request, res: Response) => {
-    const auth = resolveAuthenticatedUserId(req);
+    const auth = await resolveAuthenticatedUserId(req);
     if (!auth.userId) {
       res.status(auth.status || 401).json({ success: false, error: auth.error });
       return;
@@ -623,7 +616,7 @@ export function registerSkillTreeRoutes(app: Express, rootDir: string) {
   });
 
   app.post('/api/skill-tree/unlock-node', async (req: Request, res: Response) => {
-    const auth = resolveAuthenticatedUserId(req);
+    const auth = await resolveAuthenticatedUserId(req);
     if (!auth.userId) {
       res.status(auth.status || 401).json({ success: false, error: auth.error });
       return;
@@ -680,7 +673,7 @@ export function registerSkillTreeRoutes(app: Express, rootDir: string) {
   });
 
   app.post('/api/skill-tree/claim-milestone', async (req: Request, res: Response) => {
-    const auth = resolveAuthenticatedUserId(req);
+    const auth = await resolveAuthenticatedUserId(req);
     if (!auth.userId) {
       res.status(auth.status || 401).json({ success: false, error: auth.error });
       return;

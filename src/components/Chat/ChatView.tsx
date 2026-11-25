@@ -213,10 +213,7 @@ export const ChatView: React.FC<{ embedded?: boolean }> = ({ embedded = false })
             </div>
             <button
               type="button"
-              onClick={() => {
-                setProgressionSubTab('hall-of-legends');
-                setActiveTab('progression');
-              }}
+              onClick={() => setActiveTab('hall-of-legends')}
               className="text-[10px] font-['Cinzel'] font-bold uppercase tracking-wider text-[#00D9FF] hover:text-white whitespace-nowrap shrink-0 transition-colors"
             >
               Hall of Legends →

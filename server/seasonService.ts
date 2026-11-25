@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import type { Express, Request, Response } from 'express';
-import { resolveVerifiedCaller } from './authGuard.ts';
+import { resolveVerifiedCaller, verifyAdminHeader } from './authGuard.ts';
 import { buildInitialSeasonsCatalog } from '../src/data/polish2Data.ts';
 import type { VerifiedActivityMetadata } from '../src/data/skillTreeData.ts';
 import type {
@@ -741,9 +741,7 @@ export function createSeasonService(
     });
 
     app.post('/api/admin/seasons/transition', async (req: Request, res: Response) => {
-      const expectedKey = process.env.LIFEQUEST_ADMIN_KEY || 'lifequest-local-admin';
-      const providedKey = String(req.headers['x-lifequest-admin-key'] || '').trim();
-      if (!providedKey || providedKey !== expectedKey) {
+      if (!verifyAdminHeader(req, ['LIFEQUEST_ADMIN_KEY', 'LIFEQUEST_ADMIN_SECRET'])) {
         res.status(403).json({
           success: false,
           error: 'Forbidden: admin authorization key required for season lifecycle transitions.',

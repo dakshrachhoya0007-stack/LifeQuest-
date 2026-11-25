@@ -895,11 +895,12 @@ export const DAILY_CALENDAR_REWARDS: Array<{
     };
   }
   if (day === 7 || day === 14 || day === 21 || day === 28) {
+    const fragAmt = 40 + day;
     return {
       dayNumber: day,
       rewardType: day === 14 ? 'card_pack' : 'fragments',
-      rewardLabel: day === 14 ? 'Seasonal Canopy Card Pack' : `${60 + day * 2} Cosmetic Fragments`,
-      amount: day === 14 ? 1 : 60 + day * 2,
+      rewardLabel: day === 14 ? 'Seasonal Canopy Card Pack' : `${fragAmt} Cosmetic Fragments`,
+      amount: day === 14 ? 1 : fragAmt,
       isWeeklyMilestone: true,
     };
   }
@@ -913,28 +914,31 @@ export const DAILY_CALENDAR_REWARDS: Array<{
     };
   }
   if (day % 3 === 0) {
+    const fragAmt = 15 + (day % 4) * 5;
     return {
       dayNumber: day,
       rewardType: 'fragments',
-      rewardLabel: `${20 + (day % 4) * 5} Cosmetic Fragments`,
-      amount: 20 + (day % 4) * 5,
+      rewardLabel: `${fragAmt} Cosmetic Fragments`,
+      amount: fragAmt,
       isWeeklyMilestone: false,
     };
   }
   if (day % 2 === 0) {
+    const goldAmt = 20 + day;
     return {
       dayNumber: day,
       rewardType: 'gold',
-      rewardLabel: `${35 + day * 2} Gold`,
-      amount: 35 + day * 2,
+      rewardLabel: `${goldAmt} Gold`,
+      amount: goldAmt,
       isWeeklyMilestone: false,
     };
   }
+  const bonusAmt = 15 + Math.round(day * 0.5);
   return {
     dayNumber: day,
     rewardType: 'quest_bonus',
-    rewardLabel: `+${25 + day} Bonus Gold & Momentum`,
-    amount: 25 + day,
+    rewardLabel: `+${bonusAmt} Bonus Gold & Momentum`,
+    amount: bonusAmt,
     isWeeklyMilestone: false,
   };
 });
@@ -951,33 +955,33 @@ export const DAILY_CALENDAR_WEEKLY_MILESTONES: Array<{
     id: 'dc_week_1',
     dayTarget: 7,
     title: '7-Day Horizon Milestone',
-    rewardLabel: '+80 Gold & +45 Cosmetic Fragments',
-    rewardGold: 80,
-    rewardFragments: 45,
+    rewardLabel: '+60 Gold & +35 Cosmetic Fragments',
+    rewardGold: 60,
+    rewardFragments: 35,
   },
   {
     id: 'dc_week_2',
     dayTarget: 14,
     title: '14-Day Canopy Milestone',
-    rewardLabel: '+120 Gold & +70 Cosmetic Fragments',
-    rewardGold: 120,
-    rewardFragments: 70,
+    rewardLabel: '+90 Gold & +55 Cosmetic Fragments',
+    rewardGold: 90,
+    rewardFragments: 55,
   },
   {
     id: 'dc_week_3',
     dayTarget: 21,
     title: '21-Day Citadel Milestone',
-    rewardLabel: '+160 Gold & +95 Cosmetic Fragments',
-    rewardGold: 160,
-    rewardFragments: 95,
+    rewardLabel: '+120 Gold & +75 Cosmetic Fragments',
+    rewardGold: 120,
+    rewardFragments: 75,
   },
   {
     id: 'dc_week_4',
     dayTarget: 28,
     title: '28-Day Sovereign Milestone',
-    rewardLabel: '+250 Gold & +150 Cosmetic Fragments',
-    rewardGold: 250,
-    rewardFragments: 150,
+    rewardLabel: '+180 Gold & +110 Cosmetic Fragments',
+    rewardGold: 180,
+    rewardFragments: 110,
   },
 ];
 

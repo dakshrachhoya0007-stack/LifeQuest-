@@ -78,7 +78,7 @@ export const StorylineView: React.FC = () => {
   return (
     <div className="space-y-8 animate-in fade-in pb-12">
       {/* 1. Opening Lore Monologue Banner */}
-      <div className="rounded-2xl bg-gradient-to-br from-[#061225] via-[#0A1930] to-[#102440] border border-[#1677FF]/35 p-6 sm:p-8 shadow-[0_12px_32px_rgba(2,8,20,0.6)] space-y-5">
+      <div className="rounded-2xl bg-gradient-to-br from-[#0A1930] via-[#102440] to-[#0A1930] border border-[#1677FF]/30 p-6 sm:p-8 shadow-[0_12px_32px_rgba(2,8,20,0.6)] space-y-5">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <span className="font-['Cinzel'] font-bold text-[11px] uppercase tracking-widest text-[#00D9FF] block mb-1">
@@ -90,7 +90,7 @@ export const StorylineView: React.FC = () => {
           </div>
 
           {heroLocked ? (
-            <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0A1930] border border-[#00D9FF]/45 text-xs font-bold font-['Cinzel'] text-[#00D9FF] shrink-0">
+            <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#061225] border border-[#00D9FF]/40 text-xs font-bold font-['Cinzel'] text-[#00D9FF] shrink-0">
               <Lock className="w-3.5 h-3.5" />
               Hero Oath: {heroDef.name}
             </span>
@@ -98,7 +98,7 @@ export const StorylineView: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowHeroSelectModal(true)}
-              className="px-4 py-2 rounded-xl bg-[#0A1930] hover:bg-[#16325C] border border-[#1677FF]/45 hover:border-[#00D9FF]/50 text-xs font-bold font-['Cinzel'] text-[#00D9FF] shrink-0 transition-all"
+              className="px-4 py-2 rounded-xl bg-[#061225] hover:bg-[#16325C] border border-[#1677FF]/45 hover:border-[#00D9FF]/60 text-xs font-bold font-['Cinzel'] text-[#00D9FF] shrink-0 transition-all"
             >
               Hero Path: {heroDef.name}
             </button>
@@ -106,12 +106,12 @@ export const StorylineView: React.FC = () => {
         </div>
 
         {/* Canonical Great Fall Opening Quote */}
-        <blockquote className="p-4 sm:p-5 rounded-xl bg-[#061225] border border-[#1677FF]/30 text-xs sm:text-sm text-[#A9B8CC] leading-relaxed whitespace-pre-line font-serif italic">
+        <blockquote className="p-4 sm:p-5 rounded-xl bg-[#061225] border border-[#1677FF]/25 text-xs sm:text-sm text-[#A9B8CC] leading-relaxed whitespace-pre-line font-serif italic">
           {FALLEN_KNIGHT_OPENING_MONOLOGUE}
         </blockquote>
 
         {/* Selected Hero's Personal Origin Thread */}
-        <div className="p-4 rounded-xl bg-[#0A1930] border border-[#1677FF]/35 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="p-4 rounded-xl bg-[#0A1930] border border-[#1677FF]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="space-y-1">
             <span className="text-[10px] uppercase tracking-widest text-[#00D9FF] font-bold block">
               Your Hero Origin · {heroDef.name} ({heroDef.title})
@@ -120,7 +120,7 @@ export const StorylineView: React.FC = () => {
               {heroDef.greatFallOrigin}
             </p>
           </div>
-          <span className="font-mono text-xs text-[#00D9FF] shrink-0">
+          <span className="font-mono text-xs text-[#00D9FF] shrink-0 tabular-nums">
             {campaignProgress.claimedChapterIds.length} / {CAMPAIGN_CHAPTERS.length} Chapters Complete
           </span>
         </div>
@@ -141,9 +141,9 @@ export const StorylineView: React.FC = () => {
       {!reclaimHonorQuest.claimed && (
         <section
           aria-label="Reclaim Your Honor Introductory Quest"
-          className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/40 p-5 sm:p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)] space-y-4"
+          className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/35 p-5 sm:p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)] space-y-4"
         >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1677FF]/25 pb-3.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1677FF]/20 pb-3.5">
             <div>
               <span className="text-[10px] font-['Cinzel'] font-bold uppercase tracking-widest text-[#00D9FF] block">
                 Starter Story Trial · Awakening Chapter
@@ -205,11 +205,11 @@ export const StorylineView: React.FC = () => {
               );
             })}
 
-            <div className="p-3 rounded-xl bg-[#0A1930] border border-[#1677FF]/35 flex flex-col justify-between">
+            <div className="p-3 rounded-xl bg-[#0A1930] border border-[#1677FF]/30 flex flex-col justify-between">
               <span className="text-[10px] uppercase tracking-wider text-[#00D9FF] font-bold flex items-center gap-1">
                 <Award className="w-3 h-3" /> Completion Reward
               </span>
-              <div className="text-xs font-mono text-white mt-1 space-y-0.5">
+              <div className="text-xs font-mono text-white mt-1 space-y-0.5 tabular-nums">
                 <div>+120 Player XP · +100 Gold</div>
                 <div className="text-[#00D9FF]">+2 DIS · +1 RES</div>
               </div>
@@ -225,7 +225,7 @@ export const StorylineView: React.FC = () => {
             <BookOpen className="w-5 h-5 text-[#00D9FF]" />
             CAMPAIGN CHAPTERS (RISE OF AETHERIA)
           </h2>
-          <span className="text-xs font-mono text-[#00D9FF]">
+          <span className="text-xs font-mono text-[#00D9FF] tabular-nums">
             Citadel Restoration: {Math.min(100, campaignProgress.claimedChapterIds.length * 20)}%
           </span>
         </div>
@@ -260,17 +260,17 @@ export const StorylineView: React.FC = () => {
                   </div>
 
                   {isClaimed ? (
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-700/50 px-3 py-1 rounded-lg self-start">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-300 self-start">
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       Chapter Completed
                     </span>
                   ) : isUnlocked ? (
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#00D9FF] bg-[#0A1930] border border-[#00D9FF]/45 px-3 py-1 rounded-lg self-start">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#00D9FF] self-start">
                       <Compass className="w-3.5 h-3.5" />
                       Active Chapter
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A9B8CC] bg-[#061225] border border-[#1677FF]/20 px-3 py-1 rounded-lg self-start">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#A9B8CC] self-start">
                       <Lock className="w-3.5 h-3.5" />
                       Complete Chapter {ch.number - 1} First
                     </span>
@@ -283,7 +283,7 @@ export const StorylineView: React.FC = () => {
                 </p>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-4">
-                  <div className="p-3.5 rounded-xl bg-[#0A1930] border border-[#1677FF]/30 space-y-1">
+                  <div className="p-3.5 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 space-y-1">
                     <span className="text-[10px] uppercase tracking-wider text-[#00D9FF] font-bold flex items-center gap-1.5">
                       <MessageSquareQuote className="w-3.5 h-3.5" />
                       {ch.npcSpeaker} · {ch.npcRole}
@@ -321,7 +321,7 @@ export const StorylineView: React.FC = () => {
                       </p>
                     )}
 
-                    <div className="text-[11px] font-mono text-[#00D9FF] pt-1">
+                    <div className="text-[11px] font-mono text-[#00D9FF] pt-1 tabular-nums">
                       Reward: +{ch.rewards.playerXp} Player XP · <span className="text-amber-300">+{ch.rewards.gold} Gold</span>
                     </div>
                   </div>
@@ -400,15 +400,15 @@ export const StorylineView: React.FC = () => {
                           Theme: {kingdom.theme}
                         </span>
                         {isCleared ? (
-                          <span className="text-xs font-bold text-emerald-400 flex items-center gap-1 bg-emerald-950/60 border border-emerald-700/60 px-2 py-0.5 rounded">
+                          <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
                             <CheckCircle2 className="w-3.5 h-3.5" /> CLEARED
                           </span>
                         ) : isUnlocked ? (
-                          <span className="text-xs font-bold text-amber-400 bg-amber-950/60 border border-amber-700/60 px-2 py-0.5 rounded">
+                          <span className="text-xs font-bold text-[#00D9FF]">
                             UNLOCKED
                           </span>
                         ) : (
-                          <span className="text-xs font-bold text-[#A9B8CC] flex items-center gap-1 bg-[#061225] px-2 py-0.5 rounded">
+                          <span className="text-xs font-bold text-[#A9B8CC] flex items-center gap-1">
                             <Lock className="w-3.5 h-3.5" /> LOCKED
                           </span>
                         )}
@@ -422,7 +422,7 @@ export const StorylineView: React.FC = () => {
                       </p>
 
                       <div className="p-3 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 text-xs italic text-[#A9B8CC] leading-relaxed">
-                        "{kingdom.loreIntro}"
+                        &ldquo;{kingdom.loreIntro}&rdquo;
                       </div>
                     </div>
 

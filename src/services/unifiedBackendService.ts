@@ -54,6 +54,27 @@ export const resolveSocialRpgAvatar = (
   return avatarUrl;
 };
 
+let cachedSupabaseAccessToken: string | null = null;
+
+export const getCachedLifequestAccessToken = (): string | null => cachedSupabaseAccessToken;
+
+export const fetchWithTimeout = async (
+  input: RequestInfo | URL,
+  init: RequestInit = {},
+  timeoutMs: number = 15000
+): Promise<Response> => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  if (init.signal) {
+    init.signal.addEventListener('abort', () => controller.abort(), { once: true });
+  }
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
 export const getLifequestAuthHeaders = async (
   userId?: string,
   withContentType: boolean = false
@@ -71,6 +92,7 @@ export const getLifequestAuthHeaders = async (
       const { data } = await supabase.auth.getSession();
       const token = data?.session?.access_token;
       if (token) {
+        cachedSupabaseAccessToken = token;
         headers['Authorization'] = `Bearer ${token}`;
       }
     }
@@ -1117,11 +1139,16 @@ export const generateDailyQuestsAiServer = async (payload: {
   }>
 > => {
   try {
-    const res = await fetch('/api/ai/generate-daily-quests', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+    const headers = await getLifequestAuthHeaders(undefined, true);
+    const res = await fetchWithTimeout(
+      '/api/ai/generate-daily-quests',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload),
+      },
+      30000
+    );
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       return { ok: false, error: data?.error || 'Could not generate today’s quests.' };
@@ -1135,7 +1162,13 @@ export const generateDailyQuestsAiServer = async (payload: {
       },
     };
   } catch (err: any) {
-    return { ok: false, error: err?.message || 'Unable to reach AI Quest Architect.' };
+    const isTimeout = err?.name === 'AbortError';
+    return {
+      ok: false,
+      error: isTimeout
+        ? 'Daily quest generator timed out. Please try again.'
+        : err?.message || 'Unable to reach daily quest generator.',
+    };
   }
 };
 
@@ -1145,18 +1178,29 @@ export const generateDailyQuestReportAiServer = async (payload: {
   metrics: Record<string, any>;
 }): Promise<RpcResult<DailyQuestReportData>> => {
   try {
-    const res = await fetch('/api/ai/daily-quest-report', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+    const headers = await getLifequestAuthHeaders(undefined, true);
+    const res = await fetchWithTimeout(
+      '/api/ai/daily-quest-report',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload),
+      },
+      30000
+    );
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       return { ok: false, error: data?.error || 'Could not generate Daily Quest Report.' };
     }
     return { ok: true, data: data as DailyQuestReportData };
   } catch (err: any) {
-    return { ok: false, error: err?.message || 'Unable to reach Daily Chronicle chronicler.' };
+    const isTimeout = err?.name === 'AbortError';
+    return {
+      ok: false,
+      error: isTimeout
+        ? 'Daily Chronicle generation timed out. Please try again.'
+        : err?.message || 'Unable to reach Daily Chronicle chronicler.',
+    };
   }
 };
 
@@ -1202,6 +1246,26 @@ export const saveGeneratedDailyQuestsServer = async (
       quests: Array.isArray(res.data?.quests) ? res.data.quests.map(mapDynamicQuestRow) : quests,
     },
   };
+};
+
+export const addMentorDailyQuestServer = async (
+  periodKey: string,
+  quest: DynamicDailyQuest
+): Promise<RpcResult<{ questId?: string }>> => {
+  const res = await callRpc<any>('rpc_add_mentor_daily_quest', {
+    p_period_key: periodKey,
+    p_quest: quest,
+  });
+  if (!res.ok && res.schemaMissing) {
+    const fallback = await saveGeneratedDailyQuestsServer(periodKey, [quest]);
+    return {
+      ok: fallback.ok,
+      schemaMissing: fallback.schemaMissing,
+      error: fallback.error,
+      data: fallback.ok ? { questId: quest.id } : undefined,
+    };
+  }
+  return res;
 };
 
 export const updateDynamicQuestProgressServer = (
@@ -1260,7 +1324,7 @@ export interface LegendsFallbackState {
 
 export const fetchLegendsLedgerFallback = async (): Promise<LegendsFallbackState | null> => {
   try {
-    const res = await fetch('/api/legends/state');
+    const res = await fetchWithTimeout('/api/legends/state', {}, 12000);
     if (!res.ok) return null;
     const data = await res.json();
     return {
@@ -1476,13 +1540,11 @@ export const fetchSkillTreeStateServer = async (
   }
 
   try {
-    const resp = await fetch(
+    const headers = await getLifequestAuthHeaders(userId, false);
+    const resp = await fetchWithTimeout(
       `/api/skill-tree/state?timezone=${encodeURIComponent(timezone)}`,
-      {
-        headers: {
-          'x-lifequest-user-id': userId,
-        },
-      }
+      { headers },
+      15000
     );
     const json = await resp.json();
     if (!resp.ok || json?.success === false) {
@@ -1538,21 +1600,23 @@ export const recordVerifiedSkillActivityServer = async (params: {
   }
 
   try {
-    const resp = await fetch('/api/skill-tree/award-activity', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-lifequest-user-id': params.userId,
+    const headers = await getLifequestAuthHeaders(params.userId, true);
+    const resp = await fetchWithTimeout(
+      '/api/skill-tree/award-activity',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          activityType: params.activityType,
+          idempotencyKey: params.idempotencyKey,
+          sourceType: params.sourceType,
+          sourceId: params.sourceId,
+          metadata: params.metadata || {},
+          timezone: params.timezone || getUserTimezone(),
+        }),
       },
-      body: JSON.stringify({
-        activityType: params.activityType,
-        idempotencyKey: params.idempotencyKey,
-        sourceType: params.sourceType,
-        sourceId: params.sourceId,
-        metadata: params.metadata || {},
-        timezone: params.timezone || getUserTimezone(),
-      }),
-    });
+      15000
+    );
     const json = await resp.json();
     if (!resp.ok || json?.success === false) {
       return { success: false, error: json?.error || 'Could not record verified activity.' };
@@ -1608,17 +1672,19 @@ export const unlockSkillNodeServer = async (params: {
   }
 
   try {
-    const resp = await fetch('/api/skill-tree/unlock-node', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-lifequest-user-id': params.userId,
+    const headers = await getLifequestAuthHeaders(params.userId, true);
+    const resp = await fetchWithTimeout(
+      '/api/skill-tree/unlock-node',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          nodeId: node.id,
+          timezone: params.timezone || getUserTimezone(),
+        }),
       },
-      body: JSON.stringify({
-        nodeId: node.id,
-        timezone: params.timezone || getUserTimezone(),
-      }),
-    });
+      15000
+    );
     const json = await resp.json();
     if (!resp.ok || json?.success === false) {
       return { success: false, error: json?.error || 'Skill node requirements not met.' };
@@ -1666,17 +1732,19 @@ export const claimSkillMilestoneServer = async (params: {
   }
 
   try {
-    const resp = await fetch('/api/skill-tree/claim-milestone', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-lifequest-user-id': params.userId,
+    const headers = await getLifequestAuthHeaders(params.userId, true);
+    const resp = await fetchWithTimeout(
+      '/api/skill-tree/claim-milestone',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          milestoneId: milestone.id,
+          timezone: params.timezone || getUserTimezone(),
+        }),
       },
-      body: JSON.stringify({
-        milestoneId: milestone.id,
-        timezone: params.timezone || getUserTimezone(),
-      }),
-    });
+      15000
+    );
     const json = await resp.json();
     if (!resp.ok || json?.success === false) {
       return { success: false, error: json?.error || 'Milestone requirements not met.' };
@@ -1752,17 +1820,21 @@ export const sendPresenceHeartbeatServer = async (params: {
   }
 };
 
-export const sendPresenceOfflineBeacon = (userId: string) => {
+export const sendPresenceOfflineBeacon = (userId: string, accessToken?: string | null) => {
   if (!userId || typeof navigator === 'undefined') return;
   try {
-    const payload = JSON.stringify({ userId });
+    const token = accessToken || cachedSupabaseAccessToken || undefined;
+    const payload = JSON.stringify(token ? { userId, token } : { userId });
     if (typeof navigator.sendBeacon === 'function') {
       const blob = new Blob([payload], { type: 'text/plain;charset=UTF-8' });
       navigator.sendBeacon('/api/presence/offline', blob);
     } else {
       fetch('/api/presence/offline', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: payload,
         keepalive: true,
       }).catch(() => {});

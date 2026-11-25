@@ -4,6 +4,12 @@ import type { Server as HttpServer } from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
 import fs from 'fs';
 import path from 'path';
+import {
+  isSupabaseAuthConfigured,
+  resolveOptionalViewerId,
+  resolveVerifiedCaller,
+  verifySupabaseBearerToken,
+} from './authGuard.ts';
 
 export type PresenceStatus = 'online' | 'offline' | 'away' | 'dnd';
 export type FieldVisibilityLevel = 'everyone' | 'friends' | 'nobody';
@@ -437,7 +443,7 @@ export function attachPresenceAndPrivacySystem(
       }
     });
 
-    ws.on('message', raw => {
+    ws.on('message', async raw => {
       let msg: any;
       try {
         msg = JSON.parse(String(raw));
@@ -448,7 +454,34 @@ export function attachPresenceAndPrivacySystem(
       if (!msg || typeof msg !== 'object') return;
 
       if (msg.type === 'auth' && typeof msg.userId === 'string' && msg.userId.trim()) {
-        const userId = msg.userId.trim();
+        const requestedUserId = msg.userId.trim();
+        let userId = requestedUserId;
+        const rawToken =
+          typeof msg.token === 'string'
+            ? msg.token.trim()
+            : typeof msg.accessToken === 'string'
+            ? msg.accessToken.trim()
+            : '';
+
+        if (isSupabaseAuthConfigured()) {
+          if (!rawToken) {
+            ws.send(JSON.stringify({ type: 'auth:error', error: 'Authentication token required.' }));
+            return;
+          }
+          const verifiedUid = await verifySupabaseBearerToken(rawToken);
+          if (!verifiedUid || verifiedUid !== requestedUserId) {
+            ws.send(JSON.stringify({ type: 'auth:error', error: 'Invalid or mismatched authentication token.' }));
+            return;
+          }
+          userId = verifiedUid;
+        } else if (rawToken) {
+          const verifiedUid = await verifySupabaseBearerToken(rawToken);
+          if (verifiedUid && verifiedUid !== requestedUserId) {
+            ws.send(JSON.stringify({ type: 'auth:error', error: 'Mismatched authentication token.' }));
+            return;
+          }
+        }
+
         const sessionId = String(msg.sessionId || `sess-${Math.random().toString(36).slice(2, 8)}`);
 
         if (boundMeta && boundMeta.userId !== userId) {
@@ -824,13 +857,16 @@ export function attachPresenceAndPrivacySystem(
   // ---------------------------------------------------------------------------
 
   // Update player presence / heartbeat via HTTP
-  app.post('/api/presence/state', (req: Request, res: Response) => {
+  app.post('/api/presence/state', async (req: Request, res: Response) => {
     const body = req.body || {};
-    const userId = String(body.userId || req.header('x-viewer-id') || '').trim();
-    if (!userId) {
-      res.status(400).json({ success: false, error: 'Missing userId.' });
+    const auth = await resolveVerifiedCaller(req, {
+      expectedOwnerId: body.userId ? String(body.userId) : undefined,
+    });
+    if (!auth.ok || !auth.userId) {
+      res.status(auth.status || 401).json({ success: false, error: auth.error || 'Authentication required.' });
       return;
     }
+    const userId = auth.userId;
 
     const updated = updateServerPresence(userId, {
       manualStatus: normalizePresenceInput(body.manualStatus),
@@ -849,17 +885,32 @@ export function attachPresenceAndPrivacySystem(
   app.post(
     '/api/presence/offline',
     express.text({ type: ['text/plain', 'application/json'] }),
-    (req: Request, res: Response) => {
+    async (req: Request, res: Response) => {
       let userId = '';
+      let bodyToken = '';
       try {
         if (typeof req.body === 'string') {
           const parsed = JSON.parse(req.body);
-          userId = String(parsed?.userId || '');
+          userId = String(parsed?.userId || '').trim();
+          bodyToken = String(parsed?.token || parsed?.accessToken || '').trim();
         } else if (req.body && typeof req.body === 'object') {
-          userId = String(req.body.userId || '');
+          userId = String(req.body.userId || '').trim();
+          bodyToken = String(req.body.token || req.body.accessToken || '').trim();
         }
       } catch {
         userId = '';
+      }
+
+      if (isSupabaseAuthConfigured()) {
+        const authHeader = String(req.headers['authorization'] || '').trim();
+        const headerBearer = authHeader.toLowerCase().startsWith('bearer ') ? authHeader.slice(7).trim() : '';
+        const token = headerBearer || bodyToken;
+        const verifiedUid = token ? await verifySupabaseBearerToken(token) : null;
+        if (!verifiedUid || (userId && verifiedUid !== userId)) {
+          res.status(204).end();
+          return;
+        }
+        userId = verifiedUid;
       }
 
       if (userId) {
@@ -886,9 +937,10 @@ export function attachPresenceAndPrivacySystem(
   );
 
   // Batch presence query with server-side privacy filtering
-  app.post('/api/presence/batch', (req: Request, res: Response) => {
+  app.post('/api/presence/batch', async (req: Request, res: Response) => {
     const body = req.body || {};
-    const viewerId = String(body.viewerId || req.header('x-viewer-id') || '').trim() || null;
+    const auth = await resolveVerifiedCaller(req);
+    const viewerId = auth.ok && auth.userId ? auth.userId : await resolveOptionalViewerId(req);
     const userIds: string[] = Array.isArray(body.userIds)
       ? body.userIds.map((id: unknown) => String(id || '').trim()).filter(Boolean).slice(0, 150)
       : [];
@@ -903,13 +955,16 @@ export function attachPresenceAndPrivacySystem(
   });
 
   // Sync full profile snapshot & granular privacy settings to authoritative server store
-  app.post('/api/privacy/sync-profile', (req: Request, res: Response) => {
+  app.post('/api/privacy/sync-profile', async (req: Request, res: Response) => {
     const body = req.body || {};
-    const userId = String(body.id || body.userId || '').trim();
-    if (!userId) {
-      res.status(400).json({ success: false, error: 'Missing player userId.' });
+    const auth = await resolveVerifiedCaller(req, {
+      expectedOwnerId: (body.id || body.userId) ? String(body.id || body.userId) : undefined,
+    });
+    if (!auth.ok || !auth.userId) {
+      res.status(auth.status || 401).json({ success: false, error: auth.error || 'Authentication required.' });
       return;
     }
+    const userId = auth.userId;
 
     const existing = persisted.profiles[userId];
     const normalizedPrivacy = normalizePrivacySettings(
@@ -999,10 +1054,9 @@ export function attachPresenceAndPrivacySystem(
   });
 
   // Strictly filtered public player profile endpoint (also handles owner-only Preview As Others)
-  app.get('/api/profile/public/:targetId', (req: Request, res: Response) => {
+  app.get('/api/profile/public/:targetId', async (req: Request, res: Response) => {
     const targetId = String(req.params.targetId || '').trim();
-    const viewerId =
-      String(req.query.viewerId || req.header('x-viewer-id') || '').trim() || null;
+    const viewerId = await resolveOptionalViewerId(req);
     const rawPreview = String(req.query.previewAs || '').trim();
     const previewAs =
       rawPreview === 'public' || rawPreview === 'friend' || rawPreview === 'restricted'
@@ -1014,14 +1068,24 @@ export function attachPresenceAndPrivacySystem(
       return;
     }
 
+    if (previewAs && viewerId !== targetId) {
+      res.status(403).json({
+        success: false,
+        accessible: false,
+        error: 'Forbidden: only the profile owner can preview alternate visibility modes.',
+      });
+      return;
+    }
+
     const result = buildFilteredPublicProfile(targetId, viewerId, previewAs);
     res.status(result.status).json(result.body);
   });
 
   // Server-side enforcement for directory / search / leaderboard entries
-  app.post('/api/social/filter-directory', (req: Request, res: Response) => {
+  app.post('/api/social/filter-directory', async (req: Request, res: Response) => {
     const body = req.body || {};
-    const viewerId = String(body.viewerId || req.header('x-viewer-id') || '').trim() || null;
+    const auth = await resolveVerifiedCaller(req);
+    const viewerId = auth.ok && auth.userId ? auth.userId : await resolveOptionalViewerId(req);
     const entries: any[] = Array.isArray(body.entries) ? body.entries : [];
 
     const filtered = entries
@@ -1075,10 +1139,11 @@ export function attachPresenceAndPrivacySystem(
   });
 
   // Merge server-enforced profile fields into existing Supabase-fetched profile payload
-  app.post('/api/profile/enforce', (req: Request, res: Response) => {
+  app.post('/api/profile/enforce', async (req: Request, res: Response) => {
     const body = req.body || {};
     const targetId = String(body.targetId || '').trim();
-    const viewerId = String(body.viewerId || req.header('x-viewer-id') || '').trim() || null;
+    const auth = await resolveVerifiedCaller(req);
+    const viewerId = auth.ok && auth.userId ? auth.userId : await resolveOptionalViewerId(req);
     const incoming = body.profile;
 
     if (!targetId || !incoming) {

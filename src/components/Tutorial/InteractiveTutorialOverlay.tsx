@@ -22,6 +22,7 @@ export const InteractiveTutorialOverlay: React.FC = () => {
     activeTab,
     socialSubTab,
     progressionSubTab,
+    questHubSubTab,
     setActiveTab,
     nextTutorialStep,
     prevTutorialStep,
@@ -42,8 +43,9 @@ export const InteractiveTutorialOverlay: React.FC = () => {
     const isOnTarget =
       activeTab === currentStep.targetTab ||
       (activeTab === 'progression' &&
-        (currentStep.targetTab === 'quests' || currentStep.targetTab === 'achievements') &&
-        progressionSubTab === currentStep.targetTab) ||
+        progressionSubTab === 'quests' &&
+        ((currentStep.targetTab === 'quests' && questHubSubTab === 'board') ||
+          (currentStep.targetTab === 'achievements' && questHubSubTab === 'achievements'))) ||
       (activeTab === 'social' &&
         (currentStep.targetTab === 'leaderboard' ||
           currentStep.targetTab === 'friends' ||
@@ -53,7 +55,7 @@ export const InteractiveTutorialOverlay: React.FC = () => {
     if (!isOnTarget) {
       setActiveTab(currentStep.targetTab);
     }
-  }, [tutorialState.isOpen, stepIndex, currentStep, activeTab, progressionSubTab, socialSubTab, setActiveTab]);
+  }, [tutorialState.isOpen, stepIndex, currentStep, activeTab, progressionSubTab, questHubSubTab, socialSubTab, setActiveTab]);
 
   // Measure and scroll target UI element into view with clean spotlight rect
   useEffect(() => {

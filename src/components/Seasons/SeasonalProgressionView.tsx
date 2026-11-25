@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { getRpgAvatarForClass } from '../../assets/images';
-import type { SeasonalStatVisibility } from '../../types/game';
 import {
   Award,
   Calendar,
@@ -33,33 +32,22 @@ const formatCountdown = (endsAtIso: string): string => {
 };
 
 const REWARD_TYPE_LABELS: Record<string, string> = {
-  cosmetic_crest: 'Cosmetic Crest',
-  cosmetic_frame: 'Profile Frame',
-  cosmetic_banner: 'Profile Banner',
-  cosmetic_outfit: 'Hero Outfit',
-  cosmetic_aura: 'Portrait Aura',
-  title: 'Seasonal Title',
-  badge: 'Rare Badge Boost',
-  achievement: 'Commendation',
-  relic: 'Collector Relic',
+  cosmetic_crest: 'Cosmetic',
+  cosmetic_frame: 'Cosmetic',
+  cosmetic_banner: 'Cosmetic',
+  cosmetic_outfit: 'Cosmetic',
+  cosmetic_aura: 'Cosmetic',
+  title: 'Title',
+  badge: 'Title',
+  achievement: 'Title',
+  relic: 'Collectible',
   collectible_card: 'Collectible Card',
-  card_pack: 'Card Pack',
-  fragments: 'Cosmetic Fragments',
-  gold: 'Gold Coins',
+  card_pack: 'Collectible Card',
+  fragments: 'Fragments',
+  gold: 'Gold',
 };
 
 type TierFilter = 'all' | '1-15' | '16-35' | '36-50' | 'claimable';
-
-const VISIBILITY_LABELS: Array<{ key: keyof SeasonalStatVisibility; label: string }> = [
-  { key: 'workouts', label: 'Verified Workouts' },
-  { key: 'activeDays', label: 'Active Days' },
-  { key: 'personalRecords', label: 'Personal Records' },
-  { key: 'xpAndLevels', label: 'Season XP & Tier' },
-  { key: 'questsAndAchievements', label: 'Quests & Achievements' },
-  { key: 'rivals', label: 'Rivals Record' },
-  { key: 'guildAndCommunity', label: 'Guild & Community' },
-  { key: 'rarestMilestone', label: 'Rarest Milestone' },
-];
 
 export const SeasonalProgressionView: React.FC = () => {
   const {
@@ -70,10 +58,8 @@ export const SeasonalProgressionView: React.FC = () => {
     claimSeasonChallenge,
     claimSeasonMilestone,
     unlockSeasonElite,
-    purchaseBattlePassRmDisabled,
     seasonalRecap,
     refreshSeasonalRecap,
-    updateSeasonalRecapVisibility,
     openPublicProfile,
   } = useGame();
 
@@ -126,30 +112,6 @@ export const SeasonalProgressionView: React.FC = () => {
       showFeedback('error', res.error || 'Could not unlock Elite Cosmetic Track.');
     }
     setBusyId(null);
-  };
-
-  const handleRmDisabledAttempt = async () => {
-    setBusyId('rm-disabled');
-    const res = await purchaseBattlePassRmDisabled();
-    showFeedback(
-      'error',
-      res.error || 'Real-money Battle Pass checkout is disabled until payment settlement is configured.'
-    );
-    setBusyId(null);
-  };
-
-  const handleToggleRecapField = async (key: keyof SeasonalStatVisibility) => {
-    if (!seasonalRecap) return;
-    const next: SeasonalStatVisibility = {
-      ...seasonalRecap.visibility,
-      [key]: !seasonalRecap.visibility[key],
-    };
-    const res = await updateSeasonalRecapVisibility(next);
-    if (res.success) {
-      showFeedback('success', 'Seasonal Recap privacy updated.');
-    } else {
-      showFeedback('error', res.error || 'Could not update recap privacy.');
-    }
   };
 
   const handleCopyRecapSummary = async () => {
@@ -320,24 +282,14 @@ export const SeasonalProgressionView: React.FC = () => {
                 Elite Track Unlocked
               </span>
             ) : (
-              <>
-                <button
-                  type="button"
-                  disabled={busyId === 'unlock-elite'}
-                  onClick={() => void handleUnlockElite()}
-                  className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white text-xs font-bold whitespace-nowrap shadow-[0_0_14px_rgba(22,119,255,0.3)]"
-                >
-                  {busyId === 'unlock-elite' ? 'Unlocking...' : 'Unlock Elite Track (Earned)'}
-                </button>
-                <button
-                  type="button"
-                  disabled={busyId === 'rm-disabled'}
-                  onClick={() => void handleRmDisabledAttempt()}
-                  className="px-3 py-1.5 rounded-lg bg-[#0A1930] border border-[#1677FF]/25 text-[11px] text-[#A9B8CC] hover:text-white whitespace-nowrap"
-                >
-                  RM Checkout (Disabled)
-                </button>
-              </>
+              <button
+                type="button"
+                disabled={busyId === 'unlock-elite'}
+                onClick={() => void handleUnlockElite()}
+                className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white text-xs font-bold whitespace-nowrap shadow-[0_0_14px_rgba(22,119,255,0.3)]"
+              >
+                {busyId === 'unlock-elite' ? 'Unlocking...' : 'Unlock Elite Track (Earned)'}
+              </button>
             )}
           </div>
         </div>
@@ -426,10 +378,10 @@ export const SeasonalProgressionView: React.FC = () => {
                   </div>
 
                   {/* Free Track Slot */}
-                  <div className="p-2.5 rounded-lg bg-[#061225] border border-[#1677FF]/25 flex items-center justify-between gap-2">
+                  <div className="p-2.5 rounded-lg bg-[#061225] border border-emerald-500/25 flex items-center justify-between gap-2">
                     <div className="min-w-0">
-                      <span className="text-[10px] font-bold uppercase text-emerald-300 block">
-                        Free · {REWARD_TYPE_LABELS[ms.rewardType] || ms.rewardType}
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-300 block">
+                        Free Track · {REWARD_TYPE_LABELS[ms.rewardType] || 'Reward'}
                       </span>
                       <p className="text-xs font-semibold text-white truncate">{ms.rewardLabel}</p>
                     </div>
@@ -453,11 +405,11 @@ export const SeasonalProgressionView: React.FC = () => {
 
                   {/* Elite Track Slot */}
                   {ms.eliteRewardLabel && (
-                    <div className="p-2.5 rounded-lg bg-[#0A1930] border border-[#00D9FF]/30 flex items-center justify-between gap-2">
+                    <div className="p-2.5 rounded-lg bg-[#0A1930] border border-[#00D9FF]/35 flex items-center justify-between gap-2">
                       <div className="min-w-0">
-                        <span className="text-[10px] font-bold uppercase text-[#00D9FF] flex items-center gap-1">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#00D9FF] flex items-center gap-1">
                           <Sparkles className="w-3 h-3" />
-                          Elite · {REWARD_TYPE_LABELS[ms.eliteRewardType || 'cosmetic_crest'] || ms.eliteRewardType}
+                          Elite Track · {REWARD_TYPE_LABELS[ms.eliteRewardType || 'cosmetic_crest'] || 'Reward'}
                         </span>
                         <p className="text-xs font-semibold text-white truncate">
                           {ms.eliteRewardLabel}
@@ -653,17 +605,13 @@ export const SeasonalProgressionView: React.FC = () => {
             )}
           </div>
 
-          {/* Permanent Season History Archive */}
-          <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 rounded-2xl p-5 sm:p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)] space-y-3">
-            <h3 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-              <History className="w-4 h-4 text-[#00D9FF]" />
-              SEASON HISTORY ARCHIVE
-            </h3>
-            {history.length === 0 ? (
-              <div className="p-4 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 text-xs text-[#A9B8CC] leading-relaxed">
-                Season {season.seasonNumber} is the active inaugural chapter. When a season concludes, your final rank, tier reached, and earned seasonal rewards are permanently preserved here.
-              </div>
-            ) : (
+          {/* Past Season History Archive (shown when past seasons exist) */}
+          {history.length > 0 && (
+            <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 rounded-2xl p-5 sm:p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)] space-y-3">
+              <h3 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
+                <History className="w-4 h-4 text-[#00D9FF]" />
+                SEASON HISTORY ARCHIVE
+              </h3>
               <div className="space-y-2.5">
                 {history.map(arch => (
                   <div
@@ -693,8 +641,8 @@ export const SeasonalProgressionView: React.FC = () => {
                   </div>
                 ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -808,28 +756,6 @@ export const SeasonalProgressionView: React.FC = () => {
             </div>
           )}
 
-          {/* Privacy Checkboxes */}
-          <div className="space-y-2 pt-2 border-t border-[#1677FF]/20">
-            <span className="text-[11px] font-semibold text-[#A9B8CC] block">
-              Customize Visible Recap Categories
-            </span>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {VISIBILITY_LABELS.map(item => (
-                <label
-                  key={item.key}
-                  className="flex items-center gap-2 text-xs text-[#A9B8CC] cursor-pointer"
-                >
-                  <input
-                    type="checkbox"
-                    checked={Boolean(seasonalRecap.visibility[item.key])}
-                    onChange={() => void handleToggleRecapField(item.key)}
-                    className="accent-[#1677FF]"
-                  />
-                  <span>{item.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
         </div>
       )}
 

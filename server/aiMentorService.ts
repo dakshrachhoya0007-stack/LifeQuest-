@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import type { Express, Request, Response } from 'express';
 import { GoogleGenAI, Type } from '@google/genai';
+import { resolveVerifiedCaller } from './authGuard.ts';
 import { validateMentorRecommendedQuest } from '../src/data/ecosystemData.ts';
 import type {
   MentorChatMessage,
@@ -22,6 +23,21 @@ interface AiMentorLedgerFile {
 
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX_REQUESTS = 12;
+const AI_TIMEOUT_MS = 25_000;
+
+async function withAiTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((_, reject) => {
+        timer = setTimeout(() => reject(new Error(`ETIMEDOUT: ${label} timed out after ${AI_TIMEOUT_MS}ms.`)), AI_TIMEOUT_MS);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
 
 const MEDICAL_RED_FLAG_REGEX =
   /\b(chest pain|heart attack|faint|fainting|dizzy|dizziness|shortness of breath|sharp joint pain|fracture|torn|eating disorder|anorexia|bulimia|diagnose|medication|prescription|suicide|self-harm)\b/i;
@@ -162,16 +178,14 @@ export function createAiMentorService(
 
   const registerRoutes = (app: Express) => {
     app.get('/api/mentor/state', async (req: Request, res: Response) => {
-      const userId = String(req.headers['x-lifequest-user-id'] || '').trim();
-      if (!userId) {
-        res.status(401).json({ success: false, error: 'Authentication required.' });
+      const auth = await resolveVerifiedCaller(req, {
+        expectedOwnerId: typeof req.query.userId === 'string' ? req.query.userId : undefined,
+      });
+      if (!auth.ok || !auth.userId) {
+        res.status(auth.status || 401).json({ success: false, error: auth.error || 'Authentication required.' });
         return;
       }
-      const queryUid = typeof req.query.userId === 'string' ? req.query.userId.trim() : '';
-      if (queryUid && queryUid !== userId) {
-        res.status(403).json({ success: false, error: 'Forbidden: mentor conversations are private.' });
-        return;
-      }
+      const userId = auth.userId;
 
       const state = await withLock(() => {
         const ledger = readLedger();
@@ -187,11 +201,12 @@ export function createAiMentorService(
     });
 
     app.post('/api/mentor/chat', async (req: Request, res: Response) => {
-      const userId = String(req.headers['x-lifequest-user-id'] || '').trim();
-      if (!userId) {
-        res.status(401).json({ success: false, error: 'Authentication required.' });
+      const auth = await resolveVerifiedCaller(req);
+      if (!auth.ok || !auth.userId) {
+        res.status(auth.status || 401).json({ success: false, error: auth.error || 'Authentication required.' });
         return;
       }
+      const userId = auth.userId;
 
       const body = req.body && typeof req.body === 'object' ? req.body : {};
       const message = String(body.message || '').trim();
@@ -200,20 +215,20 @@ export function createAiMentorService(
         return;
       }
 
-      const rate = await checkAndRecordRateLimit(userId);
-      if (!rate.allowed) {
-        res.status(429).json({
-          success: false,
-          error: `Mentor rate limit reached. Please wait ${rate.retryAfterSec}s before sending another message.`,
-        });
-        return;
-      }
-
       const hasMedicalFlag = MEDICAL_RED_FLAG_REGEX.test(message);
       const safeContext = sanitizeMentorPlayerContext(body.playerContext);
 
       try {
+        // Verify AI configuration BEFORE consuming user rate limit quota
         const ai = opts.getGeminiClient();
+        const rate = await checkAndRecordRateLimit(userId);
+        if (!rate.allowed) {
+          res.status(429).json({
+            success: false,
+            error: `Mentor rate limit reached. Please wait ${rate.retryAfterSec}s before sending another message.`,
+          });
+          return;
+        }
 
         const recentHistory = await withLock(() => {
           const ledger = readLedger();
@@ -233,7 +248,8 @@ export function createAiMentorService(
           '5. Keep advice warm, concise, structured, and genuinely tailored to the player.',
         ].join('\n');
 
-        const response = await ai.models.generateContent({
+        const response = await withAiTimeout(
+          ai.models.generateContent({
           model: opts.geminiModel,
           contents: {
             parts: [
@@ -276,7 +292,9 @@ export function createAiMentorService(
               required: ['reply', 'focusAreas', 'recoveryAdvice', 'includeQuest'],
             },
           },
-        });
+        }),
+          'AI Mentor chat'
+        );
 
         const parsed = opts.parseGeminiJson<any>(response.text);
         if (!parsed || typeof parsed.reply !== 'string' || !parsed.reply.trim()) {
@@ -355,50 +373,53 @@ export function createAiMentorService(
     });
 
     app.post('/api/mentor/weekly-analysis', async (req: Request, res: Response) => {
-      const userId = String(req.headers['x-lifequest-user-id'] || '').trim();
-      if (!userId) {
-        res.status(401).json({ success: false, error: 'Authentication required.' });
+      const auth = await resolveVerifiedCaller(req);
+      if (!auth.ok || !auth.userId) {
+        res.status(auth.status || 401).json({ success: false, error: auth.error || 'Authentication required.' });
         return;
       }
-
-      const rate = await checkAndRecordRateLimit(userId);
-      if (!rate.allowed) {
-        res.status(429).json({
-          success: false,
-          error: `Mentor rate limit reached. Please wait ${rate.retryAfterSec}s before requesting weekly analysis.`,
-        });
-        return;
-      }
+      const userId = auth.userId;
 
       const safeContext = sanitizeMentorPlayerContext(req.body?.playerContext);
 
       try {
         const ai = opts.getGeminiClient();
+        const rate = await checkAndRecordRateLimit(userId);
+        if (!rate.allowed) {
+          res.status(429).json({
+            success: false,
+            error: `Mentor rate limit reached. Please wait ${rate.retryAfterSec}s before requesting weekly analysis.`,
+          });
+          return;
+        }
         const systemInstruction = [
           'You are Master Eldric conducting a Weekly Fitness & Progression Review for LIFEQUEST.',
           'Base every insight strictly on the real playerContext provided. Never fabricate workouts or records.',
           'Provide honest strengths, constructive improvement areas, a realistic 3-step plan for the coming week, and supportive recovery guidance.',
         ].join('\n');
 
-        const response = await ai.models.generateContent({
-          model: opts.geminiModel,
-          contents: { parts: [{ text: JSON.stringify({ playerContext: safeContext }) }] },
-          config: {
-            systemInstruction,
-            responseMimeType: 'application/json',
-            responseSchema: {
-              type: Type.OBJECT,
-              properties: {
-                summary: { type: Type.STRING },
-                strengths: { type: Type.ARRAY, items: { type: Type.STRING } },
-                improvementAreas: { type: Type.ARRAY, items: { type: Type.STRING } },
-                realisticPlan: { type: Type.ARRAY, items: { type: Type.STRING } },
-                recoveryRecommendation: { type: Type.STRING },
+        const response = await withAiTimeout(
+          ai.models.generateContent({
+            model: opts.geminiModel,
+            contents: { parts: [{ text: JSON.stringify({ playerContext: safeContext }) }] },
+            config: {
+              systemInstruction,
+              responseMimeType: 'application/json',
+              responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                  summary: { type: Type.STRING },
+                  strengths: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  improvementAreas: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  realisticPlan: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  recoveryRecommendation: { type: Type.STRING },
+                },
+                required: ['summary', 'strengths', 'improvementAreas', 'realisticPlan', 'recoveryRecommendation'],
               },
-              required: ['summary', 'strengths', 'improvementAreas', 'realisticPlan', 'recoveryRecommendation'],
             },
-          },
-        });
+          }),
+          'AI Mentor weekly analysis'
+        );
 
         const parsed = opts.parseGeminiJson<any>(response.text);
         if (!parsed || typeof parsed.summary !== 'string' || !parsed.summary.trim()) {
@@ -435,11 +456,12 @@ export function createAiMentorService(
     });
 
     app.post('/api/mentor/accept-quest', async (req: Request, res: Response) => {
-      const userId = String(req.headers['x-lifequest-user-id'] || '').trim();
-      if (!userId) {
-        res.status(401).json({ success: false, error: 'Authentication required.' });
+      const auth = await resolveVerifiedCaller(req);
+      if (!auth.ok || !auth.userId) {
+        res.status(auth.status || 401).json({ success: false, error: auth.error || 'Authentication required.' });
         return;
       }
+      const userId = auth.userId;
 
       const questId = String(req.body?.questId || '').trim();
       if (!questId) {

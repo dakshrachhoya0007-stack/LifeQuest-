@@ -28,11 +28,11 @@ export function buildCastleCourtyard3d(
 
   const flagstoneTex = track(createCastleStoneTextures(6, 6));
   const wallStoneTex = track(createCastleStoneTextures(3, 2));
-  const bannerTex = track(createClothWeaveTexture('#0A1930', '#061225', '#00D9FF'));
+  const bannerTex = track(createClothWeaveTexture('#141420', '#090910', '#D6A84B'));
 
   const floorMat = track(
     new THREE.MeshStandardMaterial({
-      color: 0x24344d,
+      color: 0x262636,
       map: flagstoneTex.colorMap,
       bumpMap: flagstoneTex.bumpMap,
       bumpScale: 0.035,
@@ -43,7 +43,7 @@ export function buildCastleCourtyard3d(
 
   const stoneWallMat = track(
     new THREE.MeshStandardMaterial({
-      color: 0x344966,
+      color: 0x353548,
       map: wallStoneTex.colorMap,
       bumpMap: wallStoneTex.bumpMap,
       bumpScale: 0.04,
@@ -54,7 +54,7 @@ export function buildCastleCourtyard3d(
 
   const darkSlateMat = track(
     new THREE.MeshStandardMaterial({
-      color: 0x102440,
+      color: 0x141420,
       roughness: 0.78,
       metalness: 0.18,
     })
@@ -62,8 +62,8 @@ export function buildCastleCourtyard3d(
 
   const antiqueGoldMat = track(
     new THREE.MeshStandardMaterial({
-      color: 0x1677ff,
-      emissive: 0x0066cc,
+      color: 0xd6a84b,
+      emissive: 0x8c6239,
       emissiveIntensity: 0.35,
       metalness: 0.85,
       roughness: 0.25,
@@ -73,7 +73,7 @@ export function buildCastleCourtyard3d(
 
   const ironMat = track(
     new THREE.MeshStandardMaterial({
-      color: 0x16243b,
+      color: 0x1a1a28,
       metalness: 0.85,
       roughness: 0.42,
     })
@@ -94,7 +94,7 @@ export function buildCastleCourtyard3d(
     new THREE.CircleGeometry(36, 36),
     track(
       new THREE.MeshStandardMaterial({
-        color: 0x061225,
+        color: 0x090910,
         roughness: 0.96,
         metalness: 0.04,
       })
@@ -231,13 +231,13 @@ export function buildCastleCourtyard3d(
       tower.add(spire);
     }
 
-    // Cool electric-blue arrow-slit window glow
+    // Warm golden arrow-slit window glow
     const windowGlow = new THREE.Mesh(
       new THREE.BoxGeometry(0.18, 0.55, 0.12),
       track(
         new THREE.MeshStandardMaterial({
-          color: 0x60a5fa,
-          emissive: 0x1677ff,
+          color: 0xfde68a,
+          emissive: 0xd6a84b,
           emissiveIntensity: 1.5,
         })
       )
@@ -318,8 +318,8 @@ export function buildCastleCourtyard3d(
 
   const flameMat = track(
     new THREE.MeshStandardMaterial({
-      color: 0x00d9ff,
-      emissive: 0x1677ff,
+      color: 0xfbbf24,
+      emissive: 0xf59e0b,
       emissiveIntensity: 2.4,
       roughness: 0.25,
     })
@@ -345,7 +345,7 @@ export function buildCastleCourtyard3d(
     flameCores.push(flame);
 
     if (!options.lowPerfMode || idx === 0) {
-      const fireLight = new THREE.PointLight(0x00d9ff, 4.4, 11, 1.55);
+      const fireLight = new THREE.PointLight(0xf59e0b, 4.4, 11, 1.55);
       fireLight.position.set(bx, 1.48, bz);
       root.add(fireLight);
       brazierLights.push(fireLight);
@@ -355,7 +355,7 @@ export function buildCastleCourtyard3d(
   // 6. Distant Mountain Silhouette Ridge Framing the Horizon
   const mountainMat = track(
     new THREE.MeshStandardMaterial({
-      color: 0x0a1930,
+      color: 0x0e0e17,
       roughness: 0.95,
       metalness: 0.04,
     })
@@ -386,9 +386,9 @@ export function buildCastleCourtyard3d(
     }
   });
 
-  // Fine concentric floor inlays catch the electric-blue & cyan light around the hero.
+  // Fine concentric floor inlays catch the Royal Purple & Gold light around the hero.
   const inlayMat = track(new THREE.MeshStandardMaterial({
-    color: 0x00d9ff, emissive: 0x1677ff, emissiveIntensity: 0.55, metalness: 0.8, roughness: 0.28,
+    color: 0xd6a84b, emissive: 0x8b5cf6, emissiveIntensity: 0.55, metalness: 0.8, roughness: 0.28,
     transparent: true, opacity: 0.72
   }));
   [1.82, 2.08, 3.05].forEach((radius, idx) => {
@@ -461,7 +461,7 @@ export function buildCastleCourtyard3d(
   moteGeom.setAttribute('position', new THREE.BufferAttribute(motePositions, 3));
   const moteMat = track(
     new THREE.PointsMaterial({
-      color: 0x00d9ff,
+      color: 0xd6a84b,
       size: 0.055,
       transparent: true,
       opacity: 0.62,

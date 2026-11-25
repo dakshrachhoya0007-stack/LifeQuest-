@@ -745,6 +745,7 @@ export const claimDailyCalendarCheckinServer = async (params: {
   dayNumber?: number;
   rewardSummary?: string;
   gracePassUsed?: boolean;
+  wallet?: PlayerWalletState;
   state?: DailyCalendarStateResponse;
   error?: string;
 }> => {
@@ -766,9 +767,10 @@ export const claimDailyCalendarCheckinServer = async (params: {
     if (!parsed.ok) return { ok: false, error: parsed.data?.error || 'Could not claim calendar check-in.' };
     return {
       ok: true,
-      dayNumber: parsed.data.dayNumber,
-      rewardSummary: parsed.data.rewardSummary,
-      gracePassUsed: parsed.data.gracePassUsed,
+      dayNumber: parsed.data.dayNumber ?? parsed.data.dayClaimed,
+      rewardSummary: parsed.data.rewardSummary ?? parsed.data.rewardLabel,
+      gracePassUsed: parsed.data.gracePassUsed ?? parsed.data.mode === 'grace_catchup',
+      wallet: parsed.data.wallet,
       state: parsed.data.state,
     };
   } catch (err: any) {
@@ -780,7 +782,12 @@ export const claimCalendarWeeklyMilestoneServer = async (
   userId: string,
   milestoneId: string,
   timezone?: string
-): Promise<{ ok: boolean; state?: DailyCalendarStateResponse; error?: string }> => {
+): Promise<{
+  ok: boolean;
+  wallet?: PlayerWalletState;
+  state?: DailyCalendarStateResponse;
+  error?: string;
+}> => {
   try {
     const tz = timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
     const headers = await getLifequestAuthHeaders(userId, true);
@@ -791,7 +798,7 @@ export const claimCalendarWeeklyMilestoneServer = async (
     });
     const parsed = await safeJson(res);
     if (!parsed.ok) return { ok: false, error: parsed.data?.error || 'Could not claim weekly milestone.' };
-    return { ok: true, state: parsed.data.state };
+    return { ok: true, wallet: parsed.data.wallet, state: parsed.data.state };
   } catch (err: any) {
     return { ok: false, error: err?.message || 'Network error.' };
   }

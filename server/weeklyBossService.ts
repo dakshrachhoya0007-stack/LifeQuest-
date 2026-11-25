@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import type { Express, Request, Response } from 'express';
+import { resolveVerifiedCaller, verifyAdminHeader } from './authGuard.ts';
 import {
   DAILY_BOSS_DAMAGE_CAP,
   calculateSafeBossDamage,
@@ -412,21 +413,18 @@ export function createWeeklyBossService(rootDir: string) {
   };
 
   const isAdminAuthorized = (req: Request): boolean => {
-    const provided = String(req.headers['x-lifequest-admin-key'] || '').trim();
-    const expected = String(
-      process.env.LIFEQUEST_ADMIN_SECRET || 'lifequest-realm-steward-admin'
-    ).trim();
-    return Boolean(provided) && provided === expected;
+    return verifyAdminHeader(req, ['LIFEQUEST_ADMIN_SECRET', 'LIFEQUEST_ADMIN_KEY']);
   };
 
   const registerRoutes = (app: Express) => {
     // Publicly authenticated player read
     app.get('/api/weekly-boss/state', async (req: Request, res: Response) => {
-      const userId = String(req.headers['x-lifequest-user-id'] || '').trim();
-      if (!userId) {
-        res.status(401).json({ success: false, error: 'Authentication required.' });
+      const auth = await resolveVerifiedCaller(req);
+      if (!auth.ok || !auth.userId) {
+        res.status(auth.status || 401).json({ success: false, error: auth.error || 'Authentication required.' });
         return;
       }
+      const userId = auth.userId;
       const page = Number(req.query.page || 1);
       const limit = Number(req.query.limit || 10);
       const timezone = typeof req.query.timezone === 'string' ? req.query.timezone : 'UTC';
@@ -438,11 +436,12 @@ export function createWeeklyBossService(rootDir: string) {
 
     // Reject arbitrary client boss damage submissions strictly
     app.post('/api/weekly-boss/contribute', async (req: Request, res: Response) => {
-      const userId = String(req.headers['x-lifequest-user-id'] || '').trim();
-      if (!userId) {
-        res.status(401).json({ success: false, error: 'Authentication required.' });
+      const auth = await resolveVerifiedCaller(req);
+      if (!auth.ok || !auth.userId) {
+        res.status(auth.status || 401).json({ success: false, error: auth.error || 'Authentication required.' });
         return;
       }
+      const userId = auth.userId;
       const body = req.body && typeof req.body === 'object' ? req.body : {};
       if ('damage' in body || 'damageDealt' in body || 'health' in body || 'currentHealth' in body) {
         res.status(400).json({
@@ -491,11 +490,12 @@ export function createWeeklyBossService(rootDir: string) {
 
     // Idempotent Claim for Missions, Milestones, Participation, Defeat & Top Contributor Rewards
     app.post('/api/weekly-boss/claim', async (req: Request, res: Response) => {
-      const userId = String(req.headers['x-lifequest-user-id'] || '').trim();
-      if (!userId) {
-        res.status(401).json({ success: false, error: 'Authentication required.' });
+      const auth = await resolveVerifiedCaller(req);
+      if (!auth.ok || !auth.userId) {
+        res.status(auth.status || 401).json({ success: false, error: auth.error || 'Authentication required.' });
         return;
       }
+      const userId = auth.userId;
 
       const body = req.body && typeof req.body === 'object' ? req.body : {};
       const claimType = String(body.claimType || '');

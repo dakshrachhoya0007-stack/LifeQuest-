@@ -106,9 +106,9 @@ export function createScarredSteelTextures(
  * Heavy woven medieval fabric / tattered cape texture.
  */
 export function createClothWeaveTexture(
-  primaryHex = '#0A1930',
-  shadowHex = '#061225',
-  trimHex = '#00D9FF'
+  primaryHex = '#141420',
+  shadowHex = '#090910',
+  trimHex = '#D6A84B'
 ): ProceduralTextureSet {
   const size = 256;
   const [canvas, ctx] = makeCanvas(size, size);
@@ -149,7 +149,7 @@ export function createClothWeaveTexture(
 /**
  * Stitched dark leather texture (Assassin / Ranger armor).
  */
-export function createLeatherTexture(baseHex = '#102440', grainHex = '#061225'): ProceduralTextureSet {
+export function createLeatherTexture(baseHex = '#141420', grainHex = '#090910'): ProceduralTextureSet {
   const size = 256;
   const [canvas, ctx] = makeCanvas(size, size);
   ctx.fillStyle = baseHex;
@@ -166,7 +166,7 @@ export function createLeatherTexture(baseHex = '#102440', grainHex = '#061225'):
   }
 
   // Cross-stitched seam
-  ctx.strokeStyle = 'rgba(0, 217, 255, 0.25)';
+  ctx.strokeStyle = 'rgba(214, 168, 75, 0.28)';
   ctx.lineWidth = 1.4;
   ctx.setLineDash([6, 5]);
   ctx.strokeRect(12, 12, size - 24, size - 24);
@@ -182,7 +182,7 @@ export function createLeatherTexture(baseHex = '#102440', grainHex = '#061225'):
 /**
  * Arcane embroidered tunic & rune trim texture.
  */
-export function createArcaneClothTexture(baseHex = '#0A1930', accentHex = '#1677FF'): ProceduralTextureSet {
+export function createArcaneClothTexture(baseHex = '#141420', accentHex = '#8B5CF6'): ProceduralTextureSet {
   const size = 256;
   const [canvas, ctx] = makeCanvas(size, size);
   ctx.fillStyle = baseHex;
@@ -205,8 +205,8 @@ export function createArcaneClothTexture(baseHex = '#0A1930', accentHex = '#1677
   }
   ctx.globalAlpha = 1;
 
-  // Cyan embroidered lower hem rune trim
-  ctx.fillStyle = '#00D9FF';
+  // Gold embroidered lower hem rune trim
+  ctx.fillStyle = '#D6A84B';
   ctx.fillRect(0, size - 26, size, 4);
   ctx.fillRect(0, size - 12, size, 2);
 
@@ -228,7 +228,7 @@ export function createCastleStoneTextures(
   const [cCanvas, cCtx] = makeCanvas(size, size);
   const [bCanvas, bCtx] = makeCanvas(size, size);
 
-  cCtx.fillStyle = '#0c1a30';
+  cCtx.fillStyle = '#141420';
   cCtx.fillRect(0, 0, size, size);
   bCtx.fillStyle = '#383838';
   bCtx.fillRect(0, 0, size, size);
@@ -255,7 +255,7 @@ export function createCastleStoneTextures(
         const sx = x + 6 + ((s * 23 + r * 11) % Math.max(8, colW - 12));
         const sy = y + 6 + ((s * 17 + c * 19) % Math.max(8, rowH - 12));
         cCtx.fillStyle =
-          s % 7 === 0 ? 'rgba(0, 217, 255, 0.12)' : 'rgba(169, 184, 204, 0.08)';
+          s % 7 === 0 ? 'rgba(214, 168, 75, 0.12)' : 'rgba(161, 161, 181, 0.08)';
         cCtx.fillRect(sx, sy, 3, 2);
       }
     }

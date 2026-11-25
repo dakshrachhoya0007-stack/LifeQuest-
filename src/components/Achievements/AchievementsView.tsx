@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import {
   Award,
@@ -13,19 +13,35 @@ import {
 
 export const AchievementsView: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
   const { achievements, claimAchievement } = useGame();
+  const [claimingId, setClaimingId] = useState<string | null>(null);
 
   const getAchievementIcon = (iconName: string) => {
     switch (iconName) {
-      case 'Scroll': return Scroll;
-      case 'Flame': return Flame;
+      case 'Scroll':
+        return Scroll;
+      case 'Flame':
+        return Flame;
       case 'Dumbbell':
       case 'Hammer':
       case 'Swords':
         return Dumbbell;
-      case 'Camera': return Camera;
-      case 'Compass': return Compass;
-      case 'Users': return Users;
-      default: return Award;
+      case 'Camera':
+        return Camera;
+      case 'Compass':
+        return Compass;
+      case 'Users':
+        return Users;
+      default:
+        return Award;
+    }
+  };
+
+  const handleClaim = async (id: string) => {
+    setClaimingId(id);
+    try {
+      await claimAchievement(id);
+    } finally {
+      setClaimingId(null);
     }
   };
 
@@ -35,61 +51,50 @@ export const AchievementsView: React.FC<{ embedded?: boolean }> = ({ embedded = 
   return (
     <div className="space-y-6 animate-in fade-in pb-12">
       {/* Banner / Progress Toolbar */}
-      {embedded ? (
-        <div
-          data-tutorial-id="achievements-rewards"
-          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 shadow-[0_12px_32px_rgba(2,8,20,0.6)] rounded-2xl p-4"
-        >
-          <div>
-            <h2 className="font-['Cinzel'] font-bold text-base text-white">
-              Achievements &amp; Milestones
-            </h2>
-            <p className="text-xs text-[#A9B8CC] mt-0.5">
-              Conquer heroic milestones across habits, training, and exploration to earn trophy bounties.
-            </p>
-          </div>
-          <div className="flex items-center gap-4 text-xs tabular-nums shrink-0">
-            <div className="text-right">
-              <span className="text-[11px] text-[#A9B8CC] block">Unlocked</span>
-              <span className="font-mono font-bold text-[#00D9FF]">{unlockedCount} / {achievements.length}</span>
-            </div>
-            <div className="w-px h-7 bg-[#1677FF]/30" />
-            <div className="text-right">
-              <span className="text-[11px] text-[#A9B8CC] block">Claimed</span>
-              <span className="font-mono font-bold text-emerald-300">{claimedCount} / {achievements.length}</span>
-            </div>
-          </div>
+      <div
+        data-tutorial-id="achievements-rewards"
+        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-[#1677FF]/30 shadow-[0_12px_32px_rgba(2,8,20,0.6)] rounded-2xl ${
+          embedded
+            ? 'bg-[#102440]/90 backdrop-blur-md p-4 sm:p-5'
+            : 'bg-gradient-to-r from-[#0A1930] via-[#102440] to-[#0A1930] backdrop-blur-md p-6'
+        }`}
+      >
+        <div>
+          <span className="font-['Cinzel'] font-bold text-[11px] uppercase tracking-widest text-[#00D9FF] block mb-1">
+            Heroic Milestones
+          </span>
+          <h2 className={`${embedded ? 'text-lg sm:text-xl' : 'text-2xl sm:text-3xl'} font-black font-['Cinzel'] text-white`}>
+            ACHIEVEMENTS &amp; REWARDS
+          </h2>
+          <p className="text-xs sm:text-sm text-[#A9B8CC] max-w-2xl mt-1">
+            Conquer permanent milestones across habits, training, and exploration to earn trophy XP bounties.
+          </p>
         </div>
-      ) : (
-        <div
-          data-tutorial-id="achievements-rewards"
-          className="rounded-2xl bg-gradient-to-r from-[#0A1930] via-[#102440] to-[#0A1930] border border-[#1677FF]/30 p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)] backdrop-blur-md"
-        >
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-[#00D9FF] bg-[#0A1930] border border-[#00D9FF]/40 px-2.5 py-0.5 rounded">
-                  Heroic Pantheon
-                </span>
-                <span className="text-xs text-[#A9B8CC] font-semibold">{unlockedCount} of {achievements.length} Unlocked</span>
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-white">
-                ACHIEVEMENTS & REWARDS
-              </h1>
-              <p className="text-xs sm:text-sm text-[#A9B8CC] max-w-2xl mt-1">
-                Earn permanent badges of distinction and substantial Player XP by conquering healthy milestones across real life and the realm.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* Grid */}
+        <div className="flex items-center gap-4 text-xs tabular-nums shrink-0">
+          <div className="text-right">
+            <span className="text-[11px] text-[#A9B8CC] block">Unlocked</span>
+            <span className="font-mono font-bold text-[#00D9FF]">
+              {unlockedCount} / {achievements.length}
+            </span>
+          </div>
+          <div className="w-px h-7 bg-[#1677FF]/30" />
+          <div className="text-right">
+            <span className="text-[11px] text-[#A9B8CC] block">Claimed</span>
+            <span className="font-mono font-bold text-emerald-300">
+              {claimedCount} / {achievements.length}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Achievement Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {achievements.map(ach => {
           const Icon = getAchievementIcon(ach.icon);
           const isUnlocked = ach.unlocked;
           const isClaimed = ach.claimed;
+          const pct = Math.min(100, Math.round((ach.progress / ach.maxProgress) * 100));
 
           return (
             <div
@@ -115,15 +120,15 @@ export const AchievementsView: React.FC<{ embedded?: boolean }> = ({ embedded = 
                   </div>
 
                   <span
-                    className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
+                    className={`text-[11px] font-mono font-bold uppercase tracking-wider ${
                       isClaimed
-                        ? 'bg-emerald-950/70 border-emerald-500/40 text-emerald-300'
+                        ? 'text-emerald-300'
                         : isUnlocked
-                        ? 'bg-[#0A1930] border-[#00D9FF]/50 text-[#00D9FF]'
-                        : 'bg-[#061225] border-[#1677FF]/25 text-[#A9B8CC]/70'
+                        ? 'text-[#00D9FF]'
+                        : 'text-[#A9B8CC]/70'
                     }`}
                   >
-                    {isClaimed ? 'CLAIMED' : isUnlocked ? 'UNLOCKED' : 'LOCKED'}
+                    {isClaimed ? 'Claimed' : isUnlocked ? 'Unlocked' : 'In Progress'}
                   </span>
                 </div>
 
@@ -132,7 +137,7 @@ export const AchievementsView: React.FC<{ embedded?: boolean }> = ({ embedded = 
               </div>
 
               <div className="pt-3 border-t border-[#1677FF]/20 space-y-3">
-                <div className="flex items-center justify-between text-xs font-mono">
+                <div className="flex items-center justify-between text-xs font-mono tabular-nums">
                   <span className="text-[#00D9FF] font-semibold">+{ach.rewardPlayerXp} Player XP</span>
                   <span className="text-[#A9B8CC] font-semibold">
                     {ach.progress} / {ach.maxProgress}
@@ -141,10 +146,12 @@ export const AchievementsView: React.FC<{ embedded?: boolean }> = ({ embedded = 
 
                 {isUnlocked && !isClaimed ? (
                   <button
-                    onClick={() => claimAchievement(ach.id)}
-                    className="w-full py-2 rounded-xl font-['Cinzel'] font-bold text-xs tracking-wider bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white shadow-[0_0_18px_rgba(22,119,255,0.35)] transition-all"
+                    type="button"
+                    disabled={claimingId === ach.id}
+                    onClick={() => handleClaim(ach.id)}
+                    className="w-full py-2.5 rounded-xl font-['Cinzel'] font-bold text-xs tracking-wider bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] disabled:opacity-60 text-white shadow-[0_0_18px_rgba(22,119,255,0.35)] transition-all"
                   >
-                    CLAIM TROPHY BOUNTY
+                    {claimingId === ach.id ? 'CLAIMING...' : 'CLAIM TROPHY BOUNTY'}
                   </button>
                 ) : isClaimed ? (
                   <div className="text-center py-1.5 text-xs font-semibold text-emerald-400 flex items-center justify-center gap-1">
@@ -155,7 +162,7 @@ export const AchievementsView: React.FC<{ embedded?: boolean }> = ({ embedded = 
                   <div className="w-full bg-[#061225] h-2 rounded-full overflow-hidden border border-[#1677FF]/20">
                     <div
                       className="bg-gradient-to-r from-[#1677FF] to-[#00D9FF] h-full transition-all"
-                      style={{ width: `${Math.min(100, (ach.progress / ach.maxProgress) * 100)}%` }}
+                      style={{ width: `${pct}%` }}
                     />
                   </div>
                 )}

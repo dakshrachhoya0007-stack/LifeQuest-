@@ -2,7 +2,13 @@ import type { Request } from 'express';
 
 const verifiedTokenCache = new Map<string, { userId: string; expiresAt: number }>();
 
-async function verifySupabaseBearerToken(token: string): Promise<string | null> {
+export function isSupabaseAuthConfigured(): boolean {
+  const supabaseUrl = (process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '').trim();
+  const anonKey = (process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '').trim();
+  return Boolean(supabaseUrl && anonKey);
+}
+
+export async function verifySupabaseBearerToken(token: string): Promise<string | null> {
   if (!token) return null;
   const cached = verifiedTokenCache.get(token);
   if (cached && cached.expiresAt > Date.now()) {
@@ -15,12 +21,15 @@ async function verifySupabaseBearerToken(token: string): Promise<string | null> 
     return null;
   }
 
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000);
   try {
     const resp = await fetch(`${supabaseUrl.replace(/\/+$/, '')}/auth/v1/user`, {
       headers: {
         apikey: anonKey,
         Authorization: `Bearer ${token}`,
       },
+      signal: controller.signal,
     });
     if (!resp.ok) return null;
     const data = await resp.json().catch(() => null);
@@ -34,6 +43,8 @@ async function verifySupabaseBearerToken(token: string): Promise<string | null> 
     return uid;
   } catch {
     return null;
+  } finally {
+    clearTimeout(timer);
   }
 }
 
@@ -46,10 +57,11 @@ export interface CallerAuthResult {
 
 /**
  * Verifies caller identity strictly:
- * 1. When a Bearer JWT is present and Supabase Auth is configured, verifies the JWT cryptographically
- *    and rejects any forged/mismatched `x-lifequest-user-id` or `body.ownerId` / `body.userId`.
- * 2. In local single-node / offline-Supabase preview mode without Supabase env vars, requires `x-lifequest-user-id`
- *    and verifies it matches any declared `expectedOwnerId` (no unauthenticated claims or cross-user spoofing).
+ * 1. When Supabase Auth env vars are configured, a valid Bearer JWT is ALWAYS required
+ *    (unverified `x-lifequest-user-id` headers without a matching valid JWT are rejected).
+ * 2. When Supabase Auth env vars are not configured (offline local/test mode), requires
+ *    `x-lifequest-user-id` (unless `requireSession` forces a Bearer token) and verifies it
+ *    matches any declared `expectedOwnerId`.
  */
 export async function resolveVerifiedCaller(
   req: Request,
@@ -60,18 +72,21 @@ export async function resolveVerifiedCaller(
     ? authHeader.slice(7).trim()
     : '';
   const headerUid = String(req.headers['x-lifequest-user-id'] || '').trim();
+  const supabaseConfigured = isSupabaseAuthConfigured();
 
   let verifiedUid: string | null = null;
 
   if (bearer) {
     verifiedUid = await verifySupabaseBearerToken(bearer);
-    const supabaseConfigured = Boolean(
-      (process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '').trim() &&
-        (process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '').trim()
-    );
     if (supabaseConfigured && !verifiedUid) {
       return { ok: false, status: 401, error: 'Invalid or expired authentication token.' };
     }
+  } else if (supabaseConfigured || opts?.requireSession) {
+    return {
+      ok: false,
+      status: 401,
+      error: 'Authentication required: missing valid session token.',
+    };
   }
 
   const effectiveUid = verifiedUid || headerUid;
@@ -96,4 +111,38 @@ export async function resolveVerifiedCaller(
   }
 
   return { ok: true, userId: effectiveUid };
+}
+
+/**
+ * Resolves an optional viewer user ID for public/filtered endpoints without trusting
+ * spoofed viewer headers when Supabase Auth is active.
+ */
+export async function resolveOptionalViewerId(req: Request): Promise<string | null> {
+  const authHeader = String(req.headers['authorization'] || '').trim();
+  const bearer = authHeader.toLowerCase().startsWith('bearer ')
+    ? authHeader.slice(7).trim()
+    : '';
+  if (bearer) {
+    return await verifySupabaseBearerToken(bearer);
+  }
+  if (isSupabaseAuthConfigured()) {
+    return null;
+  }
+  const fallback = String(req.headers['x-lifequest-user-id'] || req.headers['x-viewer-id'] || '').trim();
+  return fallback || null;
+}
+
+/**
+ * Fail-closed admin secret verification (never falls back to hardcoded strings).
+ */
+export function verifyAdminHeader(req: Request, envVarNames: string[]): boolean {
+  const provided = String(req.headers['x-lifequest-admin-key'] || '').trim();
+  if (!provided) return false;
+  for (const key of envVarNames) {
+    const expected = String(process.env[key] || '').trim();
+    if (expected && provided === expected) {
+      return true;
+    }
+  }
+  return false;
 }

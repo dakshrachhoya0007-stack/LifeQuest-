@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import type { Express, Request, Response } from 'express';
-import { resolveVerifiedCaller } from './authGuard.ts';
+import { resolveOptionalViewerId, resolveVerifiedCaller } from './authGuard.ts';
 import { GLOBAL_EXCLUSIVE_ACHIEVEMENTS } from '../src/data/globalLegendsData.ts';
 import { RARE_BADGES_CATALOG } from '../src/data/polish2Data.ts';
 import { MUSEUM_LOCKED_MILESTONES } from '../src/data/ecosystemData.ts';
@@ -369,7 +369,7 @@ export function createTrophyShowcaseService(rootDir: string, deps: TrophyShowcas
         return;
       }
 
-      const viewerId = String(req.header('x-lifequest-user-id') || req.header('x-viewer-id') || '').trim() || null;
+      const viewerId = await resolveOptionalViewerId(req);
       const rel = deps.privacyHelper.getRelationForUsers(targetUserId, viewerId);
       if (rel.relation === 'blocked') {
         res.status(403).json({ success: false, error: 'Trophy showcase unavailable due to block settings.' });

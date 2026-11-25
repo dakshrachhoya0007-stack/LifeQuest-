@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import type { Express, Request, Response } from 'express';
-import { resolveVerifiedCaller } from './authGuard.ts';
+import { resolveOptionalViewerId, resolveVerifiedCaller } from './authGuard.ts';
 import {
   CARD_COLLECTION_ACHIEVEMENTS,
   CARD_PACKS_CATALOG,
@@ -897,9 +897,9 @@ export function createAaaEconomyCardsService(
       res.status(outcome.status).json(outcome.payload);
     });
 
-    app.get('/api/cards/public/:targetUserId', (req: Request, res: Response) => {
+    app.get('/api/cards/public/:targetUserId', async (req: Request, res: Response) => {
       const targetUserId = String(req.params.targetUserId || '').trim();
-      const viewerId = String(req.headers['x-lifequest-user-id'] || '').trim() || null;
+      const viewerId = await resolveOptionalViewerId(req);
       if (!targetUserId) {
         res.status(400).json({ success: false, error: 'Missing targetUserId.' });
         return;

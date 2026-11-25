@@ -779,24 +779,34 @@ export const SkillTreeView: React.FC = () => {
                                     x2="12"
                                     y2="32"
                                     stroke={
-                                      isUnlocked || prevUnlocked
+                                      isUnlocked
                                         ? '#00D9FF'
-                                        : 'rgba(169, 184, 204, 0.25)'
+                                        : prevUnlocked
+                                        ? '#1677FF'
+                                        : 'rgba(169, 184, 204, 0.22)'
                                     }
-                                    strokeWidth={isUnlocked ? '2.5' : '1.75'}
-                                    strokeDasharray={prevUnlocked ? undefined : '4 3'}
+                                    strokeWidth={isUnlocked ? '2.5' : prevUnlocked ? '2' : '1.5'}
+                                    strokeDasharray={isUnlocked || prevUnlocked ? undefined : '4 3'}
                                   />
                                   <circle
                                     cx="12"
                                     cy="16"
-                                    r="2.5"
+                                    r="3"
                                     fill={
                                       isUnlocked
                                         ? '#00D9FF'
                                         : isAvailable
                                         ? '#1677FF'
-                                        : '#102440'
+                                        : '#0A1930'
                                     }
+                                    stroke={
+                                      isUnlocked
+                                        ? '#00D9FF'
+                                        : isAvailable
+                                        ? '#00D9FF'
+                                        : 'rgba(169, 184, 204, 0.25)'
+                                    }
+                                    strokeWidth="1"
                                   />
                                 </svg>
                               </div>
@@ -808,17 +818,17 @@ export const SkillTreeView: React.FC = () => {
                                 setSelectedNodeId(node.id);
                                 setUnlockFeedback(null);
                               }}
-                              className={`w-full text-left p-3.5 rounded-xl border transition-all cursor-pointer ${
+                              className={`w-full text-left p-3.5 rounded-xl border transition-all duration-200 hover:-translate-y-0.5 cursor-pointer ${
                                 isJustUnlocked
                                   ? 'ring-2 ring-[#00D9FF] scale-[1.02] motion-reduce:scale-100'
                                   : ''
                               } ${
                                 isUnlocked
-                                  ? 'bg-[#102440] border-[#00D9FF]/70 text-white shadow-[0_0_16px_rgba(0,217,255,0.14)]'
+                                  ? 'bg-gradient-to-br from-[#102440] to-[#133055] border-[#00D9FF]/75 text-white shadow-[0_0_18px_rgba(0,217,255,0.18)]'
                                   : isAvailable
-                                  ? 'bg-[#0A1930] border-[#1677FF] text-white'
-                                  : 'bg-[#061225] border-[#1677FF]/20 text-[#A9B8CC] hover:border-[#00D9FF]/40'
-                              } ${isSelected ? 'ring-2 ring-[#00D9FF]/80' : ''}`}
+                                  ? 'bg-[#0A1930] border-[#1677FF] text-white shadow-[0_0_16px_rgba(22,119,255,0.22)] hover:border-[#00D9FF]'
+                                  : 'bg-[#061225]/90 border-[#1677FF]/20 text-[#A9B8CC] opacity-75 hover:opacity-100 hover:border-[#1677FF]/45'
+                              } ${isSelected ? 'ring-2 ring-[#00D9FF]/85' : ''}`}
                             >
                               <div className="flex items-center justify-between gap-2 mb-1">
                                 <span className="text-[10px] font-mono uppercase tracking-wider text-[#A9B8CC] tabular-nums">
@@ -829,8 +839,8 @@ export const SkillTreeView: React.FC = () => {
                                     isUnlocked
                                       ? 'text-[#00D9FF]'
                                       : isAvailable
-                                      ? 'text-[#1677FF]'
-                                      : 'text-[#A9B8CC]/60'
+                                      ? 'text-emerald-300'
+                                      : 'text-[#A9B8CC]/55'
                                   }`}
                                 >
                                   {isUnlocked ? (
@@ -841,7 +851,7 @@ export const SkillTreeView: React.FC = () => {
                                   ) : isAvailable ? (
                                     <>
                                       <Sparkles className="w-3.5 h-3.5 shrink-0" />
-                                      Available
+                                      Ready to Unlock
                                     </>
                                   ) : (
                                     <>

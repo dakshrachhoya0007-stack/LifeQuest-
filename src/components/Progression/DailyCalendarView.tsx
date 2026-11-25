@@ -14,7 +14,7 @@ import {
   Trophy,
 } from 'lucide-react';
 
-export const DailyCalendarView: React.FC = () => {
+export const DailyCalendarView: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
   const {
     dailyCalendarState,
     refreshDailyCalendar,
@@ -90,7 +90,7 @@ export const DailyCalendarView: React.FC = () => {
                 {state?.monthKey || 'Current Cycle'}
               </span>
             </div>
-            <h2 className="text-2xl font-black font-['Cinzel'] text-white">
+            <h2 className={`${embedded ? 'text-lg sm:text-xl' : 'text-2xl'} font-black font-['Cinzel'] text-white`}>
               30-DAY ADVENTURER CALENDAR
             </h2>
             <p className="text-xs sm:text-sm text-[#A9B8CC] max-w-2xl mt-1">

@@ -94,9 +94,19 @@ export const GlobalLegendUnlockModal: React.FC = () => {
           <div className="mt-4 grid grid-cols-2 gap-2 w-full text-xs font-mono tabular-nums">
             <div className="rounded-xl bg-[#0A1930] border border-[#1677FF]/40 p-2.5">
               <div className="text-[#00D9FF] font-bold flex items-center justify-center gap-1">
-                <Sparkles className="w-3.5 h-3.5" />+{entry.rewardPlayerXp}
+                {entry.rewardPlayerXp > 0 ? (
+                  <>
+                    <Sparkles className="w-3.5 h-3.5" />+{entry.rewardPlayerXp}
+                  </>
+                ) : (
+                  <>
+                    <Crown className="w-3.5 h-3.5" />Exclusive
+                  </>
+                )}
               </div>
-              <div className="text-[10px] text-[#A9B8CC] mt-0.5">Player XP</div>
+              <div className="text-[10px] text-[#A9B8CC] mt-0.5">
+                {entry.rewardPlayerXp > 0 ? 'Player XP' : 'Worldwide Title'}
+              </div>
             </div>
             <div className="rounded-xl bg-[#0A1930] border border-amber-500/35 p-2.5">
               <div className="text-amber-300 font-bold flex items-center justify-center gap-1">

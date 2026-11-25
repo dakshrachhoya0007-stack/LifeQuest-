@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import type { Express, Request, Response } from 'express';
-import { resolveVerifiedCaller } from './authGuard.ts';
+import { resolveVerifiedCaller, verifyAdminHeader } from './authGuard.ts';
 import { TERRITORY_BLUEPRINTS } from '../src/data/expansionData.ts';
 import type { VerifiedActivityMetadata } from '../src/data/skillTreeData.ts';
 import type {
@@ -574,9 +574,7 @@ export function createTerritoryWarsService(rootDir: string, deps: TerritoryWarsD
 
     // Admin resolve campaign -> archive outcomes + award winning guild members shared cosmetics
     app.post('/api/admin/territory-wars/resolve', async (req: Request, res: Response) => {
-      const expectedKey = process.env.LIFEQUEST_ADMIN_KEY || 'lifequest-local-admin';
-      const providedKey = String(req.headers['x-lifequest-admin-key'] || '').trim();
-      if (!providedKey || providedKey !== expectedKey) {
+      if (!verifyAdminHeader(req, ['LIFEQUEST_ADMIN_KEY', 'LIFEQUEST_ADMIN_SECRET'])) {
         res.status(403).json({ success: false, error: 'Forbidden: admin authorization required.' });
         return;
       }

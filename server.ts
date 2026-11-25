@@ -1144,11 +1144,14 @@ async function startServer() {
   };
 
   app.get('/api/legends/state', async (_req: Request, res: Response) => {
+    const activeIds = new Set(GLOBAL_EXCLUSIVE_ACHIEVEMENTS.map(a => a.id));
     const ledger = await withLedgerLock(() => readLedger());
     res.json({
-      claims: Object.values(ledger.claims),
+      claims: Object.values(ledger.claims).filter(c => activeIds.has(c.achievementId)),
       equippedByUser: ledger.equippedByUser,
-      announcements: ledger.announcements.slice(0, 25),
+      announcements: ledger.announcements
+        .filter(a => activeIds.has(a.achievementId))
+        .slice(0, 25),
     });
   });
 
@@ -1222,6 +1225,20 @@ async function startServer() {
           Number(snap.totalBossesDefeated || 0),
           defeatedEventsParticipated
         );
+      case 'all_kingdoms_cleared': {
+        const clearedList = Array.isArray(syncedProfile.clearedKingdomIds)
+          ? syncedProfile.clearedKingdomIds.length
+          : 0;
+        const bossesCleared = Math.max(
+          Number(syncedProfile.totalBossesDefeated || 0),
+          Number(snap.totalBossesDefeated || 0)
+        );
+        return Number(syncedProfile.all_kingdoms_cleared || 0) >= 1 ||
+          clearedList >= 5 ||
+          bossesCleared >= 5
+          ? 1
+          : 0;
+      }
       case 'aether_points':
         return Number(syncedProfile.aetherPoints || 0);
       case 'habits_claimed_total':
@@ -1238,7 +1255,6 @@ async function startServer() {
       case 'guild_leader':
         return syncedProfile.guild?.role === 'leader' ? 1 : 0;
       default:
-        // For specialized counters tracked only in Supabase / pre-migration sync, look up server counters or 0
         return Number((syncedProfile as any)?.[requirementType] || 0);
     }
   };

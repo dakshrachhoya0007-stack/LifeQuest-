@@ -11,13 +11,14 @@ import {
   getResetCountdowns,
   getUserTimezone,
 } from '../../services/unifiedBackendService';
+import { DailyCalendarView } from '../Progression/DailyCalendarView';
+import { AchievementsView } from '../Achievements/AchievementsView';
 import {
   Scroll,
   CheckCircle2,
   Clock,
   Sparkles,
   History,
-  Wand2,
   Dumbbell,
   BookOpen,
   Shield,
@@ -30,6 +31,9 @@ import {
   PenLine,
   ArrowRight,
   RefreshCw,
+  CalendarCheck,
+  Award,
+  Compass,
 } from 'lucide-react';
 
 const CATEGORY_META: Record<
@@ -67,6 +71,8 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
     user,
     quests,
     claimQuest,
+    achievements,
+    dailyCalendarState,
     transactions,
     dynamicDailyQuests,
     dynamicQuestHistory,
@@ -77,6 +83,8 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
     generateTodaysAiQuests,
     submitDynamicQuestEvidence,
     claimDynamicQuest,
+    questHubSubTab,
+    setQuestHubSubTab,
     setActiveTab,
   } = useGame();
 
@@ -90,6 +98,7 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
   const [evidenceInput, setEvidenceInput] = useState('');
   const [evidenceError, setEvidenceError] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [claimingQuestId, setClaimingQuestId] = useState<string | null>(null);
 
   const [countdowns, setCountdowns] = useState(() => getResetCountdowns());
   useEffect(() => {
@@ -137,9 +146,24 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
 
   const handleClaimAiQuest = async (questId: string) => {
     setActionMessage(null);
-    const res = await claimDynamicQuest(questId);
-    if (!res.success && res.error) {
-      setActionMessage(res.error);
+    setClaimingQuestId(questId);
+    try {
+      const res = await claimDynamicQuest(questId);
+      if (!res.success && res.error) {
+        setActionMessage(res.error);
+      }
+    } finally {
+      setClaimingQuestId(null);
+    }
+  };
+
+  const handleClaimClassicQuest = async (questId: string) => {
+    setActionMessage(null);
+    setClaimingQuestId(questId);
+    try {
+      await claimQuest(questId);
+    } finally {
+      setClaimingQuestId(null);
     }
   };
 
@@ -292,10 +316,11 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
           ) : q.completed ? (
             <button
               type="button"
+              disabled={claimingQuestId === q.id}
               onClick={() => handleClaimAiQuest(q.id)}
-              className="w-full py-2.5 rounded-xl font-['Cinzel'] font-bold text-xs tracking-wider bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-950/60 transition-all"
+              className="w-full py-2.5 rounded-xl font-['Cinzel'] font-bold text-xs tracking-wider bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-60 text-white shadow-lg shadow-emerald-950/60 transition-all"
             >
-              CLAIM REWARD
+              {claimingQuestId === q.id ? 'CLAIMING...' : 'CLAIM REWARD'}
             </button>
           ) : (
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -336,10 +361,72 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
   };
 
   const activeTierMeta = TIER_LABELS[aiMentorMemory.lastAdaptiveTier] || TIER_LABELS.balanced;
+  const claimableBoardCount =
+    quests.filter(q => q.completed && !q.claimed).length +
+    todaysAiQuests.filter(q => q.completed && !q.claimed).length;
+  const claimableAchievementsCount = achievements.filter(a => a.unlocked && !a.claimed).length;
+  const claimableCalendarCount = dailyCalendarState && !dailyCalendarState.claimedToday ? 1 : 0;
+
+  const hubSubTabs: Array<{
+    id: 'board' | 'calendar' | 'achievements';
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    badge?: number;
+  }> = [
+    { id: 'board', label: 'Quest Board', icon: Scroll, badge: claimableBoardCount },
+    { id: 'calendar', label: 'Daily Calendar', icon: CalendarCheck, badge: claimableCalendarCount },
+    { id: 'achievements', label: 'Achievements', icon: Award, badge: claimableAchievementsCount },
+  ];
 
   return (
-    <div className="space-y-6 animate-in fade-in pb-12">
-      {/* AI-Powered Dynamic Quest Generator Section */}
+    <div className={`space-y-6 animate-in fade-in ${embedded ? '' : 'pb-12'}`}>
+      {/* Unified Quest Board Sub-Navigation */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl bg-[#0A1930]/90 border border-[#1677FF]/25 p-3 sm:px-4">
+        <div
+          role="tablist"
+          aria-label="Quest Board sections"
+          className="flex flex-wrap sm:flex-nowrap items-center gap-1.5"
+        >
+          {hubSubTabs.map(tab => {
+            const Icon = tab.icon;
+            const isActive = questHubSubTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                role="tab"
+                aria-selected={isActive}
+                type="button"
+                onClick={() => setQuestHubSubTab(tab.id)}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap shrink-0 border ${
+                  isActive
+                    ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white border-[#00D9FF]/50 shadow-[0_0_14px_rgba(22,119,255,0.3)]'
+                    : 'bg-[#061225]/70 text-[#A9B8CC] hover:text-white border-[#1677FF]/20 hover:border-[#1677FF]/45'
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-[#00D9FF]/75'}`} />
+                <span>{tab.label}</span>
+                {tab.badge !== undefined && tab.badge > 0 && (
+                  <span className="px-1.5 py-0.2 rounded-full bg-[#00D9FF] text-[#061225] text-[10px] font-mono font-bold tabular-nums">
+                    {tab.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex items-center gap-2 text-xs text-[#A9B8CC] font-mono tabular-nums px-1">
+          <Clock className="w-3.5 h-3.5 text-[#00D9FF]" />
+          <span>Daily Reset: {countdowns.dailyLabel}</span>
+        </div>
+      </div>
+
+      {questHubSubTab === 'calendar' && <DailyCalendarView embedded />}
+      {questHubSubTab === 'achievements' && <AchievementsView embedded />}
+
+      {questHubSubTab === 'board' && (
+        <div className="space-y-6 pb-8">
+      {/* Adaptive Daily Quests Section */}
       <section
         data-tutorial-id="quest-board"
         className="rounded-2xl border border-[#1677FF]/30 bg-[#102440]/90 backdrop-blur-md p-5 sm:p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)] space-y-5"
@@ -348,8 +435,8 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
           <div>
             <div className="flex flex-wrap items-center gap-2 text-xs mb-1">
               <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#00D9FF] flex items-center gap-1.5">
-                <Wand2 className="w-3.5 h-3.5" />
-                AI Quest Architect
+                <Compass className="w-3.5 h-3.5" />
+                Adaptive Cadence
               </span>
               <span className="text-[#A9B8CC]/40" aria-hidden="true">·</span>
               <span className="text-white font-semibold">{activeTierMeta.label}</span>
@@ -359,10 +446,10 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
               </span>
             </div>
             <h2 className="font-['Cinzel'] font-black text-xl sm:text-2xl text-white tracking-wide">
-              TODAY&apos;S PERSONALIZED AI QUESTS
+              DAILY QUESTS
             </h2>
             <p className="text-xs sm:text-sm text-[#A9B8CC] mt-1 max-w-2xl">
-              {activeTierMeta.note} Every quest is tailored uniquely to your habits, goals, streak, and recent activity.
+              {activeTierMeta.note} Every objective adapts to your habits, goals, streak, and recent training activity.
             </p>
           </div>
 
@@ -624,10 +711,11 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
                 {isCompleted && !isClaimed ? (
                   <button
                     type="button"
-                    onClick={() => claimQuest(q.id)}
-                    className="w-full py-2.5 rounded-xl font-['Cinzel'] font-bold text-xs tracking-wider bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-950/60 transition-all"
+                    disabled={claimingQuestId === q.id}
+                    onClick={() => handleClaimClassicQuest(q.id)}
+                    className="w-full py-2.5 rounded-xl font-['Cinzel'] font-bold text-xs tracking-wider bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-60 text-white shadow-lg shadow-emerald-950/60 transition-all"
                   >
-                    CLAIM REWARD
+                    {claimingQuestId === q.id ? 'CLAIMING...' : 'CLAIM REWARD'}
                   </button>
                 ) : isClaimed ? (
                   <div className="text-center py-2 text-xs font-semibold text-emerald-400/80 flex items-center justify-center gap-1.5">
@@ -645,66 +733,72 @@ export const QuestsView: React.FC<{ embedded?: boolean }> = ({ embedded = false 
         })}
       </div>
 
-      {/* Combined AI Quest & Reward History */}
-      <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 rounded-2xl p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)] space-y-5">
-        {dynamicQuestHistory.length > 0 && (
-          <div>
-            <h3 className="font-['Cinzel'] font-bold text-sm text-[#00D9FF] flex items-center gap-2 mb-3">
-              <Wand2 className="w-4 h-4" />
-              <span>AI QUEST ARCHIVE</span>
-            </h3>
-            <div className="space-y-2 max-h-44 overflow-y-auto">
-              {dynamicQuestHistory.slice(0, 12).map(h => (
-                <div
-                  key={h.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 text-xs"
-                >
-                  <div>
-                    <span className="font-semibold text-white">{h.title}</span>
-                    <span className="text-[11px] text-[#A9B8CC] ml-2 font-mono">{h.periodKey}</span>
-                    {h.evidenceNote && (
-                      <p className="text-[11px] text-[#A9B8CC]/80 mt-0.5 italic">
-                        &ldquo;{h.evidenceNote}&rdquo;
-                      </p>
-                    )}
+      {/* Completed Daily Quests & Reward History */}
+      {(dynamicQuestHistory.length > 0 || transactions.length > 0) && (
+        <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 rounded-2xl p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)] space-y-5">
+          {dynamicQuestHistory.length > 0 && (
+            <div>
+              <h3 className="font-['Cinzel'] font-bold text-sm text-[#00D9FF] flex items-center gap-2 mb-3">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>COMPLETED DAILY QUESTS</span>
+              </h3>
+              <div className="space-y-2 max-h-44 overflow-y-auto">
+                {dynamicQuestHistory.slice(0, 12).map(h => (
+                  <div
+                    key={h.id}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 text-xs"
+                  >
+                    <div>
+                      <span className="font-semibold text-white">{h.title}</span>
+                      <span className="text-[11px] text-[#A9B8CC] ml-2 font-mono">{h.periodKey}</span>
+                      {h.evidenceNote && (
+                        <p className="text-[11px] text-[#A9B8CC]/80 mt-0.5 italic">
+                          &ldquo;{h.evidenceNote}&rdquo;
+                        </p>
+                      )}
+                    </div>
+                    <span className="font-mono font-bold text-emerald-300 whitespace-nowrap shrink-0 tabular-nums">
+                      +{h.playerXpReward} XP · +{h.goldReward}g
+                    </span>
                   </div>
-                  <span className="font-mono font-bold text-emerald-300 whitespace-nowrap shrink-0 tabular-nums">
-                    +{h.playerXpReward} XP · +{h.goldReward}g
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div>
-          <h3 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2 mb-4">
-            <History className="w-4 h-4 text-[#00D9FF]" />
-            <span>RECENT XP &amp; REWARD HISTORY</span>
-          </h3>
-          <div className="space-y-2 max-h-56 overflow-y-auto">
-            {transactions.map(tx => (
-              <div
-                key={tx.id}
-                className="flex items-center justify-between p-3 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 text-xs"
-              >
-                <div>
-                  <span className="font-semibold text-white">{tx.source}</span>
-                  <span className="text-[10px] text-[#A9B8CC]/70 ml-2 font-mono">{tx.timestamp}</span>
-                </div>
-                <span
-                  className={`font-mono font-bold tabular-nums ${
-                    tx.type === 'GOLD' ? 'text-amber-300' : 'text-[#00D9FF]'
-                  }`}
-                >
-                  {tx.amount > 0 ? `+${tx.amount}` : tx.amount}{' '}
-                  {tx.type === 'GOLD' ? 'Gold' : 'Player XP'}
-                </span>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
+
+          {transactions.length > 0 && (
+            <div>
+              <h3 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2 mb-4">
+                <History className="w-4 h-4 text-[#00D9FF]" />
+                <span>RECENT XP &amp; REWARD HISTORY</span>
+              </h3>
+              <div className="space-y-2 max-h-56 overflow-y-auto">
+                {transactions.map(tx => (
+                  <div
+                    key={tx.id}
+                    className="flex items-center justify-between p-3 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 text-xs"
+                  >
+                    <div>
+                      <span className="font-semibold text-white">{tx.source}</span>
+                      <span className="text-[10px] text-[#A9B8CC]/70 ml-2 font-mono">{tx.timestamp}</span>
+                    </div>
+                    <span
+                      className={`font-mono font-bold tabular-nums ${
+                        tx.type === 'GOLD' ? 'text-amber-300' : 'text-[#00D9FF]'
+                      }`}
+                    >
+                      {tx.amount > 0 ? `+${tx.amount}` : tx.amount}{' '}
+                      {tx.type === 'GOLD' ? 'Gold' : 'Player XP'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-      </div>
+      )}
+        </div>
+      )}
     </div>
   );
 };

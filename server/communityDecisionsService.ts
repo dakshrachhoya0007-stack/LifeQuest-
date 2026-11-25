@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import type { Express, Request, Response } from 'express';
-import { resolveVerifiedCaller } from './authGuard.ts';
+import { resolveVerifiedCaller, verifyAdminHeader } from './authGuard.ts';
 import type {
   CommunityPoll,
   CommunityPollCategory,
@@ -204,9 +204,7 @@ export function createCommunityDecisionsService(
   };
 
   const isAuthorizedAdmin = (req: Request): boolean => {
-    const expectedKey = process.env.LIFEQUEST_ADMIN_KEY || 'lifequest-local-admin';
-    const provided = String(req.headers['x-lifequest-admin-key'] || '').trim();
-    return Boolean(provided && provided === expectedKey);
+    return verifyAdminHeader(req, ['LIFEQUEST_ADMIN_KEY', 'LIFEQUEST_ADMIN_SECRET']);
   };
 
   const registerRoutes = (app: Express) => {

@@ -1,18 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import { useGame } from '../../context/GameContext';
-import {
-  GLOBAL_LEGEND_CATEGORIES,
-  RARITY_FRAME_META,
-  TITLE_STYLE_META,
-} from '../../data/globalLegendsData';
-import { GlobalAchievementCategory, HallOfLegendsStatus } from '../../types/game';
+import { RARITY_FRAME_META, TITLE_STYLE_META } from '../../data/globalLegendsData';
+import { HallOfLegendsStatus } from '../../types/game';
 import { LegendEmblemIcon, LegendTitleBadge } from '../Social/LegendTitleBadge';
 import {
   Crown,
   Lock,
-  Sparkles,
   Coins,
-  Search,
   RefreshCw,
   Globe2,
   EyeOff,
@@ -33,43 +27,28 @@ export const HallOfLegendsView: React.FC = () => {
     user,
   } = useGame();
 
-  const [activeCategory, setActiveCategory] = useState<GlobalAchievementCategory | 'all'>('all');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'ready' | 'unclaimed' | 'claimed' | 'mine'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'available' | 'claimed'>('all');
   const [claimingId, setClaimingId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const summary = useMemo(() => {
     const claimedCount = hallOfLegends.filter(h => h.status === 'claimed').length;
     const readyCount = hallOfLegends.filter(h => h.eligibleToClaim).length;
-    const mineCount = hallOfLegends.filter(h => h.ownedByCurrentUser).length;
-    return { total: hallOfLegends.length, claimedCount, readyCount, mineCount };
+    return {
+      total: hallOfLegends.length,
+      claimedCount,
+      availableCount: hallOfLegends.length - claimedCount,
+      readyCount,
+    };
   }, [hallOfLegends]);
 
   const filteredEntries = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
     return hallOfLegends.filter(entry => {
-      if (activeCategory !== 'all' && entry.category !== activeCategory) return false;
-      if (statusFilter === 'ready' && !entry.eligibleToClaim) return false;
-      if (statusFilter === 'unclaimed' && entry.status === 'claimed') return false;
+      if (statusFilter === 'available' && entry.status === 'claimed') return false;
       if (statusFilter === 'claimed' && entry.status !== 'claimed') return false;
-      if (statusFilter === 'mine' && !entry.ownedByCurrentUser) return false;
-
-      if (q) {
-        const revealed = !entry.isHidden || entry.status === 'claimed' || entry.eligibleToClaim;
-        const searchable = [
-          revealed ? entry.name : 'secret hidden legend',
-          revealed ? entry.titleTag : '',
-          entry.rarity,
-          entry.ownership?.ownerUsername || '',
-        ]
-          .join(' ')
-          .toLowerCase();
-        if (!searchable.includes(q)) return false;
-      }
       return true;
     });
-  }, [hallOfLegends, activeCategory, statusFilter, searchQuery]);
+  }, [hallOfLegends, statusFilter]);
 
   const handleClaim = async (achievementId: string) => {
     setFeedback(null);
@@ -79,7 +58,7 @@ export const HallOfLegendsView: React.FC = () => {
       if (!res.success) {
         setFeedback({
           type: 'error',
-          text: res.error || 'Could not claim this Global Exclusive Title.',
+          text: res.error || 'Could not claim this Worldwide Title.',
         });
       } else {
         setFeedback({
@@ -100,15 +79,15 @@ export const HallOfLegendsView: React.FC = () => {
     }
   };
 
-  const statusBadgeText = (status: HallOfLegendsStatus, ownedByMe: boolean) => {
+  const statusText = (status: HallOfLegendsStatus, eligibleToClaim: boolean, ownedByMe: boolean) => {
     if (status === 'claimed') return ownedByMe ? 'CLAIMED BY YOU' : 'CLAIMED FOREVER';
-    if (status === 'unclaimed') return 'UNCLAIMED · ELIGIBLE NOW';
-    return 'LOCKED FOR YOU';
+    if (eligibleToClaim) return 'READY TO CLAIM';
+    return 'UNCLAIMED · IN PROGRESS';
   };
 
   return (
     <div className="space-y-6 animate-in fade-in pb-12">
-      {/* Hall Header Banner */}
+      {/* Header Banner */}
       <div className="rounded-2xl border border-[#1677FF]/30 bg-gradient-to-br from-[#0A1930] via-[#102440] to-[#0A1930] p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)] backdrop-blur-md">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
           <div>
@@ -121,16 +100,20 @@ export const HallOfLegendsView: React.FC = () => {
               <span className="text-[#A9B8CC] tabular-nums">
                 {summary.claimedCount}/{summary.total} Claimed Globally
               </span>
-              <span className="text-[#A9B8CC]/40" aria-hidden="true">·</span>
-              <span className="text-emerald-300 font-semibold tabular-nums">
-                {summary.readyCount} Ready to Claim
-              </span>
+              {summary.readyCount > 0 && (
+                <>
+                  <span className="text-[#A9B8CC]/40" aria-hidden="true">·</span>
+                  <span className="text-emerald-300 font-semibold tabular-nums">
+                    {summary.readyCount} Ready to Claim
+                  </span>
+                </>
+              )}
             </div>
-            <h2 className="font-['Cinzel'] font-black text-2xl sm:text-3xl text-white tracking-wide">
+            <h1 className="font-['Cinzel'] font-black text-2xl sm:text-3xl text-white tracking-wide">
               HALL OF LEGENDS
-            </h2>
+            </h1>
             <p className="text-xs sm:text-sm text-[#A9B8CC] mt-1 max-w-2xl">
-              Fifty-two unique worldwide honors. Only the very first champion in Aetheria to fulfill a requirement may claim each title—locking it permanently to their name forever.
+              Five one-of-a-kind worldwide honors. Only the very first champion in Aetheria to fulfill each milestone claims it forever—locking it permanently to their name across the realm.
             </p>
           </div>
 
@@ -163,10 +146,10 @@ export const HallOfLegendsView: React.FC = () => {
           <div className="mt-5 pt-4 border-t border-[#1677FF]/20">
             <div className="flex items-center gap-1.5 text-[11px] font-['Cinzel'] font-bold uppercase tracking-wider text-[#00D9FF] mb-2">
               <Scroll className="w-3.5 h-3.5" />
-              <span>Recent Worldwide Legend Claims</span>
+              <span>Recent Worldwide Claims</span>
             </div>
             <div className="flex gap-2.5 overflow-x-auto pb-1">
-              {legendAnnouncements.slice(0, 6).map(ann => (
+              {legendAnnouncements.slice(0, 5).map(ann => (
                 <button
                   key={ann.id}
                   type="button"
@@ -207,32 +190,19 @@ export const HallOfLegendsView: React.FC = () => {
         </div>
       )}
 
-      {/* Search & Status Filters */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 text-[#A9B8CC] absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search 52 worldwide titles, rarities, or holders..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#0A1930] border border-[#1677FF]/30 text-xs text-white placeholder:text-[#A9B8CC]/50 focus:outline-none focus:border-[#00D9FF]"
-          />
-        </div>
-
-        <div className="flex flex-wrap items-center gap-1.5 p-1 bg-[#061225] rounded-xl border border-[#1677FF]/25">
+      {/* Concise Status Filter */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="inline-flex items-center gap-1.5 p-1 bg-[#061225] rounded-xl border border-[#1677FF]/25">
           {[
             { id: 'all', label: `All (${summary.total})` },
-            { id: 'ready', label: `Ready (${summary.readyCount})` },
-            { id: 'unclaimed', label: `Unclaimed (${summary.total - summary.claimedCount})` },
+            { id: 'available', label: `Available (${summary.availableCount})` },
             { id: 'claimed', label: `Claimed (${summary.claimedCount})` },
-            { id: 'mine', label: `Owned (${summary.mineCount})` },
           ].map(item => (
             <button
               key={item.id}
               type="button"
-              onClick={() => setStatusFilter(item.id as any)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap shrink-0 ${
+              onClick={() => setStatusFilter(item.id as 'all' | 'available' | 'claimed')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap shrink-0 ${
                 statusFilter === item.id
                   ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white border border-[#00D9FF]/50 shadow-[0_0_14px_rgba(22,119,255,0.3)]'
                   : 'text-[#A9B8CC] hover:text-white border border-transparent'
@@ -244,37 +214,8 @@ export const HallOfLegendsView: React.FC = () => {
         </div>
       </div>
 
-      {/* Category Tabs */}
-      <div className="flex gap-1.5 overflow-x-auto pb-1">
-        <button
-          type="button"
-          onClick={() => setActiveCategory('all')}
-          className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-colors whitespace-nowrap shrink-0 border ${
-            activeCategory === 'all'
-              ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white border-[#00D9FF]/50 shadow-[0_0_14px_rgba(22,119,255,0.3)]'
-              : 'bg-[#0A1930] text-[#A9B8CC] border-[#1677FF]/25 hover:text-white'
-          }`}
-        >
-          All 8 Pillars
-        </button>
-        {GLOBAL_LEGEND_CATEGORIES.map(cat => (
-          <button
-            key={cat.id}
-            type="button"
-            onClick={() => setActiveCategory(cat.id)}
-            className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-colors whitespace-nowrap shrink-0 border ${
-              activeCategory === cat.id
-                ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white border-[#00D9FF]/50 shadow-[0_0_14px_rgba(22,119,255,0.3)]'
-                : 'bg-[#0A1930] text-[#A9B8CC] border-[#1677FF]/25 hover:text-white'
-            }`}
-          >
-            {cat.label}
-          </button>
-        ))}
-      </div>
-
-      {/* 52 Worldwide Exclusive Achievement Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      {/* 5 Worldwide Exclusive Achievement Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredEntries.map(entry => {
           const rarityMeta = RARITY_FRAME_META[entry.rarity] || RARITY_FRAME_META.Legendary;
           const styleMeta = TITLE_STYLE_META[entry.titleStyle] || TITLE_STYLE_META.gold;
@@ -297,7 +238,6 @@ export const HallOfLegendsView: React.FC = () => {
               }`}
             >
               <div>
-                {/* Top Metadata Line (No pill overload) */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
                     <div
@@ -344,7 +284,7 @@ export const HallOfLegendsView: React.FC = () => {
                         : 'text-[#A9B8CC]'
                     }
                   >
-                    {statusBadgeText(entry.status, entry.ownedByCurrentUser)}
+                    {statusText(entry.status, entry.eligibleToClaim, entry.ownedByCurrentUser)}
                   </span>
                 </div>
 
@@ -399,7 +339,7 @@ export const HallOfLegendsView: React.FC = () => {
                 <div className="flex items-center justify-between text-[11px] font-mono tabular-nums text-[#A9B8CC]">
                   <span className="flex items-center gap-1 text-[#00D9FF]">
                     <Crown className="w-3 h-3" />
-                    {entry.rewardPlayerXp > 0 ? `+${entry.rewardPlayerXp} XP` : 'Prestige Title'}
+                    Worldwide Title
                   </span>
                   <span className="flex items-center gap-1 text-amber-300">
                     <Coins className="w-3 h-3" />+{entry.rewardGold}g
@@ -459,7 +399,7 @@ export const HallOfLegendsView: React.FC = () => {
                     <span>{claimingId === entry.id ? 'VERIFYING WORLD LOCK...' : 'CLAIM WORLDWIDE TITLE'}</span>
                   </button>
                 ) : (
-                  <div className="w-full py-2 rounded-xl bg-[#061225] border border-[#1677FF]/20 text-center text-xs font-semibold text-[#A9B8CC] flex items-center justify-center gap-1.5">
+                  <div className="w-full py-2 rounded-xl bg-[#061225] border border-[#1677FF]/20 text-center text-xs font-semibold text-[#A9B8CC] flex items-center justify-center gap-1.5 tabular-nums">
                     <Lock className="w-3.5 h-3.5 text-[#00D9FF]/70" />
                     <span>Unclaimed Worldwide · {pct}% Complete</span>
                   </div>

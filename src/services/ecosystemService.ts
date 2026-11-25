@@ -1,5 +1,5 @@
 import type { VerifiedActivityMetadata } from '../data/skillTreeData';
-import { getLifequestAuthHeaders } from './unifiedBackendService';
+import { fetchWithTimeout, getLifequestAuthHeaders } from './unifiedBackendService';
 import type {
   CharacterClass,
   CommunityEventPlayerState,
@@ -42,9 +42,10 @@ export const fetchWeeklyBossStateServer = async (
       limit: String(limit),
       ...(timezone ? { timezone } : {}),
     });
-    const res = await fetch(`/api/weekly-boss/state?${qs.toString()}`, {
-      headers: { 'x-lifequest-user-id': userId },
-    });
+    const headers = await getLifequestAuthHeaders(userId, false);
+    const res = await fetchWithTimeout(`/api/weekly-boss/state?${qs.toString()}`, {
+      headers,
+    }, 15000);
     const parsed = await safeJson(res);
     if (!parsed.ok) return { ok: false, error: parsed.data?.error || 'Failed to load Weekly Boss.' };
     return { ok: true, data: parsed.data as WeeklyBossStatePayload };
@@ -65,18 +66,20 @@ export const claimWeeklyBossRewardServer = async (params: {
   error?: string;
 }> => {
   try {
-    const res = await fetch('/api/weekly-boss/claim', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-lifequest-user-id': params.userId,
+    const headers = await getLifequestAuthHeaders(params.userId, true);
+    const res = await fetchWithTimeout(
+      '/api/weekly-boss/claim',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          claimType: params.claimType,
+          claimId: params.claimId,
+          timezone: params.timezone,
+        }),
       },
-      body: JSON.stringify({
-        claimType: params.claimType,
-        claimId: params.claimId,
-        timezone: params.timezone,
-      }),
-    });
+      15000
+    );
     const parsed = await safeJson(res);
     if (!parsed.ok) {
       return { ok: false, error: parsed.data?.error || 'Could not claim boss reward.' };
@@ -413,9 +416,8 @@ export const fetchAiMentorStateServer = async (
   userId: string
 ): Promise<{ ok: boolean; data?: AiMentorStateResponse; error?: string }> => {
   try {
-    const res = await fetch('/api/mentor/state', {
-      headers: { 'x-lifequest-user-id': userId },
-    });
+    const headers = await getLifequestAuthHeaders(userId, false);
+    const res = await fetchWithTimeout('/api/mentor/state', { headers }, 15000);
     const parsed = await safeJson(res);
     if (!parsed.ok) return { ok: false, error: parsed.data?.error || 'Failed to load AI Mentor history.' };
     return { ok: true, data: parsed.data as AiMentorStateResponse };
@@ -435,17 +437,19 @@ export const sendAiMentorMessageServer = async (params: {
   error?: string;
 }> => {
   try {
-    const res = await fetch('/api/mentor/chat', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-lifequest-user-id': params.userId,
+    const headers = await getLifequestAuthHeaders(params.userId, true);
+    const res = await fetchWithTimeout(
+      '/api/mentor/chat',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          message: params.message,
+          playerContext: params.playerContext,
+        }),
       },
-      body: JSON.stringify({
-        message: params.message,
-        playerContext: params.playerContext,
-      }),
-    });
+      30000
+    );
     const parsed = await safeJson(res);
     if (!parsed.ok) return { ok: false, error: parsed.data?.error || 'AI Mentor is currently unavailable.' };
     return {
@@ -454,7 +458,13 @@ export const sendAiMentorMessageServer = async (params: {
       recommendedQuests: parsed.data?.recommendedQuests,
     };
   } catch (err: any) {
-    return { ok: false, error: err?.message || 'Network error reaching AI Mentor.' };
+    const isTimeout = err?.name === 'AbortError';
+    return {
+      ok: false,
+      error: isTimeout
+        ? 'AI Mentor request timed out. Please try again.'
+        : err?.message || 'Network error reaching AI Mentor.',
+    };
   }
 };
 
@@ -463,19 +473,27 @@ export const requestMentorWeeklyAnalysisServer = async (params: {
   playerContext: Record<string, any>;
 }): Promise<{ ok: boolean; analysis?: MentorWeeklyAnalysis; error?: string }> => {
   try {
-    const res = await fetch('/api/mentor/weekly-analysis', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-lifequest-user-id': params.userId,
+    const headers = await getLifequestAuthHeaders(params.userId, true);
+    const res = await fetchWithTimeout(
+      '/api/mentor/weekly-analysis',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ playerContext: params.playerContext }),
       },
-      body: JSON.stringify({ playerContext: params.playerContext }),
-    });
+      30000
+    );
     const parsed = await safeJson(res);
     if (!parsed.ok) return { ok: false, error: parsed.data?.error || 'Could not generate weekly analysis.' };
     return { ok: true, analysis: parsed.data?.analysis };
   } catch (err: any) {
-    return { ok: false, error: err?.message || 'Network error requesting analysis.' };
+    const isTimeout = err?.name === 'AbortError';
+    return {
+      ok: false,
+      error: isTimeout
+        ? 'Weekly analysis timed out. Please try again.'
+        : err?.message || 'Network error requesting analysis.',
+    };
   }
 };
 
@@ -489,14 +507,16 @@ export const acceptMentorQuestServer = async (params: {
   error?: string;
 }> => {
   try {
-    const res = await fetch('/api/mentor/accept-quest', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-lifequest-user-id': params.userId,
+    const headers = await getLifequestAuthHeaders(params.userId, true);
+    const res = await fetchWithTimeout(
+      '/api/mentor/accept-quest',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ questId: params.questId }),
       },
-      body: JSON.stringify({ questId: params.questId }),
-    });
+      15000
+    );
     const parsed = await safeJson(res);
     if (!parsed.ok) return { ok: false, error: parsed.data?.error || 'Could not accept quest.' };
     return {
@@ -515,9 +535,8 @@ export const fetchCommunityEventsStateServer = async (
   userId: string
 ): Promise<{ ok: boolean; data?: CommunityEventPlayerState; error?: string }> => {
   try {
-    const res = await fetch('/api/community-events/state', {
-      headers: { 'x-lifequest-user-id': userId },
-    });
+    const headers = await getLifequestAuthHeaders(userId, false);
+    const res = await fetchWithTimeout('/api/community-events/state', { headers }, 15000);
     const parsed = await safeJson(res);
     if (!parsed.ok) return { ok: false, error: parsed.data?.error || 'Failed to load Community Event.' };
     return { ok: true, data: parsed.data as CommunityEventPlayerState };
@@ -536,14 +555,16 @@ export const claimCommunityMilestoneServer = async (params: {
   error?: string;
 }> => {
   try {
-    const res = await fetch('/api/community-events/claim-milestone', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-lifequest-user-id': params.userId,
+    const headers = await getLifequestAuthHeaders(params.userId, true);
+    const res = await fetchWithTimeout(
+      '/api/community-events/claim-milestone',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ milestoneId: params.milestoneId }),
       },
-      body: JSON.stringify({ milestoneId: params.milestoneId }),
-    });
+      15000
+    );
     const parsed = await safeJson(res);
     if (!parsed.ok) return { ok: false, error: parsed.data?.error || 'Could not claim community milestone.' };
     return {
@@ -663,23 +684,25 @@ export const dispatchVerifiedEcosystemActivityServer = async (params: {
   skillLevelUp?: { attributeId: SkillAttributeId; newLevel: number };
 }) => {
   try {
-    const res = await fetch('/api/ecosystem/dispatch-activity', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-lifequest-user-id': params.userId,
+    const headers = await getLifequestAuthHeaders(params.userId, true);
+    const res = await fetchWithTimeout(
+      '/api/ecosystem/dispatch-activity',
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          username: params.username,
+          activityType: params.activityType,
+          idempotencyKey: params.idempotencyKey,
+          sourceType: params.sourceType,
+          sourceId: params.sourceId,
+          metadata: params.metadata || {},
+          timezone: params.timezone || 'UTC',
+          skillLevelUp: params.skillLevelUp,
+        }),
       },
-      body: JSON.stringify({
-        username: params.username,
-        activityType: params.activityType,
-        idempotencyKey: params.idempotencyKey,
-        sourceType: params.sourceType,
-        sourceId: params.sourceId,
-        metadata: params.metadata || {},
-        timezone: params.timezone || 'UTC',
-        skillLevelUp: params.skillLevelUp,
-      }),
-    });
+      15000
+    );
     return await safeJson(res);
   } catch {
     return { ok: false, status: 0, data: null };

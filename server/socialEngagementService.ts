@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import type { Express, Request, Response } from 'express';
-import { resolveVerifiedCaller } from './authGuard.ts';
+import { resolveOptionalViewerId, resolveVerifiedCaller } from './authGuard.ts';
 import {
   COOP_FRIENDSHIP_MISSIONS,
   DAILY_CALENDAR_REWARDS,
@@ -917,18 +917,19 @@ export function createSocialEngagementService(
         };
       });
 
+      let updatedWallet: any = undefined;
       if (outcome.status === 200 && outcome.rewardDef && deps?.economyCards) {
         const rd = outcome.rewardDef;
         const dedupe = `cal:${monthKey}:${outcome.dayClaimed}:${auth.userId}`;
         if (rd.rewardType === 'gold' || rd.rewardType === 'quest_bonus') {
-          await deps.economyCards.creditGold(
+          updatedWallet = await deps.economyCards.creditGold(
             auth.userId,
             rd.amount,
             `Daily Calendar Day ${rd.dayNumber}`,
             dedupe
           );
         } else if (rd.rewardType === 'fragments') {
-          await deps.economyCards.creditFragments(
+          updatedWallet = await deps.economyCards.creditFragments(
             auth.userId,
             rd.amount,
             `Daily Calendar Day ${rd.dayNumber}`,
@@ -949,7 +950,9 @@ export function createSocialEngagementService(
         }
       }
 
-      res.status(outcome.status).json(outcome.payload);
+      res.status(outcome.status).json(
+        updatedWallet ? { ...outcome.payload, wallet: updatedWallet } : outcome.payload
+      );
     });
 
     app.post('/api/calendar/claim-weekly-milestone', async (req: Request, res: Response) => {
@@ -1002,6 +1005,7 @@ export function createSocialEngagementService(
         };
       });
 
+      let updatedWallet: any = undefined;
       if (outcome.status === 200 && deps?.economyCards) {
         await deps.economyCards.creditGold(
           auth.userId,
@@ -1009,7 +1013,7 @@ export function createSocialEngagementService(
           `Calendar Milestone: ${ms.title}`,
           `cal_wk_g:${monthKey}:${ms.id}:${auth.userId}`
         );
-        await deps.economyCards.creditFragments(
+        updatedWallet = await deps.economyCards.creditFragments(
           auth.userId,
           ms.rewardFragments,
           `Calendar Milestone: ${ms.title}`,
@@ -1017,7 +1021,9 @@ export function createSocialEngagementService(
         );
       }
 
-      res.status(outcome.status).json(outcome.payload);
+      res.status(outcome.status).json(
+        updatedWallet ? { ...outcome.payload, wallet: updatedWallet } : outcome.payload
+      );
     });
 
     // --- AAA 15: SEASONAL STATISTICS RECAP ---
@@ -1039,9 +1045,9 @@ export function createSocialEngagementService(
       res.json({ success: true, recap });
     });
 
-    app.get('/api/seasons/recap/public/:targetUserId', (req: Request, res: Response) => {
+    app.get('/api/seasons/recap/public/:targetUserId', async (req: Request, res: Response) => {
       const targetUserId = String(req.params.targetUserId || '').trim();
-      const viewerId = String(req.headers['x-lifequest-user-id'] || '').trim() || null;
+      const viewerId = await resolveOptionalViewerId(req);
       const seasonId = typeof req.query.seasonId === 'string' ? req.query.seasonId.trim() : undefined;
       if (!targetUserId) {
         res.status(400).json({ success: false, error: 'Missing targetUserId.' });
