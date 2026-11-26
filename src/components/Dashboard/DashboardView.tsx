@@ -85,17 +85,17 @@ export const DashboardView: React.FC = () => {
         {/* Character Identity Card */}
         <section
           aria-label="Character Identity"
-          className="xl:col-span-4 rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/28 p-5 sm:p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)] space-y-5"
+          className="xl:col-span-4 rounded-2xl bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 p-5 sm:p-6 shadow-[0_12px_32px_rgba(10,6,20,0.65)] space-y-5"
         >
-          <div className="flex items-center justify-between gap-2 pb-3 border-b border-[#1677FF]/20">
-            <h2 className="font-['Cinzel'] font-bold text-sm tracking-wider uppercase text-[#00D9FF] flex items-center gap-2">
+          <div className="flex items-center justify-between gap-2 pb-3 border-b border-[#6638B8]/25">
+            <h2 className="font-['Cinzel'] font-bold text-sm tracking-wider uppercase text-[#FFD978] flex items-center gap-2">
               <User className="w-4 h-4" />
               Character Identity
             </h2>
             <button
               type="button"
               onClick={() => setActiveTab('character')}
-              className="text-xs font-semibold text-[#A9B8CC] hover:text-[#00D9FF] transition-colors whitespace-nowrap"
+              className="text-xs font-semibold text-[#BEB4D6] hover:text-[#FFD978] transition-colors whitespace-nowrap"
             >
               Customize →
             </button>
@@ -110,14 +110,14 @@ export const DashboardView: React.FC = () => {
               prestigeTier={prestigeTier}
             />
             <div className="min-w-0 space-y-0.5">
-              <h3 className="font-['Cinzel'] font-bold text-base text-white truncate">
+              <h3 className="font-['Cinzel'] font-bold text-base text-[#F7F4FF] truncate">
                 {user?.characterName || user?.username || 'Champion'}
               </h3>
-              <p className="text-xs text-[#00D9FF] font-semibold truncate">
+              <p className="text-xs text-[#A875FF] font-semibold truncate">
                 {equippedIdentityTitle ? equippedIdentityTitle.name : heroDef.title}
                 {equippedSecondaryTitle ? ` · ${equippedSecondaryTitle.name}` : ''}
               </p>
-              <p className="text-[11px] text-[#A9B8CC] tabular-nums">
+              <p className="text-[11px] text-[#BEB4D6] tabular-nums">
                 Level {stats.level} · {user?.characterClass || 'Warrior'}
                 {prestigeTier > 0 ? ` · Prestige ${prestigeTier}` : ''}
               </p>
@@ -127,31 +127,31 @@ export const DashboardView: React.FC = () => {
           {/* Level & XP Progress */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-xs font-mono tabular-nums">
-              <span className="text-[#A9B8CC]">Experience</span>
-              <span className="text-[#00D9FF] font-bold">
+              <span className="text-[#BEB4D6]">Experience</span>
+              <span className="text-[#FFD978] font-bold">
                 {stats.playerXP.toLocaleString()} / {stats.playerXPNextLevel.toLocaleString()} XP ({xpPercent}%)
               </span>
             </div>
-            <div className="w-full h-2 rounded-full bg-[#061225] border border-[#1677FF]/30 overflow-hidden">
+            <div className="w-full h-2 rounded-full bg-[#100D1C] border border-[#6638B8]/35 overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-[#1677FF] to-[#00D9FF] transition-all duration-500"
+                className="h-full bg-gradient-to-r from-[#6638B8] via-[#A875FF] to-[#FFD978] transition-all duration-500"
                 style={{ width: `${xpPercent}%` }}
               />
             </div>
           </div>
 
           {/* Reputation Summary */}
-          <div className="p-3.5 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 flex items-center justify-between gap-3">
+          <div className="p-3.5 rounded-xl bg-[#19122B] border border-[#E7B94F]/30 flex items-center justify-between gap-3">
             <div className="min-w-0">
-              <span className="text-[10px] uppercase tracking-wider text-[#00D9FF] font-semibold flex items-center gap-1">
+              <span className="text-[10px] uppercase tracking-wider text-[#E7B94F] font-semibold flex items-center gap-1">
                 <Star className="w-3 h-3" />
                 Realm Reputation
               </span>
-              <span className="text-xs font-bold text-white block truncate mt-0.5">
+              <span className="text-xs font-bold text-[#F7F4FF] block truncate mt-0.5">
                 {reputationTier}
               </span>
             </div>
-            <span className="font-mono font-black text-lg text-[#00D9FF] tabular-nums shrink-0">
+            <span className="font-mono font-black text-lg text-[#FFD978] tabular-nums shrink-0">
               {reputationScore.toLocaleString()}
             </span>
           </div>
@@ -159,10 +159,10 @@ export const DashboardView: React.FC = () => {
           {/* Featured Badges (Max 4) */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-[11px] font-['Cinzel'] uppercase tracking-wider text-[#A9B8CC]">
+              <span className="text-[11px] font-['Cinzel'] uppercase tracking-wider text-[#BEB4D6]">
                 Featured Badges
               </span>
-              <span className="text-[11px] text-[#A9B8CC]/70 tabular-nums">
+              <span className="text-[11px] text-[#BEB4D6]/70 tabular-nums">
                 {featuredBadges.length}/4
               </span>
             </div>
@@ -170,7 +170,7 @@ export const DashboardView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setActiveTab('character')}
-                className="w-full p-3 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 hover:border-[#00D9FF]/45 text-left text-xs text-[#A9B8CC] transition-colors"
+                className="w-full p-3 rounded-xl bg-[#19122B] border border-[#6638B8]/30 hover:border-[#FFD978]/50 text-left text-xs text-[#BEB4D6] transition-colors"
               >
                 {unlockedBadges.length > 0
                   ? `You have ${unlockedBadges.length} unlocked badge${unlockedBadges.length > 1 ? 's' : ''}. Feature up to 4 on your profile.`
@@ -183,12 +183,12 @@ export const DashboardView: React.FC = () => {
                   return (
                     <div
                       key={badge.id}
-                      className="p-2.5 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 min-w-0"
+                      className="p-2.5 rounded-xl bg-[#19122B] border border-[#6638B8]/30 min-w-0"
                     >
                       <span className={`text-[9px] font-bold uppercase block ${rStyle.text}`}>
                         {badge.rarity}
                       </span>
-                      <span className="text-xs font-semibold text-white truncate block mt-0.5">
+                      <span className="text-xs font-semibold text-[#F7F4FF] truncate block mt-0.5">
                         {badge.name}
                       </span>
                     </div>
@@ -210,72 +210,72 @@ export const DashboardView: React.FC = () => {
         aria-label="Progression Highlights"
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
       >
-        {/* 1. Active Fitness Goal */}
+        {/* 1. Active Fitness Goal (Emerald) */}
         <button
           type="button"
           onClick={() => setActiveTab('fitness')}
-          className="p-4 rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/25 hover:border-[#00D9FF]/50 hover:shadow-[0_0_20px_rgba(0,217,255,0.12)] text-left transition-all space-y-1.5"
+          className="p-4 rounded-2xl bg-[#24143D]/90 backdrop-blur-md border border-[#35D69A]/30 hover:border-[#35D69A]/65 hover:shadow-[0_0_20px_rgba(53,214,154,0.16)] text-left transition-all space-y-1.5"
         >
-          <span className="text-[11px] font-['Cinzel'] font-bold uppercase tracking-wider text-[#00D9FF] flex items-center gap-1.5">
+          <span className="text-[11px] font-['Cinzel'] font-bold uppercase tracking-wider text-[#35D69A] flex items-center gap-1.5">
             <Target className="w-3.5 h-3.5" />
             Active Fitness Goal
           </span>
-          <p className="text-sm font-bold text-white capitalize truncate">{activeGoalLabel}</p>
-          <p className="text-xs text-[#A9B8CC] tabular-nums">
+          <p className="text-sm font-bold text-[#F7F4FF] capitalize truncate">{activeGoalLabel}</p>
+          <p className="text-xs text-[#BEB4D6] tabular-nums">
             {fitnessSessions.length} logged session{fitnessSessions.length === 1 ? '' : 's'} · {stats.totalVerifiedReps.toLocaleString()} AI reps
           </p>
         </button>
 
-        {/* 2. Current Streak */}
+        {/* 2. Current Streak (Warm Amber) */}
         <button
           type="button"
           onClick={() => setActiveTab('quests')}
-          className="p-4 rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/25 hover:border-[#00D9FF]/50 hover:shadow-[0_0_20px_rgba(0,217,255,0.12)] text-left transition-all space-y-1.5"
+          className="p-4 rounded-2xl bg-[#24143D]/90 backdrop-blur-md border border-[#FFAA45]/30 hover:border-[#FFAA45]/65 hover:shadow-[0_0_20px_rgba(255,170,69,0.16)] text-left transition-all space-y-1.5"
         >
-          <span className="text-[11px] font-['Cinzel'] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+          <span className="text-[11px] font-['Cinzel'] font-bold uppercase tracking-wider text-[#FFAA45] flex items-center gap-1.5">
             <Flame className="w-3.5 h-3.5" />
             Current Streak
           </span>
-          <p className="text-sm font-bold text-white tabular-nums">
+          <p className="text-sm font-bold text-[#F7F4FF] tabular-nums">
             {stats.currentStreak} {stats.currentStreak === 1 ? 'Day' : 'Days'} Active
           </p>
-          <p className="text-xs text-[#A9B8CC] tabular-nums">
+          <p className="text-xs text-[#BEB4D6] tabular-nums">
             Longest Streak: {bestStreak} {bestStreak === 1 ? 'day' : 'days'}
           </p>
         </button>
 
-        {/* 3. Recent Achievements & Badges */}
+        {/* 3. Recent Achievements & Badges (Gold + Violet) */}
         <button
           type="button"
           onClick={() => setActiveTab('achievements')}
-          className="p-4 rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/25 hover:border-[#00D9FF]/50 hover:shadow-[0_0_20px_rgba(0,217,255,0.12)] text-left transition-all space-y-1.5"
+          className="p-4 rounded-2xl bg-[#24143D]/90 backdrop-blur-md border border-[#E7B94F]/30 hover:border-[#FFD978]/65 hover:shadow-[0_0_20px_rgba(231,185,79,0.18)] text-left transition-all space-y-1.5"
         >
-          <span className="text-[11px] font-['Cinzel'] font-bold uppercase tracking-wider text-[#1677FF] flex items-center gap-1.5">
-            <Award className="w-3.5 h-3.5 text-[#00D9FF]" />
+          <span className="text-[11px] font-['Cinzel'] font-bold uppercase tracking-wider text-[#FFD978] flex items-center gap-1.5">
+            <Award className="w-3.5 h-3.5 text-[#E7B94F]" />
             Recent Honors
           </span>
-          <p className="text-sm font-bold text-white truncate">
+          <p className="text-sm font-bold text-[#F7F4FF] truncate">
             {unlockedBadges[0]?.name || unlockedAchievements[0]?.name || 'No honors unlocked yet'}
           </p>
-          <p className="text-xs text-[#A9B8CC] tabular-nums">
+          <p className="text-xs text-[#BEB4D6] tabular-nums">
             {unlockedAchievements.length} achievements · {unlockedBadges.length} rare badges
           </p>
         </button>
 
-        {/* 4. Personal Record Highlight */}
+        {/* 4. Personal Record Highlight (Bright Amethyst + Gold) */}
         <button
           type="button"
           onClick={() => setActiveTab(topPersonalRecord ? 'museum' : 'fitness')}
-          className="p-4 rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/25 hover:border-[#00D9FF]/50 hover:shadow-[0_0_20px_rgba(0,217,255,0.12)] text-left transition-all space-y-1.5"
+          className="p-4 rounded-2xl bg-[#24143D]/90 backdrop-blur-md border border-[#A875FF]/30 hover:border-[#A875FF]/65 hover:shadow-[0_0_20px_rgba(168,117,255,0.18)] text-left transition-all space-y-1.5"
         >
-          <span className="text-[11px] font-['Cinzel'] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+          <span className="text-[11px] font-['Cinzel'] font-bold uppercase tracking-wider text-[#A875FF] flex items-center gap-1.5">
             <Landmark className="w-3.5 h-3.5" />
             Personal Record
           </span>
-          <p className="text-sm font-bold text-white truncate">
+          <p className="text-sm font-bold text-[#F7F4FF] truncate">
             {topPersonalRecord ? topPersonalRecord.title : 'Record Your First Milestone'}
           </p>
-          <p className="text-xs text-[#A9B8CC] truncate tabular-nums">
+          <p className="text-xs text-[#BEB4D6] truncate tabular-nums">
             {topPersonalRecord
               ? `${topPersonalRecord.displayValue} · Records Museum`
               : 'Log a verified workout to enshrine a personal best'}

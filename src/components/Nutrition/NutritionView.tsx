@@ -236,7 +236,7 @@ export const NutritionView: React.FC = () => {
       loggedRange: `${dailySummary.energyMin}–${dailySummary.energyMax} kcal`,
       targetMid: dailyPlan.nutrients.find(n => n.id === 'energy')?.targetMid,
       targetText: dailyPlan.nutrients.find(n => n.id === 'energy')?.recommendedRange || '',
-      barColor: 'bg-amber-400',
+      barColor: 'bg-[#FFAA45]',
     },
     {
       id: 'protein' as const,
@@ -245,7 +245,7 @@ export const NutritionView: React.FC = () => {
       loggedRange: `${dailySummary.proteinMin}–${dailySummary.proteinMax} g`,
       targetMid: dailyPlan.nutrients.find(n => n.id === 'protein')?.targetMid || 55,
       targetText: `${dailyPlan.nutrients.find(n => n.id === 'protein')?.recommendedRange || '45–60'} g`,
-      barColor: 'bg-cyan-400',
+      barColor: 'bg-[#38D9F5]',
     },
     {
       id: 'carbs' as const,
@@ -254,7 +254,7 @@ export const NutritionView: React.FC = () => {
       loggedRange: `${dailySummary.carbsMin}–${dailySummary.carbsMax} g`,
       targetMid: dailyPlan.nutrients.find(n => n.id === 'carbs')?.targetMid || 240,
       targetText: dailyPlan.nutrients.find(n => n.id === 'carbs')?.recommendedRange || '45–60% energy',
-      barColor: 'bg-[#1677FF]',
+      barColor: 'bg-[#65A9FF]',
     },
     {
       id: 'fats' as const,
@@ -263,7 +263,7 @@ export const NutritionView: React.FC = () => {
       loggedRange: `${dailySummary.fatMin}–${dailySummary.fatMax} g`,
       targetMid: dailyPlan.nutrients.find(n => n.id === 'fats')?.targetMid || 60,
       targetText: dailyPlan.nutrients.find(n => n.id === 'fats')?.recommendedRange || '20–30% energy',
-      barColor: 'bg-emerald-400',
+      barColor: 'bg-[#35D69A]',
     },
     {
       id: 'fibre' as const,
@@ -272,7 +272,7 @@ export const NutritionView: React.FC = () => {
       loggedRange: `${dailySummary.fibreMin}–${dailySummary.fibreMax} g`,
       targetMid: dailyPlan.nutrients.find(n => n.id === 'fibre')?.targetMid || 25,
       targetText: `${dailyPlan.nutrients.find(n => n.id === 'fibre')?.recommendedRange || '25–35'} g`,
-      barColor: 'bg-teal-400',
+      barColor: 'bg-[#A875FF]',
     },
   ];
 
@@ -281,22 +281,22 @@ export const NutritionView: React.FC = () => {
       {/* Banner */}
       <div
         data-tutorial-id="nutrition-tracker"
-        className="rounded-2xl bg-gradient-to-r from-[#0A1930] via-[#102440] to-[#0A1930] border border-[#1677FF]/35 p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)] backdrop-blur-md"
+        className="rounded-2xl bg-gradient-to-r from-[#19122B] via-[#24143D] to-[#19122B] border border-[#35D69A]/35 p-6 shadow-[0_12px_32px_rgba(16,13,28,0.65)] backdrop-blur-md"
       >
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-[#00D9FF] bg-[#061225]/80 border border-[#00D9FF]/35 px-2.5 py-0.5 rounded">
+              <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-[#35D69A] bg-[#100D1C]/80 border border-[#35D69A]/40 px-2.5 py-0.5 rounded">
                 Ocean of Balance
               </span>
-              <span className="text-xs text-[#A9B8CC] font-semibold">
+              <span className="text-xs text-[#BEB4D6] font-semibold">
                 WHO & ICMR–NIN 2024 Educational Nutrition
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-white">
+            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F7F4FF]">
               PERSONALIZED DAILY NUTRITION
             </h1>
-            <p className="text-xs sm:text-sm text-[#A9B8CC] max-w-2xl mt-1">
+            <p className="text-xs sm:text-sm text-[#BEB4D6] max-w-2xl mt-1">
               Explore educational daily nourishment ranges tailored to your profile, track meal variety and hydration without guilt or restriction, or snap a meal photo in Aether Vision.
             </p>
           </div>
@@ -305,7 +305,7 @@ export const NutritionView: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveTab('aether-vision')}
-              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white font-['Cinzel'] font-bold text-xs tracking-wider shadow-[0_0_18px_rgba(22,119,255,0.35)] flex items-center gap-2 transition-all"
+              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#35D69A] to-[#38D9F5] hover:brightness-110 text-[#100D1C] font-['Cinzel'] font-bold text-xs tracking-wider shadow-[0_0_18px_rgba(53,214,154,0.35)] flex items-center gap-2 transition-all"
             >
               <Camera className="w-4 h-4" />
               ANALYZE MEAL PHOTO (AI VISION)
@@ -318,15 +318,15 @@ export const NutritionView: React.FC = () => {
       {dailyPlan.missingFields.length > 0 && (
         <form
           onSubmit={handleSaveMissingProfileFields}
-          className="bg-[#102440]/90 backdrop-blur-md border border-amber-500/45 rounded-2xl p-5 shadow-md space-y-4"
+          className="bg-[#24143D]/90 backdrop-blur-md border border-[#FFAA45]/45 rounded-2xl p-5 shadow-md space-y-4"
         >
           <div className="flex items-start gap-3">
-            <Info className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+            <Info className="w-5 h-5 text-[#FFAA45] shrink-0 mt-0.5" />
             <div>
-              <h2 className="font-['Cinzel'] font-bold text-sm text-white">
+              <h2 className="font-['Cinzel'] font-bold text-sm text-[#F7F4FF]">
                 REFINE YOUR DAILY NUTRITION REFERENCE
               </h2>
-              <p className="text-xs text-[#A9B8CC] mt-0.5">
+              <p className="text-xs text-[#BEB4D6] mt-0.5">
                 Add only the missing profile details below so we can provide appropriate WHO / ICMR–NIN 2024 age-group or adult educational guidance. Already saved details are preserved automatically.
               </p>
             </div>
@@ -336,7 +336,7 @@ export const NutritionView: React.FC = () => {
             {dailyPlan.missingFields.includes('age') && (
               <>
                 <div>
-                  <label className="block text-[#00D9FF] font-semibold mb-1">Age (Years)</label>
+                  <label className="block text-[#35D69A] font-semibold mb-1">Age (Years)</label>
                   <input
                     type="number"
                     min={5}
@@ -344,15 +344,15 @@ export const NutritionView: React.FC = () => {
                     value={inlineAgeYears}
                     onChange={e => setInlineAgeYears(e.target.value)}
                     placeholder="e.g. 24"
-                    className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] focus:outline-none rounded-xl px-3 py-2 text-white"
+                    className="w-full bg-[#19122B] border border-[#6638B8]/40 focus:border-[#35D69A] focus:outline-none rounded-xl px-3 py-2 text-[#F7F4FF]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#00D9FF] font-semibold mb-1">Or Age Group</label>
+                  <label className="block text-[#35D69A] font-semibold mb-1">Or Age Group</label>
                   <select
                     value={inlineAgeGroup}
                     onChange={e => setInlineAgeGroup(e.target.value as AgeGroup | '')}
-                    className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] focus:outline-none rounded-xl px-3 py-2 text-white"
+                    className="w-full bg-[#19122B] border border-[#6638B8]/40 focus:border-[#35D69A] focus:outline-none rounded-xl px-3 py-2 text-[#F7F4FF]"
                   >
                     <option value="">Select group</option>
                     <option value="child">Child (5–9 yrs)</option>
@@ -367,13 +367,13 @@ export const NutritionView: React.FC = () => {
 
             {dailyPlan.missingFields.includes('biologicalSex') && (
               <div>
-                <label className="block text-[#00D9FF] font-semibold mb-1">
+                <label className="block text-[#35D69A] font-semibold mb-1">
                   Reference Physiology (Adult Calc)
                 </label>
                 <select
                   value={inlineSex}
                   onChange={e => setInlineSex(e.target.value as BiologicalSex | '')}
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] focus:outline-none rounded-xl px-3 py-2 text-white"
+                  className="w-full bg-[#19122B] border border-[#6638B8]/40 focus:border-[#35D69A] focus:outline-none rounded-xl px-3 py-2 text-[#F7F4FF]"
                 >
                   <option value="">Select option</option>
                   <option value="female">Female</option>
@@ -386,7 +386,7 @@ export const NutritionView: React.FC = () => {
 
             {dailyPlan.missingFields.includes('height') && (
               <div>
-                <label className="block text-[#00D9FF] font-semibold mb-1">
+                <label className="block text-[#35D69A] font-semibold mb-1">
                   Height ({user?.preferredUnits === 'imperial' ? 'ft/in' : 'cm'})
                 </label>
                 <input
@@ -394,14 +394,14 @@ export const NutritionView: React.FC = () => {
                   value={inlineHeight}
                   onChange={e => setInlineHeight(e.target.value)}
                   placeholder={user?.preferredUnits === 'imperial' ? 'e.g. 5 ft 8 in' : 'e.g. 170 cm'}
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] focus:outline-none rounded-xl px-3 py-2 text-white"
+                  className="w-full bg-[#19122B] border border-[#6638B8]/40 focus:border-[#35D69A] focus:outline-none rounded-xl px-3 py-2 text-[#F7F4FF]"
                 />
               </div>
             )}
 
             {dailyPlan.missingFields.includes('weight') && (
               <div>
-                <label className="block text-[#00D9FF] font-semibold mb-1">
+                <label className="block text-[#35D69A] font-semibold mb-1">
                   Weight ({user?.preferredUnits === 'imperial' ? 'lb' : 'kg'})
                 </label>
                 <input
@@ -409,7 +409,7 @@ export const NutritionView: React.FC = () => {
                   value={inlineWeight}
                   onChange={e => setInlineWeight(e.target.value)}
                   placeholder={user?.preferredUnits === 'imperial' ? 'e.g. 150 lb' : 'e.g. 68 kg'}
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] focus:outline-none rounded-xl px-3 py-2 text-white"
+                  className="w-full bg-[#19122B] border border-[#6638B8]/40 focus:border-[#35D69A] focus:outline-none rounded-xl px-3 py-2 text-[#F7F4FF]"
                 />
               </div>
             )}
@@ -417,16 +417,16 @@ export const NutritionView: React.FC = () => {
 
           <div className="flex flex-wrap items-center justify-between gap-3">
             {profileSaveMsg ? (
-              <span className="text-xs text-emerald-300">{profileSaveMsg}</span>
+              <span className="text-xs text-[#35D69A]">{profileSaveMsg}</span>
             ) : (
-              <span className="text-[11px] text-[#A9B8CC]">
+              <span className="text-[11px] text-[#BEB4D6]">
                 Optional for privacy: if omitted, safe general reference ranges are shown.
               </span>
             )}
             <button
               type="submit"
               disabled={isSavingProfile}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white font-bold text-xs disabled:opacity-60 shadow-[0_0_12px_rgba(22,119,255,0.3)]"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#35D69A] to-[#38D9F5] hover:brightness-110 text-[#100D1C] font-bold text-xs disabled:opacity-60 shadow-[0_0_12px_rgba(53,214,154,0.3)]"
             >
               {isSavingProfile ? 'Saving...' : 'Save Nutrition Details'}
             </button>
@@ -437,28 +437,28 @@ export const NutritionView: React.FC = () => {
       {/* ===================================================================== */}
       {/* TODAY'S NOURISHMENT SUMMARY + FOOD GROUPS + MEAL-BY-MEAL BREAKDOWN    */}
       {/* ===================================================================== */}
-      <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 rounded-2xl p-6 shadow-[0_12px_32px_rgba(2,8,20,0.5)] space-y-5">
+      <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 rounded-2xl p-6 shadow-[0_12px_32px_rgba(16,13,28,0.55)] space-y-5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div>
-            <h2 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-              <Utensils className="w-4 h-4 text-[#00D9FF]" />
+            <h2 className="font-['Cinzel'] font-bold text-base text-[#F7F4FF] flex items-center gap-2">
+              <Utensils className="w-4 h-4 text-[#35D69A]" />
               TODAY&apos;S NOURISHMENT & PROGRESS OVERVIEW
             </h2>
-            <p className="text-xs text-cyan-200/90 mt-0.5">{dailyPlan.profileSummaryText}</p>
+            <p className="text-xs text-[#38D9F5] mt-0.5">{dailyPlan.profileSummaryText}</p>
           </div>
-          <div className="flex items-center gap-2 text-xs text-slate-300">
-            <Heart className="w-4 h-4 text-emerald-400 shrink-0" />
+          <div className="flex items-center gap-2 text-xs text-[#BEB4D6]">
+            <Heart className="w-4 h-4 text-[#35D69A] shrink-0" />
             <span>Calm educational tracking — no shame, no restrictive scoring.</span>
           </div>
         </div>
 
         {/* Minor Safeguard Banner */}
         {dailyPlan.isMinor && (
-          <div className="p-3.5 rounded-xl bg-emerald-950/35 border border-emerald-700/60 text-xs text-emerald-100 flex items-start gap-2.5">
-            <Shield className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+          <div className="p-3.5 rounded-xl bg-[#19122B]/90 border border-[#35D69A]/50 text-xs text-[#F7F4FF] flex items-start gap-2.5">
+            <Shield className="w-4 h-4 text-[#35D69A] shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-emerald-300">Youth Growth-Safe Guidance Active</p>
-              <p className="mt-0.5 leading-relaxed">{dailyPlan.clinicalGuidanceNote}</p>
+              <p className="font-semibold text-[#35D69A]">Youth Growth-Safe Guidance Active</p>
+              <p className="mt-0.5 leading-relaxed text-[#BEB4D6]">{dailyPlan.clinicalGuidanceNote}</p>
             </div>
           </div>
         )}
@@ -473,21 +473,21 @@ export const NutritionView: React.FC = () => {
             return (
               <div
                 key={row.id}
-                className="p-3.5 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 space-y-2"
+                className="p-3.5 rounded-xl bg-[#19122B] border border-[#6638B8]/30 space-y-2"
               >
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-white">{row.label}</span>
-                  <span className="font-mono text-[11px] text-[#00D9FF]">
+                  <span className="font-semibold text-[#F7F4FF]">{row.label}</span>
+                  <span className="font-mono text-[11px] text-[#35D69A]">
                     {dailySummary.hasAnyEstimatedMacros ? row.loggedRange : '0 logged'}
                   </span>
                 </div>
-                <div className="h-2 rounded-full bg-[#061225] overflow-hidden">
+                <div className="h-2 rounded-full bg-[#100D1C] overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all ${row.barColor}`}
                     style={{ width: `${dailySummary.hasAnyEstimatedMacros ? Math.max(4, pct) : 0}%` }}
                   />
                 </div>
-                <p className="text-[11px] text-[#A9B8CC]">
+                <p className="text-[11px] text-[#BEB4D6]">
                   Reference: {row.targetText}
                 </p>
               </div>
@@ -497,12 +497,12 @@ export const NutritionView: React.FC = () => {
 
         {/* Food Groups & Today's Meals Summary */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 pt-2">
-          <div className="lg:col-span-5 p-4 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 space-y-2.5">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#00D9FF]">
+          <div className="lg:col-span-5 p-4 rounded-xl bg-[#19122B] border border-[#6638B8]/30 space-y-2.5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#35D69A]">
               Food Groups Represented Today ({dailySummary.foodGroupsToday.length})
             </h3>
             {dailySummary.foodGroupsToday.length === 0 ? (
-              <p className="text-xs text-[#A9B8CC] leading-relaxed">
+              <p className="text-xs text-[#BEB4D6] leading-relaxed">
                 Log a meal or analyze a meal photo to see your daily food-group variety (whole grains, pulses/protein, produce, healthy fats).
               </p>
             ) : (
@@ -510,56 +510,56 @@ export const NutritionView: React.FC = () => {
                 {dailySummary.foodGroupsToday.map(fg => (
                   <span
                     key={fg}
-                    className="px-2.5 py-1 rounded-lg bg-[#061225] border border-[#1677FF]/35 text-xs text-[#00D9FF]"
+                    className="px-2.5 py-1 rounded-lg bg-[#100D1C] border border-[#35D69A]/35 text-xs text-[#35D69A]"
                   >
                     {fg}
                   </span>
                 ))}
               </div>
             )}
-            <p className="text-[11px] text-[#A9B8CC] pt-1">
+            <p className="text-[11px] text-[#BEB4D6] pt-1">
               {dailySummary.imageEstimatedMealsCount > 0
                 ? `${dailySummary.imageEstimatedMealsCount} meal(s) today use visual image-based estimates (approximate ranges).`
                 : 'Tip: Use Aether Vision meal photo analysis for approximate macro, fibre, and micronutrient breakdowns.'}
             </p>
           </div>
 
-          <div className="lg:col-span-7 p-4 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 space-y-2.5">
+          <div className="lg:col-span-7 p-4 rounded-xl bg-[#19122B] border border-[#6638B8]/30 space-y-2.5">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#00D9FF]">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#38D9F5]">
                 Today&apos;s Meal-by-Meal Breakdown ({dailySummary.mealsToday.length})
               </h3>
-              <span className="text-[11px] text-[#A9B8CC]">
+              <span className="text-[11px] text-[#BEB4D6]">
                 Hydration: {waterGlasses} glasses today
               </span>
             </div>
             {dailySummary.mealsToday.length === 0 ? (
-              <p className="text-xs text-[#A9B8CC]">No meals recorded yet today.</p>
+              <p className="text-xs text-[#BEB4D6]">No meals recorded yet today.</p>
             ) : (
               <div className="space-y-2 max-h-44 overflow-y-auto pr-1">
                 {dailySummary.mealsToday.map(m => (
                   <div
                     key={m.id}
-                    className="p-2.5 rounded-lg bg-[#102440] border border-[#1677FF]/25 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-1.5"
+                    className="p-2.5 rounded-lg bg-[#24143D] border border-[#6638B8]/30 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-1.5"
                   >
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-white">{m.title}</span>
-                        <span className="text-[10px] uppercase text-[#00D9FF]">{m.mealType}</span>
+                        <span className="font-semibold text-[#F7F4FF]">{m.title}</span>
+                        <span className="text-[10px] uppercase text-[#35D69A]">{m.mealType}</span>
                         {m.nutritionEstimate?.isImageEstimate && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-950/70 border border-amber-700/60 text-amber-200">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#100D1C] border border-[#FFAA45]/50 text-[#FFAA45]">
                             Image-based estimate
                           </span>
                         )}
                       </div>
                       {m.foodItems?.length > 0 && (
-                        <p className="text-[11px] text-[#A9B8CC] truncate max-w-md">
+                        <p className="text-[11px] text-[#BEB4D6] truncate max-w-md">
                           {m.foodItems.join(', ')}
                         </p>
                       )}
                     </div>
                     {m.nutritionEstimate && (
-                      <span className="text-[11px] font-mono text-[#00D9FF] shrink-0">
+                      <span className="text-[11px] font-mono text-[#38D9F5] shrink-0">
                         ~{m.nutritionEstimate.estimatedTotals.energyKcal.min}–
                         {m.nutritionEstimate.estimatedTotals.energyKcal.max} kcal · P{' '}
                         {m.nutritionEstimate.estimatedTotals.proteinG.min}–
@@ -577,18 +577,18 @@ export const NutritionView: React.FC = () => {
       {/* ===================================================================== */}
       {/* EDUCATIONAL DAILY REFERENCE MATRIX (WHO & ICMR-NIN 2024)              */}
       {/* ===================================================================== */}
-      <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 rounded-2xl p-6 shadow-[0_12px_32px_rgba(2,8,20,0.5)] space-y-4">
+      <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 rounded-2xl p-6 shadow-[0_12px_32px_rgba(16,13,28,0.55)] space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <h2 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-[#00D9FF]" />
+            <h2 className="font-['Cinzel'] font-bold text-base text-[#F7F4FF] flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-[#35D69A]" />
               DAILY NUTRIENT EDUCATIONAL REFERENCES ({dailyPlan.ageGroupLabel})
             </h2>
-            <p className="text-xs text-[#A9B8CC] mt-0.5">
+            <p className="text-xs text-[#BEB4D6] mt-0.5">
               {dailyPlan.referenceSources.join(' · ')}
             </p>
           </div>
-          <span className="text-[11px] font-semibold text-[#00D9FF]">
+          <span className="text-[11px] font-semibold text-[#38D9F5]">
             {dailyPlan.isAdultIndividualized
               ? 'Personalized adult estimate + public health references'
               : 'General age-group reference ranges'}
@@ -599,18 +599,18 @@ export const NutritionView: React.FC = () => {
           {dailyPlan.nutrients.map(item => (
             <div
               key={item.id}
-              className="p-4 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 space-y-1.5 text-xs"
+              className="p-4 rounded-xl bg-[#19122B] border border-[#6638B8]/30 space-y-1.5 text-xs"
             >
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <h3 className="font-bold text-white text-sm">{item.label}</h3>
-                  <span className="text-[11px] text-[#A9B8CC]">{item.sourceAndAgeGroup}</span>
+                  <h3 className="font-bold text-[#F7F4FF] text-sm">{item.label}</h3>
+                  <span className="text-[11px] text-[#BEB4D6]">{item.sourceAndAgeGroup}</span>
                 </div>
                 <span
                   className={`text-[10px] font-semibold px-2 py-0.5 rounded border shrink-0 ${
                     item.estimateKind === 'individualized_estimate'
-                      ? 'bg-[#1677FF]/20 border-[#00D9FF]/45 text-[#00D9FF]'
-                      : 'bg-[#061225] border-[#1677FF]/30 text-[#A9B8CC]'
+                      ? 'bg-[#35D69A]/15 border-[#35D69A]/45 text-[#35D69A]'
+                      : 'bg-[#100D1C] border-[#6638B8]/35 text-[#BEB4D6]'
                   }`}
                 >
                   {item.estimateKind === 'individualized_estimate'
@@ -619,49 +619,49 @@ export const NutritionView: React.FC = () => {
                 </span>
               </div>
 
-              <p className="font-mono font-bold text-[#00D9FF] text-sm">
+              <p className="font-mono font-bold text-[#38D9F5] text-sm">
                 {item.recommendedRange}{' '}
-                <span className="text-xs font-sans font-normal text-[#A9B8CC]">{item.unit}</span>
+                <span className="text-xs font-sans font-normal text-[#BEB4D6]">{item.unit}</span>
               </p>
 
-              <p className="text-[#A9B8CC] leading-relaxed">{item.whyItMatters}</p>
-              <p className="text-[11px] text-[#A9B8CC]/80 leading-relaxed pt-0.5">
+              <p className="text-[#BEB4D6] leading-relaxed">{item.whyItMatters}</p>
+              <p className="text-[11px] text-[#BEB4D6]/80 leading-relaxed pt-0.5">
                 Limitation: {item.confidenceAndLimitations}
               </p>
             </div>
           ))}
         </div>
 
-        <p className="text-[11px] text-[#A9B8CC] pt-1">{dailyPlan.clinicalGuidanceNote}</p>
+        <p className="text-[11px] text-[#BEB4D6] pt-1">{dailyPlan.clinicalGuidanceNote}</p>
       </div>
 
       {/* Hydration Sanctuary */}
-      <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 rounded-2xl p-6 shadow-[0_12px_32px_rgba(2,8,20,0.5)]">
+      <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 rounded-2xl p-6 shadow-[0_12px_32px_rgba(16,13,28,0.55)]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <div>
-            <h3 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-              <Droplets className="w-5 h-5 text-[#00D9FF]" />
+            <h3 className="font-['Cinzel'] font-bold text-base text-[#F7F4FF] flex items-center gap-2">
+              <Droplets className="w-5 h-5 text-[#38D9F5]" />
               DAILY HYDRATION ELIXIR
             </h3>
-            <p className="text-xs text-[#A9B8CC]">
+            <p className="text-xs text-[#BEB4D6]">
               Target 8 glasses of pure water daily to prime the Nature’s Blessing buff (+10% quest XP).
             </p>
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="font-mono text-2xl font-bold text-[#00D9FF] tabular-nums">
-              {waterGlasses} / 8 <span className="text-xs text-[#A9B8CC] font-normal">Glasses</span>
+            <span className="font-mono text-2xl font-bold text-[#38D9F5] tabular-nums">
+              {waterGlasses} / 8 <span className="text-xs text-[#BEB4D6] font-normal">Glasses</span>
             </span>
             <button
               onClick={addWaterGlass}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(22,119,255,0.35)]"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#35D69A] to-[#38D9F5] hover:brightness-110 text-[#100D1C] font-bold text-xs flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(53,214,154,0.35)]"
             >
               <Plus className="w-3.5 h-3.5" />
               Drink Glass
             </button>
             <button
               onClick={resetWaterGlasses}
-              className="p-2 rounded-xl bg-[#0A1930] border border-[#1677FF]/35 text-[#A9B8CC] hover:text-white hover:border-[#00D9FF]/50 transition-colors"
+              className="p-2 rounded-xl bg-[#19122B] border border-[#6638B8]/40 text-[#BEB4D6] hover:text-[#F7F4FF] hover:border-[#38D9F5]/50 transition-colors"
               title="Reset Daily Hydration"
             >
               <RotateCcw className="w-4 h-4" />
@@ -675,12 +675,12 @@ export const NutritionView: React.FC = () => {
               key={i}
               className={`p-3 rounded-xl border text-center transition-all ${
                 i < waterGlasses
-                  ? 'bg-[#1677FF]/20 border-[#00D9FF]/60 text-[#00D9FF] shadow-[0_0_12px_rgba(0,217,255,0.18)]'
-                  : 'bg-[#0A1930] border-[#1677FF]/25 text-[#A9B8CC]/50'
+                  ? 'bg-[#38D9F5]/15 border-[#38D9F5]/60 text-[#38D9F5] shadow-[0_0_12px_rgba(56,217,245,0.18)]'
+                  : 'bg-[#19122B] border-[#6638B8]/30 text-[#BEB4D6]/50'
               }`}
             >
               <Droplets
-                className={`w-5 h-5 mx-auto mb-1 ${i < waterGlasses ? 'text-[#00D9FF]' : 'text-[#A9B8CC]/30'}`}
+                className={`w-5 h-5 mx-auto mb-1 ${i < waterGlasses ? 'text-[#38D9F5]' : 'text-[#BEB4D6]/30'}`}
               />
               <span className="text-[10px] font-mono font-semibold block">Glass {i + 1}</span>
             </div>
@@ -692,20 +692,20 @@ export const NutritionView: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-7 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="font-['Cinzel'] font-bold text-base text-slate-100 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-cyan-400" />
+            <h3 className="font-['Cinzel'] font-bold text-base text-[#F7F4FF] flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#35D69A]" />
               BALANCED MEAL SUGGESTIONS
             </h3>
             <div className="flex items-center gap-2 text-xs">
-              <span className="text-cyan-300 capitalize">
+              <span className="text-[#38D9F5] capitalize">
                 Diet: {(user?.dietaryPreference || 'vegetarian').replace('_', '-')}
               </span>
-              <div className="flex p-0.5 rounded-lg bg-[#0A1930] border border-[#1677FF]/35">
+              <div className="flex p-0.5 rounded-lg bg-[#19122B] border border-[#6638B8]/40">
                 <button
                   type="button"
                   onClick={() => setDietFilter('all')}
                   className={`px-2 py-0.5 rounded text-[11px] font-medium ${
-                    dietFilter === 'all' ? 'bg-[#1677FF] text-white' : 'text-[#A9B8CC]'
+                    dietFilter === 'all' ? 'bg-[#35D69A] text-[#100D1C] font-bold' : 'text-[#BEB4D6]'
                   }`}
                 >
                   All
@@ -714,7 +714,7 @@ export const NutritionView: React.FC = () => {
                   type="button"
                   onClick={() => setDietFilter('matching')}
                   className={`px-2 py-0.5 rounded text-[11px] font-medium ${
-                    dietFilter === 'matching' ? 'bg-[#1677FF] text-white' : 'text-[#A9B8CC]'
+                    dietFilter === 'matching' ? 'bg-[#35D69A] text-[#100D1C] font-bold' : 'text-[#BEB4D6]'
                   }`}
                 >
                   Fits My Diet
@@ -723,14 +723,14 @@ export const NutritionView: React.FC = () => {
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-amber-950/35 border border-amber-800/50 text-[11px] text-amber-200 flex items-start gap-2">
-            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+          <div className="p-3 rounded-xl bg-[#19122B]/90 border border-[#FFAA45]/45 text-[11px] text-[#F7F4FF] flex items-start gap-2">
+            <AlertTriangle className="w-4 h-4 text-[#FFAA45] shrink-0 mt-0.5" />
             <div>
-              <span>
+              <span className="text-[#BEB4D6]">
                 Meal ideas are informational and are never guaranteed allergen-free. Always check ingredients carefully.
               </span>
               {(userAllergies.length > 0 || userIntolerances.length > 0) && (
-                <span className="block mt-1 text-amber-100 font-medium">
+                <span className="block mt-1 text-[#FFAA45] font-medium">
                   Active Profile Watchlist: {[...userAllergies, ...userIntolerances].join(', ')}
                 </span>
               )}
@@ -743,38 +743,38 @@ export const NutritionView: React.FC = () => {
               return (
                 <div
                   key={idx}
-                  className={`p-4 rounded-xl bg-[#102440]/90 backdrop-blur-md border transition-all flex flex-col justify-between ${
-                    flags.length > 0 ? 'border-amber-500/60' : 'border-[#1677FF]/30 hover:border-[#00D9FF]/50'
+                  className={`p-4 rounded-xl bg-[#24143D]/90 backdrop-blur-md border transition-all flex flex-col justify-between ${
+                    flags.length > 0 ? 'border-[#FFAA45]/60' : 'border-[#6638B8]/35 hover:border-[#35D69A]/50'
                   }`}
                 >
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-[#0A1930] text-[#00D9FF] border border-[#1677FF]/35">
+                      <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-[#19122B] text-[#35D69A] border border-[#35D69A]/35">
                         {meal.cuisine}
                       </span>
-                      <span className="text-[10px] text-[#A9B8CC] capitalize">{meal.category}</span>
+                      <span className="text-[10px] text-[#BEB4D6] capitalize">{meal.category}</span>
                     </div>
-                    <h4 className="font-['Cinzel'] font-bold text-sm text-white mb-2">{meal.title}</h4>
+                    <h4 className="font-['Cinzel'] font-bold text-sm text-[#F7F4FF] mb-2">{meal.title}</h4>
                     {flags.length > 0 && (
                       <div className="mb-2 flex flex-wrap gap-1">
                         {flags.map(f => (
                           <span
                             key={f}
-                            className="text-[10px] px-2 py-0.5 rounded bg-amber-950/80 border border-amber-700/70 text-amber-200 font-medium"
+                            className="text-[10px] px-2 py-0.5 rounded bg-[#100D1C] border border-[#FFAA45]/55 text-[#FFAA45] font-medium"
                           >
                             {f}
                           </span>
                         ))}
                       </div>
                     )}
-                    <ul className="text-xs text-[#A9B8CC] space-y-0.5 mb-3">
+                    <ul className="text-xs text-[#BEB4D6] space-y-0.5 mb-3">
                       {meal.items.map((it, i) => (
                         <li key={i} className="flex items-center gap-1.5">
-                          <span className="text-[#00D9FF] text-[10px]">·</span> {it}
+                          <span className="text-[#35D69A] text-[10px]">·</span> {it}
                         </li>
                       ))}
                     </ul>
-                    <p className="text-[11px] text-[#00D9FF]/80 italic leading-relaxed mb-3">
+                    <p className="text-[11px] text-[#38D9F5] italic leading-relaxed mb-3">
                       {meal.notes}
                     </p>
                   </div>
@@ -782,9 +782,9 @@ export const NutritionView: React.FC = () => {
                   <button
                     onClick={() => handleLogPreset(meal)}
                     disabled={isLoggingMeal}
-                    className="w-full py-2 rounded-xl bg-[#0A1930] hover:bg-[#16325C] border border-[#1677FF]/45 hover:border-[#00D9FF]/60 text-white text-xs font-semibold flex items-center justify-center gap-1 transition-colors disabled:opacity-60"
+                    className="w-full py-2 rounded-xl bg-[#19122B] hover:bg-[#2F1B4E] border border-[#35D69A]/40 hover:border-[#35D69A] text-[#F7F4FF] text-xs font-semibold flex items-center justify-center gap-1 transition-colors disabled:opacity-60"
                   >
-                    <Plus className="w-3.5 h-3.5 text-[#00D9FF]" />
+                    <Plus className="w-3.5 h-3.5 text-[#35D69A]" />
                     Log Wholesome Meal (+25 XP · +20 Gold)
                   </button>
                 </div>
@@ -794,22 +794,22 @@ export const NutritionView: React.FC = () => {
         </div>
 
         {/* Right 5 Cols: Custom Meal Logger */}
-        <div className="lg:col-span-5 bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 rounded-2xl p-6 shadow-[0_12px_32px_rgba(2,8,20,0.5)] space-y-4">
-          <h3 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-            <Apple className="w-4 h-4 text-[#00D9FF]" />
+        <div className="lg:col-span-5 bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 rounded-2xl p-6 shadow-[0_12px_32px_rgba(16,13,28,0.55)] space-y-4">
+          <h3 className="font-['Cinzel'] font-bold text-base text-[#F7F4FF] flex items-center gap-2">
+            <Apple className="w-4 h-4 text-[#35D69A]" />
             LOG A MEAL
           </h3>
 
           {logStatusMessage && (
-            <div className="p-3 rounded-xl bg-emerald-950/60 border border-emerald-700 text-xs text-emerald-200 flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <div className="p-3 rounded-xl bg-[#19122B] border border-[#35D69A]/50 text-xs text-[#35D69A] flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-[#35D69A] shrink-0" />
               <span>{logStatusMessage}</span>
             </div>
           )}
 
           <form onSubmit={handleCustomLog} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-1">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#35D69A] mb-1">
                 Meal Category
               </label>
               <div className="grid grid-cols-4 gap-1.5">
@@ -820,8 +820,8 @@ export const NutritionView: React.FC = () => {
                     onClick={() => setMealType(type)}
                     className={`py-2 text-xs font-medium rounded-lg capitalize border transition-all ${
                       mealType === type
-                        ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white border-[#00D9FF]/70'
-                        : 'bg-[#0A1930] border-[#1677FF]/25 text-[#A9B8CC] hover:text-white'
+                        ? 'bg-gradient-to-r from-[#35D69A] to-[#38D9F5] text-[#100D1C] font-bold border-[#35D69A]'
+                        : 'bg-[#19122B] border-[#6638B8]/30 text-[#BEB4D6] hover:text-[#F7F4FF]'
                     }`}
                   >
                     {type}
@@ -831,7 +831,7 @@ export const NutritionView: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-1">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#35D69A] mb-1">
                 Meal Name / Dish
               </label>
               <input
@@ -839,12 +839,12 @@ export const NutritionView: React.FC = () => {
                 value={mealTitle}
                 onChange={e => setMealTitle(e.target.value)}
                 placeholder="e.g. Dal Tadka, 2 Whole-Wheat Rotis, Cucumber Raita"
-                className="w-full bg-[#0A1930] border border-[#1677FF]/35 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-[#00D9FF]"
+                className="w-full bg-[#19122B] border border-[#6638B8]/40 rounded-xl px-3 py-2.5 text-xs text-[#F7F4FF] focus:outline-none focus:border-[#35D69A]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-1">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#35D69A] mb-1">
                 Food Components (Comma-separated)
               </label>
               <input
@@ -852,18 +852,18 @@ export const NutritionView: React.FC = () => {
                 value={foodItemsText}
                 onChange={e => setFoodItemsText(e.target.value)}
                 placeholder="e.g. Lentils, Whole wheat, Curd, Cucumber"
-                className="w-full bg-[#0A1930] border border-[#1677FF]/35 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-[#00D9FF]"
+                className="w-full bg-[#19122B] border border-[#6638B8]/40 rounded-xl px-3 py-2.5 text-xs text-[#F7F4FF] focus:outline-none focus:border-[#35D69A]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-1">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#35D69A] mb-1">
                 Dietary Category
               </label>
               <select
                 value={dietaryCategory}
                 onChange={e => setDietaryCategory(e.target.value as DietaryPreference)}
-                className="w-full bg-[#0A1930] border border-[#1677FF]/35 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00D9FF]"
+                className="w-full bg-[#19122B] border border-[#6638B8]/40 rounded-xl px-3 py-2 text-xs text-[#F7F4FF] focus:outline-none focus:border-[#35D69A]"
               >
                 <option value="vegetarian">Vegetarian</option>
                 <option value="vegan">Vegan</option>
@@ -876,27 +876,27 @@ export const NutritionView: React.FC = () => {
             <button
               type="submit"
               disabled={isLoggingMeal}
-              className="w-full py-3 font-bold font-['Cinzel'] tracking-wider text-xs rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white shadow-[0_0_18px_rgba(22,119,255,0.35)] transition-all disabled:opacity-60"
+              className="w-full py-3 font-bold font-['Cinzel'] tracking-wider text-xs rounded-xl bg-gradient-to-r from-[#35D69A] to-[#38D9F5] hover:brightness-110 text-[#100D1C] shadow-[0_0_18px_rgba(53,214,154,0.35)] transition-all disabled:opacity-60"
             >
               {isLoggingMeal ? 'SAVING MEAL...' : 'RECORD MEAL (+25 XP · +20 GOLD)'}
             </button>
           </form>
 
-          <div className="pt-4 border-t border-[#1677FF]/25">
-            <h4 className="text-xs font-bold text-[#A9B8CC] uppercase tracking-wider mb-2">
+          <div className="pt-4 border-t border-[#6638B8]/30">
+            <h4 className="text-xs font-bold text-[#BEB4D6] uppercase tracking-wider mb-2">
               Recent Fuel History ({meals.length})
             </h4>
             {meals.length === 0 ? (
-              <p className="text-xs text-[#A9B8CC]/70">No meals logged yet.</p>
+              <p className="text-xs text-[#BEB4D6]/70">No meals logged yet.</p>
             ) : (
               <div className="space-y-2 max-h-52 overflow-y-auto">
                 {meals.map(m => (
-                  <div key={m.id} className="p-2.5 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 text-xs">
-                    <div className="flex justify-between font-semibold text-white gap-2">
+                  <div key={m.id} className="p-2.5 rounded-xl bg-[#19122B] border border-[#6638B8]/30 text-xs">
+                    <div className="flex justify-between font-semibold text-[#F7F4FF] gap-2">
                       <span>{m.title}</span>
-                      <span className="text-[10px] uppercase text-[#00D9FF] shrink-0">{m.mealType}</span>
+                      <span className="text-[10px] uppercase text-[#35D69A] shrink-0">{m.mealType}</span>
                     </div>
-                    <p className="text-[11px] text-[#A9B8CC] mt-0.5 line-clamp-2">{m.balancedNotes}</p>
+                    <p className="text-[11px] text-[#BEB4D6] mt-0.5 line-clamp-2">{m.balancedNotes}</p>
                   </div>
                 ))}
               </div>

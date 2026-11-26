@@ -529,7 +529,7 @@ export const createDefaultCommunityEvent = (now: Date = new Date()): CommunityEv
     subtitle: 'Realm-Wide Wellness & Restoration Chronicle',
     description:
       'Every champion across Aetheria contributes verified workouts, mindful study, balanced meals, and daily habits to rekindle the Golden World Tree.',
-    themeColor: '#1677FF',
+    themeColor: '#FFAA45',
     status: 'active',
     startsAt,
     endsAt,

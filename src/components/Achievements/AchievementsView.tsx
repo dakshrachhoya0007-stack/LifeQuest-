@@ -53,35 +53,35 @@ export const AchievementsView: React.FC<{ embedded?: boolean }> = ({ embedded = 
       {/* Banner / Progress Toolbar */}
       <div
         data-tutorial-id="achievements-rewards"
-        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-[#1677FF]/30 shadow-[0_12px_32px_rgba(2,8,20,0.6)] rounded-2xl ${
+        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-[#E7B94F]/35 shadow-[0_12px_32px_rgba(16,13,28,0.65)] rounded-2xl ${
           embedded
-            ? 'bg-[#102440]/90 backdrop-blur-md p-4 sm:p-5'
-            : 'bg-gradient-to-r from-[#0A1930] via-[#102440] to-[#0A1930] backdrop-blur-md p-6'
+            ? 'bg-[#24143D]/90 backdrop-blur-md p-4 sm:p-5'
+            : 'bg-gradient-to-r from-[#19122B] via-[#24143D] to-[#19122B] backdrop-blur-md p-6'
         }`}
       >
         <div>
-          <span className="font-['Cinzel'] font-bold text-[11px] uppercase tracking-widest text-[#00D9FF] block mb-1">
+          <span className="font-['Cinzel'] font-bold text-[11px] uppercase tracking-widest text-[#FFD978] block mb-1">
             Heroic Milestones
           </span>
-          <h2 className={`${embedded ? 'text-lg sm:text-xl' : 'text-2xl sm:text-3xl'} font-black font-['Cinzel'] text-white`}>
+          <h2 className={`${embedded ? 'text-lg sm:text-xl' : 'text-2xl sm:text-3xl'} font-black font-['Cinzel'] text-[#F7F4FF]`}>
             ACHIEVEMENTS &amp; REWARDS
           </h2>
-          <p className="text-xs sm:text-sm text-[#A9B8CC] max-w-2xl mt-1">
+          <p className="text-xs sm:text-sm text-[#BEB4D6] max-w-2xl mt-1">
             Conquer permanent milestones across habits, training, and exploration to earn trophy XP bounties.
           </p>
         </div>
 
         <div className="flex items-center gap-4 text-xs tabular-nums shrink-0">
           <div className="text-right">
-            <span className="text-[11px] text-[#A9B8CC] block">Unlocked</span>
-            <span className="font-mono font-bold text-[#00D9FF]">
+            <span className="text-[11px] text-[#BEB4D6] block">Unlocked</span>
+            <span className="font-mono font-bold text-[#FFD978]">
               {unlockedCount} / {achievements.length}
             </span>
           </div>
-          <div className="w-px h-7 bg-[#1677FF]/30" />
+          <div className="w-px h-7 bg-[#E7B94F]/30" />
           <div className="text-right">
-            <span className="text-[11px] text-[#A9B8CC] block">Claimed</span>
-            <span className="font-mono font-bold text-emerald-300">
+            <span className="text-[11px] text-[#BEB4D6] block">Claimed</span>
+            <span className="font-mono font-bold text-[#35D69A]">
               {claimedCount} / {achievements.length}
             </span>
           </div>
@@ -101,10 +101,10 @@ export const AchievementsView: React.FC<{ embedded?: boolean }> = ({ embedded = 
               key={ach.id}
               className={`p-5 rounded-2xl border flex flex-col justify-between transition-all ${
                 isClaimed
-                  ? 'bg-[#0A1930]/75 border-[#1677FF]/20 text-[#A9B8CC]'
+                  ? 'bg-[#19122B]/80 border-[#6638B8]/25 text-[#BEB4D6]'
                   : isUnlocked
-                  ? 'bg-[#102440] border-[#00D9FF]/60 shadow-[0_0_20px_rgba(0,217,255,0.14)]'
-                  : 'bg-[#102440]/85 border-[#1677FF]/25 hover:border-[#00D9FF]/40'
+                  ? 'bg-[#24143D] border-[#FFD978]/65 shadow-[0_0_24px_rgba(231,185,79,0.2)]'
+                  : 'bg-[#24143D]/85 border-[#6638B8]/30 hover:border-[#A875FF]/50'
               }`}
             >
               <div>
@@ -112,8 +112,8 @@ export const AchievementsView: React.FC<{ embedded?: boolean }> = ({ embedded = 
                   <div
                     className={`w-12 h-12 rounded-xl flex items-center justify-center border ${
                       isUnlocked
-                        ? 'bg-[#0A1930] border-[#00D9FF]/50 text-[#00D9FF] shadow-[0_0_12px_rgba(0,217,255,0.2)]'
-                        : 'bg-[#061225] border-[#1677FF]/25 text-[#A9B8CC]/60'
+                        ? 'bg-[#19122B] border-[#FFD978]/55 text-[#FFD978] shadow-[0_0_14px_rgba(231,185,79,0.25)]'
+                        : 'bg-[#100D1C] border-[#6638B8]/30 text-[#BEB4D6]/60'
                     }`}
                   >
                     <Icon className="w-6 h-6" />
@@ -122,24 +122,24 @@ export const AchievementsView: React.FC<{ embedded?: boolean }> = ({ embedded = 
                   <span
                     className={`text-[11px] font-mono font-bold uppercase tracking-wider ${
                       isClaimed
-                        ? 'text-emerald-300'
+                        ? 'text-[#35D69A]'
                         : isUnlocked
-                        ? 'text-[#00D9FF]'
-                        : 'text-[#A9B8CC]/70'
+                        ? 'text-[#FFD978]'
+                        : 'text-[#BEB4D6]/75'
                     }`}
                   >
                     {isClaimed ? 'Claimed' : isUnlocked ? 'Unlocked' : 'In Progress'}
                   </span>
                 </div>
 
-                <h3 className="font-['Cinzel'] font-bold text-base text-white mb-1">{ach.name}</h3>
-                <p className="text-xs text-[#A9B8CC] leading-relaxed mb-4">{ach.description}</p>
+                <h3 className="font-['Cinzel'] font-bold text-base text-[#F7F4FF] mb-1">{ach.name}</h3>
+                <p className="text-xs text-[#BEB4D6] leading-relaxed mb-4">{ach.description}</p>
               </div>
 
-              <div className="pt-3 border-t border-[#1677FF]/20 space-y-3">
+              <div className="pt-3 border-t border-[#6638B8]/25 space-y-3">
                 <div className="flex items-center justify-between text-xs font-mono tabular-nums">
-                  <span className="text-[#00D9FF] font-semibold">+{ach.rewardPlayerXp} Player XP</span>
-                  <span className="text-[#A9B8CC] font-semibold">
+                  <span className="text-[#FFD978] font-semibold">+{ach.rewardPlayerXp} Player XP</span>
+                  <span className="text-[#BEB4D6] font-semibold">
                     {ach.progress} / {ach.maxProgress}
                   </span>
                 </div>
@@ -149,19 +149,19 @@ export const AchievementsView: React.FC<{ embedded?: boolean }> = ({ embedded = 
                     type="button"
                     disabled={claimingId === ach.id}
                     onClick={() => handleClaim(ach.id)}
-                    className="w-full py-2.5 rounded-xl font-['Cinzel'] font-bold text-xs tracking-wider bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] disabled:opacity-60 text-white shadow-[0_0_18px_rgba(22,119,255,0.35)] transition-all"
+                    className="w-full py-2.5 rounded-xl font-['Cinzel'] font-bold text-xs tracking-wider bg-gradient-to-r from-[#E7B94F] to-[#FFAA45] hover:from-[#FFD978] hover:to-[#FFAA45] disabled:opacity-60 text-[#100D1C] shadow-[0_0_20px_rgba(231,185,79,0.35)] transition-all"
                   >
                     {claimingId === ach.id ? 'CLAIMING...' : 'CLAIM TROPHY BOUNTY'}
                   </button>
                 ) : isClaimed ? (
-                  <div className="text-center py-1.5 text-xs font-semibold text-emerald-400 flex items-center justify-center gap-1">
+                  <div className="text-center py-1.5 text-xs font-semibold text-[#35D69A] flex items-center justify-center gap-1">
                     <CheckCircle2 className="w-4 h-4" />
                     Bounty Claimed
                   </div>
                 ) : (
-                  <div className="w-full bg-[#061225] h-2 rounded-full overflow-hidden border border-[#1677FF]/20">
+                  <div className="w-full bg-[#100D1C] h-2 rounded-full overflow-hidden border border-[#6638B8]/25">
                     <div
-                      className="bg-gradient-to-r from-[#1677FF] to-[#00D9FF] h-full transition-all"
+                      className="bg-gradient-to-r from-[#6638B8] via-[#A875FF] to-[#E7B94F] h-full transition-all"
                       style={{ width: `${pct}%` }}
                     />
                   </div>

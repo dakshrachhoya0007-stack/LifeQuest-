@@ -46,10 +46,10 @@ export const CloudSyncIndicator: React.FC<CloudSyncIndicatorProps> = ({
       case 'offline':
       default:
         return {
-          icon: <CloudOff className="w-3.5 h-3.5 text-[#A9B8CC]" />,
+          icon: <CloudOff className="w-3.5 h-3.5 text-[#BEB4D6]" />,
           label: 'Offline',
-          textColor: 'text-[#A9B8CC]',
-          bgColor: 'bg-[#0A1930] border-[#1677FF]/30',
+          textColor: 'text-[#BEB4D6]',
+          bgColor: 'bg-[#24143D] border-[#6638B8]/40',
           title: 'Saving progress locally on this device.',
         };
     }

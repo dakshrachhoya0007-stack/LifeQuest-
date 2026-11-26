@@ -7,16 +7,21 @@ import {
   resolveFeatureThemeId,
 } from '../src/theme/featureTheme.ts';
 
-test('GLOBAL_BRAND defines the dark-fantasy obsidian, royal purple, and gold tokens', () => {
-  assert.equal(GLOBAL_BRAND.bgBase, '#090910');
-  assert.equal(GLOBAL_BRAND.bgSurface, '#141420');
-  assert.equal(GLOBAL_BRAND.brandPrimary, '#8B5CF6');
-  assert.equal(GLOBAL_BRAND.brandSecondary, '#D6A84B');
-  assert.equal(GLOBAL_BRAND.textPrimary, '#F5F3FF');
-  assert.equal(GLOBAL_BRAND.textSecondary, '#A1A1B5');
+test('GLOBAL_BRAND defines the AAA dark-fantasy midnight purple, royal violet, and gold tokens', () => {
+  assert.equal(GLOBAL_BRAND.bgBase, '#100D1C');
+  assert.equal(GLOBAL_BRAND.bgSurface, '#24143D');
+  assert.equal(GLOBAL_BRAND.brandPrimary, '#6638B8');
+  assert.equal(GLOBAL_BRAND.brandBright, '#A875FF');
+  assert.equal(GLOBAL_BRAND.brandSecondary, '#E7B94F');
+  assert.equal(GLOBAL_BRAND.brandGoldGlow, '#FFD978');
+  assert.equal(GLOBAL_BRAND.accentCyan, '#38D9F5');
+  assert.equal(GLOBAL_BRAND.accentEmerald, '#35D69A');
+  assert.equal(GLOBAL_BRAND.accentRuby, '#F05B70');
+  assert.equal(GLOBAL_BRAND.accentIce, '#65A9FF');
+  assert.equal(GLOBAL_BRAND.accentAmber, '#FFAA45');
 });
 
-test('All 12 feature themes have distinct, non-cyan hex palettes', () => {
+test('All 12 feature themes have distinct, non-navy AAA dark-fantasy hex palettes', () => {
   const expectedIds = [
     'dashboard',
     'fitness',
@@ -63,7 +68,9 @@ test('resolveFeatureThemeId maps primary tabs and progression sub-tabs to their 
   assert.equal(resolveFeatureThemeId({ activeTab: 'museum' }), 'museum');
   assert.equal(resolveFeatureThemeId({ activeTab: 'character' }), 'character');
 
-  assert.equal(resolveFeatureTheme({ activeTab: 'boss-battles' }).primaryHex, '#DC2626');
-  assert.equal(resolveFeatureTheme({ activeTab: 'fitness' }).primaryHex, '#10B981');
-  assert.equal(resolveFeatureTheme({ activeTab: 'museum' }).primaryHex, '#D6A84B');
+  assert.equal(resolveFeatureTheme({ activeTab: 'boss-battles' }).primaryHex, '#F05B70');
+  assert.equal(resolveFeatureTheme({ activeTab: 'fitness' }).primaryHex, '#35D69A');
+  assert.equal(resolveFeatureTheme({ activeTab: 'skill-tree' }).primaryHex, '#38D9F5');
+  assert.equal(resolveFeatureTheme({ activeTab: 'social' }).primaryHex, '#65A9FF');
+  assert.equal(resolveFeatureTheme({ activeTab: 'quests' }).primaryHex, '#E7B94F');
 });

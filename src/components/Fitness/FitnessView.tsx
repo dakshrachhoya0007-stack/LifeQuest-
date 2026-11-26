@@ -96,20 +96,20 @@ export const FitnessView: React.FC = () => {
       {/* Fitness Banner */}
       <div
         data-tutorial-id="fitness-tracker"
-        className="rounded-2xl bg-gradient-to-r from-[#0A1930] via-[#102440] to-[#0A1930] border border-[#1677FF]/35 p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)] backdrop-blur-md"
+        className="rounded-2xl bg-gradient-to-r from-[#19122B] via-[#24143D] to-[#19122B] border border-[#35D69A]/35 p-6 shadow-[0_12px_32px_rgba(16,13,28,0.65)] backdrop-blur-md"
       >
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-[#00D9FF] bg-[#061225]/80 border border-[#00D9FF]/35 px-2.5 py-0.5 rounded">
+              <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-[#35D69A] bg-[#100D1C]/80 border border-[#35D69A]/40 px-2.5 py-0.5 rounded">
                 Mountain of Strength
               </span>
-              <span className="text-xs text-[#A9B8CC] font-semibold">Physical Conditioning</span>
+              <span className="text-xs text-[#BEB4D6] font-semibold">Physical Conditioning</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-white">
+            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F7F4FF]">
               FITNESS TRACKER & LOGS
             </h1>
-            <p className="text-xs sm:text-sm text-[#A9B8CC] max-w-2xl mt-1">
+            <p className="text-xs sm:text-sm text-[#BEB4D6] max-w-2xl mt-1">
               Record daily workouts, walks, gym sets, and calisthenics. Camera-verified sessions on Aether Vision grant maximum Player XP, bodyweight combat strength, and combat buffs!
             </p>
           </div>
@@ -117,14 +117,14 @@ export const FitnessView: React.FC = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setActiveTab('aether-vision')}
-              className="px-4 py-2.5 rounded-xl font-bold font-['Cinzel'] text-xs tracking-wider bg-[#0A1930] hover:bg-[#16325C] border border-[#00D9FF]/45 hover:border-[#00D9FF] text-white shadow-[0_0_16px_rgba(0,217,255,0.18)] flex items-center gap-2 transition-all"
+              className="px-4 py-2.5 rounded-xl font-bold font-['Cinzel'] text-xs tracking-wider bg-[#19122B] hover:bg-[#2F1B4E] border border-[#38D9F5]/45 hover:border-[#38D9F5] text-[#F7F4FF] shadow-[0_0_16px_rgba(56,217,245,0.18)] flex items-center gap-2 transition-all"
             >
-              <Camera className="w-4 h-4 text-[#00D9FF]" />
+              <Camera className="w-4 h-4 text-[#38D9F5]" />
               Aether Vision AI
             </button>
             <button
               onClick={() => setShowLogModal(true)}
-              className="px-4 py-2.5 rounded-xl font-bold font-['Cinzel'] text-xs tracking-wider bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white shadow-[0_0_18px_rgba(22,119,255,0.35)] flex items-center gap-1.5 transition-all"
+              className="px-4 py-2.5 rounded-xl font-bold font-['Cinzel'] text-xs tracking-wider bg-gradient-to-r from-[#35D69A] to-[#38D9F5] hover:brightness-110 text-[#100D1C] shadow-[0_0_18px_rgba(53,214,154,0.35)] flex items-center gap-1.5 transition-all"
             >
               <Plus className="w-4 h-4" />
               Log Workout
@@ -134,26 +134,26 @@ export const FitnessView: React.FC = () => {
       </div>
 
       {/* Personalized Fitness Focus (from Onboarding & Settings) */}
-      <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 rounded-2xl p-5 shadow-[0_12px_32px_rgba(2,8,20,0.5)] flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 rounded-2xl p-5 shadow-[0_12px_32px_rgba(16,13,28,0.55)] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1.5">
           <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="font-['Cinzel'] font-bold text-[#00D9FF] uppercase tracking-wider">
+            <span className="font-['Cinzel'] font-bold text-[#35D69A] uppercase tracking-wider">
               Training Focus: {(user?.activityLevel || 'moderate').replace('_', ' ')}
             </span>
-            <span className="text-[#1677FF]/60">·</span>
-            <span className="text-[#A9B8CC]">
-              Units: <strong className="text-white uppercase">{user?.preferredUnits || 'metric'}</strong>
+            <span className="text-[#6638B8]">·</span>
+            <span className="text-[#BEB4D6]">
+              Units: <strong className="text-[#F7F4FF] uppercase">{user?.preferredUnits || 'metric'}</strong>
             </span>
             {(user?.height || user?.weight) && (
               <>
-                <span className="text-[#1677FF]/60">·</span>
-                <span className="text-[#A9B8CC]">
+                <span className="text-[#6638B8]">·</span>
+                <span className="text-[#BEB4D6]">
                   Profile: {[user.height, user.weight].filter(Boolean).join(' / ')}
                 </span>
               </>
             )}
           </div>
-          <p className="text-xs text-[#A9B8CC]">
+          <p className="text-xs text-[#BEB4D6]">
             {activityPaceNote[user?.activityLevel || 'moderate'] || activityPaceNote.moderate}
           </p>
           {user?.personalGoals && user.personalGoals.length > 0 && (
@@ -161,7 +161,7 @@ export const FitnessView: React.FC = () => {
               {user.personalGoals.map(goal => (
                 <span
                   key={goal}
-                  className="text-[11px] px-2.5 py-0.5 rounded-lg bg-[#0A1930] border border-[#1677FF]/35 text-[#A9B8CC]"
+                  className="text-[11px] px-2.5 py-0.5 rounded-lg bg-[#19122B] border border-[#35D69A]/30 text-[#BEB4D6]"
                 >
                   {goal}
                 </span>
@@ -172,13 +172,13 @@ export const FitnessView: React.FC = () => {
 
         {user?.preferredActivities && user.preferredActivities.length > 0 && (
           <div className="flex flex-wrap items-center gap-1.5 shrink-0">
-            <span className="text-[11px] text-[#A9B8CC] mr-1">Quick Log:</span>
+            <span className="text-[11px] text-[#BEB4D6] mr-1">Quick Log:</span>
             {user.preferredActivities.slice(0, 4).map(act => (
               <button
                 key={act}
                 type="button"
                 onClick={() => openQuickLogForActivity(act)}
-                className="px-2.5 py-1.5 rounded-lg bg-[#0A1930] hover:bg-[#16325C] border border-[#1677FF]/40 hover:border-[#00D9FF]/60 text-xs font-medium text-white transition-colors whitespace-nowrap"
+                className="px-2.5 py-1.5 rounded-lg bg-[#19122B] hover:bg-[#2F1B4E] border border-[#35D69A]/35 hover:border-[#38D9F5]/60 text-xs font-medium text-[#F7F4FF] transition-colors whitespace-nowrap"
               >
                 + {act}
               </button>
@@ -189,46 +189,46 @@ export const FitnessView: React.FC = () => {
 
       {/* KPI Stats Strip */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 hover:border-[#00D9FF]/45 transition-colors rounded-2xl p-5 shadow-[0_12px_32px_rgba(2,8,20,0.45)]">
-          <span className="text-xs font-semibold text-[#A9B8CC] uppercase tracking-wider block mb-1">
+        <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 hover:border-[#35D69A]/50 transition-colors rounded-2xl p-5 shadow-[0_12px_32px_rgba(16,13,28,0.5)]">
+          <span className="text-xs font-semibold text-[#BEB4D6] uppercase tracking-wider block mb-1">
             Total Sessions
           </span>
-          <span className="font-mono text-3xl font-black text-white tabular-nums">
+          <span className="font-mono text-3xl font-black text-[#F7F4FF] tabular-nums">
             {fitnessSessions.length}
           </span>
-          <p className="text-xs text-[#00D9FF] mt-1">Across all fitness modalities</p>
+          <p className="text-xs text-[#35D69A] mt-1">Across all fitness modalities</p>
         </div>
 
-        <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 hover:border-[#00D9FF]/45 transition-colors rounded-2xl p-5 shadow-[0_12px_32px_rgba(2,8,20,0.45)]">
-          <span className="text-xs font-semibold text-[#A9B8CC] uppercase tracking-wider block mb-1">
+        <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 hover:border-[#38D9F5]/50 transition-colors rounded-2xl p-5 shadow-[0_12px_32px_rgba(16,13,28,0.5)]">
+          <span className="text-xs font-semibold text-[#BEB4D6] uppercase tracking-wider block mb-1">
             Total Active Time
           </span>
-          <span className="font-mono text-3xl font-black text-[#00D9FF] tabular-nums">
-            {totalMinutes} <span className="text-lg font-normal text-[#A9B8CC]">mins</span>
+          <span className="font-mono text-3xl font-black text-[#38D9F5] tabular-nums">
+            {totalMinutes} <span className="text-lg font-normal text-[#BEB4D6]">mins</span>
           </span>
-          <p className="text-xs text-[#A9B8CC] mt-1">Endurance built for the Mountain</p>
+          <p className="text-xs text-[#BEB4D6] mt-1">Endurance built for the Mountain</p>
         </div>
 
-        <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 hover:border-[#00D9FF]/45 transition-colors rounded-2xl p-5 shadow-[0_12px_32px_rgba(2,8,20,0.45)]">
-          <span className="text-xs font-semibold text-[#00D9FF] uppercase tracking-wider mb-1 flex items-center gap-1">
+        <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 hover:border-[#35D69A]/50 transition-colors rounded-2xl p-5 shadow-[0_12px_32px_rgba(16,13,28,0.5)]">
+          <span className="text-xs font-semibold text-[#35D69A] uppercase tracking-wider mb-1 flex items-center gap-1">
             <Zap className="w-3.5 h-3.5" /> AI Verified Sessions
           </span>
-          <span className="font-mono text-3xl font-black text-white tabular-nums">
+          <span className="font-mono text-3xl font-black text-[#F7F4FF] tabular-nums">
             {totalVerifiedCount}
           </span>
-          <p className="text-xs text-[#A9B8CC] mt-1">Earned Warrior’s Momentum Buff</p>
+          <p className="text-xs text-[#BEB4D6] mt-1">Earned Warrior’s Momentum Buff</p>
         </div>
       </div>
 
       {/* Session History Feed */}
-      <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 rounded-2xl p-6 shadow-[0_12px_32px_rgba(2,8,20,0.5)]">
-        <h3 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2 mb-4">
-          <Activity className="w-4 h-4 text-[#00D9FF]" />
+      <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 rounded-2xl p-6 shadow-[0_12px_32px_rgba(16,13,28,0.55)]">
+        <h3 className="font-['Cinzel'] font-bold text-base text-[#F7F4FF] flex items-center gap-2 mb-4">
+          <Activity className="w-4 h-4 text-[#35D69A]" />
           ACTIVITY LOG HISTORY
         </h3>
 
         {fitnessSessions.length === 0 ? (
-          <div className="text-center py-12 text-[#A9B8CC] text-xs">
+          <div className="text-center py-12 text-[#BEB4D6] text-xs">
             No workouts logged yet. Start an Aether Vision session or log your first routine!
           </div>
         ) : (
@@ -236,43 +236,43 @@ export const FitnessView: React.FC = () => {
             {fitnessSessions.map(session => (
               <div
                 key={session.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 hover:border-[#00D9FF]/40 transition-colors gap-3"
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-[#19122B] border border-[#6638B8]/30 hover:border-[#35D69A]/45 transition-colors gap-3"
               >
                 <div className="flex items-center gap-3">
                   <div
                     className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg border ${
                       session.verifiedWithAetherVision
-                        ? 'bg-[#1677FF]/20 border-[#00D9FF]/55 text-[#00D9FF]'
-                        : 'bg-[#061225] border-[#1677FF]/40 text-[#1677FF]'
+                        ? 'bg-[#35D69A]/15 border-[#35D69A]/55 text-[#35D69A]'
+                        : 'bg-[#100D1C] border-[#6638B8]/40 text-[#38D9F5]'
                     }`}
                   >
                     {session.verifiedWithAetherVision ? (
-                      <Zap className="w-4 h-4 text-[#00D9FF]" />
+                      <Zap className="w-4 h-4 text-[#35D69A]" />
                     ) : (
-                      <Dumbbell className="w-4 h-4 text-[#00D9FF]" />
+                      <Dumbbell className="w-4 h-4 text-[#38D9F5]" />
                     )}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h4 className="text-sm font-bold text-white">{session.exerciseName}</h4>
+                      <h4 className="text-sm font-bold text-[#F7F4FF]">{session.exerciseName}</h4>
                       {session.verifiedWithAetherVision ? (
-                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-[#1677FF]/20 text-[#00D9FF] border border-[#00D9FF]/45">
+                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-[#35D69A]/15 text-[#35D69A] border border-[#35D69A]/45">
                           AI Verified
                         </span>
                       ) : (
-                        <span className="text-[10px] uppercase font-medium px-2 py-0.5 rounded bg-[#061225] text-[#A9B8CC] border border-[#1677FF]/25">
+                        <span className="text-[10px] uppercase font-medium px-2 py-0.5 rounded bg-[#100D1C] text-[#BEB4D6] border border-[#6638B8]/30">
                           Manually Logged
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-[#A9B8CC] mt-0.5">
+                    <p className="text-xs text-[#BEB4D6] mt-0.5">
                       {session.durationMinutes} mins {session.repetitions ? `· ${session.repetitions} reps` : ''} · {new Date(session.timestamp).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-4 text-xs font-mono">
-                  <span className="text-[#00D9FF] font-semibold">+{session.playerXpEarned} Player XP</span>
+                  <span className="text-[#35D69A] font-semibold">+{session.playerXpEarned} Player XP</span>
                 </div>
               </div>
             ))}
@@ -282,15 +282,15 @@ export const FitnessView: React.FC = () => {
 
       {/* Manual Workout Log Modal */}
       {showLogModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#061225]/85 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-md bg-[#102440] border border-[#1677FF]/45 rounded-2xl p-6 shadow-[0_20px_50px_rgba(2,8,20,0.8)]">
-            <h3 className="text-lg font-bold font-['Cinzel'] text-white mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#100D1C]/85 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-md bg-[#24143D] border border-[#35D69A]/45 rounded-2xl p-6 shadow-[0_20px_50px_rgba(16,13,28,0.85)]">
+            <h3 className="text-lg font-bold font-['Cinzel'] text-[#F7F4FF] mb-4">
               RECORD FITNESS SESSION
             </h3>
 
             <form onSubmit={handleManualLog} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-[#A9B8CC] mb-1">Activity Type</label>
+                <label className="block text-xs font-medium text-[#BEB4D6] mb-1">Activity Type</label>
                 <div className="grid grid-cols-2 gap-2">
                   {activityOptions.map(opt => (
                     <button
@@ -302,11 +302,11 @@ export const FitnessView: React.FC = () => {
                       }}
                       className={`p-2.5 rounded-xl border text-xs font-medium flex items-center gap-2 transition-all ${
                         exerciseType === opt.type
-                          ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white border-[#00D9FF]/70 shadow-[0_0_12px_rgba(22,119,255,0.35)]'
-                          : 'bg-[#0A1930] border-[#1677FF]/30 text-[#A9B8CC] hover:text-white hover:border-[#00D9FF]/45'
+                          ? 'bg-gradient-to-r from-[#35D69A] to-[#38D9F5] text-[#100D1C] font-bold border-[#35D69A]/80 shadow-[0_0_12px_rgba(53,214,154,0.35)]'
+                          : 'bg-[#19122B] border-[#6638B8]/35 text-[#BEB4D6] hover:text-[#F7F4FF] hover:border-[#35D69A]/50'
                       }`}
                     >
-                      <opt.Icon className={`w-3.5 h-3.5 shrink-0 ${exerciseType === opt.type ? 'text-white' : 'text-[#00D9FF]'}`} />
+                      <opt.Icon className={`w-3.5 h-3.5 shrink-0 ${exerciseType === opt.type ? 'text-[#100D1C]' : 'text-[#35D69A]'}`} />
                       <span>{opt.label}</span>
                     </button>
                   ))}
@@ -314,29 +314,29 @@ export const FitnessView: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#A9B8CC] mb-1">Session Title</label>
+                <label className="block text-xs font-medium text-[#BEB4D6] mb-1">Session Title</label>
                 <input
                   type="text"
                   value={exerciseName}
                   onChange={e => setExerciseName(e.target.value)}
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00D9FF]"
+                  className="w-full bg-[#19122B] border border-[#6638B8]/40 rounded-xl px-3 py-2 text-xs text-[#F7F4FF] focus:outline-none focus:border-[#35D69A]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-[#A9B8CC] mb-1">Duration (Minutes)</label>
+                  <label className="block text-xs font-medium text-[#BEB4D6] mb-1">Duration (Minutes)</label>
                   <input
                     type="number"
                     min="1"
                     max="300"
                     value={durationMinutes}
                     onChange={e => setDurationMinutes(Number(e.target.value))}
-                    className="w-full bg-[#0A1930] border border-[#1677FF]/35 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00D9FF] font-mono"
+                    className="w-full bg-[#19122B] border border-[#6638B8]/40 rounded-xl px-3 py-2 text-xs text-[#F7F4FF] focus:outline-none focus:border-[#35D69A] font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-[#A9B8CC] mb-1">
+                  <label className="block text-xs font-medium text-[#BEB4D6] mb-1">
                     {isImperial ? 'Distance (mi optional)' : 'Distance (km optional)'}
                   </label>
                   <input
@@ -345,7 +345,7 @@ export const FitnessView: React.FC = () => {
                     placeholder={isImperial ? 'e.g. 2.2' : 'e.g. 3.5'}
                     value={distanceInput}
                     onChange={e => setDistanceInput(e.target.value)}
-                    className="w-full bg-[#0A1930] border border-[#1677FF]/35 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00D9FF] font-mono"
+                    className="w-full bg-[#19122B] border border-[#6638B8]/40 rounded-xl px-3 py-2 text-xs text-[#F7F4FF] focus:outline-none focus:border-[#35D69A] font-mono"
                   />
                 </div>
               </div>
@@ -354,13 +354,13 @@ export const FitnessView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowLogModal(false)}
-                  className="px-4 py-2 text-xs rounded-xl bg-[#0A1930] border border-[#1677FF]/35 text-[#A9B8CC] hover:text-white transition-colors"
+                  className="px-4 py-2 text-xs rounded-xl bg-[#19122B] border border-[#6638B8]/40 text-[#BEB4D6] hover:text-[#F7F4FF] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 text-xs font-bold font-['Cinzel'] bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white rounded-xl shadow-[0_0_15px_rgba(22,119,255,0.35)] transition-all"
+                  className="px-5 py-2 text-xs font-bold font-['Cinzel'] bg-gradient-to-r from-[#35D69A] to-[#38D9F5] hover:brightness-110 text-[#100D1C] rounded-xl shadow-[0_0_15px_rgba(53,214,154,0.35)] transition-all"
                 >
                   Log Workout
                 </button>

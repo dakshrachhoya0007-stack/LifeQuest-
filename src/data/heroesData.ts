@@ -14,7 +14,7 @@ export const RPG_ATTRIBUTE_META: Array<{
     shortLabel: 'STR',
     description: 'Governs unarmed strike force and heavy bodyweight power.',
     realLifeSource: 'Strength training, pushups, squats & Aether Vision reps',
-    accentHex: '#D97745',
+    accentHex: '#F05B70',
   },
   {
     key: 'discipline',
@@ -22,7 +22,7 @@ export const RPG_ATTRIBUTE_META: Array<{
     shortLabel: 'DIS',
     description: 'Steadfast willpower that unlocks ancient vows and honor trials.',
     realLifeSource: 'Daily habit consistency, streaks & claimed quest bounties',
-    accentHex: '#C5A15A',
+    accentHex: '#E7B94F',
   },
   {
     key: 'intelligence',
@@ -30,7 +30,7 @@ export const RPG_ATTRIBUTE_META: Array<{
     shortLabel: 'INT',
     description: 'Tactical clarity and arcane perception across corrupted realms.',
     realLifeSource: 'Mindfulness, study habits & Aether Vision meal/form scans',
-    accentHex: '#00D9FF',
+    accentHex: '#38D9F5',
   },
   {
     key: 'vitality',
@@ -38,7 +38,7 @@ export const RPG_ATTRIBUTE_META: Array<{
     shortLabel: 'VIT',
     description: 'Enduring life-force built through nourishment and hydration.',
     realLifeSource: 'Balanced meals logged, hydration glasses & recovery habits',
-    accentHex: '#4E9F76',
+    accentHex: '#35D69A',
   },
   {
     key: 'agility',
@@ -46,7 +46,7 @@ export const RPG_ATTRIBUTE_META: Array<{
     shortLabel: 'AGI',
     description: 'Swift footwork, evade windows and critical leg-work tempo in battle.',
     realLifeSource: 'Running, walking, cycling, lunges & jumping jacks',
-    accentHex: '#569EC4',
+    accentHex: '#65A9FF',
   },
   {
     key: 'resilience',
@@ -54,7 +54,7 @@ export const RPG_ATTRIBUTE_META: Array<{
     shortLabel: 'RES',
     description: 'Unbreakable physical conditioning against Void corruption and boss strikes.',
     realLifeSource: 'Multi-day streaks, core conditioning & boss victories',
-    accentHex: '#B68A4C',
+    accentHex: '#FFAA45',
   },
 ];
 
@@ -90,8 +90,8 @@ export const PLAYABLE_HEROES: PlayableHeroDefinition[] = [
       'Dominates calisthenics, pushup/squat sets, and frontline boss combat',
       'Heavy-impact hand and leg strikes scale directly with bodyweight conditioning',
     ],
-    accentHex: '#1677FF',
-    secondaryHex: '#00D9FF',
+    accentHex: '#E7B94F',
+    secondaryHex: '#A875FF',
     introFlourishLabel: 'Iron-Knuckle Salute',
   },
   {
@@ -125,8 +125,8 @@ export const PLAYABLE_HEROES: PlayableHeroDefinition[] = [
       'Excels at high-cadence interval training, mobility, and daily streaks',
       'High critical kick precision against Void Sovereign phases',
     ],
-    accentHex: '#00D9FF',
-    secondaryHex: '#102440',
+    accentHex: '#A875FF',
+    secondaryHex: '#38D9F5',
     introFlourishLabel: 'Swift Stance Cross Flourish',
   },
   {
@@ -160,8 +160,8 @@ export const PLAYABLE_HEROES: PlayableHeroDefinition[] = [
       'Scales smoothly with mindfulness, study, and nutrition logging',
       'Amplified elemental hand-and-leg technique power',
     ],
-    accentHex: '#00D9FF',
-    secondaryHex: '#1677FF',
+    accentHex: '#38D9F5',
+    secondaryHex: '#6638B8',
     introFlourishLabel: 'Astral Open-Palm Invocation',
   },
   {
@@ -195,8 +195,8 @@ export const PLAYABLE_HEROES: PlayableHeroDefinition[] = [
       'Rewards outdoor steps, running, cycling, squats, and wholesome fueling',
       'Relentless leg-strike impact and mobility',
     ],
-    accentHex: '#5BA375',
-    secondaryHex: '#A67C46',
+    accentHex: '#35D69A',
+    secondaryHex: '#FFAA45',
     introFlourishLabel: 'Thornwood Stride Stance',
   },
   {
@@ -230,8 +230,8 @@ export const PLAYABLE_HEROES: PlayableHeroDefinition[] = [
       'Thrives on restful sleep, recovery consistency, and full-body bodyweight work',
       'Highest survivability in multi-phase Void Sovereign battles',
     ],
-    accentHex: '#D8B36A',
-    secondaryHex: '#D9D2C5',
+    accentHex: '#FFD978',
+    secondaryHex: '#F05B70',
     introFlourishLabel: 'Dawn-Guard Stance Oath',
   },
 ];

@@ -63,57 +63,57 @@ export const DailyCalendarView: React.FC<{ embedded?: boolean }> = ({ embedded =
   const getRewardIcon = (type: string) => {
     switch (type) {
       case 'card_pack':
-        return <Gift className="w-4 h-4 text-rose-400 shrink-0" />;
+        return <Gift className="w-4 h-4 text-[#F05B70] shrink-0" />;
       case 'card':
-        return <Layers className="w-4 h-4 text-sky-400 shrink-0" />;
+        return <Layers className="w-4 h-4 text-[#65A9FF] shrink-0" />;
       case 'fragments':
-        return <Sparkles className="w-4 h-4 text-[#00D9FF] shrink-0" />;
+        return <Sparkles className="w-4 h-4 text-[#A875FF] shrink-0" />;
       case 'quest_bonus':
-        return <Flame className="w-4 h-4 text-emerald-400 shrink-0" />;
+        return <Flame className="w-4 h-4 text-[#35D69A] shrink-0" />;
       default:
-        return <Coins className="w-4 h-4 text-amber-400 shrink-0" />;
+        return <Coins className="w-4 h-4 text-[#E7B94F] shrink-0" />;
     }
   };
 
   return (
     <div className="space-y-6 animate-in fade-in">
       {/* Header & Healthy Rest Policy */}
-      <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 shadow-[0_12px_32px_rgba(2,8,20,0.6)] p-5 sm:p-6">
+      <div className="rounded-2xl bg-[#24143D]/90 backdrop-blur-md border border-[#E7B94F]/35 shadow-[0_12px_32px_rgba(10,6,20,0.65)] p-5 sm:p-6">
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-5">
           <div>
             <div className="flex flex-wrap items-center gap-2 text-xs mb-1">
-              <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#00D9FF]">
+              <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#FFD978]">
                 Sustainable Monthly Cadence
               </span>
-              <span className="text-[#A9B8CC]/40" aria-hidden="true">·</span>
-              <span className="text-[#A9B8CC] font-mono tabular-nums">
+              <span className="text-[#BEB4D6]/40" aria-hidden="true">·</span>
+              <span className="text-[#BEB4D6] font-mono tabular-nums">
                 {state?.monthKey || 'Current Cycle'}
               </span>
             </div>
-            <h2 className={`${embedded ? 'text-lg sm:text-xl' : 'text-2xl'} font-black font-['Cinzel'] text-white`}>
+            <h2 className={`${embedded ? 'text-lg sm:text-xl' : 'text-2xl'} font-black font-['Cinzel'] text-[#F7F4FF]`}>
               30-DAY ADVENTURER CALENDAR
             </h2>
-            <p className="text-xs sm:text-sm text-[#A9B8CC] max-w-2xl mt-1">
+            <p className="text-xs sm:text-sm text-[#BEB4D6] max-w-2xl mt-1">
               Honor both effort and recovery. Claim today&apos;s step via a verified workout or an intentional Rest &amp; Recovery check-in, and recover missed days with monthly Grace Passes.
             </p>
           </div>
 
           <div className="grid grid-cols-3 gap-2.5 shrink-0">
-            <div className="px-3.5 py-2.5 rounded-xl bg-[#0A1930] border border-[#1677FF]/25">
-              <div className="text-[11px] text-[#A9B8CC]">Active Days</div>
-              <div className="text-lg font-black font-mono text-white tabular-nums">
+            <div className="px-3.5 py-2.5 rounded-xl bg-[#19122B] border border-[#E7B94F]/30">
+              <div className="text-[11px] text-[#BEB4D6]">Active Days</div>
+              <div className="text-lg font-black font-mono text-[#F7F4FF] tabular-nums">
                 {state?.activeParticipationDays || 0} / 30
               </div>
             </div>
-            <div className="px-3.5 py-2.5 rounded-xl bg-[#0A1930] border border-[#1677FF]/30">
-              <div className="text-[11px] text-[#A9B8CC]">Grace Passes</div>
-              <div className="text-lg font-black font-mono text-[#00D9FF] tabular-nums">
+            <div className="px-3.5 py-2.5 rounded-xl bg-[#19122B] border border-[#35D69A]/35">
+              <div className="text-[11px] text-[#BEB4D6]">Grace Passes</div>
+              <div className="text-lg font-black font-mono text-[#35D69A] tabular-nums">
                 {state?.gracePassesRemaining ?? 2} / 2
               </div>
             </div>
-            <div className="px-3.5 py-2.5 rounded-xl bg-[#0A1930] border border-[#00D9FF]/30">
-              <div className="text-[11px] text-[#A9B8CC]">Fragments</div>
-              <div className="text-lg font-black font-mono text-[#00D9FF] tabular-nums">
+            <div className="px-3.5 py-2.5 rounded-xl bg-[#19122B] border border-[#A875FF]/35">
+              <div className="text-[11px] text-[#BEB4D6]">Fragments</div>
+              <div className="text-lg font-black font-mono text-[#A875FF] tabular-nums">
                 {walletState?.cosmeticFragments ?? 0}
               </div>
             </div>
@@ -121,9 +121,9 @@ export const DailyCalendarView: React.FC<{ embedded?: boolean }> = ({ embedded =
         </div>
 
         {/* Today Check-In Bar */}
-        <div className="mt-5 pt-4 border-t border-[#1677FF]/20 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-start gap-2.5 text-xs text-[#A9B8CC]">
-            <ShieldCheck className="w-4 h-4 text-[#00D9FF] shrink-0 mt-0.5" />
+        <div className="mt-5 pt-4 border-t border-[#6638B8]/25 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-start gap-2.5 text-xs text-[#BEB4D6]">
+            <ShieldCheck className="w-4 h-4 text-[#FFD978] shrink-0 mt-0.5" />
             <div>
               {state?.claimedToday ? (
                 <span>
@@ -144,8 +144,8 @@ export const DailyCalendarView: React.FC<{ embedded?: boolean }> = ({ embedded =
               onClick={() => void handleCheckIn('workout')}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 ${
                 state?.claimedToday
-                  ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white shadow-[0_0_18px_rgba(22,119,255,0.35)]'
+                  ? 'bg-[#35D69A]/15 border border-[#35D69A]/35 text-[#35D69A] cursor-not-allowed'
+                  : 'bg-gradient-to-r from-[#E7B94F] to-[#FFAA45] hover:brightness-110 text-[#100D1C] shadow-[0_0_18px_rgba(231,185,79,0.35)]'
               }`}
             >
               <Dumbbell className="w-4 h-4 shrink-0" />
@@ -164,11 +164,11 @@ export const DailyCalendarView: React.FC<{ embedded?: boolean }> = ({ embedded =
               onClick={() => void handleCheckIn('rest_recovery')}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold border transition-all whitespace-nowrap shrink-0 ${
                 state?.claimedToday
-                  ? 'bg-[#0A1930]/60 border-[#1677FF]/15 text-[#A9B8CC]/40 cursor-not-allowed'
-                  : 'bg-[#0A1930] hover:bg-[#16325C] border-[#1677FF]/40 hover:border-[#00D9FF]/50 text-white'
+                  ? 'bg-[#19122B]/60 border-[#6638B8]/20 text-[#BEB4D6]/40 cursor-not-allowed'
+                  : 'bg-[#19122B] hover:bg-[#113328] border-[#35D69A]/45 hover:border-[#35D69A]/75 text-[#F7F4FF]'
               }`}
             >
-              <HeartHandshake className="w-4 h-4 shrink-0 text-[#00D9FF]" />
+              <HeartHandshake className="w-4 h-4 shrink-0 text-[#35D69A]" />
               <span>
                 {busyId === 'checkin-rest_recovery' ? 'Recording...' : 'Check In: Rest & Recovery'}
               </span>
@@ -182,8 +182,8 @@ export const DailyCalendarView: React.FC<{ embedded?: boolean }> = ({ embedded =
           role="status"
           className={`px-4 py-3 rounded-xl border text-xs font-semibold ${
             notice.type === 'success'
-              ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-200'
-              : 'bg-rose-950/60 border-rose-500/40 text-rose-200'
+              ? 'bg-[#113328]/70 border-[#35D69A]/50 text-[#F7F4FF]'
+              : 'bg-[#36111F]/70 border-[#F05B70]/50 text-[#F7F4FF]'
           }`}
         >
           {notice.text}
@@ -199,20 +199,20 @@ export const DailyCalendarView: React.FC<{ embedded?: boolean }> = ({ embedded =
               key={ms.id}
               className={`rounded-xl border p-4 flex flex-col justify-between gap-3 transition-all ${
                 ms.claimed
-                  ? 'bg-emerald-950/25 border-emerald-500/35'
+                  ? 'bg-[#113328]/40 border-[#35D69A]/40'
                   : ms.unlocked
-                    ? 'bg-[#102440]/90 border-[#00D9FF]/50 shadow-[0_0_16px_rgba(0,217,255,0.12)]'
-                    : 'bg-[#0A1930] border-[#1677FF]/25'
+                    ? 'bg-[#24143D]/95 border-[#FFD978]/60 shadow-[0_0_16px_rgba(231,185,79,0.18)]'
+                    : 'bg-[#19122B] border-[#6638B8]/30'
               }`}
             >
               <div>
                 <div className="flex items-center justify-between gap-2 text-xs">
-                  <span className="font-['Cinzel'] font-bold text-[#00D9FF]">{ms.title}</span>
-                  <span className="font-mono text-[11px] text-[#A9B8CC] tabular-nums">
+                  <span className="font-['Cinzel'] font-bold text-[#FFD978]">{ms.title}</span>
+                  <span className="font-mono text-[11px] text-[#BEB4D6] tabular-nums">
                     {ms.dayTarget} Days
                   </span>
                 </div>
-                <p className="text-xs text-[#A9B8CC] mt-1">{ms.rewardLabel}</p>
+                <p className="text-xs text-[#BEB4D6] mt-1">{ms.rewardLabel}</p>
               </div>
 
               <button
@@ -221,10 +221,10 @@ export const DailyCalendarView: React.FC<{ embedded?: boolean }> = ({ embedded =
                 onClick={() => void handleClaimWeekly(ms.id)}
                 className={`w-full py-2 px-3 rounded-lg text-xs font-bold transition-all whitespace-nowrap shrink-0 ${
                   ms.claimed
-                    ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 cursor-default'
+                    ? 'bg-[#35D69A]/15 text-[#35D69A] border border-[#35D69A]/35 cursor-default'
                     : ms.unlocked
-                      ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white shadow-[0_0_18px_rgba(22,119,255,0.35)]'
-                      : 'bg-[#061225] text-[#A9B8CC]/50 border border-[#1677FF]/20 cursor-not-allowed'
+                      ? 'bg-gradient-to-r from-[#239B6F] to-[#35D69A] hover:brightness-110 text-[#100D1C] shadow-[0_0_18px_rgba(53,214,154,0.3)]'
+                      : 'bg-[#100D1C] text-[#BEB4D6]/50 border border-[#6638B8]/25 cursor-not-allowed'
                 }`}
               >
                 {ms.claimed ? 'Claimed' : busy ? 'Claiming...' : ms.unlocked ? 'Claim Milestone' : 'Locked'}
@@ -235,13 +235,13 @@ export const DailyCalendarView: React.FC<{ embedded?: boolean }> = ({ embedded =
       </div>
 
       {/* 30-Day Calendar Grid */}
-      <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 shadow-[0_12px_32px_rgba(2,8,20,0.6)] p-4 sm:p-5">
+      <div className="rounded-2xl bg-[#24143D]/90 backdrop-blur-md border border-[#E7B94F]/30 shadow-[0_12px_32px_rgba(10,6,20,0.65)] p-4 sm:p-5">
         <div className="flex items-center justify-between gap-2 mb-4">
-          <div className="flex items-center gap-2 text-xs font-['Cinzel'] font-bold text-white uppercase tracking-wider">
-            <CalendarCheck className="w-4 h-4 text-[#00D9FF]" />
+          <div className="flex items-center gap-2 text-xs font-['Cinzel'] font-bold text-[#F7F4FF] uppercase tracking-wider">
+            <CalendarCheck className="w-4 h-4 text-[#FFD978]" />
             <span>Monthly Track (30 Steps)</span>
           </div>
-          <span className="text-[11px] text-[#A9B8CC] tabular-nums">
+          <span className="text-[11px] text-[#BEB4D6] tabular-nums">
             {state?.totalClaimedThisMonth || 0} / 30 Claimed
           </span>
         </div>
@@ -255,34 +255,34 @@ export const DailyCalendarView: React.FC<{ embedded?: boolean }> = ({ embedded =
                 key={day.dayNumber}
                 className={`rounded-xl border p-3 flex flex-col justify-between gap-2 transition-all ${
                   day.claimed
-                    ? 'bg-emerald-950/25 border-emerald-500/40'
+                    ? 'bg-[#113328]/40 border-[#35D69A]/45'
                     : isRecoverable
-                      ? 'bg-[#102440] border-[#00D9FF]/50'
+                      ? 'bg-[#24143D] border-[#FFAA45]/60'
                       : day.isWeeklyMilestone
-                        ? 'bg-[#0A1930] border-[#1677FF]/45'
-                        : 'bg-[#061225]/90 border-[#1677FF]/20 hover:border-[#00D9FF]/40'
+                        ? 'bg-[#19122B] border-[#E7B94F]/50'
+                        : 'bg-[#100D1C]/90 border-[#6638B8]/25 hover:border-[#FFD978]/45'
                 }`}
               >
                 <div className="flex items-center justify-between gap-1">
-                  <span className="text-xs font-mono font-bold text-white tabular-nums">
+                  <span className="text-xs font-mono font-bold text-[#F7F4FF] tabular-nums">
                     Day {day.dayNumber}
                   </span>
                   {day.claimed ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-[#35D69A] shrink-0" />
                   ) : day.isWeeklyMilestone ? (
-                    <Trophy className="w-3.5 h-3.5 text-[#00D9FF] shrink-0" />
+                    <Trophy className="w-3.5 h-3.5 text-[#FFD978] shrink-0" />
                   ) : null}
                 </div>
 
                 <div className="flex items-start gap-2 my-1">
                   {getRewardIcon(day.rewardType)}
-                  <span className="text-[11px] text-[#A9B8CC] leading-snug">
+                  <span className="text-[11px] text-[#BEB4D6] leading-snug">
                     {day.rewardLabel}
                   </span>
                 </div>
 
                 {day.claimed ? (
-                  <div className="text-[10px] font-semibold text-emerald-300/90 capitalize">
+                  <div className="text-[10px] font-semibold text-[#35D69A] capitalize">
                     {day.claimedMode === 'rest_recovery'
                       ? 'Rest & Recovery'
                       : day.claimedMode === 'grace_catchup'
@@ -294,12 +294,12 @@ export const DailyCalendarView: React.FC<{ embedded?: boolean }> = ({ embedded =
                     type="button"
                     disabled={busyId !== null}
                     onClick={() => void handleCheckIn('rest_recovery', day.dayNumber)}
-                    className="w-full py-1.5 px-2 rounded-lg bg-[#0A1930] hover:bg-[#16325C] border border-[#00D9FF]/50 text-[#00D9FF] text-[10px] font-bold whitespace-nowrap shrink-0 transition-colors"
+                    className="w-full py-1.5 px-2 rounded-lg bg-[#19122B] hover:bg-[#113328] border border-[#35D69A]/55 text-[#35D69A] text-[10px] font-bold whitespace-nowrap shrink-0 transition-colors"
                   >
                     {busyCatchup ? 'Applying...' : 'Grace Catch-Up'}
                   </button>
                 ) : (
-                  <div className="text-[10px] text-[#A9B8CC]/60">
+                  <div className="text-[10px] text-[#BEB4D6]/60">
                     {day.isWeeklyMilestone ? 'Milestone Step' : 'Upcoming Step'}
                   </div>
                 )}

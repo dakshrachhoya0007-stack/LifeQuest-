@@ -197,25 +197,25 @@ export const SettingsView: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in pb-12">
       {/* Banner */}
-      <div className="rounded-2xl bg-gradient-to-r from-[#0A1930] via-[#102440] to-[#0A1930] border border-[#1677FF]/35 p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)]">
+      <div className="rounded-2xl bg-gradient-to-r from-[#19122B] via-[#24143D] to-[#19122B] border border-[#6638B8]/40 p-6 shadow-[0_12px_32px_rgba(10,5,24,0.65)]">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-[#00D9FF] bg-[#0A1930] border border-[#1677FF]/40 px-2.5 py-0.5 rounded">
+            <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-[#FFD978] bg-[#100D1C] border border-[#E7B94F]/40 px-2.5 py-0.5 rounded">
               Hero Preferences
             </span>
-            <span className="text-xs text-[#A9B8CC] font-semibold">Preferences & Privacy</span>
+            <span className="text-xs text-[#BEB4D6] font-semibold">Preferences & Privacy</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-white">
+          <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F7F4FF]">
             SETTINGS & PRIVACY CHARTER
           </h1>
-          <p className="text-xs sm:text-sm text-[#A9B8CC] max-w-2xl mt-1">
+          <p className="text-xs sm:text-sm text-[#BEB4D6] max-w-2xl mt-1">
             Manage your hero archetype, preferences, audio feedback, and cross-platform cloud synchronization.
           </p>
         </div>
       </div>
 
       {savedSuccess && (
-        <div className="p-3 rounded-xl bg-emerald-950/80 border border-emerald-600 text-xs text-emerald-200 flex items-center justify-center gap-2 animate-in fade-in">
+        <div className="p-3 rounded-xl bg-[#35D69A]/15 border border-[#35D69A]/45 text-xs text-[#35D69A] flex items-center justify-center gap-2 animate-in fade-in">
           <Check className="w-4 h-4" />
           Settings updated and synced across Web & Mobile!
         </div>
@@ -223,49 +223,49 @@ export const SettingsView: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Profile & Wellness Settings */}
-        <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 rounded-2xl p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)] space-y-4">
-          <h3 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-            <User className="w-4 h-4 text-[#00D9FF]" />
+        <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 rounded-2xl p-6 shadow-[0_12px_32px_rgba(10,5,24,0.65)] space-y-4">
+          <h3 className="font-['Cinzel'] font-bold text-base text-[#F7F4FF] flex items-center gap-2">
+            <User className="w-4 h-4 text-[#FFD978]" />
             HERO PROFILE
           </h3>
 
           {/* Dual Identity Preview: RPG Character Portrait vs Google Account Photo */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-xl bg-[#0A1930] border border-[#1677FF]/30">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-xl bg-[#19122B] border border-[#6638B8]/35">
             <div className="flex items-center gap-3">
               <img
                 src={getHeroArtwork(selectedHeroId, characterClass)}
                 alt={`${boundHero.name} Portrait`}
                 referrerPolicy="no-referrer"
-                className="w-14 h-14 rounded-xl object-cover object-top border-2 border-[#1677FF] shadow"
+                className="w-14 h-14 rounded-xl object-cover object-top border-2 border-[#E7B94F] shadow"
               />
               <div className="min-w-0">
-                <span className="text-[10px] uppercase tracking-wider text-[#00D9FF] font-bold block">
+                <span className="text-[10px] uppercase tracking-wider text-[#FFD978] font-bold block">
                   Bound Champion Portrait
                 </span>
-                <span className="text-xs font-bold text-white block truncate">
+                <span className="text-xs font-bold text-[#F7F4FF] block truncate">
                   {boundHero.name} · {characterClass}
                 </span>
-                <span className="text-[10px] text-[#A9B8CC] block">
+                <span className="text-[10px] text-[#BEB4D6] block">
                   Used across Realm &amp; Combat
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 sm:border-l sm:border-[#1677FF]/25 sm:pl-3">
+            <div className="flex items-center gap-3 sm:border-l sm:border-[#6638B8]/30 sm:pl-3">
               <img
                 src={resolveAssetUrl(user?.googleAvatar || user?.avatar, characterWarriorAvatarImg)}
                 alt={user?.username || 'Account Photo'}
                 referrerPolicy="no-referrer"
-                className="w-14 h-14 rounded-full object-cover border-2 border-[#00D9FF]/60 shadow"
+                className="w-14 h-14 rounded-full object-cover border-2 border-[#A875FF]/70 shadow"
               />
               <div className="min-w-0">
-                <span className="text-[10px] uppercase tracking-wider text-[#00D9FF] font-bold block">
+                <span className="text-[10px] uppercase tracking-wider text-[#A875FF] font-bold block">
                   Account Profile Photo
                 </span>
-                <span className="text-xs font-semibold text-white block truncate">
+                <span className="text-xs font-semibold text-[#F7F4FF] block truncate">
                   {user?.email || user?.username}
                 </span>
-                <span className="text-[10px] text-[#A9B8CC] block">
+                <span className="text-[10px] text-[#BEB4D6] block">
                   Kept separate from RPG portrait
                 </span>
               </div>
@@ -275,31 +275,31 @@ export const SettingsView: React.FC = () => {
           <form onSubmit={handleSave} className="space-y-4 text-xs">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block font-medium text-[#A9B8CC] mb-1">Hero Username</label>
+                <label className="block font-medium text-[#BEB4D6] mb-1">Hero Username</label>
                 <input
                   type="text"
                   value={username}
                   onChange={e => setUsername(e.target.value)}
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2.5 text-white focus:outline-none"
+                  className="w-full bg-[#100D1C] border border-[#6638B8]/40 focus:border-[#E7B94F] rounded-xl px-3 py-2.5 text-[#F7F4FF] focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block font-medium text-[#A9B8CC] mb-1">Character Name</label>
+                <label className="block font-medium text-[#BEB4D6] mb-1">Character Name</label>
                 <input
                   type="text"
                   value={characterName}
                   onChange={e => setCharacterName(e.target.value)}
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2.5 text-white focus:outline-none"
+                  className="w-full bg-[#100D1C] border border-[#6638B8]/40 focus:border-[#E7B94F] rounded-xl px-3 py-2.5 text-[#F7F4FF] focus:outline-none"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block font-medium text-[#A9B8CC] mb-1 flex items-center justify-between">
+                <label className="block font-medium text-[#BEB4D6] mb-1 flex items-center justify-between">
                   <span>Character Class Archetype</span>
                   {heroLocked && (
-                    <span className="text-[10px] text-[#00D9FF] font-semibold inline-flex items-center gap-1">
+                    <span className="text-[10px] text-[#FFD978] font-semibold inline-flex items-center gap-1">
                       <Lock className="w-3 h-3" />
                       Locked
                     </span>
@@ -309,7 +309,7 @@ export const SettingsView: React.FC = () => {
                   value={characterClass}
                   disabled={heroLocked}
                   onChange={e => setCharacterClass(e.target.value as CharacterClass)}
-                  className={`w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2.5 text-white focus:outline-none ${
+                  className={`w-full bg-[#100D1C] border border-[#6638B8]/40 focus:border-[#E7B94F] rounded-xl px-3 py-2.5 text-[#F7F4FF] focus:outline-none ${
                     heroLocked ? 'opacity-65 cursor-not-allowed' : ''
                   }`}
                 >
@@ -319,17 +319,17 @@ export const SettingsView: React.FC = () => {
                   <option value="Guardian">Guardian (Sleep, recovery, preservation)</option>
                 </select>
                 {heroLocked && (
-                  <p className="text-[10px] text-[#A9B8CC] mt-1">
+                  <p className="text-[10px] text-[#BEB4D6] mt-1">
                     Permanently bound to {boundHero.name}.
                   </p>
                 )}
               </div>
               <div>
-                <label className="block font-medium text-[#A9B8CC] mb-1">Activity Level</label>
+                <label className="block font-medium text-[#BEB4D6] mb-1">Activity Level</label>
                 <select
                   value={activityLevel}
                   onChange={e => setActivityLevel(e.target.value as ActivityLevel)}
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2.5 text-white focus:outline-none"
+                  className="w-full bg-[#100D1C] border border-[#6638B8]/40 focus:border-[#E7B94F] rounded-xl px-3 py-2.5 text-[#F7F4FF] focus:outline-none"
                 >
                   <option value="sedentary">Mostly Seated</option>
                   <option value="light">Lightly Active</option>
@@ -341,11 +341,11 @@ export const SettingsView: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block font-medium text-[#A9B8CC] mb-1">Preferred Units</label>
+                <label className="block font-medium text-[#BEB4D6] mb-1">Preferred Units</label>
                 <select
                   value={preferredUnits}
                   onChange={e => setPreferredUnits(e.target.value as UnitSystem)}
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2.5 text-white focus:outline-none"
+                  className="w-full bg-[#100D1C] border border-[#6638B8]/40 focus:border-[#E7B94F] rounded-xl px-3 py-2.5 text-[#F7F4FF] focus:outline-none"
                 >
                   <option value="metric">Metric (cm / kg / km)</option>
                   <option value="imperial">Imperial (ft / lb / mi)</option>
@@ -353,11 +353,11 @@ export const SettingsView: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-medium text-[#A9B8CC] mb-1">Dietary Preference</label>
+                <label className="block font-medium text-[#BEB4D6] mb-1">Dietary Preference</label>
                 <select
                   value={dietaryPreference}
                   onChange={e => setDietaryPreference(e.target.value as DietaryPreference)}
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2.5 text-white focus:outline-none"
+                  className="w-full bg-[#100D1C] border border-[#6638B8]/40 focus:border-[#E7B94F] rounded-xl px-3 py-2.5 text-[#F7F4FF] focus:outline-none"
                 >
                   <option value="vegetarian">Vegetarian</option>
                   <option value="vegan">Vegan</option>
@@ -370,7 +370,7 @@ export const SettingsView: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label className="block font-medium text-[#A9B8CC] mb-1">Age (Years, Optional)</label>
+                <label className="block font-medium text-[#BEB4D6] mb-1">Age (Years, Optional)</label>
                 <input
                   type="number"
                   min={5}
@@ -378,15 +378,15 @@ export const SettingsView: React.FC = () => {
                   value={ageYearsInput}
                   onChange={e => setAgeYearsInput(e.target.value)}
                   placeholder="e.g. 24"
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2.5 text-white focus:outline-none"
+                  className="w-full bg-[#100D1C] border border-[#6638B8]/40 focus:border-[#E7B94F] rounded-xl px-3 py-2.5 text-[#F7F4FF] focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block font-medium text-[#A9B8CC] mb-1">Age Group (Optional)</label>
+                <label className="block font-medium text-[#BEB4D6] mb-1">Age Group (Optional)</label>
                 <select
                   value={ageGroup}
                   onChange={e => setAgeGroup(e.target.value as AgeGroup | '')}
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2.5 text-white focus:outline-none"
+                  className="w-full bg-[#100D1C] border border-[#6638B8]/40 focus:border-[#E7B94F] rounded-xl px-3 py-2.5 text-[#F7F4FF] focus:outline-none"
                 >
                   <option value="">Auto from age</option>
                   <option value="child">Child (5–9 yrs)</option>
@@ -397,11 +397,11 @@ export const SettingsView: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block font-medium text-[#A9B8CC] mb-1">Reference Sex (Optional)</label>
+                <label className="block font-medium text-[#BEB4D6] mb-1">Reference Sex (Optional)</label>
                 <select
                   value={biologicalSex}
                   onChange={e => setBiologicalSex(e.target.value as BiologicalSex | '')}
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2.5 text-white focus:outline-none"
+                  className="w-full bg-[#100D1C] border border-[#6638B8]/40 focus:border-[#E7B94F] rounded-xl px-3 py-2.5 text-[#F7F4FF] focus:outline-none"
                 >
                   <option value="">Prefer not to specify</option>
                   <option value="female">Female</option>
@@ -414,80 +414,80 @@ export const SettingsView: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block font-medium text-[#A9B8CC] mb-1">Height (Optional)</label>
+                <label className="block font-medium text-[#BEB4D6] mb-1">Height (Optional)</label>
                 <input
                   type="text"
                   value={height}
                   onChange={e => setHeight(e.target.value)}
                   placeholder={preferredUnits === 'metric' ? 'e.g. 175 cm' : 'e.g. 5 ft 9 in'}
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2.5 text-white focus:outline-none"
+                  className="w-full bg-[#100D1C] border border-[#6638B8]/40 focus:border-[#E7B94F] rounded-xl px-3 py-2.5 text-[#F7F4FF] focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block font-medium text-[#A9B8CC] mb-1">Weight (Optional)</label>
+                <label className="block font-medium text-[#BEB4D6] mb-1">Weight (Optional)</label>
                 <input
                   type="text"
                   value={weight}
                   onChange={e => setWeight(e.target.value)}
                   placeholder={preferredUnits === 'metric' ? 'e.g. 70 kg' : 'e.g. 154 lb'}
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2.5 text-white focus:outline-none"
+                  className="w-full bg-[#100D1C] border border-[#6638B8]/40 focus:border-[#E7B94F] rounded-xl px-3 py-2.5 text-[#F7F4FF] focus:outline-none"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block font-medium text-[#A9B8CC] mb-1">Food Allergies (Comma-separated)</label>
+                <label className="block font-medium text-[#BEB4D6] mb-1">Food Allergies (Comma-separated)</label>
                 <input
                   type="text"
                   value={foodAllergiesText}
                   onChange={e => setFoodAllergiesText(e.target.value)}
                   placeholder="e.g. Peanuts, Dairy"
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2.5 text-white focus:outline-none"
+                  className="w-full bg-[#100D1C] border border-[#6638B8]/40 focus:border-[#E7B94F] rounded-xl px-3 py-2.5 text-[#F7F4FF] focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block font-medium text-[#A9B8CC] mb-1">Intolerances (Comma-separated)</label>
+                <label className="block font-medium text-[#BEB4D6] mb-1">Intolerances (Comma-separated)</label>
                 <input
                   type="text"
                   value={foodIntolerancesText}
                   onChange={e => setFoodIntolerancesText(e.target.value)}
                   placeholder="e.g. Lactose"
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2.5 text-white focus:outline-none"
+                  className="w-full bg-[#100D1C] border border-[#6638B8]/40 focus:border-[#E7B94F] rounded-xl px-3 py-2.5 text-[#F7F4FF] focus:outline-none"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block font-medium text-[#A9B8CC] mb-1">Foods to Avoid</label>
+                <label className="block font-medium text-[#BEB4D6] mb-1">Foods to Avoid</label>
                 <input
                   type="text"
                   value={dislikedFoods}
                   onChange={e => setDislikedFoods(e.target.value)}
                   placeholder="e.g. Mushrooms, Olives"
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2.5 text-white focus:outline-none"
+                  className="w-full bg-[#100D1C] border border-[#6638B8]/40 focus:border-[#E7B94F] rounded-xl px-3 py-2.5 text-[#F7F4FF] focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block font-medium text-[#A9B8CC] mb-1">Timezone</label>
+                <label className="block font-medium text-[#BEB4D6] mb-1">Timezone</label>
                 <input
                   type="text"
                   value={timezone}
                   onChange={e => setTimezone(e.target.value)}
                   placeholder="e.g. Asia/Kolkata"
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 focus:border-[#00D9FF] rounded-xl px-3 py-2.5 text-white focus:outline-none"
+                  className="w-full bg-[#100D1C] border border-[#6638B8]/40 focus:border-[#E7B94F] rounded-xl px-3 py-2.5 text-[#F7F4FF] focus:outline-none"
                 />
               </div>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-[#0A1930] border border-[#1677FF]/30 space-y-2.5">
+            <div className="p-3.5 rounded-xl bg-[#19122B] border border-[#6638B8]/35 space-y-2.5">
               <div className="flex items-center justify-between gap-2">
-                <span className="font-semibold text-white flex items-center gap-1.5">
-                  <Bell className="w-3.5 h-3.5 text-[#00D9FF]" />
+                <span className="font-semibold text-[#F7F4FF] flex items-center gap-1.5">
+                  <Bell className="w-3.5 h-3.5 text-[#FFD978]" />
                   Alert &amp; Notification Controls
                 </span>
-                <label className="flex items-center gap-2 text-[11px] text-[#00D9FF] cursor-pointer">
+                <label className="flex items-center gap-2 text-[11px] text-[#FFD978] cursor-pointer">
                   <span>All Enabled</span>
                   <input
                     type="checkbox"
@@ -498,7 +498,7 @@ export const SettingsView: React.FC = () => {
                         masterEnabled: e.target.checked,
                       })
                     }
-                    className="accent-[#1677FF] cursor-pointer"
+                    className="accent-[#A875FF] cursor-pointer"
                   />
                 </label>
               </div>
@@ -515,7 +515,7 @@ export const SettingsView: React.FC = () => {
                 ).map(item => (
                   <label
                     key={item.key}
-                    className="flex items-center justify-between gap-2 text-[11px] text-[#A9B8CC] cursor-pointer"
+                    className="flex items-center justify-between gap-2 text-[11px] text-[#BEB4D6] cursor-pointer"
                   >
                     <span>{item.label}</span>
                     <input
@@ -528,7 +528,7 @@ export const SettingsView: React.FC = () => {
                           [item.key]: e.target.checked,
                         })
                       }
-                      className="accent-[#1677FF] cursor-pointer"
+                      className="accent-[#A875FF] cursor-pointer"
                     />
                   </label>
                 ))}
@@ -536,13 +536,13 @@ export const SettingsView: React.FC = () => {
             </div>
 
             {/* Bio & Granular 11-Field Privacy Matrix */}
-            <div className="p-4 rounded-xl bg-[#0A1930] border border-[#1677FF]/30 space-y-4">
+            <div className="p-4 rounded-xl bg-[#19122B] border border-[#6638B8]/35 space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-wider text-[#00D9FF] block">
+                  <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-wider text-[#FFD978] block">
                     Granular Profile Privacy Matrix
                   </span>
-                  <span className="text-[11px] text-[#A9B8CC]">
+                  <span className="text-[11px] text-[#BEB4D6]">
                     Choose Everyone, Friends Only, or Nobody per category. Email &amp; private health details never leave your account.
                   </span>
                 </div>
@@ -550,21 +550,21 @@ export const SettingsView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setPrivacySettings(PUBLIC_CHAMPION_PRESET)}
-                    className="px-2.5 py-1 rounded-lg bg-[#061225] hover:bg-[#102440] border border-[#1677FF]/30 hover:border-[#00D9FF]/45 text-[11px] text-[#A9B8CC] hover:text-white transition-colors"
+                    className="px-2.5 py-1 rounded-lg bg-[#100D1C] hover:bg-[#2F1B4E] border border-[#6638B8]/35 hover:border-[#E7B94F]/50 text-[11px] text-[#BEB4D6] hover:text-[#F7F4FF] transition-colors"
                   >
                     Public Preset
                   </button>
                   <button
                     type="button"
                     onClick={() => setPrivacySettings(FRIENDS_ONLY_PRESET)}
-                    className="px-2.5 py-1 rounded-lg bg-[#061225] hover:bg-[#102440] border border-[#1677FF]/30 hover:border-[#00D9FF]/45 text-[11px] text-[#A9B8CC] hover:text-white transition-colors"
+                    className="px-2.5 py-1 rounded-lg bg-[#100D1C] hover:bg-[#2F1B4E] border border-[#6638B8]/35 hover:border-[#E7B94F]/50 text-[11px] text-[#BEB4D6] hover:text-[#F7F4FF] transition-colors"
                   >
                     Friends Preset
                   </button>
                   <button
                     type="button"
                     onClick={() => setPrivacySettings(PRIVATE_BY_DEFAULT_PRESET)}
-                    className="px-2.5 py-1 rounded-lg bg-[#061225] hover:bg-[#102440] border border-[#1677FF]/30 hover:border-[#00D9FF]/45 text-[11px] text-[#A9B8CC] hover:text-white transition-colors"
+                    className="px-2.5 py-1 rounded-lg bg-[#100D1C] hover:bg-[#2F1B4E] border border-[#6638B8]/35 hover:border-[#E7B94F]/50 text-[11px] text-[#BEB4D6] hover:text-[#F7F4FF] transition-colors"
                   >
                     Private Preset
                   </button>
@@ -573,8 +573,8 @@ export const SettingsView: React.FC = () => {
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block font-medium text-[#A9B8CC]">Hero Bio</label>
-                  <span className="text-[10px] text-[#A9B8CC]/75 font-mono tabular-nums">
+                  <label className="block font-medium text-[#BEB4D6]">Hero Bio</label>
+                  <span className="text-[10px] text-[#BEB4D6]/75 font-mono tabular-nums">
                     {bio.length}/240
                   </span>
                 </div>
@@ -584,14 +584,14 @@ export const SettingsView: React.FC = () => {
                   rows={2}
                   onChange={e => setBio(e.target.value)}
                   placeholder="Share your quest ethos, training focus, or guild motto..."
-                  className="w-full bg-[#061225] border border-[#1677FF]/35 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-[#00D9FF] resize-none"
+                  className="w-full bg-[#100D1C] border border-[#6638B8]/40 rounded-xl px-3 py-2 text-[#F7F4FF] focus:outline-none focus:border-[#E7B94F] resize-none"
                 />
               </div>
 
-              <label className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-[#061225] border border-[#1677FF]/25 cursor-pointer">
+              <label className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-[#100D1C] border border-[#6638B8]/30 cursor-pointer">
                 <div>
-                  <span className="font-semibold text-white block">Private-by-Default Mode</span>
-                  <span className="text-[10px] text-[#A9B8CC]">
+                  <span className="font-semibold text-[#F7F4FF] block">Private-by-Default Mode</span>
+                  <span className="text-[10px] text-[#BEB4D6]">
                     Restrict default profile discovery and treat non-public fields strictly.
                   </span>
                 </div>
@@ -604,11 +604,11 @@ export const SettingsView: React.FC = () => {
                       privateByDefault: e.target.checked,
                     }))
                   }
-                  className="w-4 h-4 accent-[#1677FF] cursor-pointer"
+                  className="w-4 h-4 accent-[#A875FF] cursor-pointer"
                 />
               </label>
 
-              <div className="divide-y divide-[#1677FF]/15 border border-[#1677FF]/25 rounded-xl overflow-hidden bg-[#061225]">
+              <div className="divide-y divide-[#6638B8]/20 border border-[#6638B8]/30 rounded-xl overflow-hidden bg-[#100D1C]">
                 {PRIVACY_FIELD_DEFINITIONS.map(field => {
                   const val = privacySettings[field.key];
                   return (
@@ -617,12 +617,12 @@ export const SettingsView: React.FC = () => {
                       className="px-3 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
                     >
                       <div className="min-w-0">
-                        <span className="font-semibold text-white block">{field.label}</span>
-                        <span className="text-[10px] text-[#A9B8CC] block">
+                        <span className="font-semibold text-[#F7F4FF] block">{field.label}</span>
+                        <span className="text-[10px] text-[#BEB4D6] block">
                           {field.description}
                         </span>
                       </div>
-                      <div className="flex items-center gap-1 p-0.5 rounded-lg bg-[#0A1930] border border-[#1677FF]/25 shrink-0">
+                      <div className="flex items-center gap-1 p-0.5 rounded-lg bg-[#19122B] border border-[#6638B8]/30 shrink-0">
                         {(['everyone', 'friends', 'nobody'] as FieldVisibilityLevel[]).map(opt => (
                           <button
                             key={opt}
@@ -635,8 +635,8 @@ export const SettingsView: React.FC = () => {
                             }
                             className={`px-2 py-1 rounded text-[10px] font-semibold capitalize transition-colors whitespace-nowrap ${
                               val === opt
-                                ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white'
-                                : 'text-[#A9B8CC] hover:text-white'
+                                ? 'bg-gradient-to-r from-[#6638B8] to-[#A875FF] text-[#F7F4FF]'
+                                : 'text-[#BEB4D6] hover:text-[#F7F4FF]'
                             }`}
                           >
                             {opt === 'everyone' ? 'Everyone' : opt === 'friends' ? 'Friends' : 'Nobody'}
@@ -649,7 +649,7 @@ export const SettingsView: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-2 pt-1">
-                <label className="flex items-center justify-between gap-2 text-[11px] text-[#A9B8CC] cursor-pointer p-2 rounded-lg bg-[#061225] border border-[#1677FF]/20">
+                <label className="flex items-center justify-between gap-2 text-[11px] text-[#BEB4D6] cursor-pointer p-2 rounded-lg bg-[#100D1C] border border-[#6638B8]/25">
                   <span>Show Combat Stance</span>
                   <input
                     type="checkbox"
@@ -657,10 +657,10 @@ export const SettingsView: React.FC = () => {
                     onChange={e =>
                       setPrivacySettings(prev => ({ ...prev, showEquipment: e.target.checked }))
                     }
-                    className="accent-[#1677FF] cursor-pointer"
+                    className="accent-[#A875FF] cursor-pointer"
                   />
                 </label>
-                <label className="flex items-center justify-between gap-2 text-[11px] text-[#A9B8CC] cursor-pointer p-2 rounded-lg bg-[#061225] border border-[#1677FF]/20">
+                <label className="flex items-center justify-between gap-2 text-[11px] text-[#BEB4D6] cursor-pointer p-2 rounded-lg bg-[#100D1C] border border-[#6638B8]/25">
                   <span>Show Guild Affiliation</span>
                   <input
                     type="checkbox"
@@ -668,15 +668,15 @@ export const SettingsView: React.FC = () => {
                     onChange={e =>
                       setPrivacySettings(prev => ({ ...prev, showGuild: e.target.checked }))
                     }
-                    className="accent-[#1677FF] cursor-pointer"
+                    className="accent-[#A875FF] cursor-pointer"
                   />
                 </label>
               </div>
 
               {/* Preview Public Profile As */}
-              <div className="pt-2 border-t border-[#1677FF]/20 space-y-2">
+              <div className="pt-2 border-t border-[#6638B8]/25 space-y-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-[11px] font-semibold text-[#00D9FF] flex items-center gap-1.5">
+                  <span className="text-[11px] font-semibold text-[#FFD978] flex items-center gap-1.5">
                     <Eye className="w-3.5 h-3.5" />
                     Preview Profile As Visitor
                   </span>
@@ -695,8 +695,8 @@ export const SettingsView: React.FC = () => {
                         onClick={() => void handleRunPreview(m.id)}
                         className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold border transition-colors ${
                           previewMode === m.id
-                            ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] border-[#00D9FF]/60 text-white'
-                            : 'bg-[#061225] border-[#1677FF]/30 text-[#A9B8CC] hover:text-white'
+                            ? 'bg-gradient-to-r from-[#6638B8] to-[#A875FF] border-[#A875FF]/60 text-[#F7F4FF]'
+                            : 'bg-[#100D1C] border-[#6638B8]/35 text-[#BEB4D6] hover:text-[#F7F4FF]'
                         }`}
                       >
                         {m.label}
@@ -705,20 +705,20 @@ export const SettingsView: React.FC = () => {
                   </div>
                 </div>
                 {previewMode && (
-                  <div className="rounded-lg bg-[#061225] border border-[#1677FF]/30 p-3 text-[11px] text-[#A9B8CC] space-y-1">
+                  <div className="rounded-lg bg-[#100D1C] border border-[#6638B8]/35 p-3 text-[11px] text-[#BEB4D6] space-y-1">
                     {previewLoading ? (
                       <span>Verifying server privacy filter...</span>
                     ) : previewResult ? (
                       <>
-                        <div className="font-semibold text-white">
-                          Viewing as <span className="text-[#00D9FF] capitalize">{previewMode}</span>:{' '}
+                        <div className="font-semibold text-[#F7F4FF]">
+                          Viewing as <span className="text-[#FFD978] capitalize">{previewMode}</span>:{' '}
                           {previewResult.accessible === false
                             ? 'Profile restricted / inaccessible'
                             : `${previewResult.player?.username || 'Hidden Champion'} · Level ${
                                 previewResult.player?.level ?? 'Hidden'
                               }`}
                         </div>
-                        <div className="text-[10px] text-[#A9B8CC]/80">
+                        <div className="text-[10px] text-[#BEB4D6]/85">
                           Visible sections:{' '}
                           {previewResult.permittedFields?.length
                             ? previewResult.permittedFields.join(', ')
@@ -735,10 +735,10 @@ export const SettingsView: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-xl bg-[#0A1930] border border-[#1677FF]/30">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-[#19122B] border border-[#6638B8]/35">
               <div>
-                <span className="font-semibold text-white block">Show me on Public Leaderboards</span>
-                <span className="text-[11px] text-[#A9B8CC]">
+                <span className="font-semibold text-[#F7F4FF] block">Show me on Public Leaderboards</span>
+                <span className="text-[11px] text-[#BEB4D6]">
                   Allow other champions to find you in search & public rankings ({timezone || 'UTC'})
                 </span>
               </div>
@@ -746,13 +746,13 @@ export const SettingsView: React.FC = () => {
                 type="checkbox"
                 checked={leaderboardVisible}
                 onChange={e => setLeaderboardVisible(e.target.checked)}
-                className="w-4 h-4 accent-[#1677FF] cursor-pointer"
+                className="w-4 h-4 accent-[#A875FF] cursor-pointer"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full py-2.5 rounded-xl font-['Cinzel'] font-bold text-xs tracking-wider bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white shadow-[0_0_16px_rgba(22,119,255,0.35)] flex items-center justify-center gap-1.5 transition-all"
+              className="w-full py-2.5 rounded-xl font-['Cinzel'] font-bold text-xs tracking-wider bg-gradient-to-r from-[#6638B8] to-[#A875FF] hover:from-[#7849cc] hover:to-[#b78cff] text-[#F7F4FF] shadow-[0_0_16px_rgba(102,56,184,0.35)] flex items-center justify-center gap-1.5 transition-all"
             >
               <Save className="w-3.5 h-3.5" />
               Save Changes
@@ -763,15 +763,15 @@ export const SettingsView: React.FC = () => {
         {/* Right Column: Live Presence, Audio, Privacy & Data Management */}
         <div className="space-y-6">
           {/* Online Presence Status & Auto-Away Card (4 Discord-style statuses: Online / Away / DND / Offline) */}
-          <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 rounded-2xl p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)] space-y-4">
+          <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 rounded-2xl p-6 shadow-[0_12px_32px_rgba(10,5,24,0.65)] space-y-4">
             <div className="flex items-center justify-between gap-3">
-              <h3 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-                <Radio className="w-4 h-4 text-[#00D9FF]" />
+              <h3 className="font-['Cinzel'] font-bold text-base text-[#F7F4FF] flex items-center gap-2">
+                <Radio className="w-4 h-4 text-[#FFD978]" />
                 ONLINE PRESENCE STATUS
               </h3>
               <PresenceBadge status={myEffectivePresence} showLabel size="md" />
             </div>
-            <p className="text-xs text-[#A9B8CC] leading-relaxed">
+            <p className="text-xs text-[#BEB4D6] leading-relaxed">
               Your real-time presence updates across Friends, Guilds, Rivals, Chat, and Leaderboards via live heartbeat. Offline sets automatically when you close Aetheria or log out.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
@@ -785,12 +785,12 @@ export const SettingsView: React.FC = () => {
                     onClick={() => void setManualPresenceStatus(opt)}
                     className={`p-3 rounded-xl border text-left transition-colors ${
                       selected
-                        ? 'bg-[#1677FF]/20 border-[#00D9FF] shadow-[0_0_12px_rgba(0,217,255,0.2)]'
-                        : 'bg-[#0A1930] border-[#1677FF]/25 hover:border-[#00D9FF]/45'
+                        ? 'bg-[#6638B8]/25 border-[#E7B94F] shadow-[0_0_12px_rgba(231,185,79,0.2)]'
+                        : 'bg-[#19122B] border-[#6638B8]/30 hover:border-[#E7B94F]/50'
                     }`}
                   >
                     <PresenceBadge status={opt} showLabel size="sm" />
-                    <span className="text-[10px] text-[#A9B8CC] block mt-1 leading-snug">
+                    <span className="text-[10px] text-[#BEB4D6] block mt-1 leading-snug">
                       {meta.description}
                     </span>
                   </button>
@@ -798,27 +798,27 @@ export const SettingsView: React.FC = () => {
               })}
             </div>
 
-            <div className="pt-2 border-t border-[#1677FF]/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-              <label className="flex items-center gap-2 text-[#A9B8CC] cursor-pointer">
+            <div className="pt-2 border-t border-[#6638B8]/25 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <label className="flex items-center gap-2 text-[#BEB4D6] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={autoAwayEnabled}
                   onChange={e =>
                     void updatePresencePreferences({ autoAwayEnabled: e.target.checked })
                   }
-                  className="accent-[#1677FF] cursor-pointer"
+                  className="accent-[#A875FF] cursor-pointer"
                 />
                 <span>Auto-mark Away after inactivity</span>
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] text-[#A9B8CC]">Idle timeout:</span>
+                <span className="text-[11px] text-[#BEB4D6]">Idle timeout:</span>
                 <select
                   disabled={!autoAwayEnabled}
                   value={autoAwayMinutes}
                   onChange={e =>
                     void updatePresencePreferences({ autoAwayMinutes: Number(e.target.value) })
                   }
-                  className="rounded-lg bg-[#0A1930] border border-[#1677FF]/35 px-2.5 py-1 text-xs text-white focus:outline-none focus:border-[#00D9FF] disabled:opacity-45"
+                  className="rounded-lg bg-[#100D1C] border border-[#6638B8]/40 px-2.5 py-1 text-xs text-[#F7F4FF] focus:outline-none focus:border-[#E7B94F] disabled:opacity-45"
                 >
                   {[3, 5, 10, 15, 30].map(mins => (
                     <option key={mins} value={mins}>
@@ -831,12 +831,12 @@ export const SettingsView: React.FC = () => {
           </div>
 
           {/* Interactive Guided Tutorial & Hero Oath */}
-          <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 rounded-2xl p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)] space-y-3">
-            <h3 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-              <Shield className="w-4 h-4 text-[#00D9FF]" />
+          <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 rounded-2xl p-6 shadow-[0_12px_32px_rgba(10,5,24,0.65)] space-y-3">
+            <h3 className="font-['Cinzel'] font-bold text-base text-[#F7F4FF] flex items-center gap-2">
+              <Shield className="w-4 h-4 text-[#FFD978]" />
               GUIDED TUTORIAL &amp; HERO OATH
             </h3>
-            <p className="text-xs text-[#A9B8CC] leading-relaxed">
+            <p className="text-xs text-[#BEB4D6] leading-relaxed">
               {heroLocked
                 ? `Replay the interactive 11-step tour of Aetheria at any time without affecting your level, XP, Gold, or training progress. Your champion oath is permanently bound to ${boundHero.name}.`
                 : 'Replay the interactive 11-step tour of Aetheria or complete your one-time champion selection to permanently bind your hero to your account.'}
@@ -845,12 +845,12 @@ export const SettingsView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => startTutorial(0)}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white shadow-[0_0_14px_rgba(22,119,255,0.3)] font-['Cinzel'] font-bold text-xs tracking-wider transition-all"
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#6638B8] to-[#A875FF] hover:from-[#7849cc] hover:to-[#b78cff] text-[#F7F4FF] shadow-[0_0_14px_rgba(102,56,184,0.3)] font-['Cinzel'] font-bold text-xs tracking-wider transition-all"
               >
                 Replay Interactive Tutorial
               </button>
               {heroLocked ? (
-                <span className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#0A1930] border border-[#00D9FF]/35 text-[#00D9FF] text-xs font-['Cinzel'] font-semibold">
+                <span className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#19122B] border border-[#E7B94F]/40 text-[#FFD978] text-xs font-['Cinzel'] font-semibold">
                   <Lock className="w-3.5 h-3.5" />
                   Oath Bound: {boundHero.name}
                 </span>
@@ -858,7 +858,7 @@ export const SettingsView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowHeroSelectModal(true)}
-                  className="px-4 py-2 rounded-xl bg-[#0A1930] hover:bg-[#16325C] border border-[#1677FF]/45 hover:border-[#00D9FF]/60 text-white font-['Cinzel'] font-bold text-xs tracking-wider transition-colors"
+                  className="px-4 py-2 rounded-xl bg-[#19122B] hover:bg-[#2F1B4E] border border-[#6638B8]/45 hover:border-[#E7B94F]/55 text-[#F7F4FF] font-['Cinzel'] font-bold text-xs tracking-wider transition-colors"
                 >
                   Choose Permanent Champion
                 </button>
@@ -867,22 +867,22 @@ export const SettingsView: React.FC = () => {
           </div>
 
           {/* Sound Settings */}
-          <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 rounded-2xl p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)] space-y-4">
-            <h3 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-              {stats.soundEnabled ? <Volume2 className="w-4 h-4 text-[#00D9FF]" /> : <VolumeX className="w-4 h-4 text-[#A9B8CC]" />}
+          <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 rounded-2xl p-6 shadow-[0_12px_32px_rgba(10,5,24,0.65)] space-y-4">
+            <h3 className="font-['Cinzel'] font-bold text-base text-[#F7F4FF] flex items-center gap-2">
+              {stats.soundEnabled ? <Volume2 className="w-4 h-4 text-[#FFD978]" /> : <VolumeX className="w-4 h-4 text-[#BEB4D6]" />}
               AUDIO ENGINE
             </h3>
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-xs font-semibold text-white block">RPG Sound Effects</span>
-                <span className="text-[11px] text-[#A9B8CC]">Play sound effects for rep counts, quests, and battle hits</span>
+                <span className="text-xs font-semibold text-[#F7F4FF] block">RPG Sound Effects</span>
+                <span className="text-[11px] text-[#BEB4D6]">Play sound effects for rep counts, quests, and battle hits</span>
               </div>
               <button
                 onClick={toggleSound}
                 className={`px-4 py-2 rounded-xl text-xs font-bold font-['Cinzel'] transition-all ${
                   stats.soundEnabled
-                    ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white shadow-[0_0_12px_rgba(22,119,255,0.35)]'
-                    : 'bg-[#0A1930] border border-[#1677FF]/30 text-[#A9B8CC]'
+                    ? 'bg-gradient-to-r from-[#6638B8] to-[#A875FF] text-[#F7F4FF] shadow-[0_0_12px_rgba(102,56,184,0.35)]'
+                    : 'bg-[#19122B] border border-[#6638B8]/35 text-[#BEB4D6]'
                 }`}
               >
                 {stats.soundEnabled ? 'ENABLED' : 'MUTED'}
@@ -891,32 +891,32 @@ export const SettingsView: React.FC = () => {
           </div>
 
           {/* Camera Privacy Charter */}
-          <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 rounded-2xl p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)] space-y-3">
-            <h3 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-              <Camera className="w-4 h-4 text-emerald-400" />
+          <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 rounded-2xl p-6 shadow-[0_12px_32px_rgba(10,5,24,0.65)] space-y-3">
+            <h3 className="font-['Cinzel'] font-bold text-base text-[#F7F4FF] flex items-center gap-2">
+              <Camera className="w-4 h-4 text-[#35D69A]" />
               AETHER VISION PRIVACY CHARTER
             </h3>
-            <p className="text-xs text-[#A9B8CC] leading-relaxed">
+            <p className="text-xs text-[#BEB4D6] leading-relaxed">
               Camera access is strictly opt-in and active only during workouts. Movement tracking runs privately on your device—raw video is never stored, uploaded, or used for facial recognition.
             </p>
           </div>
 
           {/* Cloud Save & Progress Sync */}
-          <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 rounded-2xl p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)] space-y-3">
+          <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 rounded-2xl p-6 shadow-[0_12px_32px_rgba(10,5,24,0.65)] space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-                <Cloud className="w-4 h-4 text-[#00D9FF]" />
+              <h3 className="font-['Cinzel'] font-bold text-base text-[#F7F4FF] flex items-center gap-2">
+                <Cloud className="w-4 h-4 text-[#FFD978]" />
                 CLOUD SAVE &amp; SYNC
               </h3>
               <span
                 className={`text-[11px] font-mono font-semibold ${
                   cloudStatus === 'saved'
-                    ? 'text-emerald-300'
+                    ? 'text-[#35D69A]'
                     : cloudStatus === 'saving'
-                    ? 'text-amber-300'
+                    ? 'text-[#FFD978]'
                     : cloudStatus === 'error'
-                    ? 'text-rose-300'
-                    : 'text-[#A9B8CC]'
+                    ? 'text-[#F05B70]'
+                    : 'text-[#BEB4D6]'
                 }`}
               >
                 {cloudStatus === 'saved'
@@ -928,11 +928,11 @@ export const SettingsView: React.FC = () => {
                   : 'Offline Mode'}
               </span>
             </div>
-            <p className="text-xs text-[#A9B8CC] leading-relaxed">
+            <p className="text-xs text-[#BEB4D6] leading-relaxed">
               Automatic saving keeps your hero, bodyweight strength, habit streaks, workouts, and realm progress safely synced across all your devices.
             </p>
             {lastSavedAt && (
-              <div className="text-[11px] text-[#00D9FF]/85 font-mono tabular-nums">
+              <div className="text-[11px] text-[#FFD978]/90 font-mono tabular-nums">
                 Last Saved: {lastSavedAt.toLocaleTimeString()} ({lastSavedAt.toLocaleDateString()})
               </div>
             )}
@@ -941,32 +941,32 @@ export const SettingsView: React.FC = () => {
                 type="button"
                 disabled={manualSyncing}
                 onClick={handleManualSync}
-                className="px-3.5 py-2 rounded-xl border border-[#1677FF]/45 bg-[#0A1930] hover:bg-[#16325C] hover:border-[#00D9FF]/50 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                className="px-3.5 py-2 rounded-xl border border-[#6638B8]/45 bg-[#19122B] hover:bg-[#2F1B4E] hover:border-[#E7B94F]/55 text-[#F7F4FF] text-xs font-semibold flex items-center gap-1.5 transition-colors"
               >
-                <RefreshCw className={`w-3.5 h-3.5 text-[#00D9FF] ${manualSyncing ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-3.5 h-3.5 text-[#FFD978] ${manualSyncing ? 'animate-spin' : ''}`} />
                 {manualSyncing ? 'Syncing...' : 'Sync Progress'}
               </button>
             </div>
           </div>
 
           {/* Data Backup & Reset */}
-          <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 rounded-2xl p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)] space-y-3">
-            <h3 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-              <Shield className="w-4 h-4 text-[#00D9FF]" />
+          <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 rounded-2xl p-6 shadow-[0_12px_32px_rgba(10,5,24,0.65)] space-y-3">
+            <h3 className="font-['Cinzel'] font-bold text-base text-[#F7F4FF] flex items-center gap-2">
+              <Shield className="w-4 h-4 text-[#FFD978]" />
               ACCOUNT &amp; DATA
             </h3>
             <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={handleExport}
-                className="px-4 py-2 rounded-xl border border-[#1677FF]/45 bg-[#0A1930] hover:bg-[#16325C] hover:border-[#00D9FF]/50 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                className="px-4 py-2 rounded-xl border border-[#6638B8]/45 bg-[#19122B] hover:bg-[#2F1B4E] hover:border-[#E7B94F]/55 text-[#F7F4FF] text-xs font-semibold flex items-center gap-1.5 transition-colors"
               >
-                <Download className="w-3.5 h-3.5 text-[#00D9FF]" />
+                <Download className="w-3.5 h-3.5 text-[#FFD978]" />
                 Download Progress Backup
               </button>
 
               <button
                 onClick={() => setShowResetConfirm(true)}
-                className="px-4 py-2 rounded-xl border border-rose-800/60 bg-rose-950/40 text-rose-300 hover:text-white text-xs font-semibold flex items-center gap-1.5"
+                className="px-4 py-2 rounded-xl border border-[#F05B70]/50 bg-[#36111F]/70 text-[#F05B70] hover:bg-[#36111F] hover:text-[#F7F4FF] text-xs font-semibold flex items-center gap-1.5 transition-colors"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 Reset Progress
@@ -974,7 +974,7 @@ export const SettingsView: React.FC = () => {
 
               <button
                 onClick={logout}
-                className="px-4 py-2 rounded-xl border border-[#1677FF]/35 bg-[#0A1930] hover:bg-[#16325C] text-[#A9B8CC] hover:text-white text-xs font-semibold flex items-center gap-1.5 ml-auto transition-colors"
+                className="px-4 py-2 rounded-xl border border-[#6638B8]/40 bg-[#19122B] hover:bg-[#2F1B4E] text-[#BEB4D6] hover:text-[#F7F4FF] text-xs font-semibold flex items-center gap-1.5 ml-auto transition-colors"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 Log Out
@@ -986,18 +986,18 @@ export const SettingsView: React.FC = () => {
 
       {/* Reset Confirmation Modal */}
       {showResetConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#061225]/85 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-sm bg-[#102440] border border-rose-900 rounded-2xl p-6 shadow-[0_20px_50px_rgba(2,8,20,0.85)] text-center space-y-4">
-            <h3 className="font-['Cinzel'] font-bold text-base text-rose-300">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#100D1C]/85 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-sm bg-[#24143D] border border-[#F05B70]/55 rounded-2xl p-6 shadow-[0_20px_50px_rgba(10,5,24,0.85)] text-center space-y-4">
+            <h3 className="font-['Cinzel'] font-bold text-base text-[#F05B70]">
               RESET ALL REALM PROGRESS?
             </h3>
-            <p className="text-xs text-[#A9B8CC]">
+            <p className="text-xs text-[#BEB4D6]">
               This will restore all habits, workouts, and levels to default initial values. This action cannot be reversed.
             </p>
             <div className="flex justify-center gap-3">
               <button
                 onClick={() => setShowResetConfirm(false)}
-                className="px-4 py-2 rounded-xl border border-[#1677FF]/35 bg-[#0A1930] text-xs text-[#A9B8CC] hover:text-white"
+                className="px-4 py-2 rounded-xl border border-[#6638B8]/40 bg-[#19122B] hover:bg-[#2F1B4E] text-xs text-[#BEB4D6] hover:text-[#F7F4FF] transition-colors"
               >
                 Cancel
               </button>
@@ -1006,7 +1006,7 @@ export const SettingsView: React.FC = () => {
                   resetAllData();
                   setShowResetConfirm(false);
                 }}
-                className="px-4 py-2 rounded-xl bg-rose-700 hover:bg-rose-600 text-white text-xs font-bold"
+                className="px-4 py-2 rounded-xl bg-[#F05B70] hover:bg-[#f47587] text-[#100D1C] text-xs font-bold transition-colors"
               >
                 Yes, Reset All
               </button>

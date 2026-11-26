@@ -114,23 +114,23 @@ export function buildHero3DModel(heroId: PlayableHeroId): Hero3DInstance {
         ? '#20422d'
         : heroId === 'paladin'
         ? '#f0ece1'
-        : '#0A1930',
-      '#061225',
-      '#00D9FF'
+        : '#24143D',
+      '#100D1C',
+      '#A875FF'
     )
   );
   const leatherTex = track(
     createLeatherTexture(
-      heroId === 'ranger' ? '#3a2a1d' : '#102440',
-      '#061225'
+      heroId === 'ranger' ? '#3a2a1d' : '#19122B',
+      '#100D1C'
     )
   );
-  const arcaneTex = track(createArcaneClothTexture('#0A1930', '#1677FF'));
+  const arcaneTex = track(createArcaneClothTexture('#24143D', '#6638B8'));
 
   // Materials
   const steelMat = track(
     new THREE.MeshStandardMaterial({
-      color: heroId === 'paladin' ? 0xd9dee8 : heroId === 'shadowblade' ? 0x24344d : 0x8991a2,
+      color: heroId === 'paladin' ? 0xd9dee8 : heroId === 'shadowblade' ? 0x2a1f45 : 0x8991a2,
       map: steelTex.colorMap,
       roughnessMap: steelTex.roughnessMap,
       bumpMap: steelTex.bumpMap,
@@ -143,7 +143,7 @@ export function buildHero3DModel(heroId: PlayableHeroId): Hero3DInstance {
 
   const darkIronMat = track(
     new THREE.MeshStandardMaterial({
-      color: 0x16243b,
+      color: 0x24143d,
       roughnessMap: steelTex.roughnessMap,
       metalness: 0.78,
       roughness: 0.48,
@@ -162,7 +162,7 @@ export function buildHero3DModel(heroId: PlayableHeroId): Hero3DInstance {
 
   const leatherMat = track(
     new THREE.MeshStandardMaterial({
-      color: heroId === 'ranger' ? 0x4b3826 : 0x102440,
+      color: heroId === 'ranger' ? 0x4b3826 : 0x24143d,
       map: leatherTex.colorMap,
       metalness: 0.14,
       roughness: 0.76,
@@ -217,7 +217,7 @@ export function buildHero3DModel(heroId: PlayableHeroId): Hero3DInstance {
 
   const eyeColor =
     heroId === 'arcane_mage'
-      ? 0x00d9ff
+      ? 0x38d9f5
       : heroId === 'shadowblade'
       ? 0x38bdf8
       : heroId === 'ranger'

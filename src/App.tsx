@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { GameProvider, useGame } from './context/GameContext';
+import { applyFeatureThemeToDocument, resolveFeatureTheme } from './theme/featureTheme';
 import { TopBar } from './components/Navigation/TopBar';
 import { Sidebar } from './components/Navigation/Sidebar';
 import { WelcomeLanding } from './components/Welcome/WelcomeLanding';
@@ -37,6 +38,12 @@ const MainAppContent: React.FC = () => {
     isAuthLoading,
     isAuthenticated,
     activeTab,
+    progressionSubTab,
+    socialSubTab,
+    characterSubTab,
+    storeSubTab,
+    eventsSubTab,
+    guildsSubTab,
     showAuthModal,
     authMode,
     setShowAuthModal,
@@ -58,19 +65,33 @@ const MainAppContent: React.FC = () => {
   } = useGame();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  const activeFeatureTheme = resolveFeatureTheme({
+    activeTab,
+    progressionSubTab,
+    socialSubTab,
+    characterSubTab,
+    storeSubTab,
+    eventsSubTab,
+    guildsSubTab,
+  });
+
+  useEffect(() => {
+    applyFeatureThemeToDocument(activeFeatureTheme);
+  }, [activeFeatureTheme]);
+
   // 1. Loading gate while verifying existing Supabase session (prevents dashboard flash)
   if (isAuthLoading) {
     return (
-      <div className="min-h-screen bg-[#061225] text-[#FFFFFF] flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-[#100D1C] text-[#F7F4FF] flex flex-col items-center justify-center p-6">
         <div className="flex flex-col items-center gap-4 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#1677FF]/25 to-[#00D9FF]/15 border border-[#00D9FF]/45 flex items-center justify-center shadow-[0_0_28px_rgba(22,119,255,0.28)]">
-            <div className="w-6 h-6 border-2 border-[#00D9FF] border-t-transparent rounded-full animate-spin" />
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#24143D] via-[#6638B8]/40 to-[#E7B94F]/25 border border-[#E7B94F]/55 flex items-center justify-center shadow-[0_0_28px_rgba(168,117,255,0.34)]">
+            <div className="w-6 h-6 border-2 border-[#FFD978] border-t-transparent rounded-full animate-spin" />
           </div>
           <div>
-            <h1 className="font-['Cinzel'] font-black tracking-widest text-xl text-[#FFFFFF]">
+            <h1 className="font-['Cinzel'] font-black tracking-widest text-xl text-[#FFD978]">
               LIFEQUEST
             </h1>
-            <p className="text-xs text-[#A9B8CC] mt-1 tracking-wide">
+            <p className="text-xs text-[#BEB4D6] mt-1 tracking-wide">
               Verifying Realm Session...
             </p>
           </div>
@@ -178,10 +199,9 @@ const MainAppContent: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen bg-[#061225] text-[#FFFFFF] flex flex-col antialiased selection:bg-[#1677FF] selection:text-white"
+      className="min-h-screen bg-[#100D1C] text-[#F7F4FF] flex flex-col antialiased selection:bg-[#6638B8] selection:text-[#FFD978]"
       style={{
-        backgroundImage:
-          'radial-gradient(ellipse 85% 45% at 50% -10%, rgba(22, 119, 255, 0.14), transparent 70%), radial-gradient(ellipse 60% 35% at 85% 15%, rgba(0, 217, 255, 0.06), transparent 65%)',
+        backgroundImage: `radial-gradient(ellipse 85% 48% at 50% -12%, rgba(${activeFeatureTheme.primaryRgb}, 0.2), transparent 70%), radial-gradient(ellipse 62% 38% at 88% 12%, rgba(${activeFeatureTheme.secondaryRgb}, 0.1), transparent 65%), radial-gradient(ellipse 50% 35% at 10% 80%, rgba(102, 56, 184, 0.12), transparent 65%)`,
       }}
     >
       {/* Top Header */}

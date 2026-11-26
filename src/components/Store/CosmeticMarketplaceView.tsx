@@ -109,41 +109,41 @@ export const CosmeticMarketplaceView: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in">
       {/* Integrity & Currencies Header */}
-      <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 p-5 sm:p-6 flex flex-col xl:flex-row xl:items-center justify-between gap-5 shadow-[0_12px_32px_rgba(2,8,20,0.6)]">
+      <div className="rounded-2xl bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/40 p-5 sm:p-6 flex flex-col xl:flex-row xl:items-center justify-between gap-5 shadow-[0_12px_32px_rgba(10,6,20,0.6)]">
         <div className="space-y-1.5">
-          <div className="flex flex-wrap items-center gap-2 text-xs text-[#00D9FF] font-semibold">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-[#E7B94F] font-semibold">
             <ShieldCheck className="w-4 h-4 shrink-0" />
             <span>Zero Pay-to-Win Guarantee · Strictly Cosmetic & Card Packs</span>
-            <span className="text-[#A9B8CC]/45" aria-hidden="true">·</span>
-            <span className="text-amber-300 flex items-center gap-1 tabular-nums">
+            <span className="text-[#BEB4D6]/45" aria-hidden="true">·</span>
+            <span className="text-[#FFD978] flex items-center gap-1 tabular-nums">
               <Clock className="w-3.5 h-3.5" />
               {rotationLabel}
             </span>
           </div>
-          <h2 className="text-2xl font-black font-['Cinzel'] text-white">
+          <h2 className="text-2xl font-black font-['Cinzel'] text-[#F7F4FF]">
             COSMETIC MARKETPLACE
           </h2>
-          <p className="text-xs text-[#A9B8CC] max-w-2xl">
+          <p className="text-xs text-[#BEB4D6] max-w-2xl">
             Spend earned Gold or Cosmetic Fragments on bespoke frames, banners, auras, outfits, titles, and collectible card packs.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3 shrink-0">
-          <div className="rounded-xl bg-[#0A1930] border border-amber-400/45 px-4 py-2 text-xs tabular-nums">
-            <span className="text-[#A9B8CC] block text-[11px]">Gold Wallet</span>
-            <span className="font-mono font-bold text-amber-300 text-sm">{goldBalance.toLocaleString()}</span>
+          <div className="rounded-xl bg-[#19122B] border border-[#E7B94F]/45 px-4 py-2 text-xs tabular-nums">
+            <span className="text-[#BEB4D6] block text-[11px]">Gold Wallet</span>
+            <span className="font-mono font-bold text-[#FFD978] text-sm">{goldBalance.toLocaleString()}</span>
           </div>
-          <div className="rounded-xl bg-[#0A1930] border border-[#00D9FF]/45 px-4 py-2 text-xs tabular-nums">
-            <span className="text-[#A9B8CC] block text-[11px]">Cosmetic Fragments</span>
-            <span className="font-mono font-bold text-[#00D9FF] text-sm">{fragmentBalance.toLocaleString()}</span>
+          <div className="rounded-xl bg-[#19122B] border border-[#A875FF]/45 px-4 py-2 text-xs tabular-nums">
+            <span className="text-[#BEB4D6] block text-[11px]">Cosmetic Fragments</span>
+            <span className="font-mono font-bold text-[#A875FF] text-sm">{fragmentBalance.toLocaleString()}</span>
           </div>
           <button
             type="button"
             disabled={busyId === 'rm-check'}
             onClick={() => void handleRmCheckoutAttempt()}
-            className="px-3.5 py-2.5 rounded-xl bg-[#0A1930] hover:bg-[#16325C] border border-[#1677FF]/35 text-xs text-[#A9B8CC] hover:text-white flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all"
+            className="px-3.5 py-2.5 rounded-xl bg-[#19122B] hover:bg-[#2F1B4E] border border-[#6638B8]/40 text-xs text-[#BEB4D6] hover:text-[#F7F4FF] flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all"
           >
-            <Lock className="w-3.5 h-3.5 text-amber-300" />
+            <Lock className="w-3.5 h-3.5 text-[#FFD978]" />
             Payment Checkout Disabled
           </button>
         </div>
@@ -153,10 +153,10 @@ export const CosmeticMarketplaceView: React.FC = () => {
         <div
           className={`rounded-xl px-4 py-3 text-xs border ${
             notice.type === 'success'
-              ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-200'
+              ? 'bg-emerald-950/60 border-[#35D69A]/45 text-emerald-200'
               : notice.type === 'info'
-              ? 'bg-amber-950/55 border-amber-500/40 text-amber-200'
-              : 'bg-rose-950/60 border-rose-500/40 text-rose-200'
+              ? 'bg-amber-950/55 border-[#FFAA45]/45 text-amber-200'
+              : 'bg-[#36111F]/70 border-[#F05B70]/45 text-rose-200'
           }`}
         >
           {notice.text}
@@ -166,7 +166,7 @@ export const CosmeticMarketplaceView: React.FC = () => {
       {/* Curated Citadel Spotlight */}
       {featuredItems.length > 0 && (
         <div className="space-y-3">
-          <h3 className="font-['Cinzel'] font-bold text-sm uppercase tracking-wider text-[#00D9FF] flex items-center gap-2">
+          <h3 className="font-['Cinzel'] font-bold text-sm uppercase tracking-wider text-[#FFD978] flex items-center gap-2">
             <Sparkles className="w-4 h-4" />
             Citadel Rotating Spotlight
           </h3>
@@ -177,18 +177,18 @@ export const CosmeticMarketplaceView: React.FC = () => {
               return (
                 <div
                   key={`spot-${item.id}`}
-                  className="rounded-2xl border border-[#1677FF]/45 hover:border-[#00D9FF]/60 p-5 flex flex-col justify-between gap-4 transition-all"
+                  className="rounded-2xl border border-[#6638B8]/45 hover:border-[#FFD978]/60 p-5 flex flex-col justify-between gap-4 transition-all"
                   style={{
-                    background: `radial-gradient(circle at top right, ${item.accentHex}20, transparent 58%), #102440`,
+                    background: `radial-gradient(circle at top right, ${item.accentHex}20, transparent 58%), #24143D`,
                   }}
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-[#00D9FF] font-semibold">{item.featuredCollectionTag || 'Featured'}</span>
-                      <span className="text-[#A9B8CC]">{item.rarity}</span>
+                      <span className="text-[#FFD978] font-semibold">{item.featuredCollectionTag || 'Featured'}</span>
+                      <span className="text-[#BEB4D6]">{item.rarity}</span>
                     </div>
-                    <h4 className="font-['Cinzel'] font-bold text-base text-white">{item.name}</h4>
-                    <p className="text-xs text-[#A9B8CC]">{item.description}</p>
+                    <h4 className="font-['Cinzel'] font-bold text-base text-[#F7F4FF]">{item.name}</h4>
+                    <p className="text-xs text-[#BEB4D6]">{item.description}</p>
                   </div>
                   <button
                     type="button"
@@ -196,8 +196,8 @@ export const CosmeticMarketplaceView: React.FC = () => {
                     onClick={() => setConfirmItem(item)}
                     className={`w-full py-2 px-3 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                       owned
-                        ? 'bg-emerald-950/60 border border-emerald-500/40 text-emerald-300'
-                        : 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white shadow-[0_0_16px_rgba(22,119,255,0.35)]'
+                        ? 'bg-emerald-950/60 border border-[#35D69A]/45 text-[#35D69A]'
+                        : 'bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#100D1C] shadow-[0_0_16px_rgba(231,185,79,0.35)]'
                     }`}
                   >
                     {owned
@@ -221,8 +221,8 @@ export const CosmeticMarketplaceView: React.FC = () => {
               onClick={() => setCategory(t.id)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
                 category === t.id
-                  ? 'bg-[#1677FF] text-white border border-[#00D9FF]/50 shadow-[0_0_12px_rgba(22,119,255,0.3)]'
-                  : 'bg-[#0A1930] hover:bg-[#16325C] text-[#A9B8CC] hover:text-white border border-[#1677FF]/30'
+                  ? 'bg-[#6638B8] text-white border border-[#FFD978]/50 shadow-[0_0_12px_rgba(102,56,184,0.35)]'
+                  : 'bg-[#19122B] hover:bg-[#2F1B4E] text-[#BEB4D6] hover:text-[#F7F4FF] border border-[#6638B8]/35'
               }`}
             >
               {t.label}
@@ -230,14 +230,14 @@ export const CosmeticMarketplaceView: React.FC = () => {
           ))}
         </div>
 
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-[#061225] border border-[#1677FF]/30">
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-[#100D1C] border border-[#6638B8]/35">
           <button
             type="button"
             onClick={() => setCurrency('gold')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all ${
               currency === 'gold'
-                ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white shadow-[0_0_12px_rgba(22,119,255,0.35)]'
-                : 'text-[#A9B8CC] hover:text-white'
+                ? 'bg-gradient-to-r from-[#E7B94F] to-[#FFD978] text-[#100D1C] shadow-[0_0_12px_rgba(231,185,79,0.35)]'
+                : 'text-[#BEB4D6] hover:text-[#F7F4FF]'
             }`}
           >
             <Coins className="w-3.5 h-3.5" />
@@ -248,8 +248,8 @@ export const CosmeticMarketplaceView: React.FC = () => {
             onClick={() => setCurrency('fragments')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all ${
               currency === 'fragments'
-                ? 'bg-gradient-to-r from-[#1677FF] to-[#00D9FF] text-white shadow-[0_0_12px_rgba(0,217,255,0.35)]'
-                : 'text-[#A9B8CC] hover:text-white'
+                ? 'bg-gradient-to-r from-[#6638B8] to-[#A875FF] text-white shadow-[0_0_12px_rgba(168,117,255,0.35)]'
+                : 'text-[#BEB4D6] hover:text-[#F7F4FF]'
             }`}
           >
             <Sparkles className="w-3.5 h-3.5" />
@@ -269,13 +269,13 @@ export const CosmeticMarketplaceView: React.FC = () => {
           return (
             <div
               key={item.id}
-              className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 hover:border-[#00D9FF]/45 p-5 flex flex-col justify-between gap-4 transition-all"
+              className="rounded-2xl bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 hover:border-[#FFD978]/50 p-5 flex flex-col justify-between gap-4 transition-all"
             >
               <div className="space-y-3">
                 <div
                   className="h-14 rounded-xl border border-white/10 flex items-center justify-between px-4"
                   style={{
-                    background: `linear-gradient(135deg, ${item.primaryHex}, #061225)`,
+                    background: `linear-gradient(135deg, ${item.primaryHex}, #100D1C)`,
                   }}
                 >
                   <span className="text-xs font-semibold capitalize text-white/85">
@@ -288,22 +288,22 @@ export const CosmeticMarketplaceView: React.FC = () => {
 
                 <div>
                   <div className="flex items-start justify-between gap-2">
-                    <h4 className="font-['Cinzel'] font-bold text-sm text-white">{item.name}</h4>
+                    <h4 className="font-['Cinzel'] font-bold text-sm text-[#F7F4FF]">{item.name}</h4>
                     <button
                       type="button"
                       onClick={() => void toggleMarketplaceWishlist(item.id)}
                       aria-label={`Wishlist ${item.name}`}
                       className={`p-1.5 rounded-lg border shrink-0 transition-all ${
                         wishlisted
-                          ? 'bg-rose-950/60 border-rose-500/45 text-rose-300'
-                          : 'bg-[#0A1930] border-[#1677FF]/30 text-[#A9B8CC] hover:text-white'
+                          ? 'bg-[#36111F]/70 border-[#F05B70]/45 text-[#F05B70]'
+                          : 'bg-[#19122B] border-[#6638B8]/35 text-[#BEB4D6] hover:text-[#F7F4FF]'
                       }`}
                     >
                       <Heart className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                  <p className="text-xs text-[#A9B8CC] mt-1">{item.description}</p>
-                  <p className="text-[11px] text-[#A9B8CC]/70 mt-2">
+                  <p className="text-xs text-[#BEB4D6] mt-1">{item.description}</p>
+                  <p className="text-[11px] text-[#BEB4D6]/70 mt-2">
                     Ref Tier: {item.realMoneyUsdDisplay}
                   </p>
                 </div>
@@ -314,7 +314,7 @@ export const CosmeticMarketplaceView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setActiveTab('customization')}
-                    className="w-full py-2 px-3 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-xs font-semibold text-emerald-300 flex items-center justify-center gap-1.5"
+                    className="w-full py-2 px-3 rounded-xl bg-emerald-950/60 border border-[#35D69A]/45 text-xs font-semibold text-[#35D69A] flex items-center justify-center gap-1.5"
                   >
                     <Check className="w-3.5 h-3.5" />
                     Owned · Customize
@@ -326,8 +326,8 @@ export const CosmeticMarketplaceView: React.FC = () => {
                     onClick={() => setConfirmItem(item)}
                     className={`w-full py-2 px-3 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                       canAfford
-                        ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white shadow-[0_0_16px_rgba(22,119,255,0.35)]'
-                        : 'bg-[#0A1930] border border-[#1677FF]/25 text-[#A9B8CC]/50'
+                        ? 'bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#100D1C] shadow-[0_0_16px_rgba(231,185,79,0.35)]'
+                        : 'bg-[#19122B] border border-[#6638B8]/30 text-[#BEB4D6]/50'
                     }`}
                   >
                     Acquire ({price} {currency === 'gold' ? 'Gold' : 'Fragments'})
@@ -341,16 +341,16 @@ export const CosmeticMarketplaceView: React.FC = () => {
 
       {/* Order History */}
       {marketplaceState && marketplaceState.orders.length > 0 && (
-        <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/30 p-5 space-y-3">
-          <h3 className="font-['Cinzel'] font-bold text-sm text-white flex items-center gap-2">
-            <History className="w-4 h-4 text-[#00D9FF]" />
+        <div className="rounded-2xl bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 p-5 space-y-3">
+          <h3 className="font-['Cinzel'] font-bold text-sm text-[#F7F4FF] flex items-center gap-2">
+            <History className="w-4 h-4 text-[#FFD978]" />
             Marketplace Order Ledger
           </h3>
-          <div className="divide-y divide-[#1677FF]/20 text-xs">
+          <div className="divide-y divide-[#6638B8]/25 text-xs">
             {marketplaceState.orders.slice(0, 8).map(ord => (
               <div key={ord.id} className="py-2 flex items-center justify-between gap-2">
-                <span className="text-white/90">{ord.itemName}</span>
-                <span className="font-mono text-[#00D9FF] tabular-nums">
+                <span className="text-[#F7F4FF]/90">{ord.itemName}</span>
+                <span className="font-mono text-[#FFD978] tabular-nums">
                   -{ord.pricePaid} {ord.currency} · {new Date(ord.createdAt).toLocaleDateString()}
                 </span>
               </div>
@@ -362,31 +362,31 @@ export const CosmeticMarketplaceView: React.FC = () => {
       {/* Purchase Confirmation Modal */}
       {confirmItem && (
         <div
-          className="fixed inset-0 z-50 bg-[#020814]/85 backdrop-blur-xs flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-[#100D1C]/85 backdrop-blur-xs flex items-center justify-center p-4"
           onClick={() => setConfirmItem(null)}
         >
           <div
-            className="w-full max-w-md rounded-2xl bg-[#102440] border border-[#00D9FF]/50 p-6 space-y-4 shadow-[0_16px_40px_rgba(2,8,20,0.85)]"
+            className="w-full max-w-md rounded-2xl bg-[#24143D] border border-[#FFD978]/50 p-6 space-y-4 shadow-[0_16px_40px_rgba(10,6,20,0.85)]"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h3 className="font-['Cinzel'] font-bold text-base text-white flex items-center gap-2">
-                <ShoppingBag className="w-4 h-4 text-[#00D9FF]" />
+              <h3 className="font-['Cinzel'] font-bold text-base text-[#F7F4FF] flex items-center gap-2">
+                <ShoppingBag className="w-4 h-4 text-[#FFD978]" />
                 Confirm Cosmetic Acquisition
               </h3>
               <button
                 type="button"
                 onClick={() => setConfirmItem(null)}
                 aria-label="Close confirmation"
-                className="text-[#A9B8CC] hover:text-white"
+                className="text-[#BEB4D6] hover:text-[#F7F4FF]"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="rounded-xl bg-[#0A1930] border border-[#1677FF]/30 p-4 space-y-1">
-              <p className="font-['Cinzel'] font-bold text-sm text-[#00D9FF]">{confirmItem.name}</p>
-              <p className="text-xs text-[#A9B8CC]">{confirmItem.description}</p>
-              <p className="text-xs font-mono text-white pt-2 tabular-nums">
+            <div className="rounded-xl bg-[#19122B] border border-[#6638B8]/35 p-4 space-y-1">
+              <p className="font-['Cinzel'] font-bold text-sm text-[#FFD978]">{confirmItem.name}</p>
+              <p className="text-xs text-[#BEB4D6]">{confirmItem.description}</p>
+              <p className="text-xs font-mono text-[#F7F4FF] pt-2 tabular-nums">
                 Cost: {currency === 'gold' ? confirmItem.priceGold : confirmItem.priceFragments}{' '}
                 {currency === 'gold' ? 'Gold' : 'Cosmetic Fragments'}
               </p>
@@ -395,7 +395,7 @@ export const CosmeticMarketplaceView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setConfirmItem(null)}
-                className="px-4 py-2 rounded-xl text-xs text-[#A9B8CC] hover:text-white"
+                className="px-4 py-2 rounded-xl text-xs text-[#BEB4D6] hover:text-[#F7F4FF]"
               >
                 Cancel
               </button>
@@ -403,7 +403,7 @@ export const CosmeticMarketplaceView: React.FC = () => {
                 type="button"
                 disabled={busyId === confirmItem.id}
                 onClick={() => void handleConfirmPurchase()}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] text-white text-xs font-bold shadow-[0_0_14px_rgba(22,119,255,0.35)] transition-all"
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#100D1C] text-xs font-bold shadow-[0_0_14px_rgba(231,185,79,0.35)] transition-all"
               >
                 {busyId === confirmItem.id ? 'Processing...' : 'Confirm Purchase'}
               </button>

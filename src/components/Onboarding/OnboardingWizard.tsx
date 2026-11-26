@@ -55,8 +55,8 @@ const PRESET_AVATARS = [
   { id: 'mage-portrait', label: 'Astral Mage', src: heroArcaneMageImg },
   { id: 'ranger-portrait', label: 'Verdant Ranger', src: heroRangerImg },
   { id: 'guardian-portrait', label: 'Iron Guardian', src: heroPaladinImg },
-  { id: 'warrior-crest', label: 'Solar Crest', src: makeCrestAvatar('#102440', '#061225', 'solar', '#00D9FF') },
-  { id: 'mage-crest', label: 'Arcane Crest', src: makeCrestAvatar('#0A1930', '#061225', 'arcane', '#1677FF') },
+  { id: 'warrior-crest', label: 'Solar Crest', src: makeCrestAvatar('#24143D', '#100D1C', 'solar', '#FFD978') },
+  { id: 'mage-crest', label: 'Arcane Crest', src: makeCrestAvatar('#19122B', '#100D1C', 'arcane', '#6638B8') },
 ];
 
 const COMMON_ALLERGIES = ['Peanuts', 'Tree Nuts', 'Dairy', 'Gluten', 'Soy', 'Eggs', 'Shellfish', 'Sesame'];
@@ -277,23 +277,23 @@ export const OnboardingWizard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#061225] text-[#FFFFFF] flex flex-col justify-between py-8 px-4 sm:px-6">
+    <div className="min-h-screen bg-[#100D1C] text-[#FFFFFF] flex flex-col justify-between py-8 px-4 sm:px-6">
       <div className="max-w-3xl mx-auto w-full">
         {/* Wizard Header & 5-Step Progress */}
         <div className="mb-7 text-center relative">
           <button
             type="button"
             onClick={logout}
-            className="absolute right-0 top-0 text-[11px] text-[#A9B8CC] hover:text-white px-2.5 py-1 rounded-lg border border-[#1677FF]/35 bg-[#0A1930] hover:bg-[#102440] transition-colors"
+            className="absolute right-0 top-0 text-[11px] text-[#BEB4D6] hover:text-white px-2.5 py-1 rounded-lg border border-[#6638B8]/35 bg-[#19122B] hover:bg-[#24143D] transition-colors"
           >
             Sign Out
           </button>
-          <p className="text-xs uppercase tracking-widest text-[#00D9FF] font-semibold mb-2">
+          <p className="text-xs uppercase tracking-widest text-[#FFD978] font-semibold mb-2">
             Champion Awakening · Step {currentStep} of 5
           </p>
-          <div className="w-full bg-[#0A1930] h-2 rounded-full overflow-hidden max-w-lg mx-auto mb-4 border border-[#1677FF]/30">
+          <div className="w-full bg-[#19122B] h-2 rounded-full overflow-hidden max-w-lg mx-auto mb-4 border border-[#6638B8]/30">
             <div
-              className="bg-gradient-to-r from-[#1677FF] to-[#00D9FF] h-full transition-all duration-300"
+              className="bg-gradient-to-r from-[#6638B8] to-[#FFD978] h-full transition-all duration-300"
               style={{ width: `${(currentStep / 5) * 100}%` }}
             />
           </div>
@@ -314,10 +314,10 @@ export const OnboardingWizard: React.FC = () => {
                   }}
                   className={`px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap ${
                     isActive
-                      ? 'bg-[#1677FF] border-[#00D9FF]/60 text-white shadow-[0_0_16px_rgba(22,119,255,0.4)]'
+                      ? 'bg-[#6638B8] border-[#FFD978]/60 text-white shadow-[0_0_16px_rgba(168,117,255,0.4)]'
                       : isDone
                       ? 'bg-emerald-950/50 border-emerald-700/60 text-emerald-300'
-                      : 'bg-[#0A1930] border-[#1677FF]/25 text-[#A9B8CC] hover:text-white'
+                      : 'bg-[#19122B] border-[#6638B8]/25 text-[#BEB4D6] hover:text-white'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -337,19 +337,19 @@ export const OnboardingWizard: React.FC = () => {
 
         {/* STEP 1: CHARACTER PROFILE */}
         {currentStep === 1 && (
-          <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/35 rounded-2xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(2,8,20,0.65)] space-y-6 animate-in fade-in">
+          <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 rounded-2xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(10,6,20,0.7)] space-y-6 animate-in fade-in">
             <div>
               <h2 className="text-2xl font-bold font-['Cinzel'] text-white mb-1">
                 STEP 1: CHARACTER PROFILE
               </h2>
-              <p className="text-sm text-[#A9B8CC]">
+              <p className="text-sm text-[#BEB4D6]">
                 Choose your public hero username, in-realm character name, starting class archetype, and portrait avatar. After completing setup, you will inspect full character artwork and permanently bind your champion.
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#FFD978] mb-1.5">
                   Hero Username (Public Handle)
                 </label>
                 <input
@@ -358,12 +358,12 @@ export const OnboardingWizard: React.FC = () => {
                   value={username}
                   onChange={e => setUsername(e.target.value)}
                   placeholder="e.g. IronVanguard"
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/40 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00D9FF] text-sm"
+                  className="w-full bg-[#19122B] border border-[#6638B8]/40 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#FFD978] text-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#FFD978] mb-1.5">
                   Character Name (In-Realm Title)
                 </label>
                 <input
@@ -372,14 +372,14 @@ export const OnboardingWizard: React.FC = () => {
                   value={characterName}
                   onChange={e => setCharacterName(e.target.value)}
                   placeholder="e.g. Sir Kaelen of Aetheria"
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/40 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00D9FF] text-sm"
+                  className="w-full bg-[#19122B] border border-[#6638B8]/40 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#FFD978] text-sm"
                 />
               </div>
             </div>
 
             {/* Avatar Selector */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#FFD978] mb-2">
                 Select Champion Avatar
               </label>
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
@@ -392,17 +392,17 @@ export const OnboardingWizard: React.FC = () => {
                       onClick={() => setSelectedAvatar(av.src)}
                       className={`p-2 rounded-xl border flex flex-col items-center gap-1.5 transition-all ${
                         active
-                          ? 'bg-[#1677FF]/25 border-[#00D9FF] ring-2 ring-[#00D9FF]/40 shadow-[0_0_16px_rgba(0,217,255,0.22)]'
-                          : 'bg-[#0A1930] border-[#1677FF]/25 hover:border-[#00D9FF]/55'
+                          ? 'bg-[#6638B8]/25 border-[#FFD978] ring-2 ring-[#FFD978]/40 shadow-[0_0_16px_rgba(255,217,120,0.24)]'
+                          : 'bg-[#19122B] border-[#6638B8]/25 hover:border-[#FFD978]/55'
                       }`}
                     >
                       <img
                         src={resolveAssetUrl(av.src, characterWarriorAvatarImg)}
                         alt={av.label}
                         referrerPolicy="no-referrer"
-                        className="w-12 h-12 rounded-lg object-cover border border-[#1677FF]/40"
+                        className="w-12 h-12 rounded-lg object-cover border border-[#6638B8]/40"
                       />
-                      <span className="text-[10px] font-medium text-[#A9B8CC] truncate max-w-full">
+                      <span className="text-[10px] font-medium text-[#BEB4D6] truncate max-w-full">
                         {av.label}
                       </span>
                     </button>
@@ -413,7 +413,7 @@ export const OnboardingWizard: React.FC = () => {
 
             {/* Class Picker */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#FFD978] mb-2">
                 Choose Character Class
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -429,16 +429,16 @@ export const OnboardingWizard: React.FC = () => {
                       }}
                       className={`p-4 rounded-xl border text-left transition-all ${
                         isSelected
-                          ? 'bg-[#1677FF]/20 border-[#00D9FF] shadow-[0_0_20px_rgba(0,217,255,0.2)] ring-1 ring-[#00D9FF]'
-                          : 'bg-[#0A1930] border-[#1677FF]/25 hover:border-[#00D9FF]/50'
+                          ? 'bg-[#6638B8]/20 border-[#FFD978] shadow-[0_0_20px_rgba(255,217,120,0.24)] ring-1 ring-[#FFD978]'
+                          : 'bg-[#19122B] border-[#6638B8]/25 hover:border-[#FFD978]/50'
                       }`}
                     >
                       <div className="flex items-center gap-2.5 mb-1.5">
-                        <c.Icon className="w-5 h-5 text-[#00D9FF]" />
+                        <c.Icon className="w-5 h-5 text-[#FFD978]" />
                         <h4 className="font-['Cinzel'] font-bold text-white text-base">{c.title}</h4>
                       </div>
-                      <p className="text-xs text-[#A9B8CC] mb-1.5">{c.desc}</p>
-                      <p className="text-[11px] text-[#00D9FF] font-medium">{c.perk}</p>
+                      <p className="text-xs text-[#BEB4D6] mb-1.5">{c.desc}</p>
+                      <p className="text-[11px] text-[#FFD978] font-medium">{c.perk}</p>
                     </button>
                   );
                 })}
@@ -449,20 +449,20 @@ export const OnboardingWizard: React.FC = () => {
 
         {/* STEP 2: FITNESS PROFILE */}
         {currentStep === 2 && (
-          <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/35 rounded-2xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(2,8,20,0.65)] space-y-6 animate-in fade-in">
+          <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 rounded-2xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(10,6,20,0.7)] space-y-6 animate-in fade-in">
             <div>
               <h2 className="text-2xl font-bold font-['Cinzel'] text-white mb-1">
                 STEP 2: FITNESS PROFILE
               </h2>
-              <p className="text-sm text-[#A9B8CC]">
+              <p className="text-sm text-[#BEB4D6]">
                 Personalize your movement pacing and activity focus. Height and weight are strictly optional and never scored.
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-1.5">
-                  Age (Years) <span className="text-[#A9B8CC]/70 font-normal">(Optional)</span>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#FFD978] mb-1.5">
+                  Age (Years) <span className="text-[#BEB4D6]/70 font-normal">(Optional)</span>
                 </label>
                 <input
                   type="number"
@@ -471,18 +471,18 @@ export const OnboardingWizard: React.FC = () => {
                   value={ageYearsInput}
                   onChange={e => setAgeYearsInput(e.target.value)}
                   placeholder="e.g. 22"
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/40 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#00D9FF]"
+                  className="w-full bg-[#19122B] border border-[#6638B8]/40 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#FFD978]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-1.5">
-                  Age Group <span className="text-[#A9B8CC]/70 font-normal">(Optional)</span>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#FFD978] mb-1.5">
+                  Age Group <span className="text-[#BEB4D6]/70 font-normal">(Optional)</span>
                 </label>
                 <select
                   value={ageGroup}
                   onChange={e => setAgeGroup(e.target.value as AgeGroup | '')}
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/40 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#00D9FF]"
+                  className="w-full bg-[#19122B] border border-[#6638B8]/40 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#FFD978]"
                 >
                   <option value="">Auto from age</option>
                   <option value="child">Child (5–9 yrs)</option>
@@ -494,13 +494,13 @@ export const OnboardingWizard: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-1.5">
-                  Reference Sex <span className="text-[#A9B8CC]/70 font-normal">(Optional)</span>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#FFD978] mb-1.5">
+                  Reference Sex <span className="text-[#BEB4D6]/70 font-normal">(Optional)</span>
                 </label>
                 <select
                   value={biologicalSex}
                   onChange={e => setBiologicalSex(e.target.value as BiologicalSex | '')}
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/40 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#00D9FF]"
+                  className="w-full bg-[#19122B] border border-[#6638B8]/40 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#FFD978]"
                 >
                   <option value="">Prefer not to specify</option>
                   <option value="female">Female</option>
@@ -513,15 +513,15 @@ export const OnboardingWizard: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#FFD978] mb-1.5">
                   Measurement Units
                 </label>
-                <div className="flex p-1 bg-[#0A1930] rounded-xl border border-[#1677FF]/40">
+                <div className="flex p-1 bg-[#19122B] rounded-xl border border-[#6638B8]/40">
                   <button
                     type="button"
                     onClick={() => setPreferredUnits('metric')}
                     className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-                      preferredUnits === 'metric' ? 'bg-[#1677FF] text-white' : 'text-[#A9B8CC]'
+                      preferredUnits === 'metric' ? 'bg-[#6638B8] text-white' : 'text-[#BEB4D6]'
                     }`}
                   >
                     Metric
@@ -530,7 +530,7 @@ export const OnboardingWizard: React.FC = () => {
                     type="button"
                     onClick={() => setPreferredUnits('imperial')}
                     className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-                      preferredUnits === 'imperial' ? 'bg-[#1677FF] text-white' : 'text-[#A9B8CC]'
+                      preferredUnits === 'imperial' ? 'bg-[#6638B8] text-white' : 'text-[#BEB4D6]'
                     }`}
                   >
                     Imperial
@@ -539,8 +539,8 @@ export const OnboardingWizard: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-1.5">
-                  Height <span className="text-[#A9B8CC]/70 font-normal">(Optional)</span>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#FFD978] mb-1.5">
+                  Height <span className="text-[#BEB4D6]/70 font-normal">(Optional)</span>
                 </label>
                 <input
                   type="text"
@@ -548,13 +548,13 @@ export const OnboardingWizard: React.FC = () => {
                   value={height}
                   onChange={e => setHeight(e.target.value)}
                   placeholder={preferredUnits === 'metric' ? 'e.g. 175 cm' : 'e.g. 5 ft 9 in'}
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/40 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#00D9FF]"
+                  className="w-full bg-[#19122B] border border-[#6638B8]/40 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#FFD978]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-1.5">
-                  Weight <span className="text-[#A9B8CC]/70 font-normal">(Optional)</span>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#FFD978] mb-1.5">
+                  Weight <span className="text-[#BEB4D6]/70 font-normal">(Optional)</span>
                 </label>
                 <input
                   type="text"
@@ -562,13 +562,13 @@ export const OnboardingWizard: React.FC = () => {
                   value={weight}
                   onChange={e => setWeight(e.target.value)}
                   placeholder={preferredUnits === 'metric' ? 'e.g. 70 kg' : 'e.g. 154 lb'}
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/40 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#00D9FF]"
+                  className="w-full bg-[#19122B] border border-[#6638B8]/40 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#FFD978]"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#FFD978] mb-2">
                 Current Activity Level
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -584,8 +584,8 @@ export const OnboardingWizard: React.FC = () => {
                     onClick={() => setActivityLevel(item.id as ActivityLevel)}
                     className={`p-3 rounded-xl border text-xs font-semibold transition-all ${
                       activityLevel === item.id
-                        ? 'bg-[#1677FF]/25 border-[#00D9FF] text-white shadow-[0_0_14px_rgba(0,217,255,0.2)]'
-                        : 'bg-[#0A1930] border-[#1677FF]/25 text-[#A9B8CC] hover:text-white'
+                        ? 'bg-[#6638B8]/25 border-[#FFD978] text-white shadow-[0_0_14px_rgba(255,217,120,0.22)]'
+                        : 'bg-[#19122B] border-[#6638B8]/25 text-[#BEB4D6] hover:text-white'
                     }`}
                   >
                     {item.label}
@@ -595,7 +595,7 @@ export const OnboardingWizard: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#FFD978] mb-2">
                 Preferred Fitness Activities
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -608,12 +608,12 @@ export const OnboardingWizard: React.FC = () => {
                       onClick={() => toggleItem(preferredActivities, setPreferredActivities, act)}
                       className={`p-2.5 rounded-xl border text-xs font-medium flex items-center justify-between transition-all ${
                         isChecked
-                          ? 'bg-[#1677FF]/25 border-[#00D9FF] text-white'
-                          : 'bg-[#0A1930] border-[#1677FF]/25 text-[#A9B8CC] hover:text-white'
+                          ? 'bg-[#6638B8]/25 border-[#FFD978] text-white'
+                          : 'bg-[#19122B] border-[#6638B8]/25 text-[#BEB4D6] hover:text-white'
                       }`}
                     >
                       <span>{act}</span>
-                      {isChecked && <Check className="w-3.5 h-3.5 text-[#00D9FF] shrink-0" />}
+                      {isChecked && <Check className="w-3.5 h-3.5 text-[#FFD978] shrink-0" />}
                     </button>
                   );
                 })}
@@ -621,7 +621,7 @@ export const OnboardingWizard: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#FFD978] mb-2">
                 Health-Focused Fitness Goals
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -641,20 +641,20 @@ export const OnboardingWizard: React.FC = () => {
                       onClick={() => toggleItem(fitnessGoals, setFitnessGoals, goal)}
                       className={`p-3 rounded-xl border text-left text-xs font-medium flex items-center justify-between transition-all ${
                         isChecked
-                          ? 'bg-[#1677FF]/25 border-[#00D9FF] text-white'
-                          : 'bg-[#0A1930] border-[#1677FF]/25 text-[#A9B8CC] hover:text-white'
+                          ? 'bg-[#6638B8]/25 border-[#FFD978] text-white'
+                          : 'bg-[#19122B] border-[#6638B8]/25 text-[#BEB4D6] hover:text-white'
                       }`}
                     >
                       <span>{goal}</span>
-                      {isChecked && <Check className="w-3.5 h-3.5 text-[#00D9FF] shrink-0" />}
+                      {isChecked && <Check className="w-3.5 h-3.5 text-[#FFD978] shrink-0" />}
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-[#0A1930] border border-[#1677FF]/35 text-xs text-[#A9B8CC] flex items-start gap-2">
-              <Heart className="w-4 h-4 text-[#00D9FF] shrink-0 mt-0.5" />
+            <div className="p-3 rounded-xl bg-[#19122B] border border-[#6638B8]/35 text-xs text-[#BEB4D6] flex items-start gap-2">
+              <Heart className="w-4 h-4 text-[#FFD978] shrink-0 mt-0.5" />
               <span>
                 LifeQuest promotes sustainable daily movement and vitality at every pace — never restrictive targets or body-image scoring.
               </span>
@@ -664,18 +664,18 @@ export const OnboardingWizard: React.FC = () => {
 
         {/* STEP 3: NUTRITION PREFERENCES */}
         {currentStep === 3 && (
-          <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/35 rounded-2xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(2,8,20,0.65)] space-y-6 animate-in fade-in">
+          <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 rounded-2xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(10,6,20,0.7)] space-y-6 animate-in fade-in">
             <div>
               <h2 className="text-2xl font-bold font-['Cinzel'] text-white mb-1">
                 STEP 3: NUTRITION PREFERENCES
               </h2>
-              <p className="text-sm text-[#A9B8CC]">
+              <p className="text-sm text-[#BEB4D6]">
                 Help us tailor balanced meal ideas and highlight potential allergens safely. All fields except dietary style are optional.
               </p>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#FFD978] mb-2">
                 Dietary Preference
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
@@ -694,8 +694,8 @@ export const OnboardingWizard: React.FC = () => {
                     onClick={() => setDietaryPreference(diet.id)}
                     className={`p-3 rounded-xl border text-xs font-semibold transition-all ${
                       dietaryPreference === diet.id
-                        ? 'bg-[#1677FF]/25 border-[#00D9FF] text-white shadow-[0_0_14px_rgba(0,217,255,0.2)]'
-                        : 'bg-[#0A1930] border-[#1677FF]/25 text-[#A9B8CC] hover:text-white'
+                        ? 'bg-[#6638B8]/25 border-[#FFD978] text-white shadow-[0_0_14px_rgba(255,217,120,0.22)]'
+                        : 'bg-[#19122B] border-[#6638B8]/25 text-[#BEB4D6] hover:text-white'
                     }`}
                   >
                     {diet.label}
@@ -706,8 +706,8 @@ export const OnboardingWizard: React.FC = () => {
 
             {/* Multiple Food Allergies */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-2">
-                Food Allergies <span className="text-[#A9B8CC]/70 font-normal">(Select or add multiple)</span>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#FFD978] mb-2">
+                Food Allergies <span className="text-[#BEB4D6]/70 font-normal">(Select or add multiple)</span>
               </label>
               <div className="flex flex-wrap gap-1.5 mb-2.5">
                 {COMMON_ALLERGIES.map(item => {
@@ -720,7 +720,7 @@ export const OnboardingWizard: React.FC = () => {
                       className={`px-2.5 py-1 rounded-lg border text-xs transition-all ${
                         selected
                           ? 'bg-rose-950/80 border-rose-500 text-rose-200'
-                          : 'bg-[#0A1930] border-[#1677FF]/25 text-[#A9B8CC] hover:text-white'
+                          : 'bg-[#19122B] border-[#6638B8]/25 text-[#BEB4D6] hover:text-white'
                       }`}
                     >
                       {selected ? `✓ ${item}` : `+ ${item}`}
@@ -741,12 +741,12 @@ export const OnboardingWizard: React.FC = () => {
                     }
                   }}
                   placeholder="Add custom allergy (e.g. Mustard, Shellfish)..."
-                  className="flex-1 bg-[#0A1930] border border-[#1677FF]/40 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#00D9FF]"
+                  className="flex-1 bg-[#19122B] border border-[#6638B8]/40 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#FFD978]"
                 />
                 <button
                   type="button"
                   onClick={() => addTag(allergyInput, setAllergyInput, foodAllergiesList, setFoodAllergiesList)}
-                  className="px-3.5 py-2 rounded-xl bg-[#1677FF] hover:bg-[#0099FF] text-white text-xs font-semibold flex items-center gap-1 transition-colors"
+                  className="px-3.5 py-2 rounded-xl bg-[#6638B8] hover:bg-[#A875FF] text-white text-xs font-semibold flex items-center gap-1 transition-colors"
                 >
                   <Plus className="w-3.5 h-3.5" /> Add
                 </button>
@@ -775,8 +775,8 @@ export const OnboardingWizard: React.FC = () => {
 
             {/* Food Intolerances */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-2">
-                Food Intolerances <span className="text-[#A9B8CC]/70 font-normal">(Optional)</span>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#FFD978] mb-2">
+                Food Intolerances <span className="text-[#BEB4D6]/70 font-normal">(Optional)</span>
               </label>
               <div className="flex flex-wrap gap-1.5 mb-2.5">
                 {COMMON_INTOLERANCES.map(item => {
@@ -789,7 +789,7 @@ export const OnboardingWizard: React.FC = () => {
                       className={`px-2.5 py-1 rounded-lg border text-xs transition-all ${
                         selected
                           ? 'bg-amber-950/80 border-amber-500 text-amber-200'
-                          : 'bg-[#0A1930] border-[#1677FF]/25 text-[#A9B8CC] hover:text-white'
+                          : 'bg-[#19122B] border-[#6638B8]/25 text-[#BEB4D6] hover:text-white'
                       }`}
                     >
                       {selected ? `✓ ${item}` : `+ ${item}`}
@@ -810,12 +810,12 @@ export const OnboardingWizard: React.FC = () => {
                     }
                   }}
                   placeholder="Add intolerance (e.g. Sulfites)..."
-                  className="flex-1 bg-[#0A1930] border border-[#1677FF]/40 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#00D9FF]"
+                  className="flex-1 bg-[#19122B] border border-[#6638B8]/40 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#FFD978]"
                 />
                 <button
                   type="button"
                   onClick={() => addTag(intoleranceInput, setIntoleranceInput, foodIntolerances, setFoodIntolerances)}
-                  className="px-3.5 py-2 rounded-xl bg-[#1677FF] hover:bg-[#0099FF] text-white text-xs font-semibold flex items-center gap-1 transition-colors"
+                  className="px-3.5 py-2 rounded-xl bg-[#6638B8] hover:bg-[#A875FF] text-white text-xs font-semibold flex items-center gap-1 transition-colors"
                 >
                   <Plus className="w-3.5 h-3.5" /> Add
                 </button>
@@ -823,8 +823,8 @@ export const OnboardingWizard: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-1.5">
-                Foods to Avoid <span className="text-[#A9B8CC]/70 font-normal">(Optional, comma-separated)</span>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#FFD978] mb-1.5">
+                Foods to Avoid <span className="text-[#BEB4D6]/70 font-normal">(Optional, comma-separated)</span>
               </label>
               <input
                 type="text"
@@ -832,7 +832,7 @@ export const OnboardingWizard: React.FC = () => {
                 value={dislikedFoods}
                 onChange={e => setDislikedFoods(e.target.value)}
                 placeholder="e.g. Mushrooms, Olives, Eggplant"
-                className="w-full bg-[#0A1930] border border-[#1677FF]/40 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#00D9FF]"
+                className="w-full bg-[#19122B] border border-[#6638B8]/40 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#FFD978]"
               />
             </div>
 
@@ -847,25 +847,25 @@ export const OnboardingWizard: React.FC = () => {
 
         {/* STEP 4: PREFERENCES */}
         {currentStep === 4 && (
-          <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/35 rounded-2xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(2,8,20,0.65)] space-y-6 animate-in fade-in">
+          <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 rounded-2xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(10,6,20,0.7)] space-y-6 animate-in fade-in">
             <div>
               <h2 className="text-2xl font-bold font-['Cinzel'] text-white mb-1">
                 STEP 4: REALM PREFERENCES
               </h2>
-              <p className="text-sm text-[#A9B8CC]">
+              <p className="text-sm text-[#BEB4D6]">
                 Configure your daily reset timezone, alerts, sound effects, and public leaderboard privacy.
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-1.5 flex items-center gap-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#FFD978] mb-1.5 flex items-center gap-1.5">
                   <Globe className="w-3.5 h-3.5" /> Timezone (For Daily/Weekly Resets)
                 </label>
                 <select
                   value={timezone}
                   onChange={e => setTimezone(e.target.value)}
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/40 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#00D9FF]"
+                  className="w-full bg-[#19122B] border border-[#6638B8]/40 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[#FFD978]"
                 >
                   {timezoneOptions.map(tz => (
                     <option key={tz} value={tz}>
@@ -876,15 +876,15 @@ export const OnboardingWizard: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#FFD978] mb-1.5">
                   Preferred Measurement Units
                 </label>
-                <div className="flex p-1 bg-[#0A1930] rounded-xl border border-[#1677FF]/40">
+                <div className="flex p-1 bg-[#19122B] rounded-xl border border-[#6638B8]/40">
                   <button
                     type="button"
                     onClick={() => setPreferredUnits('metric')}
                     className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-                      preferredUnits === 'metric' ? 'bg-[#1677FF] text-white' : 'text-[#A9B8CC]'
+                      preferredUnits === 'metric' ? 'bg-[#6638B8] text-white' : 'text-[#BEB4D6]'
                     }`}
                   >
                     Metric (cm / kg / km)
@@ -893,7 +893,7 @@ export const OnboardingWizard: React.FC = () => {
                     type="button"
                     onClick={() => setPreferredUnits('imperial')}
                     className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-                      preferredUnits === 'imperial' ? 'bg-[#1677FF] text-white' : 'text-[#A9B8CC]'
+                      preferredUnits === 'imperial' ? 'bg-[#6638B8] text-white' : 'text-[#BEB4D6]'
                     }`}
                   >
                     Imperial (ft / lb / mi)
@@ -904,7 +904,7 @@ export const OnboardingWizard: React.FC = () => {
 
             {/* Notification Preferences */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#00D9FF] mb-2 flex items-center gap-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#FFD978] mb-2 flex items-center gap-1.5">
                 <Bell className="w-3.5 h-3.5" /> Notification Preferences
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -918,11 +918,11 @@ export const OnboardingWizard: React.FC = () => {
                 ).map(item => (
                   <label
                     key={item.key}
-                    className="p-3.5 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 flex items-center justify-between gap-3 cursor-pointer hover:border-[#00D9FF]/50 transition-colors"
+                    className="p-3.5 rounded-xl bg-[#19122B] border border-[#6638B8]/25 flex items-center justify-between gap-3 cursor-pointer hover:border-[#FFD978]/50 transition-colors"
                   >
                     <div>
                       <span className="text-xs font-semibold text-white block">{item.title}</span>
-                      <span className="text-[11px] text-[#A9B8CC]">{item.desc}</span>
+                      <span className="text-[11px] text-[#BEB4D6]">{item.desc}</span>
                     </div>
                     <input
                       type="checkbox"
@@ -930,7 +930,7 @@ export const OnboardingWizard: React.FC = () => {
                       onChange={e =>
                         setNotificationPrefs(prev => ({ ...prev, [item.key]: e.target.checked }))
                       }
-                      className="w-4 h-4 accent-[#1677FF] cursor-pointer shrink-0"
+                      className="w-4 h-4 accent-[#6638B8] cursor-pointer shrink-0"
                     />
                   </label>
                 ))}
@@ -938,39 +938,39 @@ export const OnboardingWizard: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="p-3.5 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 flex items-center justify-between gap-3">
+              <div className="p-3.5 rounded-xl bg-[#19122B] border border-[#6638B8]/25 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
                   {soundEnabled ? (
-                    <Volume2 className="w-4 h-4 text-[#00D9FF]" />
+                    <Volume2 className="w-4 h-4 text-[#FFD978]" />
                   ) : (
-                    <VolumeX className="w-4 h-4 text-[#A9B8CC]" />
+                    <VolumeX className="w-4 h-4 text-[#BEB4D6]" />
                   )}
                   <div>
                     <span className="text-xs font-semibold text-white block">RPG Sound Effects</span>
-                    <span className="text-[11px] text-[#A9B8CC]">Combat & habit chime audio</span>
+                    <span className="text-[11px] text-[#BEB4D6]">Combat & habit chime audio</span>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSoundEnabled(prev => !prev)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                    soundEnabled ? 'bg-[#1677FF] text-white' : 'bg-[#061225] text-[#A9B8CC]'
+                    soundEnabled ? 'bg-[#6638B8] text-white' : 'bg-[#100D1C] text-[#BEB4D6]'
                   }`}
                 >
                   {soundEnabled ? 'ON' : 'OFF'}
                 </button>
               </div>
 
-              <label className="p-3.5 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 flex items-center justify-between gap-3 cursor-pointer">
+              <label className="p-3.5 rounded-xl bg-[#19122B] border border-[#6638B8]/25 flex items-center justify-between gap-3 cursor-pointer">
                 <div>
                   <span className="text-xs font-semibold text-white block">Public Leaderboard</span>
-                  <span className="text-[11px] text-[#A9B8CC]">Show hero username & level on rankings</span>
+                  <span className="text-[11px] text-[#BEB4D6]">Show hero username & level on rankings</span>
                 </div>
                 <input
                   type="checkbox"
                   checked={leaderboardVisible}
                   onChange={e => setLeaderboardVisible(e.target.checked)}
-                  className="w-4 h-4 accent-[#1677FF] cursor-pointer shrink-0"
+                  className="w-4 h-4 accent-[#6638B8] cursor-pointer shrink-0"
                 />
               </label>
             </div>
@@ -979,9 +979,9 @@ export const OnboardingWizard: React.FC = () => {
 
         {/* STEP 5: CONFIRMATION */}
         {currentStep === 5 && (
-          <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/35 rounded-2xl p-6 sm:p-8 shadow-[0_24px_64px_rgba(2,8,20,0.75)] space-y-6 animate-in fade-in">
+          <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 rounded-2xl p-6 sm:p-8 shadow-[0_24px_64px_rgba(10,6,20,0.75)] space-y-6 animate-in fade-in">
             <div className="text-center">
-              <div className="inline-block p-1 rounded-2xl bg-gradient-to-r from-[#1677FF] to-[#00D9FF] mb-3 shadow-[0_0_24px_rgba(0,217,255,0.3)]">
+              <div className="inline-block p-1 rounded-2xl bg-gradient-to-r from-[#6638B8] to-[#FFD978] mb-3 shadow-[0_0_24px_rgba(231,185,79,0.3)]">
                 <img
                   src={resolveAssetUrl(selectedAvatar, characterWarriorAvatarImg)}
                   alt={characterName}
@@ -992,94 +992,94 @@ export const OnboardingWizard: React.FC = () => {
               <h2 className="text-2xl font-black font-['Cinzel'] text-white">
                 CONFIRM YOUR CHAMPION PROFILE
               </h2>
-              <p className="text-xs text-[#00D9FF] mt-1">
+              <p className="text-xs text-[#FFD978] mt-1">
                 Review your setup before entering the World of Aetheria. You can edit any preference later in Settings.
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               {/* Summary Card 1 */}
-              <div className="p-4 rounded-xl bg-[#0A1930] border border-[#1677FF]/30 space-y-1.5">
+              <div className="p-4 rounded-xl bg-[#19122B] border border-[#6638B8]/30 space-y-1.5">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-['Cinzel'] font-bold text-[#00D9FF] uppercase">1. Character</span>
+                  <span className="font-['Cinzel'] font-bold text-[#FFD978] uppercase">1. Character</span>
                   <button
                     type="button"
                     onClick={() => setCurrentStep(1)}
-                    className="text-[#00D9FF] hover:text-white inline-flex items-center gap-1"
+                    className="text-[#FFD978] hover:text-white inline-flex items-center gap-1"
                   >
                     <Edit3 className="w-3 h-3" /> Edit
                   </button>
                 </div>
-                <p className="text-[#A9B8CC]">Username: <strong className="text-white">{username}</strong></p>
-                <p className="text-[#A9B8CC]">Character: <strong className="text-white">{characterName}</strong></p>
-                <p className="text-[#A9B8CC]">Class: <strong className="text-[#00D9FF]">{characterClass}</strong></p>
+                <p className="text-[#BEB4D6]">Username: <strong className="text-white">{username}</strong></p>
+                <p className="text-[#BEB4D6]">Character: <strong className="text-white">{characterName}</strong></p>
+                <p className="text-[#BEB4D6]">Class: <strong className="text-[#FFD978]">{characterClass}</strong></p>
               </div>
 
               {/* Summary Card 2 */}
-              <div className="p-4 rounded-xl bg-[#0A1930] border border-[#1677FF]/30 space-y-1.5">
+              <div className="p-4 rounded-xl bg-[#19122B] border border-[#6638B8]/30 space-y-1.5">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-['Cinzel'] font-bold text-[#00D9FF] uppercase">2. Fitness</span>
+                  <span className="font-['Cinzel'] font-bold text-[#FFD978] uppercase">2. Fitness</span>
                   <button
                     type="button"
                     onClick={() => setCurrentStep(2)}
-                    className="text-[#00D9FF] hover:text-white inline-flex items-center gap-1"
+                    className="text-[#FFD978] hover:text-white inline-flex items-center gap-1"
                   >
                     <Edit3 className="w-3 h-3" /> Edit
                   </button>
                 </div>
-                <p className="text-[#A9B8CC]">Activity: <strong className="text-white capitalize">{activityLevel.replace('_', ' ')}</strong></p>
-                <p className="text-[#A9B8CC]">
+                <p className="text-[#BEB4D6]">Activity: <strong className="text-white capitalize">{activityLevel.replace('_', ' ')}</strong></p>
+                <p className="text-[#BEB4D6]">
                   Activities: <strong className="text-white">{preferredActivities.length > 0 ? preferredActivities.join(', ') : 'None selected'}</strong>
                 </p>
-                <p className="text-[#A9B8CC]">
+                <p className="text-[#BEB4D6]">
                   Goals: <strong className="text-white">{fitnessGoals.length > 0 ? fitnessGoals.join(', ') : 'General wellness'}</strong>
                 </p>
                 {(height || weight) && (
-                  <p className="text-[#A9B8CC]/80">
+                  <p className="text-[#BEB4D6]/80">
                     Optional Metrics: {height || '—'} · {weight || '—'}
                   </p>
                 )}
               </div>
 
               {/* Summary Card 3 */}
-              <div className="p-4 rounded-xl bg-[#0A1930] border border-[#1677FF]/30 space-y-1.5">
+              <div className="p-4 rounded-xl bg-[#19122B] border border-[#6638B8]/30 space-y-1.5">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-['Cinzel'] font-bold text-[#00D9FF] uppercase">3. Nutrition</span>
+                  <span className="font-['Cinzel'] font-bold text-[#FFD978] uppercase">3. Nutrition</span>
                   <button
                     type="button"
                     onClick={() => setCurrentStep(3)}
-                    className="text-[#00D9FF] hover:text-white inline-flex items-center gap-1"
+                    className="text-[#FFD978] hover:text-white inline-flex items-center gap-1"
                   >
                     <Edit3 className="w-3 h-3" /> Edit
                   </button>
                 </div>
-                <p className="text-[#A9B8CC]">Diet: <strong className="text-white">{dietaryLabelMap[dietaryPreference]}</strong></p>
-                <p className="text-[#A9B8CC]">
+                <p className="text-[#BEB4D6]">Diet: <strong className="text-white">{dietaryLabelMap[dietaryPreference]}</strong></p>
+                <p className="text-[#BEB4D6]">
                   Allergies: <strong className="text-rose-300">{foodAllergiesList.length > 0 ? foodAllergiesList.join(', ') : 'None listed'}</strong>
                 </p>
-                <p className="text-[#A9B8CC]">
+                <p className="text-[#BEB4D6]">
                   Intolerances: <strong className="text-amber-300">{foodIntolerances.length > 0 ? foodIntolerances.join(', ') : 'None listed'}</strong>
                 </p>
                 {dislikedFoods && (
-                  <p className="text-[#A9B8CC]/80">Avoid: {dislikedFoods}</p>
+                  <p className="text-[#BEB4D6]/80">Avoid: {dislikedFoods}</p>
                 )}
               </div>
 
               {/* Summary Card 4 */}
-              <div className="p-4 rounded-xl bg-[#0A1930] border border-[#1677FF]/30 space-y-1.5">
+              <div className="p-4 rounded-xl bg-[#19122B] border border-[#6638B8]/30 space-y-1.5">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-['Cinzel'] font-bold text-[#00D9FF] uppercase">4. Preferences</span>
+                  <span className="font-['Cinzel'] font-bold text-[#FFD978] uppercase">4. Preferences</span>
                   <button
                     type="button"
                     onClick={() => setCurrentStep(4)}
-                    className="text-[#00D9FF] hover:text-white inline-flex items-center gap-1"
+                    className="text-[#FFD978] hover:text-white inline-flex items-center gap-1"
                   >
                     <Edit3 className="w-3 h-3" /> Edit
                   </button>
                 </div>
-                <p className="text-[#A9B8CC]">Units: <strong className="text-white uppercase">{preferredUnits}</strong> · Sound: <strong className="text-white">{soundEnabled ? 'On' : 'Muted'}</strong></p>
-                <p className="text-[#A9B8CC]">Timezone: <strong className="text-white">{timezone}</strong></p>
-                <p className="text-[#A9B8CC]">Leaderboard: <strong className="text-white">{leaderboardVisible ? 'Visible' : 'Hidden'}</strong></p>
+                <p className="text-[#BEB4D6]">Units: <strong className="text-white uppercase">{preferredUnits}</strong> · Sound: <strong className="text-white">{soundEnabled ? 'On' : 'Muted'}</strong></p>
+                <p className="text-[#BEB4D6]">Timezone: <strong className="text-white">{timezone}</strong></p>
+                <p className="text-[#BEB4D6]">Leaderboard: <strong className="text-white">{leaderboardVisible ? 'Visible' : 'Hidden'}</strong></p>
               </div>
             </div>
 
@@ -1088,7 +1088,7 @@ export const OnboardingWizard: React.FC = () => {
                 type="button"
                 disabled={isSaving}
                 onClick={handleFinish}
-                className="w-full sm:w-auto px-10 py-3.5 font-black font-['Cinzel'] tracking-widest text-sm rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2684FF] hover:to-[#00D9FF] disabled:opacity-60 border border-[#00D9FF]/50 text-white shadow-[0_8px_26px_rgba(22,119,255,0.4)] hover:shadow-[0_0_28px_rgba(0,217,255,0.5)] transition-all inline-flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-10 py-3.5 font-black font-['Cinzel'] tracking-widest text-sm rounded-xl bg-gradient-to-r from-[#6638B8] to-[#A875FF] hover:from-[#7A49CF] hover:to-[#E7B94F] disabled:opacity-60 border border-[#FFD978]/50 text-white shadow-[0_8px_26px_rgba(102,56,184,0.45)] hover:shadow-[0_0_28px_rgba(255,217,120,0.45)] transition-all inline-flex items-center justify-center gap-2"
               >
                 {isSaving ? (
                   <>
@@ -1112,9 +1112,9 @@ export const OnboardingWizard: React.FC = () => {
                 setSaveError(null);
                 setCurrentStep(prev => prev - 1);
               }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#1677FF]/40 bg-[#0A1930] hover:bg-[#102440] hover:border-[#00D9FF]/65 text-xs font-semibold text-white transition-all"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#6638B8]/40 bg-[#19122B] hover:bg-[#24143D] hover:border-[#FFD978]/65 text-xs font-semibold text-white transition-all"
             >
-              <ArrowLeft className="w-4 h-4 text-[#00D9FF]" />
+              <ArrowLeft className="w-4 h-4 text-[#FFD978]" />
               Previous Step
             </button>
           ) : (
@@ -1125,7 +1125,7 @@ export const OnboardingWizard: React.FC = () => {
             <button
               type="button"
               onClick={handleNext}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2684FF] hover:to-[#00D9FF] border border-[#00D9FF]/45 text-xs font-semibold text-white shadow-[0_4px_16px_rgba(22,119,255,0.35)] hover:shadow-[0_0_20px_rgba(0,217,255,0.45)] transition-all"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#6638B8] to-[#A875FF] hover:from-[#7A49CF] hover:to-[#E7B94F] border border-[#FFD978]/45 text-xs font-semibold text-white shadow-[0_4px_16px_rgba(102,56,184,0.4)] hover:shadow-[0_0_20px_rgba(255,217,120,0.4)] transition-all"
             >
               Next Step
               <ArrowRight className="w-4 h-4" />

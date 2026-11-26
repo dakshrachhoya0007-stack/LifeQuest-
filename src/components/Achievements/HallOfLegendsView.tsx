@@ -88,39 +88,39 @@ export const HallOfLegendsView: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in pb-12">
       {/* Header Banner */}
-      <div className="rounded-2xl border border-[#1677FF]/30 bg-gradient-to-br from-[#0A1930] via-[#102440] to-[#0A1930] p-6 shadow-[0_12px_32px_rgba(2,8,20,0.6)] backdrop-blur-md">
+      <div className="rounded-2xl border border-[#E7B94F]/35 bg-gradient-to-br from-[#19122B] via-[#24143D] to-[#19122B] p-6 shadow-[0_12px_32px_rgba(16,13,28,0.65)] backdrop-blur-md">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
           <div>
             <div className="flex flex-wrap items-center gap-2 text-xs mb-1.5">
-              <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#00D9FF] flex items-center gap-1.5">
+              <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#FFD978] flex items-center gap-1.5">
                 <Globe2 className="w-3.5 h-3.5" />
                 One-Player-Only Worldwide Registry
               </span>
-              <span className="text-[#A9B8CC]/40" aria-hidden="true">·</span>
-              <span className="text-[#A9B8CC] tabular-nums">
+              <span className="text-[#BEB4D6]/40" aria-hidden="true">·</span>
+              <span className="text-[#BEB4D6] tabular-nums">
                 {summary.claimedCount}/{summary.total} Claimed Globally
               </span>
               {summary.readyCount > 0 && (
                 <>
-                  <span className="text-[#A9B8CC]/40" aria-hidden="true">·</span>
-                  <span className="text-emerald-300 font-semibold tabular-nums">
+                  <span className="text-[#BEB4D6]/40" aria-hidden="true">·</span>
+                  <span className="text-[#35D69A] font-semibold tabular-nums">
                     {summary.readyCount} Ready to Claim
                   </span>
                 </>
               )}
             </div>
-            <h1 className="font-['Cinzel'] font-black text-2xl sm:text-3xl text-white tracking-wide">
+            <h1 className="font-['Cinzel'] font-black text-2xl sm:text-3xl text-[#F7F4FF] tracking-wide">
               HALL OF LEGENDS
             </h1>
-            <p className="text-xs sm:text-sm text-[#A9B8CC] mt-1 max-w-2xl">
+            <p className="text-xs sm:text-sm text-[#BEB4D6] mt-1 max-w-2xl">
               Five one-of-a-kind worldwide honors. Only the very first champion in Aetheria to fulfill each milestone claims it forever—locking it permanently to their name across the realm.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
             {user?.legendTitle && (
-              <div className="flex items-center gap-2 rounded-xl bg-[#061225]/90 border border-[#1677FF]/30 px-3 py-2">
-                <span className="text-[11px] text-[#A9B8CC]">Active Title:</span>
+              <div className="flex items-center gap-2 rounded-xl bg-[#100D1C]/90 border border-[#E7B94F]/35 px-3 py-2">
+                <span className="text-[11px] text-[#BEB4D6]">Active Title:</span>
                 <LegendTitleBadge
                   title={user.legendTitle}
                   style={user.legendTitleStyle}
@@ -133,9 +133,9 @@ export const HallOfLegendsView: React.FC = () => {
               type="button"
               disabled={hallLoading}
               onClick={refreshHallOfLegends}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#0A1930] hover:bg-[#16325C] border border-[#1677FF]/40 hover:border-[#00D9FF]/50 text-xs font-semibold text-white transition-colors whitespace-nowrap shrink-0"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#19122B] hover:bg-[#2F1B4E] border border-[#A875FF]/40 hover:border-[#FFD978]/55 text-xs font-semibold text-[#F7F4FF] transition-colors whitespace-nowrap shrink-0"
             >
-              <RefreshCw className={`w-3.5 h-3.5 text-[#00D9FF] ${hallLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 text-[#FFD978] ${hallLoading ? 'animate-spin' : ''}`} />
               <span>Sync Registry</span>
             </button>
           </div>
@@ -143,8 +143,8 @@ export const HallOfLegendsView: React.FC = () => {
 
         {/* Realm Herald Announcements Strip */}
         {legendAnnouncements.length > 0 && (
-          <div className="mt-5 pt-4 border-t border-[#1677FF]/20">
-            <div className="flex items-center gap-1.5 text-[11px] font-['Cinzel'] font-bold uppercase tracking-wider text-[#00D9FF] mb-2">
+          <div className="mt-5 pt-4 border-t border-[#E7B94F]/20">
+            <div className="flex items-center gap-1.5 text-[11px] font-['Cinzel'] font-bold uppercase tracking-wider text-[#FFD978] mb-2">
               <Scroll className="w-3.5 h-3.5" />
               <span>Recent Worldwide Claims</span>
             </div>
@@ -154,7 +154,7 @@ export const HallOfLegendsView: React.FC = () => {
                   key={ann.id}
                   type="button"
                   onClick={() => openPublicProfile(ann.ownerId)}
-                  className="flex items-center gap-2.5 rounded-xl bg-[#0A1930]/90 hover:bg-[#16325C] border border-[#1677FF]/25 hover:border-[#00D9FF]/45 px-3 py-2 text-left transition-colors shrink-0"
+                  className="flex items-center gap-2.5 rounded-xl bg-[#19122B]/90 hover:bg-[#2F1B4E] border border-[#6638B8]/35 hover:border-[#FFD978]/50 px-3 py-2 text-left transition-colors shrink-0"
                 >
                   <LegendTitleBadge
                     title={ann.titleTag}
@@ -163,8 +163,8 @@ export const HallOfLegendsView: React.FC = () => {
                     size="xs"
                   />
                   <div className="text-xs">
-                    <span className="font-semibold text-white">{ann.ownerUsername}</span>
-                    <span className="text-[#A9B8CC]"> claimed {ann.achievementName}</span>
+                    <span className="font-semibold text-[#F7F4FF]">{ann.ownerUsername}</span>
+                    <span className="text-[#BEB4D6]"> claimed {ann.achievementName}</span>
                   </div>
                 </button>
               ))}
@@ -177,14 +177,14 @@ export const HallOfLegendsView: React.FC = () => {
         <div
           className={`rounded-xl border p-3.5 flex items-center gap-2 text-xs ${
             feedback.type === 'success'
-              ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200'
-              : 'bg-rose-950/40 border-rose-500/40 text-rose-200'
+              ? 'bg-[#35D69A]/10 border-[#35D69A]/45 text-[#35D69A]'
+              : 'bg-[#F05B70]/10 border-[#F05B70]/45 text-[#F05B70]'
           }`}
         >
           {feedback.type === 'success' ? (
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-[#35D69A] shrink-0" />
           ) : (
-            <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+            <AlertTriangle className="w-4 h-4 text-[#F05B70] shrink-0" />
           )}
           <span>{feedback.text}</span>
         </div>
@@ -192,7 +192,7 @@ export const HallOfLegendsView: React.FC = () => {
 
       {/* Concise Status Filter */}
       <div className="flex items-center justify-between gap-3">
-        <div className="inline-flex items-center gap-1.5 p-1 bg-[#061225] rounded-xl border border-[#1677FF]/25">
+        <div className="inline-flex items-center gap-1.5 p-1 bg-[#100D1C] rounded-xl border border-[#6638B8]/30">
           {[
             { id: 'all', label: `All (${summary.total})` },
             { id: 'available', label: `Available (${summary.availableCount})` },
@@ -204,8 +204,8 @@ export const HallOfLegendsView: React.FC = () => {
               onClick={() => setStatusFilter(item.id as 'all' | 'available' | 'claimed')}
               className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap shrink-0 ${
                 statusFilter === item.id
-                  ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white border border-[#00D9FF]/50 shadow-[0_0_14px_rgba(22,119,255,0.3)]'
-                  : 'text-[#A9B8CC] hover:text-white border border-transparent'
+                  ? 'bg-gradient-to-r from-[#6638B8] to-[#A875FF] text-[#F7F4FF] border border-[#FFD978]/45 shadow-[0_0_16px_rgba(168,117,255,0.3)]'
+                  : 'text-[#BEB4D6] hover:text-[#F7F4FF] border border-transparent'
               }`}
             >
               {item.label}
@@ -229,12 +229,12 @@ export const HallOfLegendsView: React.FC = () => {
               key={entry.id}
               className={`rounded-2xl border p-5 flex flex-col justify-between transition-all ${
                 entry.eligibleToClaim
-                  ? 'bg-gradient-to-b from-[#102440] to-[#0A1930] border-[#00D9FF]/65 ring-1 ring-[#00D9FF]/35 shadow-[0_12px_32px_rgba(2,8,20,0.6)]'
+                  ? 'bg-gradient-to-b from-[#24143D] to-[#19122B] border-[#FFD978]/70 ring-1 ring-[#FFD978]/35 shadow-[0_12px_32px_rgba(231,185,79,0.18)]'
                   : isClaimed
                   ? entry.ownedByCurrentUser
-                    ? 'bg-gradient-to-b from-[#102440] to-[#0A1930] border-emerald-500/45'
-                    : 'bg-[#0A1930]/80 border-[#1677FF]/20 opacity-90'
-                  : `bg-[#102440]/90 backdrop-blur-md ${rarityMeta.borderClass}`
+                    ? 'bg-gradient-to-b from-[#24143D] to-[#19122B] border-[#35D69A]/50'
+                    : 'bg-[#19122B]/85 border-[#6638B8]/25 opacity-90'
+                  : `bg-[#24143D]/90 backdrop-blur-md ${rarityMeta.borderClass}`
               }`}
             >
               <div>
@@ -243,17 +243,17 @@ export const HallOfLegendsView: React.FC = () => {
                     <div
                       className={`w-12 h-12 rounded-xl border flex items-center justify-center shrink-0 ${
                         isClaimed && !entry.ownedByCurrentUser
-                          ? 'bg-[#061225] border-[#1677FF]/25 text-[#A9B8CC]/70'
+                          ? 'bg-[#100D1C] border-[#6638B8]/25 text-[#BEB4D6]/70'
                           : `${styleMeta.badgeBg} ${styleMeta.badgeBorder} ${styleMeta.glowShadow}`
                       }`}
                     >
                       {isSecretMasked ? (
-                        <EyeOff className="w-5 h-5 text-[#A9B8CC]" />
+                        <EyeOff className="w-5 h-5 text-[#BEB4D6]" />
                       ) : (
                         <LegendEmblemIcon
                           iconName={entry.emblemIcon}
                           className={`w-6 h-6 ${
-                            isClaimed && !entry.ownedByCurrentUser ? 'text-[#A9B8CC]/70' : styleMeta.badgeText
+                            isClaimed && !entry.ownedByCurrentUser ? 'text-[#BEB4D6]/70' : styleMeta.badgeText
                           }`}
                         />
                       )}
@@ -261,10 +261,10 @@ export const HallOfLegendsView: React.FC = () => {
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5 text-[11px] font-mono">
                         <span className={`font-bold uppercase ${rarityMeta.textClass}`}>{entry.rarity}</span>
-                        <span className="text-[#A9B8CC]/40" aria-hidden="true">·</span>
-                        <span className="text-[#A9B8CC]">{entry.difficulty}</span>
+                        <span className="text-[#BEB4D6]/40" aria-hidden="true">·</span>
+                        <span className="text-[#BEB4D6]">{entry.difficulty}</span>
                       </div>
-                      <h3 className="font-['Cinzel'] font-bold text-base text-white leading-snug mt-0.5 truncate">
+                      <h3 className="font-['Cinzel'] font-bold text-base text-[#F7F4FF] leading-snug mt-0.5 truncate">
                         {isSecretMasked ? 'Hidden Legend of Aetheria' : entry.name}
                       </h3>
                     </div>
@@ -276,12 +276,12 @@ export const HallOfLegendsView: React.FC = () => {
                   <span
                     className={
                       entry.eligibleToClaim
-                        ? 'text-emerald-400'
+                        ? 'text-[#35D69A]'
                         : entry.ownedByCurrentUser
-                        ? 'text-[#00D9FF]'
+                        ? 'text-[#FFD978]'
                         : isClaimed
-                        ? 'text-rose-400/90'
-                        : 'text-[#A9B8CC]'
+                        ? 'text-[#F05B70]'
+                        : 'text-[#BEB4D6]'
                     }
                   >
                     {statusText(entry.status, entry.eligibleToClaim, entry.ownedByCurrentUser)}
@@ -289,7 +289,7 @@ export const HallOfLegendsView: React.FC = () => {
                 </div>
 
                 {/* Story */}
-                <p className="text-xs text-[#A9B8CC] leading-relaxed mt-2">
+                <p className="text-xs text-[#BEB4D6] leading-relaxed mt-2">
                   {isSecretMasked
                     ? 'A secret one-of-one feat concealed by ancient wards. Keep striving across Aetheria to uncover and claim it first.'
                     : entry.story}
@@ -298,7 +298,7 @@ export const HallOfLegendsView: React.FC = () => {
                 {/* Exclusive Title Preview */}
                 {!isSecretMasked && (
                   <div className="mt-3 flex items-center gap-2">
-                    <span className="text-[11px] text-[#A9B8CC]">Title:</span>
+                    <span className="text-[11px] text-[#BEB4D6]">Title:</span>
                     <LegendTitleBadge
                       title={entry.titleTag}
                       style={entry.titleStyle}
@@ -310,24 +310,24 @@ export const HallOfLegendsView: React.FC = () => {
               </div>
 
               {/* Bottom Requirements, Progress & Ownership */}
-              <div className="mt-4 pt-3 border-t border-[#1677FF]/20 space-y-3">
-                <div className="text-xs text-[#A9B8CC]">
-                  <span className="text-white/80 font-semibold">Requirement: </span>
+              <div className="mt-4 pt-3 border-t border-[#6638B8]/25 space-y-3">
+                <div className="text-xs text-[#BEB4D6]">
+                  <span className="text-[#F7F4FF]/85 font-semibold">Requirement: </span>
                   {isSecretMasked ? 'Discovered upon meeting hidden mastery criteria.' : entry.requirementSummary}
                 </div>
 
                 {!isClaimed && (
                   <div>
-                    <div className="flex justify-between text-[11px] font-mono text-[#A9B8CC] mb-1 tabular-nums">
+                    <div className="flex justify-between text-[11px] font-mono text-[#BEB4D6] mb-1 tabular-nums">
                       <span>Your Progress</span>
                       <span>
                         {Math.min(entry.userProgress, entry.threshold).toLocaleString()} / {entry.threshold.toLocaleString()}
                       </span>
                     </div>
-                    <div className="w-full h-2 rounded-full bg-[#061225] overflow-hidden border border-[#1677FF]/20">
+                    <div className="w-full h-2 rounded-full bg-[#100D1C] overflow-hidden border border-[#6638B8]/25">
                       <div
                         className={`h-full transition-all ${
-                          entry.eligibleToClaim ? 'bg-emerald-400' : 'bg-gradient-to-r from-[#1677FF] to-[#00D9FF]'
+                          entry.eligibleToClaim ? 'bg-[#35D69A]' : 'bg-gradient-to-r from-[#6638B8] via-[#A875FF] to-[#FFD978]'
                         }`}
                         style={{ width: `${pct}%` }}
                       />
@@ -336,12 +336,12 @@ export const HallOfLegendsView: React.FC = () => {
                 )}
 
                 {/* Rewards Row */}
-                <div className="flex items-center justify-between text-[11px] font-mono tabular-nums text-[#A9B8CC]">
-                  <span className="flex items-center gap-1 text-[#00D9FF]">
-                    <Crown className="w-3 h-3" />
+                <div className="flex items-center justify-between text-[11px] font-mono tabular-nums text-[#BEB4D6]">
+                  <span className="flex items-center gap-1 text-[#A875FF]">
+                    <Crown className="w-3 h-3 text-[#FFD978]" />
                     Worldwide Title
                   </span>
-                  <span className="flex items-center gap-1 text-amber-300">
+                  <span className="flex items-center gap-1 text-[#FFD978]">
                     <Coins className="w-3 h-3" />+{entry.rewardGold}g
                   </span>
                 </div>
@@ -349,18 +349,18 @@ export const HallOfLegendsView: React.FC = () => {
                 {/* Action / Ownership State */}
                 {entry.ownership ? (
                   <div className="space-y-2">
-                    <div className="rounded-xl bg-[#061225] border border-[#1677FF]/25 px-3 py-2 flex items-center justify-between gap-2 text-xs">
+                    <div className="rounded-xl bg-[#100D1C] border border-[#6638B8]/30 px-3 py-2 flex items-center justify-between gap-2 text-xs">
                       <div className="min-w-0">
-                        <span className="text-[#A9B8CC]">Sole Owner: </span>
+                        <span className="text-[#BEB4D6]">Sole Owner: </span>
                         <button
                           type="button"
                           onClick={() => openPublicProfile(entry.ownership!.ownerId)}
-                          className="font-bold text-[#00D9FF] hover:underline truncate"
+                          className="font-bold text-[#FFD978] hover:underline truncate"
                         >
                           {entry.ownership.ownerUsername}
                         </button>
                       </div>
-                      <span className="text-[10px] font-mono text-[#A9B8CC]/70 shrink-0">
+                      <span className="text-[10px] font-mono text-[#BEB4D6]/70 shrink-0">
                         {new Date(entry.ownership.claimedAt).toLocaleDateString()}
                       </span>
                     </div>
@@ -371,8 +371,8 @@ export const HallOfLegendsView: React.FC = () => {
                         onClick={() => handleEquipToggle(entry.id)}
                         className={`w-full py-2 rounded-xl text-xs font-['Cinzel'] font-bold tracking-wider transition-all ${
                           isEquippedByMe
-                            ? 'bg-emerald-950/60 border border-emerald-500/50 text-emerald-300 hover:bg-emerald-900/50'
-                            : 'bg-[#0A1930] hover:bg-[#16325C] border border-[#1677FF]/40 hover:border-[#00D9FF]/50 text-white'
+                            ? 'bg-[#35D69A]/15 border border-[#35D69A]/50 text-[#35D69A] hover:bg-[#35D69A]/25'
+                            : 'bg-[#19122B] hover:bg-[#2F1B4E] border border-[#E7B94F]/45 hover:border-[#FFD978] text-[#F7F4FF]'
                         }`}
                       >
                         {isEquippedByMe ? 'EQUIPPED ON PROFILE (UNEQUIP)' : 'EQUIP WORLDWIDE TITLE'}
@@ -381,7 +381,7 @@ export const HallOfLegendsView: React.FC = () => {
                       <button
                         type="button"
                         disabled
-                        className="w-full py-2 rounded-xl bg-[#061225] border border-[#1677FF]/20 text-xs font-semibold text-[#A9B8CC]/60 flex items-center justify-center gap-1.5 cursor-not-allowed"
+                        className="w-full py-2 rounded-xl bg-[#100D1C] border border-[#6638B8]/25 text-xs font-semibold text-[#BEB4D6]/60 flex items-center justify-center gap-1.5 cursor-not-allowed"
                       >
                         <Lock className="w-3.5 h-3.5" />
                         <span>Claimed Forever</span>
@@ -393,14 +393,14 @@ export const HallOfLegendsView: React.FC = () => {
                     type="button"
                     disabled={claimingId === entry.id}
                     onClick={() => handleClaim(entry.id)}
-                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#2b85ff] hover:to-[#00D9FF] disabled:opacity-60 text-white font-['Cinzel'] font-bold text-xs tracking-wider flex items-center justify-center gap-1.5 shadow-[0_0_18px_rgba(22,119,255,0.35)] transition-all"
+                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#E7B94F] to-[#FFAA45] hover:from-[#FFD978] hover:to-[#FFAA45] disabled:opacity-60 text-[#100D1C] font-['Cinzel'] font-bold text-xs tracking-wider flex items-center justify-center gap-1.5 shadow-[0_0_20px_rgba(231,185,79,0.35)] transition-all"
                   >
                     <Crown className="w-4 h-4" />
                     <span>{claimingId === entry.id ? 'VERIFYING WORLD LOCK...' : 'CLAIM WORLDWIDE TITLE'}</span>
                   </button>
                 ) : (
-                  <div className="w-full py-2 rounded-xl bg-[#061225] border border-[#1677FF]/20 text-center text-xs font-semibold text-[#A9B8CC] flex items-center justify-center gap-1.5 tabular-nums">
-                    <Lock className="w-3.5 h-3.5 text-[#00D9FF]/70" />
+                  <div className="w-full py-2 rounded-xl bg-[#100D1C] border border-[#6638B8]/25 text-center text-xs font-semibold text-[#BEB4D6] flex items-center justify-center gap-1.5 tabular-nums">
+                    <Lock className="w-3.5 h-3.5 text-[#A875FF]" />
                     <span>Unclaimed Worldwide · {pct}% Complete</span>
                   </div>
                 )}

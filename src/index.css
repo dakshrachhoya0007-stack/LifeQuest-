@@ -6,83 +6,103 @@
   --font-mono: 'JetBrains Mono', monospace;
 }
 
-/* Global Futuristic Midnight Blue Design Tokens */
+/* Global Premium AAA Dark-Fantasy RPG Design Tokens */
 :root {
-  --bg-primary: #061225;
-  --bg-secondary: #0A1930;
-  --bg-card: #102440;
-  --accent-primary: #1677FF;
-  --accent-cyan: #00D9FF;
-  --text-primary: #FFFFFF;
-  --text-secondary: #A9B8CC;
+  --bg-primary: #100D1C;
+  --bg-secondary: #19122B;
+  --bg-card: #24143D;
+  --accent-violet: #6638B8;
+  --accent-amethyst: #A875FF;
+  --accent-gold: #E7B94F;
+  --accent-gold-glow: #FFD978;
+  --accent-cyan: #38D9F5;
+  --accent-emerald: #35D69A;
+  --accent-ruby: #F05B70;
+  --accent-ice: #65A9FF;
+  --accent-amber: #FFAA45;
+  --text-primary: #F7F4FF;
+  --text-secondary: #BEB4D6;
 }
 
 html,
 body {
-  background-color: #061225;
-  color: #FFFFFF;
+  background-color: #100D1C;
+  color: #F7F4FF;
 }
 
-/* Custom sleek cyber-navy scrollbars */
+/* Custom royal amethyst scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #061225;
+  background: #100D1C;
 }
 ::-webkit-scrollbar-thumb {
-  background: #16325C;
+  background: #24143D;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #1677FF;
+  background: #6638B8;
 }
 
-/* Sleek glassmorphism & futuristic button/card utilities */
+/* Royal dark-fantasy glassmorphism & gold-lit card/button utilities */
 .ff-glass-card {
-  background: linear-gradient(155deg, rgba(16, 36, 64, 0.92) 0%, rgba(10, 25, 48, 0.95) 100%);
+  background: linear-gradient(155deg, rgba(36, 20, 61, 0.92) 0%, rgba(22, 15, 42, 0.96) 100%);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(22, 119, 255, 0.24);
-  box-shadow: 0 12px 32px -12px rgba(2, 8, 20, 0.72), inset 0 1px 0 rgba(0, 217, 255, 0.08);
+  border: 1px solid rgba(168, 117, 255, 0.26);
+  box-shadow: 0 14px 34px -12px rgba(7, 4, 15, 0.78), inset 0 1px 0 rgba(255, 217, 120, 0.08);
   transition: border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .ff-glass-card:hover {
-  border-color: rgba(0, 217, 255, 0.38);
-  box-shadow: 0 16px 36px -12px rgba(2, 12, 30, 0.8), 0 0 20px rgba(0, 217, 255, 0.08);
+  border-color: rgba(231, 185, 79, 0.45);
+  box-shadow: 0 18px 38px -12px rgba(7, 4, 15, 0.86), 0 0 24px rgba(168, 117, 255, 0.14);
+}
+
+.ff-gold-card {
+  background: linear-gradient(155deg, rgba(36, 20, 61, 0.94) 0%, rgba(25, 18, 43, 0.97) 100%);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(231, 185, 79, 0.48);
+  box-shadow: 0 14px 36px -12px rgba(7, 4, 15, 0.82), 0 0 26px -10px rgba(231, 185, 79, 0.25), inset 0 1px 0 rgba(255, 217, 120, 0.18);
+  transition: border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ff-gold-card:hover {
+  border-color: rgba(255, 217, 120, 0.72);
+  box-shadow: 0 18px 40px -12px rgba(7, 4, 15, 0.88), 0 0 30px -8px rgba(231, 185, 79, 0.35);
 }
 
 .ff-btn-primary {
-  background: linear-gradient(135deg, #1677FF 0%, #0A58CA 100%);
+  background: linear-gradient(135deg, #6638B8 0%, #864CE6 55%, #A875FF 100%);
   color: #FFFFFF;
-  border: 1px solid rgba(0, 217, 255, 0.45);
-  box-shadow: 0 4px 16px rgba(22, 119, 255, 0.32);
+  border: 1px solid rgba(255, 217, 120, 0.42);
+  box-shadow: 0 4px 18px rgba(102, 56, 184, 0.42);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .ff-btn-primary:hover {
-  background: linear-gradient(135deg, #2584FF 0%, #00B4D8 100%);
-  border-color: rgba(0, 217, 255, 0.8);
-  box-shadow: 0 0 22px rgba(0, 217, 255, 0.42);
+  background: linear-gradient(135deg, #7444C9 0%, #A875FF 100%);
+  border-color: rgba(255, 217, 120, 0.78);
+  box-shadow: 0 0 24px rgba(168, 117, 255, 0.48);
 }
 
 .ff-btn-secondary {
-  background-color: #0A1930;
-  color: #FFFFFF;
-  border: 1px solid rgba(22, 119, 255, 0.38);
+  background-color: #19122B;
+  color: #F7F4FF;
+  border: 1px solid rgba(168, 117, 255, 0.35);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .ff-btn-secondary:hover {
-  background-color: #102440;
-  border-color: rgba(0, 217, 255, 0.7);
-  box-shadow: 0 0 16px rgba(0, 217, 255, 0.22);
+  background-color: #24143D;
+  border-color: rgba(231, 185, 79, 0.68);
+  box-shadow: 0 0 18px rgba(168, 117, 255, 0.24);
 }
 
 @keyframes ascendantRunePulse {
   0%, 100% {
-    opacity: 0.76;
+    opacity: 0.78;
     transform: scale(1);
   }
   50% {
