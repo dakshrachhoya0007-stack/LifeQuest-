@@ -31,6 +31,11 @@ import { AiMentorView } from './components/Mentor/AiMentorView';
 import { CommunityEventsView } from './components/Events/CommunityEventsView';
 import { RecordsMuseumView } from './components/Museum/RecordsMuseumView';
 import { NotificationCenterView } from './components/Notifications/NotificationCenterView';
+import {
+  AetheriaAtmosphericBackdrop,
+  RpgPageTransition,
+} from './components/Motion/RpgMotionPrimitives';
+import { GoldenWorldTreeEmblem } from './components/Brand/GoldenWorldTreeEmblem';
 
 const MainAppContent: React.FC = () => {
   const {
@@ -79,20 +84,20 @@ const MainAppContent: React.FC = () => {
     applyFeatureThemeToDocument(activeFeatureTheme);
   }, [activeFeatureTheme]);
 
-  // 1. Loading gate while verifying existing Supabase session (prevents dashboard flash)
+  // 1. Loading gate while verifying existing Supabase session
   if (isAuthLoading) {
     return (
-      <div className="min-h-screen bg-[#061225] text-[#FFFFFF] flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-[#100D18] text-[#F2EDF7] flex flex-col items-center justify-center p-6">
         <div className="flex flex-col items-center gap-4 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0A1930] via-[#1677FF]/30 to-[#00D9FF]/20 border border-[#00D9FF]/45 flex items-center justify-center shadow-[0_0_28px_rgba(0,217,255,0.28)]">
-            <div className="w-6 h-6 border-2 border-[#00D9FF] border-t-transparent rounded-full animate-spin" />
+          <div className="w-16 h-16 rounded-2xl bg-[#171220] border border-[#D6A84B]/45 flex items-center justify-center shadow-[0_14px_34px_rgba(6,4,12,0.85)]">
+            <GoldenWorldTreeEmblem className="w-10 h-10 animate-ascendant-pulse" />
           </div>
           <div>
-            <h1 className="font-['Cinzel'] font-black tracking-widest text-xl text-[#00D9FF]">
+            <h1 className="font-['Cinzel'] font-black tracking-[0.22em] text-xl text-[#E8C777]">
               LIFEQUEST
             </h1>
-            <p className="text-xs text-[#A9B8CC] mt-1 tracking-wide">
-              Verifying Realm Session...
+            <p className="text-xs text-[#A69AAF] mt-1.5 tracking-wide">
+              Entering the Citadel of Aetheria...
             </p>
           </div>
         </div>
@@ -150,7 +155,8 @@ const MainAppContent: React.FC = () => {
       return null;
     }
     switch (activeTab) {
-      case 'dashboard': return <DashboardView />;
+      case 'dashboard':
+        return <DashboardView />;
       case 'progression':
       case 'quests':
       case 'achievements':
@@ -164,14 +170,19 @@ const MainAppContent: React.FC = () => {
       case 'cards':
       case 'trophies':
         return <CharacterView />;
-      case 'fitness': return <FitnessView />;
-      case 'nutrition': return <NutritionView />;
-      case 'aether-vision': return <AetherVisionView />;
+      case 'fitness':
+        return <FitnessView />;
+      case 'nutrition':
+        return <NutritionView />;
+      case 'aether-vision':
+        return <AetherVisionView />;
       case 'store':
       case 'marketplace':
         return <StoreView />;
-      case 'boss-battles': return <BossBattleView />;
-      case 'storyline': return <StorylineView />;
+      case 'boss-battles':
+        return <BossBattleView />;
+      case 'storyline':
+        return <StorylineView />;
       case 'seasons':
       case 'social':
       case 'leaderboard':
@@ -183,36 +194,43 @@ const MainAppContent: React.FC = () => {
         return <SocialHubView />;
       case 'rivals':
         return <RivalsView />;
-      case 'mentor': return <AiMentorView />;
+      case 'mentor':
+        return <AiMentorView />;
       case 'events':
       case 'decisions':
         return <CommunityEventsView />;
-      case 'museum': return <RecordsMuseumView />;
+      case 'museum':
+        return <RecordsMuseumView />;
       case 'guilds':
       case 'territory-wars':
         return <GuildsView />;
-      case 'notifications': return <NotificationCenterView />;
-      case 'settings': return <SettingsView />;
-      default: return <DashboardView />;
+      case 'notifications':
+        return <NotificationCenterView />;
+      case 'settings':
+        return <SettingsView />;
+      default:
+        return <DashboardView />;
     }
   };
 
   return (
-    <div
-      className="min-h-screen bg-[#061225] text-[#FFFFFF] flex flex-col antialiased selection:bg-[#1677FF] selection:text-[#FFFFFF]"
-      style={{
-        backgroundImage: `radial-gradient(ellipse 85% 48% at 50% -12%, rgba(22, 119, 255, 0.16), transparent 70%), radial-gradient(ellipse 62% 38% at 88% 12%, rgba(0, 217, 255, 0.08), transparent 65%)`,
-      }}
-    >
+    <div className="relative min-h-screen bg-[#100D18] text-[#F2EDF7] flex flex-col antialiased selection:bg-[#7045A0] selection:text-[#F2EDF7]">
+      <AetheriaAtmosphericBackdrop
+        primaryRgb={activeFeatureTheme.primaryRgb}
+        secondaryRgb={activeFeatureTheme.secondaryRgb}
+      />
+
       {/* Top Header */}
       <TopBar onToggleSidebar={() => setIsSidebarOpen(prev => !prev)} />
 
       {/* Main Layout: Sidebar + Viewport */}
-      <div className="flex-1 max-w-7xl w-full mx-auto flex">
+      <div className="relative z-10 flex-1 max-w-[1440px] w-full mx-auto flex">
         <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-        <main className="flex-1 min-w-0 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          {renderCurrentView()}
+        <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8">
+          <RpgPageTransition routeKey={activeTab}>
+            {renderCurrentView()}
+          </RpgPageTransition>
         </main>
       </div>
 

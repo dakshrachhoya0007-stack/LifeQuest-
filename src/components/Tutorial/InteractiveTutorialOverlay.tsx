@@ -37,6 +37,18 @@ export const InteractiveTutorialOverlay: React.FC = () => {
   const isFirst = stepIndex === 0;
   const isLast = stepIndex === TUTORIAL_STEPS.length - 1;
 
+  // Close tutorial cleanly on Escape
+  useEffect(() => {
+    if (!tutorialState.isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        skipTutorial();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [tutorialState.isOpen, skipTutorial]);
+
   // Automatically navigate to the current tutorial step's real section
   useEffect(() => {
     if (!tutorialState.isOpen || !currentStep) return;
@@ -117,22 +129,23 @@ export const InteractiveTutorialOverlay: React.FC = () => {
     <div
       className="fixed inset-0 z-50 pointer-events-none"
       role="dialog"
+      aria-modal="true"
       aria-label="Interactive Kingdom Tutorial"
     >
       {/* Target Highlight Ring (non-blocking pointer-events so real UI remains visible & clear) */}
       {highlightRect && (
         <div
           aria-hidden="true"
-          className="fixed rounded-2xl border-2 border-[#FFD978] transition-all duration-300 pointer-events-none"
+          className="fixed rounded-2xl border-2 border-[#E8C777] transition-all duration-300 pointer-events-none"
           style={{
             top: highlightRect.top,
             left: highlightRect.left,
             width: highlightRect.width,
             height: highlightRect.height,
-            boxShadow: '0 0 0 9999px rgba(4,12,28, 0.68), 0 0 28px rgba(255, 217, 120, 0.42)',
+            boxShadow: '0 0 0 9999px rgba(16, 13, 24, 0.74), 0 0 28px rgba(214, 168, 75, 0.38)',
           }}
         >
-          <span className="absolute -top-3 left-4 px-2.5 py-0.5 rounded bg-[#FFD978] text-[#061225] font-['Cinzel'] font-black text-[10px] uppercase tracking-wider shadow-lg flex items-center gap-1">
+          <span className="absolute -top-3 left-4 px-2.5 py-0.5 rounded bg-[#E8C777] text-[#100D18] font-['Cinzel'] font-black text-[10px] uppercase tracking-wider shadow-lg flex items-center gap-1">
             <Compass className="w-3 h-3" />
             Focused Section
           </span>
@@ -140,13 +153,13 @@ export const InteractiveTutorialOverlay: React.FC = () => {
       )}
 
       {/* Floating Coachmark Dock Card */}
-      <div className="fixed bottom-4 right-4 left-4 sm:left-auto sm:w-[430px] pointer-events-auto rounded-2xl bg-[#102440]/95 backdrop-blur-xl border-2 border-[#FFD978]/65 shadow-[0_24px_64px_rgba(4,12,28,0.85)] p-5 space-y-4">
+      <div className="fixed bottom-4 right-4 left-4 sm:left-auto sm:w-[430px] pointer-events-auto lq-card-gold rounded-2xl backdrop-blur-xl p-5 space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-widest text-[#FFD978] font-bold block">
-              {currentStep.sectionLabel} · Guided Tour
+            <span className="text-[10px] font-mono uppercase tracking-widest text-[#E8C777] font-bold block">
+              {currentStep.sectionLabel} · Guided Tour ({stepIndex + 1}/{TUTORIAL_STEPS.length})
             </span>
-            <h3 className="font-['Cinzel'] font-black text-base sm:text-lg text-[#FFFFFF] mt-0.5">
+            <h3 className="font-['Cinzel'] font-black text-base sm:text-lg text-[#F2EDF7] mt-0.5">
               {currentStep.title}
             </h3>
           </div>
@@ -154,19 +167,19 @@ export const InteractiveTutorialOverlay: React.FC = () => {
             type="button"
             onClick={skipTutorial}
             title="Skip tutorial"
-            className="p-1.5 rounded-lg bg-[#0A1930] hover:bg-[#1677FF]/25 border border-[#1677FF]/35 text-[#94A8C7] hover:text-white transition-colors"
+            className="lq-btn lq-btn-secondary p-1.5 rounded-lg text-[#A69AAF] hover:text-[#F2EDF7] cursor-pointer"
             aria-label="Skip tutorial"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <p className="text-xs text-[#94A8C7] leading-relaxed">
+        <p className="text-xs text-[#A69AAF] leading-relaxed">
           {currentStep.description}
         </p>
 
-        <div className="p-2.5 rounded-xl bg-[#0A1930] border border-[#1677FF]/35 text-[11px] text-[#FFD978] flex items-start gap-2">
-          <Sparkles className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+        <div className="p-2.5 rounded-xl bg-[#100D18] border border-[#362B45] text-[11px] text-[#E8C777] flex items-start gap-2">
+          <Sparkles className="w-3.5 h-3.5 shrink-0 mt-0.5 text-[#D6A84B]" />
           <span>{currentStep.actionTip}</span>
         </div>
 
@@ -176,7 +189,7 @@ export const InteractiveTutorialOverlay: React.FC = () => {
             <div
               key={st.id}
               className={`h-1 flex-1 rounded-full transition-colors ${
-                idx <= stepIndex ? 'bg-[#FFD978]' : 'bg-[#0A1930]'
+                idx <= stepIndex ? 'bg-[#D6A84B]' : 'bg-[#362B45]'
               }`}
             />
           ))}
@@ -187,7 +200,7 @@ export const InteractiveTutorialOverlay: React.FC = () => {
           <button
             type="button"
             onClick={skipTutorial}
-            className="text-xs text-[#94A8C7] hover:text-white px-2 py-1.5"
+            className="text-xs text-[#A69AAF] hover:text-[#F2EDF7] px-2 py-1.5 transition-colors cursor-pointer"
           >
             Skip Tour
           </button>
@@ -197,7 +210,7 @@ export const InteractiveTutorialOverlay: React.FC = () => {
               type="button"
               disabled={isFirst}
               onClick={prevTutorialStep}
-              className="px-3 py-2 rounded-xl bg-[#0A1930] hover:bg-[#102440] disabled:opacity-40 border border-[#1677FF]/40 text-xs font-semibold text-white flex items-center gap-1 transition-all"
+              className="lq-btn lq-btn-secondary px-3 py-2 rounded-xl disabled:opacity-40 text-xs font-semibold flex items-center gap-1 cursor-pointer"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
               Prev
@@ -205,7 +218,7 @@ export const InteractiveTutorialOverlay: React.FC = () => {
             <button
               type="button"
               onClick={isLast ? completeTutorial : nextTutorialStep}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:brightness-110 border border-[#FFD978]/45 text-white font-['Cinzel'] font-black text-xs tracking-wider flex items-center gap-1 shadow-[0_4px_14px_rgba(22,119,255,0.4)] transition-all"
+              className="lq-btn lq-btn-gold px-4 py-2 rounded-xl font-['Cinzel'] font-black text-xs tracking-wider flex items-center gap-1 cursor-pointer"
             >
               {isLast ? 'Finish Tour' : 'Next'}
               {!isLast && <ChevronRight className="w-3.5 h-3.5" />}

@@ -14,6 +14,13 @@ import {
   Sparkles,
   X,
 } from 'lucide-react';
+import {
+  AnimatedCounter,
+  RpgModalWrapper,
+  RpgScrollReveal,
+  RpgStaggerGrid,
+  RpgStaggerItem,
+} from '../Motion/RpgMotionPrimitives';
 
 const CATEGORY_TABS: Array<{ id: MarketplaceCategory | 'all'; label: string }> = [
   { id: 'all', label: 'All Cosmetics' },
@@ -107,43 +114,47 @@ export const CosmeticMarketplaceView: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in">
+    <div className="space-y-6">
       {/* Integrity & Currencies Header */}
-      <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/40 p-5 sm:p-6 flex flex-col xl:flex-row xl:items-center justify-between gap-5 shadow-[0_12px_32px_rgba(4,12,28,0.6)]">
+      <div className="lq-card rounded-2xl p-5 sm:p-6 flex flex-col xl:flex-row xl:items-center justify-between gap-5">
         <div className="space-y-1.5">
-          <div className="flex flex-wrap items-center gap-2 text-xs text-[#E7B94F] font-semibold">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-[#D6A84B] font-semibold">
             <ShieldCheck className="w-4 h-4 shrink-0" />
-            <span>Zero Pay-to-Win Guarantee · Strictly Cosmetic & Card Packs</span>
-            <span className="text-[#94A8C7]/45" aria-hidden="true">·</span>
-            <span className="text-[#FFD978] flex items-center gap-1 tabular-nums">
+            <span>Zero Pay-to-Win Guarantee · Strictly Cosmetic &amp; Card Packs</span>
+            <span className="text-[#766D82]" aria-hidden="true">·</span>
+            <span className="text-[#E8C777] flex items-center gap-1 tabular-nums">
               <Clock className="w-3.5 h-3.5" />
               {rotationLabel}
             </span>
           </div>
-          <h2 className="text-2xl font-black font-['Cinzel'] text-[#F2F7FF]">
-            COSMETIC MARKETPLACE
+          <h2 className="text-2xl font-black font-['Cinzel'] text-[#F2EDF7]">
+            Cosmetic Marketplace
           </h2>
-          <p className="text-xs text-[#94A8C7] max-w-2xl">
+          <p className="text-xs text-[#A69AAF] max-w-2xl">
             Spend earned Gold or Cosmetic Fragments on bespoke frames, banners, auras, outfits, titles, and collectible card packs.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3 shrink-0">
-          <div className="rounded-xl bg-[#0A1930] border border-[#E7B94F]/45 px-4 py-2 text-xs tabular-nums">
-            <span className="text-[#94A8C7] block text-[11px]">Gold Wallet</span>
-            <span className="font-mono font-bold text-[#FFD978] text-sm">{goldBalance.toLocaleString()}</span>
+          <div className="lq-surface-gold rounded-xl px-4 py-2 text-xs tabular-nums">
+            <span className="text-[#A69AAF] block text-[11px]">Gold Wallet</span>
+            <span className="font-mono font-bold text-[#E8C777] text-sm">
+              <AnimatedCounter value={goldBalance} />
+            </span>
           </div>
-          <div className="rounded-xl bg-[#0A1930] border border-[#00D9FF]/45 px-4 py-2 text-xs tabular-nums">
-            <span className="text-[#94A8C7] block text-[11px]">Cosmetic Fragments</span>
-            <span className="font-mono font-bold text-[#00D9FF] text-sm">{fragmentBalance.toLocaleString()}</span>
+          <div className="lq-surface rounded-xl px-4 py-2 text-xs tabular-nums">
+            <span className="text-[#A69AAF] block text-[11px]">Cosmetic Fragments</span>
+            <span className="font-mono font-bold text-[#9A72CC] text-sm">
+              <AnimatedCounter value={fragmentBalance} />
+            </span>
           </div>
           <button
             type="button"
             disabled={busyId === 'rm-check'}
             onClick={() => void handleRmCheckoutAttempt()}
-            className="px-3.5 py-2.5 rounded-xl bg-[#0A1930] hover:bg-[#152E52] border border-[#1677FF]/40 text-xs text-[#94A8C7] hover:text-[#F2F7FF] flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all"
+            className="lq-btn lq-btn-secondary px-3.5 py-2.5 rounded-xl text-xs text-[#A69AAF] hover:text-[#F2EDF7] flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
           >
-            <Lock className="w-3.5 h-3.5 text-[#FFD978]" />
+            <Lock className="w-3.5 h-3.5 text-[#D6A84B]" />
             Payment Checkout Disabled
           </button>
         </div>
@@ -153,10 +164,10 @@ export const CosmeticMarketplaceView: React.FC = () => {
         <div
           className={`rounded-xl px-4 py-3 text-xs border ${
             notice.type === 'success'
-              ? 'bg-emerald-950/60 border-[#35D69A]/45 text-emerald-200'
+              ? 'bg-[#49B88A]/10 border-[#49B88A]/45 text-[#49B88A]'
               : notice.type === 'info'
-              ? 'bg-amber-950/55 border-[#FFAA45]/45 text-amber-200'
-              : 'bg-[#36111F]/70 border-[#F05B70]/45 text-rose-200'
+              ? 'bg-[#D6A84B]/10 border-[#D6A84B]/45 text-[#E8C777]'
+              : 'bg-[#D65C66]/12 border-[#D65C66]/45 text-[#D65C66]'
           }`}
         >
           {notice.text}
@@ -166,8 +177,8 @@ export const CosmeticMarketplaceView: React.FC = () => {
       {/* Curated Citadel Spotlight */}
       {featuredItems.length > 0 && (
         <div className="space-y-3">
-          <h3 className="font-['Cinzel'] font-bold text-sm uppercase tracking-wider text-[#FFD978] flex items-center gap-2">
-            <Sparkles className="w-4 h-4" />
+          <h3 className="font-['Cinzel'] font-bold text-sm uppercase tracking-wider text-[#E8C777] flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-[#D6A84B]" />
             Citadel Rotating Spotlight
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -177,27 +188,27 @@ export const CosmeticMarketplaceView: React.FC = () => {
               return (
                 <div
                   key={`spot-${item.id}`}
-                  className="rounded-2xl border border-[#1677FF]/45 hover:border-[#FFD978]/60 p-5 flex flex-col justify-between gap-4 transition-all"
+                  className="lq-card lq-card-interactive rounded-2xl p-5 flex flex-col justify-between gap-4"
                   style={{
-                    background: `radial-gradient(circle at top right, ${item.accentHex}20, transparent 58%), #102440`,
+                    background: `radial-gradient(circle at top right, ${item.accentHex}1e, transparent 60%), linear-gradient(165deg, #21152F 0%, #171220 100%)`,
                   }}
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-[#FFD978] font-semibold">{item.featuredCollectionTag || 'Featured'}</span>
-                      <span className="text-[#94A8C7]">{item.rarity}</span>
+                      <span className="text-[#E8C777] font-semibold">{item.featuredCollectionTag || 'Featured'}</span>
+                      <span className="text-[#A69AAF]">{item.rarity}</span>
                     </div>
-                    <h4 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF]">{item.name}</h4>
-                    <p className="text-xs text-[#94A8C7]">{item.description}</p>
+                    <h4 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7]">{item.name}</h4>
+                    <p className="text-xs text-[#A69AAF]">{item.description}</p>
                   </div>
                   <button
                     type="button"
                     disabled={owned}
                     onClick={() => setConfirmItem(item)}
-                    className={`w-full py-2 px-3 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                    className={`lq-btn w-full py-2 px-3 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer ${
                       owned
-                        ? 'bg-emerald-950/60 border border-[#35D69A]/45 text-[#35D69A]'
-                        : 'bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#061225] shadow-[0_0_16px_rgba(231,185,79,0.35)]'
+                        ? 'bg-[#49B88A]/15 border border-[#49B88A]/45 text-[#49B88A]'
+                        : 'lq-btn-gold'
                     }`}
                   >
                     {owned
@@ -219,10 +230,8 @@ export const CosmeticMarketplaceView: React.FC = () => {
               key={t.id}
               type="button"
               onClick={() => setCategory(t.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
-                category === t.id
-                  ? 'bg-[#1677FF] text-white border border-[#FFD978]/50 shadow-[0_0_12px_rgba(22,119,255,0.35)]'
-                  : 'bg-[#0A1930] hover:bg-[#152E52] text-[#94A8C7] hover:text-[#F2F7FF] border border-[#1677FF]/35'
+              className={`lq-btn px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 cursor-pointer ${
+                category === t.id ? 'lq-btn-primary' : 'lq-btn-secondary text-[#A69AAF]'
               }`}
             >
               {t.label}
@@ -230,14 +239,12 @@ export const CosmeticMarketplaceView: React.FC = () => {
           ))}
         </div>
 
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-[#061225] border border-[#1677FF]/35">
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-[#100D18] border border-[#362B45]">
           <button
             type="button"
             onClick={() => setCurrency('gold')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all ${
-              currency === 'gold'
-                ? 'bg-gradient-to-r from-[#E7B94F] to-[#FFD978] text-[#061225] shadow-[0_0_12px_rgba(231,185,79,0.35)]'
-                : 'text-[#94A8C7] hover:text-[#F2F7FF]'
+            className={`lq-btn px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer ${
+              currency === 'gold' ? 'lq-btn-gold font-bold' : 'text-[#A69AAF] hover:text-[#F2EDF7]'
             }`}
           >
             <Coins className="w-3.5 h-3.5" />
@@ -246,10 +253,8 @@ export const CosmeticMarketplaceView: React.FC = () => {
           <button
             type="button"
             onClick={() => setCurrency('fragments')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all ${
-              currency === 'fragments'
-                ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white shadow-[0_0_12px_rgba(0,217,255,0.35)]'
-                : 'text-[#94A8C7] hover:text-[#F2F7FF]'
+            className={`lq-btn px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer ${
+              currency === 'fragments' ? 'lq-btn-primary' : 'text-[#A69AAF] hover:text-[#F2EDF7]'
             }`}
           >
             <Sparkles className="w-3.5 h-3.5" />
@@ -259,7 +264,7 @@ export const CosmeticMarketplaceView: React.FC = () => {
       </div>
 
       {/* Main Catalog */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <RpgStaggerGrid key={`${category}-${currency}`} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredItems.map(item => {
           const owned = ownedSet.has(item.id) && item.category !== 'pack';
           const wishlisted = wishlistSet.has(item.id);
@@ -267,126 +272,126 @@ export const CosmeticMarketplaceView: React.FC = () => {
           const canAfford = currency === 'gold' ? goldBalance >= price : fragmentBalance >= price;
 
           return (
-            <div
-              key={item.id}
-              className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/35 hover:border-[#FFD978]/50 p-5 flex flex-col justify-between gap-4 transition-all"
-            >
-              <div className="space-y-3">
-                <div
-                  className="h-14 rounded-xl border border-white/10 flex items-center justify-between px-4"
-                  style={{
-                    background: `linear-gradient(135deg, ${item.primaryHex}, #061225)`,
-                  }}
-                >
-                  <span className="text-xs font-semibold capitalize text-white/85">
-                    {item.category}
-                  </span>
-                  <span className="text-xs font-bold" style={{ color: item.accentHex }}>
-                    {item.rarity}
-                  </span>
+            <RpgStaggerItem key={item.id}>
+              <div className="lq-card lq-card-interactive rounded-2xl p-5 h-full flex flex-col justify-between gap-4">
+                <div className="space-y-3">
+                  <div
+                    className="h-14 rounded-xl border border-[#F2EDF7]/10 flex items-center justify-between px-4"
+                    style={{
+                      background: `linear-gradient(135deg, ${item.primaryHex}, #100D18)`,
+                    }}
+                  >
+                    <span className="text-xs font-semibold capitalize text-[#F2EDF7]/85">
+                      {item.category}
+                    </span>
+                    <span className="text-xs font-bold" style={{ color: item.accentHex }}>
+                      {item.rarity}
+                    </span>
+                  </div>
+
+                  <div>
+                    <div className="flex items-start justify-between gap-2">
+                      <h4 className="font-['Cinzel'] font-bold text-sm text-[#F2EDF7]">{item.name}</h4>
+                      <button
+                        type="button"
+                        onClick={() => void toggleMarketplaceWishlist(item.id)}
+                        aria-label={`Wishlist ${item.name}`}
+                        className={`lq-btn p-1.5 rounded-lg border shrink-0 cursor-pointer ${
+                          wishlisted
+                            ? 'bg-[#D65C66]/15 border-[#D65C66]/45 text-[#D65C66]'
+                            : 'lq-btn-secondary text-[#A69AAF]'
+                        }`}
+                      >
+                        <Heart className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    <p className="text-xs text-[#A69AAF] mt-1">{item.description}</p>
+                    <p className="text-[11px] text-[#766D82] mt-2">
+                      Ref Tier: {item.realMoneyUsdDisplay}
+                    </p>
+                  </div>
                 </div>
 
-                <div>
-                  <div className="flex items-start justify-between gap-2">
-                    <h4 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF]">{item.name}</h4>
+                <div className="flex items-center gap-2">
+                  {owned ? (
                     <button
                       type="button"
-                      onClick={() => void toggleMarketplaceWishlist(item.id)}
-                      aria-label={`Wishlist ${item.name}`}
-                      className={`p-1.5 rounded-lg border shrink-0 transition-all ${
-                        wishlisted
-                          ? 'bg-[#36111F]/70 border-[#F05B70]/45 text-[#F05B70]'
-                          : 'bg-[#0A1930] border-[#1677FF]/35 text-[#94A8C7] hover:text-[#F2F7FF]'
+                      onClick={() => setActiveTab('character')}
+                      className="lq-btn w-full py-2 px-3 rounded-xl bg-[#49B88A]/15 border border-[#49B88A]/45 text-xs font-semibold text-[#49B88A] flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                      Owned · View Profile
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={!canAfford}
+                      onClick={() => setConfirmItem(item)}
+                      className={`lq-btn w-full py-2 px-3 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer ${
+                        canAfford ? 'lq-btn-gold' : 'lq-btn-secondary opacity-50'
                       }`}
                     >
-                      <Heart className="w-3.5 h-3.5" />
+                      Acquire ({price} {currency === 'gold' ? 'Gold' : 'Fragments'})
                     </button>
-                  </div>
-                  <p className="text-xs text-[#94A8C7] mt-1">{item.description}</p>
-                  <p className="text-[11px] text-[#94A8C7]/70 mt-2">
-                    Ref Tier: {item.realMoneyUsdDisplay}
-                  </p>
+                  )}
                 </div>
               </div>
-
-              <div className="flex items-center gap-2">
-                {owned ? (
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('character')}
-                    className="w-full py-2 px-3 rounded-xl bg-emerald-950/60 border border-emerald-500/45 text-xs font-semibold text-emerald-300 flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                    Owned · View Profile
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    disabled={!canAfford}
-                    onClick={() => setConfirmItem(item)}
-                    className={`w-full py-2 px-3 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-                      canAfford
-                        ? 'bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#061225] shadow-[0_0_16px_rgba(231,185,79,0.35)]'
-                        : 'bg-[#0A1930] border border-[#1677FF]/30 text-[#94A8C7]/50'
-                    }`}
-                  >
-                    Acquire ({price} {currency === 'gold' ? 'Gold' : 'Fragments'})
-                  </button>
-                )}
-              </div>
-            </div>
+            </RpgStaggerItem>
           );
         })}
-      </div>
+      </RpgStaggerGrid>
 
       {/* Order History */}
       {marketplaceState && marketplaceState.orders.length > 0 && (
-        <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/35 p-5 space-y-3">
-          <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF] flex items-center gap-2">
-            <History className="w-4 h-4 text-[#FFD978]" />
+        <RpgScrollReveal className="lq-card rounded-2xl p-5 space-y-3">
+          <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2EDF7] flex items-center gap-2">
+            <History className="w-4 h-4 text-[#D6A84B]" />
             Marketplace Order Ledger
           </h3>
-          <div className="divide-y divide-[#1677FF]/25 text-xs">
+          <div className="divide-y divide-[#362B45] text-xs">
             {marketplaceState.orders.slice(0, 8).map(ord => (
               <div key={ord.id} className="py-2 flex items-center justify-between gap-2">
-                <span className="text-[#F2F7FF]/90">{ord.itemName}</span>
-                <span className="font-mono text-[#FFD978] tabular-nums">
+                <span className="text-[#F2EDF7]">{ord.itemName}</span>
+                <span className="font-mono text-[#E8C777] tabular-nums">
                   -{ord.pricePaid} {ord.currency} · {new Date(ord.createdAt).toLocaleDateString()}
                 </span>
               </div>
             ))}
           </div>
-        </div>
+        </RpgScrollReveal>
       )}
 
       {/* Purchase Confirmation Modal */}
-      {confirmItem && (
-        <div
-          className="fixed inset-0 z-50 bg-[#061225]/85 backdrop-blur-xs flex items-center justify-center p-4"
-          onClick={() => setConfirmItem(null)}
-        >
+      <RpgModalWrapper
+        isOpen={Boolean(confirmItem)}
+        onClose={() => setConfirmItem(null)}
+        panelClassName="w-full max-w-md"
+      >
+        {confirmItem && (
           <div
-            className="w-full max-w-md rounded-2xl bg-[#102440] border border-[#FFD978]/50 p-6 space-y-4 shadow-[0_16px_40px_rgba(4,12,28,0.85)]"
-            onClick={e => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Confirm Cosmetic Acquisition"
+            className="lq-card-gold rounded-2xl p-6 space-y-4"
           >
             <div className="flex items-center justify-between">
-              <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
-                <ShoppingBag className="w-4 h-4 text-[#FFD978]" />
+              <h3 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
+                <ShoppingBag className="w-4 h-4 text-[#D6A84B]" />
                 Confirm Cosmetic Acquisition
               </h3>
               <button
                 type="button"
                 onClick={() => setConfirmItem(null)}
                 aria-label="Close confirmation"
-                className="text-[#94A8C7] hover:text-[#F2F7FF]"
+                className="text-[#A69AAF] hover:text-[#F2EDF7] cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="rounded-xl bg-[#0A1930] border border-[#1677FF]/35 p-4 space-y-1">
-              <p className="font-['Cinzel'] font-bold text-sm text-[#FFD978]">{confirmItem.name}</p>
-              <p className="text-xs text-[#94A8C7]">{confirmItem.description}</p>
-              <p className="text-xs font-mono text-[#F2F7FF] pt-2 tabular-nums">
+            <div className="lq-surface rounded-xl p-4 space-y-1">
+              <p className="font-['Cinzel'] font-bold text-sm text-[#E8C777]">{confirmItem.name}</p>
+              <p className="text-xs text-[#A69AAF]">{confirmItem.description}</p>
+              <p className="text-xs font-mono text-[#F2EDF7] pt-2 tabular-nums">
                 Cost: {currency === 'gold' ? confirmItem.priceGold : confirmItem.priceFragments}{' '}
                 {currency === 'gold' ? 'Gold' : 'Cosmetic Fragments'}
               </p>
@@ -395,7 +400,7 @@ export const CosmeticMarketplaceView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setConfirmItem(null)}
-                className="px-4 py-2 rounded-xl text-xs text-[#94A8C7] hover:text-[#F2F7FF]"
+                className="lq-btn lq-btn-secondary px-4 py-2 rounded-xl text-xs cursor-pointer"
               >
                 Cancel
               </button>
@@ -403,14 +408,14 @@ export const CosmeticMarketplaceView: React.FC = () => {
                 type="button"
                 disabled={busyId === confirmItem.id}
                 onClick={() => void handleConfirmPurchase()}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#061225] text-xs font-bold shadow-[0_0_14px_rgba(231,185,79,0.35)] transition-all"
+                className="lq-btn lq-btn-gold px-4 py-2 rounded-xl text-xs font-bold cursor-pointer"
               >
                 {busyId === confirmItem.id ? 'Processing...' : 'Confirm Purchase'}
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </RpgModalWrapper>
     </div>
   );
 };

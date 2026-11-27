@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import { useGame } from '../../context/GameContext';
 import {
   FEATURE_THEMES,
@@ -6,6 +7,7 @@ import {
   FeatureThemeId,
   resolveFeatureTheme,
 } from '../../theme/featureTheme';
+import { LQ_EASE } from '../Motion/RpgMotionPrimitives';
 
 export function useActiveFeatureTheme(explicitId?: FeatureThemeId): FeatureTheme {
   const {
@@ -58,11 +60,11 @@ export const FeatureBanner: React.FC<FeatureBannerProps> = ({
   return (
     <div
       {...rest}
-      className={`rounded-2xl bg-gradient-to-br from-[#102440]/95 via-[#0A1930] to-[#061225] p-5 sm:p-6 transition-all duration-300 ${className}`}
+      className={`rounded-2xl bg-[#171220] p-5 sm:p-6 transition-colors duration-200 ${className}`}
       style={{
-        border: `1px solid rgba(${theme.primaryRgb}, 0.38)`,
-        backgroundImage: `radial-gradient(ellipse 75% 95% at 15% 0%, rgba(${theme.primaryRgb}, 0.16), transparent 62%), radial-gradient(ellipse 65% 85% at 92% 100%, rgba(${theme.secondaryRgb}, 0.11), transparent 60%)`,
-        boxShadow: `0 16px 38px -14px rgba(4, 12, 28, 0.86), 0 0 28px -18px rgba(${theme.primaryRgb}, 0.5)`,
+        border: `1px solid rgba(${theme.primaryRgb}, 0.34)`,
+        backgroundImage: `radial-gradient(ellipse 75% 95% at 12% 0%, rgba(${theme.primaryRgb}, 0.14), transparent 62%), radial-gradient(ellipse 65% 85% at 92% 100%, rgba(${theme.secondaryRgb}, 0.08), transparent 60%)`,
+        boxShadow: '0 16px 38px -14px rgba(5, 3, 10, 0.86), inset 0 1px 0 rgba(242, 237, 247, 0.05)',
       }}
     >
       {children}
@@ -86,12 +88,12 @@ export const FeatureSurfaceCard: React.FC<FeatureSurfaceCardProps> = ({
   const theme = useActiveFeatureTheme(themeId);
   return (
     <div
-      className={`rounded-2xl bg-gradient-to-br from-[#102440]/88 to-[#0A1930]/95 backdrop-blur-md transition-all duration-300 ${className}`}
+      className={`rounded-2xl bg-[#171220] transition-all duration-200 ${className}`}
       style={{
-        border: `1px solid rgba(${theme.primaryRgb}, ${highlighted ? 0.58 : 0.24})`,
+        border: `1px solid rgba(${theme.primaryRgb}, ${highlighted ? 0.52 : 0.24})`,
         boxShadow: highlighted
-          ? `0 16px 34px -12px rgba(4, 12, 28, 0.88), 0 0 26px -12px rgba(${theme.primaryRgb}, 0.45)`
-          : '0 12px 30px -12px rgba(4, 12, 28, 0.8)',
+          ? `0 16px 34px -14px rgba(5, 3, 10, 0.88), 0 0 22px -12px rgba(${theme.primaryRgb}, 0.38)`
+          : '0 12px 30px -14px rgba(5, 3, 10, 0.8)',
       }}
     >
       {children}
@@ -113,6 +115,7 @@ interface FeatureTabBarProps<T extends string> {
   ariaLabel?: string;
   className?: string;
   themeId?: FeatureThemeId;
+  layoutId?: string;
 }
 
 export function FeatureTabBar<T extends string>({
@@ -122,14 +125,16 @@ export function FeatureTabBar<T extends string>({
   ariaLabel = 'Section navigation',
   className = '',
   themeId,
+  layoutId = 'feature-tab-pill',
 }: FeatureTabBarProps<T>) {
   const theme = useActiveFeatureTheme(themeId);
+  const prefersReduced = useReducedMotion();
+
   return (
     <div
       role="tablist"
       aria-label={ariaLabel}
-      className={`flex flex-wrap sm:flex-nowrap items-center gap-1.5 p-1.5 rounded-xl bg-[#061225]/92 overflow-x-auto max-w-full ${className}`}
-      style={{ border: `1px solid rgba(${theme.primaryRgb}, 0.28)` }}
+      className={`flex flex-wrap sm:flex-nowrap items-center gap-1 p-1.5 rounded-xl bg-[#100D18] border border-[#362B45] overflow-x-auto max-w-full ${className}`}
     >
       {tabs.map(tab => {
         const Icon = tab.icon;
@@ -141,41 +146,40 @@ export function FeatureTabBar<T extends string>({
             aria-selected={isActive}
             type="button"
             onClick={() => onSelect(tab.id)}
-            className="relative flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 whitespace-nowrap shrink-0 cursor-pointer"
-            style={
-              isActive
-                ? {
-                    background: `linear-gradient(135deg, ${theme.primaryHex} 0%, rgba(${theme.primaryRgb}, 0.82) 100%)`,
-                    color: theme.contrastTextHex,
-                    border: `1px solid rgba(${theme.secondaryRgb}, 0.55)`,
-                    boxShadow: `0 4px 18px rgba(${theme.primaryRgb}, 0.36)`,
-                  }
-                : {
-                    color: '#94A8C7',
-                    border: '1px solid transparent',
-                  }
-            }
+            className="relative flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors duration-150 whitespace-nowrap shrink-0 cursor-pointer"
+            style={{
+              color: isActive ? '#F2EDF7' : '#A69AAF',
+            }}
           >
-            {Icon && (
-              <span
-                className="shrink-0 inline-flex"
-                style={{ color: isActive ? theme.contrastTextHex : theme.accentTextHex }}
-              >
-                <Icon className="w-4 h-4 shrink-0" />
-              </span>
+            {isActive && (
+              <motion.span
+                layoutId={prefersReduced ? undefined : layoutId}
+                transition={{ duration: 0.22, ease: LQ_EASE }}
+                aria-hidden="true"
+                className="absolute inset-0 rounded-lg bg-[#7045A0] border border-[#E8C777]/30 shadow-[0_4px_16px_rgba(112,69,160,0.45)]"
+              />
             )}
-            <span>{tab.label}</span>
-            {tab.badge !== undefined && tab.badge > 0 && (
-              <span
-                className="px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold tabular-nums"
-                style={{
-                  backgroundColor: isActive ? 'rgba(6, 18, 37, 0.24)' : theme.secondaryHex,
-                  color: isActive ? theme.contrastTextHex : '#061225',
-                }}
-              >
-                {tab.badge}
-              </span>
-            )}
+            <span className="relative z-10 flex items-center gap-2">
+              {Icon && (
+                <Icon
+                  className={`w-4 h-4 shrink-0 ${
+                    isActive ? 'text-[#E8C777]' : 'text-[#A69AAF]'
+                  }`}
+                />
+              )}
+              <span>{tab.label}</span>
+              {tab.badge !== undefined && tab.badge > 0 && (
+                <span
+                  className="px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold tabular-nums"
+                  style={{
+                    backgroundColor: isActive ? '#100D18' : theme.secondaryHex,
+                    color: isActive ? '#E8C777' : '#100D18',
+                  }}
+                >
+                  {tab.badge}
+                </span>
+              )}
+            </span>
           </button>
         );
       })}

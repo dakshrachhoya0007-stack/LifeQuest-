@@ -13,6 +13,11 @@ import {
   Sparkles,
   Trophy,
 } from 'lucide-react';
+import {
+  AnimatedCounter,
+  RpgStaggerGrid,
+  RpgStaggerItem,
+} from '../Motion/RpgMotionPrimitives';
 
 export const DailyCalendarView: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
   const {
@@ -72,67 +77,67 @@ export const DailyCalendarView: React.FC<{ embedded?: boolean }> = ({ embedded =
   const getRewardIcon = (type: string) => {
     switch (type) {
       case 'card_pack':
-        return <Gift className="w-4 h-4 text-[#F05B70] shrink-0" />;
+        return <Gift className="w-4 h-4 text-[#D65C66] shrink-0" />;
       case 'card':
-        return <Layers className="w-4 h-4 text-[#65A9FF] shrink-0" />;
+        return <Layers className="w-4 h-4 text-[#B998E3] shrink-0" />;
       case 'fragments':
-        return <Sparkles className="w-4 h-4 text-[#00D9FF] shrink-0" />;
+        return <Sparkles className="w-4 h-4 text-[#9A72CC] shrink-0" />;
       case 'quest_bonus':
-        return <Flame className="w-4 h-4 text-[#35D69A] shrink-0" />;
+        return <Flame className="w-4 h-4 text-[#49B88A] shrink-0" />;
       default:
-        return <Coins className="w-4 h-4 text-[#E7B94F] shrink-0" />;
+        return <Coins className="w-4 h-4 text-[#D6A84B] shrink-0" />;
     }
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in">
+    <div className="space-y-6">
       {/* Header & Healthy Rest Policy */}
-      <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#E7B94F]/35 shadow-[0_12px_32px_rgba(4,12,28,0.65)] p-5 sm:p-6">
+      <div className="rounded-2xl bg-[#171220] border border-[#362B45] p-5 sm:p-6 shadow-[0_14px_34px_-14px_rgba(5,3,10,0.85)]">
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-5">
           <div>
             <div className="flex flex-wrap items-center gap-2 text-xs mb-1">
-              <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#FFD978]">
+              <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#E8C777]">
                 Sustainable Monthly Cadence
               </span>
-              <span className="text-[#94A8C7]/40" aria-hidden="true">·</span>
-              <span className="text-[#94A8C7] font-mono tabular-nums">
+              <span className="text-[#766D82]" aria-hidden="true">·</span>
+              <span className="text-[#A69AAF] font-mono tabular-nums">
                 {state?.monthKey || 'Current Cycle'}
               </span>
             </div>
-            <h2 className={`${embedded ? 'text-lg sm:text-xl' : 'text-2xl'} font-black font-['Cinzel'] text-[#F2F7FF]`}>
+            <h2 className={`${embedded ? 'text-lg sm:text-xl' : 'text-2xl'} font-black font-['Cinzel'] text-[#F2EDF7]`}>
               30-DAY ADVENTURER CALENDAR
             </h2>
-            <p className="text-xs sm:text-sm text-[#94A8C7] max-w-2xl mt-1">
+            <p className="text-xs sm:text-sm text-[#A69AAF] max-w-2xl mt-1">
               Honor both effort and recovery. Claim today&apos;s step via a verified workout or an intentional Rest &amp; Recovery check-in, and recover missed days with monthly Grace Passes.
             </p>
           </div>
 
           <div className="grid grid-cols-3 gap-2.5 shrink-0">
-            <div className="px-3.5 py-2.5 rounded-xl bg-[#0A1930] border border-[#E7B94F]/30">
-              <div className="text-[11px] text-[#94A8C7]">Active Days</div>
-              <div className="text-lg font-black font-mono text-[#F2F7FF] tabular-nums">
-                {state?.activeParticipationDays || 0} / 30
+            <div className="px-3.5 py-2.5 rounded-xl bg-[#100D18] border border-[#362B45]">
+              <div className="text-[11px] text-[#A69AAF]">Active Days</div>
+              <div className="text-lg font-black font-mono text-[#E8C777] tabular-nums">
+                <AnimatedCounter value={state?.activeParticipationDays || 0} /> / 30
               </div>
             </div>
-            <div className="px-3.5 py-2.5 rounded-xl bg-[#0A1930] border border-[#35D69A]/35">
-              <div className="text-[11px] text-[#94A8C7]">Grace Passes</div>
-              <div className="text-lg font-black font-mono text-[#35D69A] tabular-nums">
-                {state?.gracePassesRemaining ?? 2} / 2
+            <div className="px-3.5 py-2.5 rounded-xl bg-[#100D18] border border-[#362B45]">
+              <div className="text-[11px] text-[#A69AAF]">Grace Passes</div>
+              <div className="text-lg font-black font-mono text-[#49B88A] tabular-nums">
+                <AnimatedCounter value={state?.gracePassesRemaining ?? 2} /> / 2
               </div>
             </div>
-            <div className="px-3.5 py-2.5 rounded-xl bg-[#0A1930] border border-[#00D9FF]/35">
-              <div className="text-[11px] text-[#94A8C7]">Fragments</div>
-              <div className="text-lg font-black font-mono text-[#00D9FF] tabular-nums">
-                {walletState?.cosmeticFragments ?? 0}
+            <div className="px-3.5 py-2.5 rounded-xl bg-[#100D18] border border-[#362B45]">
+              <div className="text-[11px] text-[#A69AAF]">Fragments</div>
+              <div className="text-lg font-black font-mono text-[#B998E3] tabular-nums">
+                <AnimatedCounter value={walletState?.cosmeticFragments ?? 0} />
               </div>
             </div>
           </div>
         </div>
 
         {/* Today Check-In Bar */}
-        <div className="mt-5 pt-4 border-t border-[#1677FF]/25 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-start gap-2.5 text-xs text-[#94A8C7]">
-            <ShieldCheck className="w-4 h-4 text-[#FFD978] shrink-0 mt-0.5" />
+        <div className="mt-5 pt-4 border-t border-[#362B45] flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-start gap-2.5 text-xs text-[#A69AAF]">
+            <ShieldCheck className="w-4 h-4 text-[#E8C777] shrink-0 mt-0.5" />
             <div>
               {state?.claimedToday ? (
                 <span>
@@ -151,10 +156,10 @@ export const DailyCalendarView: React.FC<{ embedded?: boolean }> = ({ embedded =
               type="button"
               disabled={Boolean(state?.claimedToday) || busyId !== null}
               onClick={() => void handleCheckIn('workout')}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 ${
+              className={`lq-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 ${
                 state?.claimedToday
-                  ? 'bg-[#35D69A]/15 border border-[#35D69A]/35 text-[#35D69A] cursor-not-allowed'
-                  : 'bg-gradient-to-r from-[#E7B94F] to-[#FFAA45] hover:brightness-110 text-[#061225] shadow-[0_0_18px_rgba(231,185,79,0.35)]'
+                  ? 'bg-[#49B88A]/15 border border-[#49B88A]/40 text-[#49B88A] cursor-not-allowed'
+                  : 'lq-btn-gold'
               }`}
             >
               <Dumbbell className="w-4 h-4 shrink-0" />
@@ -171,13 +176,13 @@ export const DailyCalendarView: React.FC<{ embedded?: boolean }> = ({ embedded =
               type="button"
               disabled={Boolean(state?.claimedToday) || busyId !== null}
               onClick={() => void handleCheckIn('rest_recovery')}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold border transition-all whitespace-nowrap shrink-0 ${
+              className={`lq-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold border whitespace-nowrap shrink-0 ${
                 state?.claimedToday
-                  ? 'bg-[#0A1930]/60 border-[#1677FF]/20 text-[#94A8C7]/40 cursor-not-allowed'
-                  : 'bg-[#0A1930] hover:bg-[#113328] border-[#35D69A]/45 hover:border-[#35D69A]/75 text-[#F2F7FF]'
+                  ? 'bg-[#100D18]/70 border-[#362B45] text-[#766D82] cursor-not-allowed'
+                  : 'bg-[#21152F] hover:bg-[#2B1D3D] border-[#49B88A]/45 hover:border-[#49B88A]/75 text-[#F2EDF7] cursor-pointer'
               }`}
             >
-              <HeartHandshake className="w-4 h-4 shrink-0 text-[#35D69A]" />
+              <HeartHandshake className="w-4 h-4 shrink-0 text-[#49B88A]" />
               <span>
                 {busyId === 'checkin-rest_recovery' ? 'Recording...' : 'Check In: Rest & Recovery'}
               </span>
@@ -191,8 +196,8 @@ export const DailyCalendarView: React.FC<{ embedded?: boolean }> = ({ embedded =
           role="status"
           className={`px-4 py-3 rounded-xl border text-xs font-semibold ${
             notice.type === 'success'
-              ? 'bg-[#113328]/70 border-[#35D69A]/50 text-[#F2F7FF]'
-              : 'bg-[#36111F]/70 border-[#F05B70]/50 text-[#F2F7FF]'
+              ? 'bg-[#49B88A]/12 border-[#49B88A]/45 text-[#F2EDF7]'
+              : 'bg-[#D65C66]/12 border-[#D65C66]/45 text-[#F2EDF7]'
           }`}
         >
           {notice.text}
@@ -200,57 +205,58 @@ export const DailyCalendarView: React.FC<{ embedded?: boolean }> = ({ embedded =
       )}
 
       {/* 4 Weekly Participation Milestones */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
+      <RpgStaggerGrid className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
         {(state?.weeklyMilestones || []).map(ms => {
           const busy = busyId === `week-${ms.id}`;
           return (
-            <div
-              key={ms.id}
-              className={`rounded-xl border p-4 flex flex-col justify-between gap-3 transition-all ${
-                ms.claimed
-                  ? 'bg-[#113328]/40 border-[#35D69A]/40'
-                  : ms.unlocked
-                    ? 'bg-[#102440]/95 border-[#FFD978]/60 shadow-[0_0_16px_rgba(231,185,79,0.18)]'
-                    : 'bg-[#0A1930] border-[#1677FF]/30'
-              }`}
-            >
-              <div>
-                <div className="flex items-center justify-between gap-2 text-xs">
-                  <span className="font-['Cinzel'] font-bold text-[#FFD978]">{ms.title}</span>
-                  <span className="font-mono text-[11px] text-[#94A8C7] tabular-nums">
-                    {ms.dayTarget} Days
-                  </span>
-                </div>
-                <p className="text-xs text-[#94A8C7] mt-1">{ms.rewardLabel}</p>
-              </div>
-
-              <button
-                type="button"
-                disabled={!ms.unlocked || ms.claimed || busy}
-                onClick={() => void handleClaimWeekly(ms.id)}
-                className={`w-full py-2 px-3 rounded-lg text-xs font-bold transition-all whitespace-nowrap shrink-0 ${
+            <RpgStaggerItem key={ms.id}>
+              <div
+                className={`h-full rounded-xl border p-4 flex flex-col justify-between gap-3 transition-all ${
                   ms.claimed
-                    ? 'bg-[#35D69A]/15 text-[#35D69A] border border-[#35D69A]/35 cursor-default'
+                    ? 'bg-[#171220] border-[#49B88A]/40'
                     : ms.unlocked
-                      ? 'bg-gradient-to-r from-[#239B6F] to-[#35D69A] hover:brightness-110 text-[#061225] shadow-[0_0_18px_rgba(53,214,154,0.3)]'
-                      : 'bg-[#061225] text-[#94A8C7]/50 border border-[#1677FF]/25 cursor-not-allowed'
+                      ? 'bg-[#21152F] border-[#D6A84B]/60 shadow-[0_0_18px_rgba(214,168,75,0.18)]'
+                      : 'bg-[#171220] border-[#362B45]'
                 }`}
               >
-                {ms.claimed ? 'Claimed' : busy ? 'Claiming...' : ms.unlocked ? 'Claim Milestone' : 'Locked'}
-              </button>
-            </div>
+                <div>
+                  <div className="flex items-center justify-between gap-2 text-xs">
+                    <span className="font-['Cinzel'] font-bold text-[#E8C777]">{ms.title}</span>
+                    <span className="font-mono text-[11px] text-[#A69AAF] tabular-nums">
+                      {ms.dayTarget} Days
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#A69AAF] mt-1">{ms.rewardLabel}</p>
+                </div>
+
+                <button
+                  type="button"
+                  disabled={!ms.unlocked || ms.claimed || busy}
+                  onClick={() => void handleClaimWeekly(ms.id)}
+                  className={`lq-btn w-full py-2 px-3 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 ${
+                    ms.claimed
+                      ? 'bg-[#49B88A]/15 text-[#49B88A] border border-[#49B88A]/35 cursor-default'
+                      : ms.unlocked
+                        ? 'lq-btn-gold'
+                        : 'bg-[#100D18] text-[#766D82] border border-[#362B45] cursor-not-allowed'
+                  }`}
+                >
+                  {ms.claimed ? 'Claimed' : busy ? 'Claiming...' : ms.unlocked ? 'Claim Milestone' : 'Locked'}
+                </button>
+              </div>
+            </RpgStaggerItem>
           );
         })}
-      </div>
+      </RpgStaggerGrid>
 
       {/* 30-Day Calendar Grid */}
-      <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#E7B94F]/30 shadow-[0_12px_32px_rgba(4,12,28,0.65)] p-4 sm:p-5">
+      <div className="rounded-2xl bg-[#171220] border border-[#362B45] shadow-[0_14px_34px_-14px_rgba(5,3,10,0.85)] p-4 sm:p-5">
         <div className="flex items-center justify-between gap-2 mb-4">
-          <div className="flex items-center gap-2 text-xs font-['Cinzel'] font-bold text-[#F2F7FF] uppercase tracking-wider">
-            <CalendarCheck className="w-4 h-4 text-[#FFD978]" />
+          <div className="flex items-center gap-2 text-xs font-['Cinzel'] font-bold text-[#F2EDF7] uppercase tracking-wider">
+            <CalendarCheck className="w-4 h-4 text-[#E8C777]" />
             <span>Monthly Track (30 Steps)</span>
           </div>
-          <span className="text-[11px] text-[#94A8C7] tabular-nums">
+          <span className="text-[11px] text-[#A69AAF] tabular-nums">
             {state?.totalClaimedThisMonth || 0} / 30 Claimed
           </span>
         </div>
@@ -264,34 +270,34 @@ export const DailyCalendarView: React.FC<{ embedded?: boolean }> = ({ embedded =
                 key={day.dayNumber}
                 className={`rounded-xl border p-3 flex flex-col justify-between gap-2 transition-all ${
                   day.claimed
-                    ? 'bg-[#113328]/40 border-[#35D69A]/45'
+                    ? 'bg-[#14201C] border-[#49B88A]/40'
                     : isRecoverable
-                      ? 'bg-[#102440] border-[#FFAA45]/60'
+                      ? 'bg-[#21152F] border-[#E8C777]/55'
                       : day.isWeeklyMilestone
-                        ? 'bg-[#0A1930] border-[#E7B94F]/50'
-                        : 'bg-[#061225]/90 border-[#1677FF]/25 hover:border-[#FFD978]/45'
+                        ? 'bg-[#21152F]/75 border-[#D6A84B]/45'
+                        : 'bg-[#100D18]/90 border-[#362B45] hover:border-[#7045A0]/65'
                 }`}
               >
                 <div className="flex items-center justify-between gap-1">
-                  <span className="text-xs font-mono font-bold text-[#F2F7FF] tabular-nums">
+                  <span className="text-xs font-mono font-bold text-[#F2EDF7] tabular-nums">
                     Day {day.dayNumber}
                   </span>
                   {day.claimed ? (
-                    <CheckCircle2 className="w-4 h-4 text-[#35D69A] shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-[#49B88A] shrink-0" />
                   ) : day.isWeeklyMilestone ? (
-                    <Trophy className="w-3.5 h-3.5 text-[#FFD978] shrink-0" />
+                    <Trophy className="w-3.5 h-3.5 text-[#E8C777] shrink-0" />
                   ) : null}
                 </div>
 
                 <div className="flex items-start gap-2 my-1">
                   {getRewardIcon(day.rewardType)}
-                  <span className="text-[11px] text-[#94A8C7] leading-snug">
+                  <span className="text-[11px] text-[#A69AAF] leading-snug">
                     {day.rewardLabel}
                   </span>
                 </div>
 
                 {day.claimed ? (
-                  <div className="text-[10px] font-semibold text-[#35D69A] capitalize">
+                  <div className="text-[10px] font-semibold text-[#49B88A] capitalize">
                     {day.claimedMode === 'rest_recovery'
                       ? 'Rest & Recovery'
                       : day.claimedMode === 'grace_catchup'
@@ -303,12 +309,12 @@ export const DailyCalendarView: React.FC<{ embedded?: boolean }> = ({ embedded =
                     type="button"
                     disabled={busyId !== null}
                     onClick={() => void handleCheckIn('rest_recovery', day.dayNumber)}
-                    className="w-full py-1.5 px-2 rounded-lg bg-[#0A1930] hover:bg-[#113328] border border-[#35D69A]/55 text-[#35D69A] text-[10px] font-bold whitespace-nowrap shrink-0 transition-colors"
+                    className="lq-btn w-full py-1.5 px-2 rounded-lg bg-[#21152F] hover:bg-[#172822] border border-[#49B88A]/50 text-[#49B88A] text-[10px] font-bold whitespace-nowrap shrink-0 cursor-pointer"
                   >
                     {busyCatchup ? 'Applying...' : 'Grace Catch-Up'}
                   </button>
                 ) : (
-                  <div className="text-[10px] text-[#94A8C7]/60">
+                  <div className="text-[10px] text-[#766D82]">
                     {day.isWeeklyMilestone ? 'Milestone Step' : 'Upcoming Step'}
                   </div>
                 )}

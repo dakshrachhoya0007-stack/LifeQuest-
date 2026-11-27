@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '../../context/GameContext';
 import { GoldenWorldTreeEmblem } from '../Brand/GoldenWorldTreeEmblem';
+import { RpgModalWrapper } from '../Motion/RpgMotionPrimitives';
 import {
   X,
   Shield,
@@ -63,7 +64,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setSuccessMessage(null);
   }, [initialMode, isOpen, authError]);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (!isOpen || !canClose) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isOpen, canClose, onClose]);
 
   const handleGoogleSignIn = async () => {
     setError(null);
@@ -76,7 +84,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         setIsGoogleLoading(false);
         setError(res.error || 'Could not start Google sign-in. Please try again in a moment.');
       }
-      // On success, browser redirects to Google OAuth consent screen
     } catch (err: any) {
       setIsGoogleLoading(false);
       setError(err?.message || 'Unable to connect to Google authentication.');
@@ -93,7 +100,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       return;
     }
 
-    // 1. Forgot Password Flow
     if (mode === 'forgot_password') {
       setIsSubmitting(true);
       try {
@@ -104,7 +110,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             'Password reset link has been dispatched to your email! Please check your inbox and follow the instructions to restore your account.'
           );
         } else {
-          setError(res.error || 'Could not send password reset email. Please verify your email address and try again.');
+          setError(
+            res.error ||
+              'Could not send password reset email. Please verify your email address and try again.'
+          );
         }
       } catch (err: any) {
         setIsSubmitting(false);
@@ -113,13 +122,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       return;
     }
 
-    // Password validation for login & register
     if (password.length < 6) {
       setError('Password must be at least 6 characters in length.');
       return;
     }
 
-    // 2. Register Flow
     if (mode === 'register') {
       if (!username.trim()) {
         setError('Please choose a hero username for your champion.');
@@ -164,7 +171,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       return;
     }
 
-    // 3. Login Flow
     if (mode === 'login') {
       setIsSubmitting(true);
       try {
@@ -183,13 +189,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#061225]/85 backdrop-blur-md animate-in fade-in duration-150">
-      <div className="relative w-full max-w-md bg-[#102440]/95 backdrop-blur-xl border border-[#1677FF]/45 rounded-2xl p-6 sm:p-8 shadow-[0_24px_64px_rgba(4,12,28,0.85)] max-h-[92vh] overflow-y-auto">
+    <RpgModalWrapper
+      isOpen={isOpen}
+      onClose={canClose ? onClose : undefined}
+      panelClassName="w-full max-w-md"
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="auth-modal-title"
+        className="relative w-full lq-card-gold p-6 sm:p-8 max-h-[92vh] overflow-y-auto"
+      >
         {canClose && (
           <button
+            type="button"
             onClick={onClose}
             aria-label="Close authentication modal"
-            className="absolute top-4 right-4 p-2 text-[#94A8C7] hover:text-white rounded-lg hover:bg-[#0A1930] transition-colors"
+            className="absolute top-4 right-4 p-2 text-[#A69AAF] hover:text-[#F2EDF7] rounded-lg hover:bg-[#21152F] transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -197,23 +213,26 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         {/* Brand & Title */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-[#0A1930] border border-[#1677FF]/35 text-white text-[10px] font-bold uppercase tracking-widest mb-3">
+          <div className="inline-flex items-center gap-2 text-[#E8C777] text-[11px] font-semibold uppercase tracking-widest mb-3">
             <GoldenWorldTreeEmblem className="w-4 h-4" />
-            <span className="font-['Cinzel']">LIFEQUEST</span>
-            <span className="text-[#FFD978]/60">·</span>
-            <span className="text-[#FFD978]">World of Aetheria</span>
+            <span className="font-['Cinzel'] text-[#F2EDF7]">LIFEQUEST</span>
+            <span aria-hidden="true" className="text-[#766D82]">·</span>
+            <span>World of Aetheria</span>
           </div>
-          <div className="w-12 h-12 mx-auto rounded-xl bg-[#1677FF]/25 border border-[#FFD978]/45 flex items-center justify-center text-[#FFD978] mb-3 shadow-[0_0_20px_rgba(0,217,255,0.25)]">
+          <div className="w-12 h-12 mx-auto rounded-xl bg-[#7045A0]/25 border border-[#D6A84B]/50 flex items-center justify-center text-[#E8C777] mb-3 shadow-[0_8px_20px_rgba(112,69,160,0.3)]">
             <Shield className="w-6 h-6" />
           </div>
-          <h2 className="text-xl sm:text-2xl font-black font-['Cinzel'] text-[#FFFFFF]">
+          <h2
+            id="auth-modal-title"
+            className="text-xl sm:text-2xl font-bold font-['Cinzel'] text-[#F2EDF7]"
+          >
             {mode === 'login'
-              ? 'SIGN IN TO LIFEQUEST'
+              ? 'Sign In to LifeQuest'
               : mode === 'register'
-              ? 'ENLIST IN AETHERIA'
-              : 'RESTORE PASSKEY'}
+              ? 'Enlist in Aetheria'
+              : 'Restore Passkey'}
           </h2>
-          <p className="text-xs text-[#94A8C7] mt-1 max-w-xs mx-auto">
+          <p className="text-xs text-[#A69AAF] mt-1 max-w-xs mx-auto leading-relaxed">
             {mode === 'login'
               ? 'Authenticate to access your training, habits, and quest progress.'
               : mode === 'register'
@@ -224,7 +243,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         {/* Tab switch for Login / Register */}
         {mode !== 'forgot_password' && (
-          <div className="flex p-1 mb-5 bg-[#061225] rounded-xl border border-[#1677FF]/30">
+          <div className="flex p-1 mb-5 bg-[#100D18] rounded-xl border border-[#362B45]">
             <button
               type="button"
               onClick={() => {
@@ -234,8 +253,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               }}
               className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
                 mode === 'login'
-                  ? 'bg-[#1677FF] text-white shadow-[0_0_12px_rgba(0,217,255,0.4)]'
-                  : 'text-[#94A8C7] hover:text-white'
+                  ? 'bg-[#7045A0] text-[#F2EDF7] border border-[#E8C777]/30 shadow-[0_4px_12px_rgba(112,69,160,0.4)]'
+                  : 'text-[#A69AAF] hover:text-[#F2EDF7]'
               }`}
             >
               Sign In
@@ -249,8 +268,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               }}
               className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
                 mode === 'register'
-                  ? 'bg-[#1677FF] text-white shadow-[0_0_12px_rgba(0,217,255,0.4)]'
-                  : 'text-[#94A8C7] hover:text-white'
+                  ? 'bg-[#7045A0] text-[#F2EDF7] border border-[#E8C777]/30 shadow-[0_4px_12px_rgba(112,69,160,0.4)]'
+                  : 'text-[#A69AAF] hover:text-[#F2EDF7]'
               }`}
             >
               Create Account
@@ -260,32 +279,32 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         {/* Success Banner */}
         {successMessage && (
-          <div className="p-3.5 mb-4 text-xs text-emerald-200 bg-emerald-950/70 border border-emerald-700/60 rounded-xl flex items-start gap-2.5">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-            <div className="leading-relaxed">{successMessage}</div>
+          <div className="p-3.5 mb-4 text-xs text-[#49B88A] bg-[#49B88A]/12 border border-[#49B88A]/45 rounded-xl flex items-start gap-2.5">
+            <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+            <div className="leading-relaxed text-[#F2EDF7]">{successMessage}</div>
           </div>
         )}
 
         {/* Error Banner */}
         {error && (
-          <div className="p-3.5 mb-4 text-xs text-rose-200 bg-rose-950/70 border border-rose-800/60 rounded-xl flex items-start gap-2.5">
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-            <div className="leading-relaxed">{error}</div>
+          <div className="p-3.5 mb-4 text-xs text-[#D65C66] bg-[#D65C66]/12 border border-[#D65C66]/45 rounded-xl flex items-start gap-2.5">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <div className="leading-relaxed text-[#F2EDF7]">{error}</div>
           </div>
         )}
 
-        {/* Continue with Google OAuth (visible in both Sign In and Create Account) */}
+        {/* Continue with Google OAuth */}
         {mode !== 'forgot_password' && (
           <div className="mb-5 space-y-3">
             <button
               type="button"
               onClick={handleGoogleSignIn}
               disabled={isGoogleLoading || isSubmitting}
-              className="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-slate-100 disabled:opacity-60 text-slate-900 font-semibold text-sm shadow-md flex items-center justify-center gap-2.5 transition-all whitespace-nowrap"
+              className="w-full py-2.5 px-4 rounded-xl bg-[#F2EDF7] hover:bg-white disabled:opacity-60 text-[#100D18] font-semibold text-sm shadow-md flex items-center justify-center gap-2.5 transition-all whitespace-nowrap"
             >
               {isGoogleLoading ? (
                 <>
-                  <RefreshCw className="w-4 h-4 animate-spin text-slate-700" />
+                  <RefreshCw className="w-4 h-4 animate-spin text-[#100D18]" />
                   <span>Redirecting to Google...</span>
                 </>
               ) : (
@@ -314,17 +333,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </button>
 
             {isInIframe && (
-              <p className="text-[11px] text-amber-300/80 text-center leading-snug">
+              <p className="text-[11px] text-[#E8C777]/85 text-center leading-snug">
                 Tip: If Google sign-in is blocked in this frame, open the app in a full browser tab.
               </p>
             )}
 
             <div className="relative flex items-center py-1">
-              <div className="flex-grow border-t border-[#1677FF]/30" />
-              <span className="flex-shrink mx-3 text-[11px] uppercase tracking-wider text-[#94A8C7]">
+              <div className="flex-grow border-t border-[#362B45]" />
+              <span className="flex-shrink mx-3 text-[11px] uppercase tracking-wider text-[#A69AAF]">
                 or continue with email
               </span>
-              <div className="flex-grow border-t border-[#1677FF]/30" />
+              <div className="flex-grow border-t border-[#362B45]" />
             </div>
           </div>
         )}
@@ -333,36 +352,36 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === 'register' && (
             <div>
-              <label className="block text-xs font-medium text-[#94A8C7] mb-1">
+              <label className="block text-xs font-medium text-[#A69AAF] mb-1">
                 Hero Username
               </label>
               <div className="relative">
-                <User className="w-4 h-4 text-[#94A8C7]/70 absolute left-3 top-3" />
+                <User className="w-4 h-4 text-[#766D82] absolute left-3 top-3" />
                 <input
                   type="text"
                   required
                   value={username}
                   onChange={e => setUsername(e.target.value)}
                   placeholder="e.g. IronVanguard"
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder-[#94A8C7]/50 focus:outline-none focus:border-[#FFD978] transition-colors"
+                  className="lq-input pl-9"
                 />
               </div>
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-medium text-[#94A8C7] mb-1">
+            <label className="block text-xs font-medium text-[#A69AAF] mb-1">
               Email Address
             </label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-[#94A8C7]/70 absolute left-3 top-3" />
+              <Mail className="w-4 h-4 text-[#766D82] absolute left-3 top-3" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="champion@aetheria.realm"
-                className="w-full bg-[#0A1930] border border-[#1677FF]/35 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder-[#94A8C7]/50 focus:outline-none focus:border-[#FFD978] transition-colors"
+                className="lq-input pl-9"
               />
             </div>
           </div>
@@ -370,7 +389,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {mode !== 'forgot_password' && (
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-medium text-[#94A8C7]">Password</label>
+                <label className="text-xs font-medium text-[#A69AAF]">Password</label>
                 {mode === 'login' && (
                   <button
                     type="button"
@@ -379,27 +398,28 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       setError(null);
                       setSuccessMessage(null);
                     }}
-                    className="text-[11px] text-[#FFD978] hover:text-white transition-colors"
+                    className="text-[11px] text-[#E8C777] hover:text-[#F2EDF7] transition-colors"
                   >
                     Forgot password?
                   </button>
                 )}
               </div>
               <div className="relative">
-                <Lock className="w-4 h-4 text-[#94A8C7]/70 absolute left-3 top-3" />
+                <Lock className="w-4 h-4 text-[#766D82] absolute left-3 top-3" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 rounded-xl pl-9 pr-10 py-2.5 text-sm text-white placeholder-[#94A8C7]/50 focus:outline-none focus:border-[#FFD978] transition-colors"
+                  className="lq-input pl-9 pr-10"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-[#94A8C7]/70 hover:text-white focus:outline-none"
+                  className="absolute right-3 top-3 text-[#766D82] hover:text-[#F2EDF7] focus:outline-none"
                   tabIndex={-1}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -409,26 +429,31 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           {mode === 'register' && (
             <div>
-              <label className="block text-xs font-medium text-[#94A8C7] mb-1">
+              <label className="block text-xs font-medium text-[#A69AAF] mb-1">
                 Confirm Password
               </label>
               <div className="relative">
-                <Lock className="w-4 h-4 text-[#94A8C7]/70 absolute left-3 top-3" />
+                <Lock className="w-4 h-4 text-[#766D82] absolute left-3 top-3" />
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   required
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 rounded-xl pl-9 pr-10 py-2.5 text-sm text-white placeholder-[#94A8C7]/50 focus:outline-none focus:border-[#FFD978] transition-colors"
+                  className="lq-input pl-9 pr-10"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-3 text-[#94A8C7]/70 hover:text-white focus:outline-none"
+                  className="absolute right-3 top-3 text-[#766D82] hover:text-[#F2EDF7] focus:outline-none"
                   tabIndex={-1}
+                  aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
                 >
-                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showConfirmPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
                 </button>
               </div>
 
@@ -438,10 +463,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   id="auth-terms"
                   checked={agreeTerms}
                   onChange={e => setAgreeTerms(e.target.checked)}
-                  className="mt-1 accent-[#1677FF] rounded"
+                  className="mt-1 accent-[#7045A0] rounded"
                 />
-                <label htmlFor="auth-terms" className="text-[11px] text-[#94A8C7] leading-tight">
-                  I agree to the Realm Terms & Privacy Charter (camera video processed strictly locally on-device).
+                <label htmlFor="auth-terms" className="text-[11px] text-[#A69AAF] leading-tight">
+                  I agree to the Realm Terms &amp; Privacy Charter (camera video processed strictly
+                  locally on-device).
                 </label>
               </div>
             </div>
@@ -450,19 +476,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-3 px-4 font-semibold text-sm rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:brightness-110 border border-[#FFD978]/45 text-white shadow-[0_6px_20px_rgba(22,119,255,0.45)] hover:shadow-[0_0_24px_rgba(255,217,120,0.45)] transition-all font-['Cinzel'] tracking-wider flex items-center justify-center gap-2"
+            className="lq-btn lq-btn-gold w-full py-3 px-4 text-sm font-['Cinzel'] tracking-wider"
           >
             {isSubmitting ? (
               <>
                 <RefreshCw className="w-4 h-4 animate-spin" />
-                CONNECTING TO REALM...
+                <span>Connecting...</span>
               </>
             ) : mode === 'login' ? (
-              'ENTER THE REALM'
+              'Enter the Realm'
             ) : mode === 'register' ? (
-              'START CHARACTER CREATION'
+              'Start Character Creation'
             ) : (
-              'SEND RESET LINK'
+              'Send Reset Link'
             )}
           </button>
 
@@ -474,14 +500,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 setError(null);
                 setSuccessMessage(null);
               }}
-              className="w-full py-2 text-xs text-[#FFD978] hover:text-white flex items-center justify-center gap-1.5 transition-colors"
+              className="w-full py-2 text-xs text-[#E8C777] hover:text-[#F2EDF7] flex items-center justify-center gap-1.5 transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              Back to Sign In
+              <span>Back to Sign In</span>
             </button>
           )}
         </form>
       </div>
-    </div>
+    </RpgModalWrapper>
   );
 };

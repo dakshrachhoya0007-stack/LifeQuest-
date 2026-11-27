@@ -291,13 +291,13 @@ export const COMPETITIVE_TIERS: Array<{
   maxRating: number | null;
   accentHex: string;
 }> = [
-  { tier: 'Bronze', minRating: 0, maxRating: 1099, accentHex: '#CD7F32' },
-  { tier: 'Silver', minRating: 1100, maxRating: 1299, accentHex: '#CBD5E1' },
-  { tier: 'Gold', minRating: 1300, maxRating: 1499, accentHex: '#E8CF96' },
-  { tier: 'Platinum', minRating: 1500, maxRating: 1699, accentHex: '#38BDF8' },
-  { tier: 'Diamond', minRating: 1700, maxRating: 1899, accentHex: '#A78BFA' },
-  { tier: 'Master', minRating: 1900, maxRating: 2099, accentHex: '#F472B6' },
-  { tier: 'Grandmaster', minRating: 2100, maxRating: null, accentHex: '#FBBF24' },
+  { tier: 'Bronze', minRating: 0, maxRating: 1099, accentHex: '#B87A4B' },
+  { tier: 'Silver', minRating: 1100, maxRating: 1299, accentHex: '#C7BFD3' },
+  { tier: 'Gold', minRating: 1300, maxRating: 1499, accentHex: '#D6A84B' },
+  { tier: 'Platinum', minRating: 1500, maxRating: 1699, accentHex: '#49B88A' },
+  { tier: 'Diamond', minRating: 1700, maxRating: 1899, accentHex: '#9A72CC' },
+  { tier: 'Master', minRating: 1900, maxRating: 2099, accentHex: '#D65C66' },
+  { tier: 'Grandmaster', minRating: 2100, maxRating: null, accentHex: '#E8C777' },
 ];
 
 export const computeCompetitiveTier = (
@@ -529,7 +529,7 @@ export const createDefaultCommunityEvent = (now: Date = new Date()): CommunityEv
     subtitle: 'Realm-Wide Wellness & Restoration Chronicle',
     description:
       'Every champion across Aetheria contributes verified workouts, mindful study, balanced meals, and daily habits to rekindle the Golden World Tree.',
-    themeColor: '#FFAA45',
+    themeColor: '#D6A84B',
     status: 'active',
     startsAt,
     endsAt,

@@ -19,6 +19,13 @@ import type {
 } from '../../types/game';
 import { PresenceBadge } from '../Brand/PresenceBadge';
 import { GoldenWorldTreeEmblem } from '../Brand/GoldenWorldTreeEmblem';
+import { FeatureBanner, FeatureTabBar } from '../Theme/FeatureThemePrimitives';
+import {
+  AnimatedCounter,
+  AnimatedProgressBar,
+  RpgModalWrapper,
+  RpgSubTabTransition,
+} from '../Motion/RpgMotionPrimitives';
 import {
   AlertTriangle,
   Award,
@@ -102,12 +109,10 @@ export const RivalsView: React.FC = () => {
   const [queueMode, setQueueMode] = useState<CompetitiveRivalMode>('overall_fitness');
   const [showDivisionRoadmap, setShowDivisionRoadmap] = useState(false);
 
-  // Tournament creation form state
   const [newTourneyTitle, setNewTourneyTitle] = useState('');
   const [newTourneySubtitle, setNewTourneySubtitle] = useState('');
   const [newTourneyMode, setNewTourneyMode] = useState<CompetitiveRivalMode>('overall_fitness');
 
-  // Direct Challenge form state
   const [selectedOpponentId, setSelectedOpponentId] = useState<string>('');
   const [challengeMode, setChallengeMode] = useState<CompetitiveRivalMode>('overall_fitness');
   const [durationDays, setDurationDays] = useState<number>(7);
@@ -118,7 +123,6 @@ export const RivalsView: React.FC = () => {
   const [customNote, setCustomNote] = useState<string>('');
   const [candidateSearch, setCandidateSearch] = useState<string>('');
 
-  // Rankings filter state
   const [lbScope, setLbScope] = useState<'global' | 'friends' | 'seasonal' | 'weekly'>('global');
   const [lbMode, setLbMode] = useState<CompetitiveRivalMode | 'all'>('all');
   const [lbDivision, setLbDivision] = useState<RankedDivisionName | 'all'>('all');
@@ -127,7 +131,6 @@ export const RivalsView: React.FC = () => {
   );
   const [lbLoading, setLbLoading] = useState(false);
 
-  // Dispute modal state
   const [disputeTarget, setDisputeTarget] = useState<CompetitiveRivalMatch | null>(null);
   const [disputeReason, setDisputeReason] = useState<string>('');
 
@@ -152,7 +155,6 @@ export const RivalsView: React.FC = () => {
     [friends, rivalsState?.blockedIds]
   );
 
-  // Combine accepted friends and open non-friend candidates safely
   const selectableOpponents = useMemo(() => {
     const byId = new Map<
       string,
@@ -210,7 +212,6 @@ export const RivalsView: React.FC = () => {
     }
   }, [selectableOpponents, selectedOpponentId]);
 
-  // Query live presences for visible opponents and leaderboard entries
   useEffect(() => {
     const ids = new Set<string>();
     selectableOpponents.forEach(o => ids.add(o.id));
@@ -512,7 +513,7 @@ export const RivalsView: React.FC = () => {
   const placementPlayed = profile?.placementMatchesPlayed ?? profile?.matchesPlayed ?? 0;
   const placementDone = Boolean(profile?.placementCompleted || placementPlayed >= PLACEMENT_MATCHES_REQUIRED);
   const demotionShieldRemaining = profile?.demotionShieldRemaining ?? 0;
-  const tierHex = TIER_ACCENT_MAP[playerTier] || playerDivisionMeta.accentHex || '#FFAA45';
+  const tierHex = TIER_ACCENT_MAP[playerTier] || playerDivisionMeta.accentHex || '#D6A84B';
   const wins = profile?.wins ?? rivalsState?.stats.wins ?? 0;
   const losses = profile?.losses ?? rivalsState?.stats.losses ?? 0;
   const ties = profile?.ties ?? rivalsState?.stats.ties ?? 0;
@@ -523,28 +524,28 @@ export const RivalsView: React.FC = () => {
   const displayedLeaderboard = filteredLeaderboard ?? defaultLeaderboard;
 
   return (
-    <div className="space-y-6 animate-in fade-in pb-12">
+    <div className="space-y-6 pb-12">
       {/* Arena Hero Header — Isolated Competitive Domain */}
-      <div className="rounded-2xl bg-gradient-to-br from-[#36111F]/90 via-[#102440] to-[#0A1930] backdrop-blur-md border border-[#F05B70]/35 p-6 shadow-[0_12px_32px_rgba(4,12,28,0.65)] space-y-5">
+      <FeatureBanner themeId="rivals" className="space-y-5">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-[#0A1930] border border-[#FFAA45]/45 flex items-center justify-center shrink-0 shadow-[0_0_16px_rgba(240,91,112,0.22)]">
+            <div className="w-12 h-12 rounded-xl bg-[#100D18] border border-[#D65C66]/45 flex items-center justify-center shrink-0">
               <GoldenWorldTreeEmblem className="w-9 h-9" />
             </div>
             <div>
-              <div className="flex flex-wrap items-center gap-2 text-xs text-[#F05B70] font-semibold">
+              <div className="flex flex-wrap items-center gap-2 text-xs text-[#D65C66] font-semibold">
                 <span className="font-['Cinzel'] uppercase tracking-widest">
                   Competitive Arena
                 </span>
-                <span className="text-[#94A8C7]/40" aria-hidden="true">·</span>
-                <span className="text-[#94A8C7]">
+                <span className="text-[#766D82]" aria-hidden="true">·</span>
+                <span className="text-[#A69AAF]">
                   Isolated 1v1 Elo Ladder · Rating &amp; H2H Only (Zero XP/Gold)
                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2F7FF] mt-0.5">
-                RIVALS ARENA
+              <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2EDF7] mt-0.5">
+                Rivals Arena
               </h1>
-              <p className="text-xs sm:text-sm text-[#94A8C7] max-w-2xl mt-1">
+              <p className="text-xs sm:text-sm text-[#A69AAF] max-w-2xl mt-1">
                 Compete head-to-head against real champions using server-verified fitness telemetry. Matches award Elo Rating, Competitive Tiers, and Head-to-Head Prestige—never Boss damage, Player XP, or Gold.
               </p>
             </div>
@@ -555,17 +556,17 @@ export const RivalsView: React.FC = () => {
               type="button"
               disabled={busyId === 'privacy' || !profile}
               onClick={() => void handleTogglePrivacy()}
-              className="px-3.5 py-2 rounded-xl bg-[#0A1930] hover:bg-[#152E52] border border-[#F05B70]/40 hover:border-[#FFAA45]/55 text-xs font-semibold text-[#F2F7FF] flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0 cursor-pointer"
+              className="lq-btn lq-btn-secondary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
               title="Toggle whether non-friends can challenge you directly"
             >
               {profile?.allowNonFriendChallenges !== false ? (
                 <>
-                  <Unlock className="w-3.5 h-3.5 text-[#35D69A]" />
+                  <Unlock className="w-3.5 h-3.5 text-[#49B88A]" />
                   Open Challenges On
                 </>
               ) : (
                 <>
-                  <Lock className="w-3.5 h-3.5 text-[#FFAA45]" />
+                  <Lock className="w-3.5 h-3.5 text-[#E8C777]" />
                   Friends-Only Challenges
                 </>
               )}
@@ -574,7 +575,7 @@ export const RivalsView: React.FC = () => {
               type="button"
               disabled={rivalsLoading}
               onClick={() => void refreshRivalsState()}
-              className="px-3.5 py-2 rounded-xl bg-[#0A1930] hover:bg-[#152E52] border border-[#F05B70]/40 hover:border-[#FFAA45]/55 text-xs font-semibold text-[#FFAA45] flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0 cursor-pointer"
+              className="lq-btn lq-btn-secondary px-3.5 py-2 rounded-xl text-xs font-semibold text-[#E8C777] flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${rivalsLoading ? 'animate-spin' : ''}`} />
               Sync Arena
@@ -583,18 +584,18 @@ export const RivalsView: React.FC = () => {
         </div>
 
         {/* Rating & Competitive Metrics Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-4 border-t border-[#F05B70]/25">
-          <div className="rounded-xl bg-[#061225] border border-[#1677FF]/35 p-3.5">
-            <span className="text-[11px] text-[#94A8C7] block">Arena Elo &amp; Division</span>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-4 border-t border-[#362B45]">
+          <div className="rounded-xl bg-[#100D18] border border-[#362B45] p-3.5">
+            <span className="text-[11px] text-[#A69AAF] block">Arena Elo &amp; Division</span>
             <div className="flex items-baseline gap-2 mt-0.5">
-              <span className="text-xl font-black font-mono text-[#F2F7FF] tabular-nums">
-                {playerRating}
+              <span className="text-xl font-black font-mono text-[#F2EDF7] tabular-nums">
+                <AnimatedCounter value={playerRating} />
               </span>
               <span className="text-xs font-bold uppercase" style={{ color: tierHex }}>
                 {playerDivision}
               </span>
             </div>
-            <span className="text-[10px] text-[#94A8C7]/75 tabular-nums block mt-0.5">
+            <span className="text-[10px] text-[#766D82] tabular-nums block mt-0.5">
               {placementDone
                 ? demotionShieldRemaining > 0
                   ? `Shield: ${demotionShieldRemaining} games`
@@ -602,34 +603,34 @@ export const RivalsView: React.FC = () => {
                 : `Placement ${Math.min(placementPlayed, PLACEMENT_MATCHES_REQUIRED)}/${PLACEMENT_MATCHES_REQUIRED}`}
             </span>
           </div>
-          <div className="rounded-xl bg-[#061225] border border-[#1677FF]/35 p-3.5">
-            <span className="text-[11px] text-[#94A8C7] block">Match Record</span>
-            <span className="text-xl font-bold font-mono text-[#FFAA45] tabular-nums mt-0.5 block">
+          <div className="rounded-xl bg-[#100D18] border border-[#362B45] p-3.5">
+            <span className="text-[11px] text-[#A69AAF] block">Match Record</span>
+            <span className="text-xl font-bold font-mono text-[#E8C777] tabular-nums mt-0.5 block">
               {wins}-{losses}-{ties}
             </span>
           </div>
-          <div className="rounded-xl bg-[#061225] border border-[#1677FF]/35 p-3.5">
-            <span className="text-[11px] text-[#94A8C7] block">Win Rate</span>
-            <span className="text-xl font-bold font-mono text-[#F2F7FF] tabular-nums mt-0.5 block">
+          <div className="rounded-xl bg-[#100D18] border border-[#362B45] p-3.5">
+            <span className="text-[11px] text-[#A69AAF] block">Win Rate</span>
+            <span className="text-xl font-bold font-mono text-[#F2EDF7] tabular-nums mt-0.5 block">
               {winRate}%
             </span>
           </div>
-          <div className="rounded-xl bg-[#061225] border border-[#1677FF]/35 p-3.5">
-            <span className="text-[11px] text-[#94A8C7] block">Win Streak</span>
-            <span className="text-xl font-bold font-mono text-[#35D69A] tabular-nums mt-0.5 flex items-center gap-1.5">
-              <Flame className="w-4 h-4 text-[#FFAA45]" />
+          <div className="rounded-xl bg-[#100D18] border border-[#362B45] p-3.5">
+            <span className="text-[11px] text-[#A69AAF] block">Win Streak</span>
+            <span className="text-xl font-bold font-mono text-[#49B88A] tabular-nums mt-0.5 flex items-center gap-1.5">
+              <Flame className="w-4 h-4 text-[#D6A84B]" />
               {currentStreak}
             </span>
           </div>
-          <div className="rounded-xl bg-[#061225] border border-[#1677FF]/35 p-3.5">
-            <span className="text-[11px] text-[#94A8C7] block">Peak Rating</span>
-            <span className="text-xl font-bold font-mono text-[#FFD978] tabular-nums mt-0.5 block">
+          <div className="rounded-xl bg-[#100D18] border border-[#362B45] p-3.5">
+            <span className="text-[11px] text-[#A69AAF] block">Peak Rating</span>
+            <span className="text-xl font-bold font-mono text-[#E8C777] tabular-nums mt-0.5 block">
               {peakRating}
             </span>
           </div>
-          <div className="rounded-xl bg-[#061225] border border-[#1677FF]/35 p-3.5">
-            <span className="text-[11px] text-[#94A8C7] block">Active Matches</span>
-            <span className="text-xl font-bold font-mono text-[#F2F7FF] tabular-nums mt-0.5 block">
+          <div className="rounded-xl bg-[#100D18] border border-[#362B45] p-3.5">
+            <span className="text-[11px] text-[#A69AAF] block">Active Matches</span>
+            <span className="text-xl font-bold font-mono text-[#F2EDF7] tabular-nums mt-0.5 block">
               {activeDuels.length}
               {incomingInvites.length > 0 ? ` (${incomingInvites.length} pending)` : ''}
             </span>
@@ -637,13 +638,13 @@ export const RivalsView: React.FC = () => {
         </div>
 
         {/* Collapsible 7-Division Ranked Roadmap */}
-        <div className="pt-2 border-t border-[#F05B70]/25">
+        <div className="pt-2 border-t border-[#362B45]">
           <button
             type="button"
             onClick={() => setShowDivisionRoadmap(v => !v)}
-            className="text-xs font-semibold text-[#F2F7FF] hover:text-[#FFAA45] flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="text-xs font-semibold text-[#F2EDF7] hover:text-[#E8C777] flex items-center gap-1.5 transition-colors cursor-pointer"
           >
-            <Shield className="w-3.5 h-3.5 text-[#F05B70]" />
+            <Shield className="w-3.5 h-3.5 text-[#D65C66]" />
             <span>Ranked Divisions &amp; Milestone Rewards (7 Tiers)</span>
             {showDivisionRoadmap ? (
               <ChevronUp className="w-3.5 h-3.5" />
@@ -662,10 +663,10 @@ export const RivalsView: React.FC = () => {
                     key={div.division}
                     className={`rounded-xl p-3 border space-y-2 transition-all ${
                       isCurrent
-                        ? 'bg-[#0A1930] border-[#FFAA45] shadow-[0_0_16px_rgba(255,170,69,0.22)]'
+                        ? 'bg-[#21152F] border-[#D6A84B]'
                         : unlocked
-                        ? 'bg-[#0A1930]/80 border-[#F05B70]/40'
-                        : 'bg-[#061225] border-[#1677FF]/25 opacity-75'
+                        ? 'bg-[#171220] border-[#D65C66]/40'
+                        : 'bg-[#100D18] border-[#362B45] opacity-75'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-1">
@@ -675,21 +676,21 @@ export const RivalsView: React.FC = () => {
                       >
                         {div.division}
                       </span>
-                      <span className="text-[10px] font-mono text-[#94A8C7]/80 tabular-nums">
+                      <span className="text-[10px] font-mono text-[#A69AAF] tabular-nums">
                         {div.maxRating ? `${div.minRating}–${div.maxRating}` : `${div.minRating}+`}
                       </span>
                     </div>
-                    <p className="text-[11px] font-semibold text-[#F2F7FF] truncate">
+                    <p className="text-[11px] font-semibold text-[#F2EDF7] truncate">
                       {div.rewardTitleName}
                     </p>
                     <button
                       type="button"
                       disabled={!unlocked || busyId === `div-${div.division}`}
                       onClick={() => void handleClaimDivisionReward(div.division)}
-                      className={`w-full py-1.5 rounded-lg text-[10px] font-bold transition-all whitespace-nowrap ${
+                      className={`lq-btn w-full py-1.5 rounded-lg text-[10px] font-bold whitespace-nowrap ${
                         unlocked
-                          ? 'bg-gradient-to-r from-[#F05B70] to-[#FFAA45] hover:from-[#ff6b80] hover:to-[#FFD978] text-[#061225] shadow-[0_0_12px_rgba(240,91,112,0.3)] cursor-pointer'
-                          : 'bg-[#0A1930] text-[#94A8C7]/45 border border-[#1677FF]/25 cursor-not-allowed'
+                          ? 'lq-btn-gold cursor-pointer'
+                          : 'bg-[#171220] text-[#766D82] border border-[#362B45] cursor-not-allowed'
                       }`}
                     >
                       {unlocked
@@ -704,51 +705,37 @@ export const RivalsView: React.FC = () => {
             </div>
           )}
         </div>
-      </div>
+      </FeatureBanner>
 
       {/* Arena Navigation Tabs */}
-      <div className="flex flex-wrap items-center gap-1.5 p-1 bg-[#0A1930] border border-[#F05B70]/35 rounded-xl w-fit">
-        {(
-          [
-            { id: 'queue', label: 'Arena & Queue', icon: Dumbbell },
-            { id: 'challenge', label: 'Direct Challenge', icon: Target },
-            {
-              id: 'matches',
-              label: `Matches (${activeDuels.length + incomingInvites.length})`,
-              icon: Trophy,
-            },
-            { id: 'tournaments', label: 'Tournaments', icon: Award },
-            { id: 'spectate', label: 'Spectate', icon: Eye },
-            { id: 'history', label: 'Archive & H2H', icon: History },
-            { id: 'rankings', label: 'Rankings', icon: Crown },
-          ] as const
-        ).map(tab => {
-          const Icon = tab.icon;
-          const active = arenaTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setArenaTab(tab.id)}
-              className={`px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0 tabular-nums cursor-pointer ${
-                active
-                  ? 'bg-gradient-to-r from-[#F05B70] to-[#FFAA45] text-[#061225] font-bold shadow-[0_0_12px_rgba(240,91,112,0.35)]'
-                  : 'text-[#94A8C7] hover:text-[#F2F7FF] hover:bg-[#102440] border border-transparent'
-              }`}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
+      <FeatureTabBar
+        themeId="rivals"
+        layoutId="rivals-arena-tab"
+        activeId={arenaTab}
+        onSelect={setArenaTab}
+        tabs={[
+          { id: 'queue', label: 'Arena & Queue', icon: Dumbbell },
+          { id: 'challenge', label: 'Direct Challenge', icon: Target },
+          {
+            id: 'matches',
+            label: 'Matches',
+            icon: Trophy,
+            badge: activeDuels.length + incomingInvites.length,
+          },
+          { id: 'tournaments', label: 'Tournaments', icon: Award },
+          { id: 'spectate', label: 'Spectate', icon: Eye },
+          { id: 'history', label: 'Archive & H2H', icon: History },
+          { id: 'rankings', label: 'Rankings', icon: Crown },
+        ]}
+        className="w-fit"
+      />
 
       {feedback && (
         <div
-          className={`rounded-xl px-4 py-3 text-xs border flex items-center justify-between gap-2 ${
+          className={`rounded-xl px-4 py-3 text-xs border flex items-center justify-between gap-2 font-medium ${
             feedback.type === 'success'
-              ? 'bg-[#35D69A]/15 border-[#35D69A]/45 text-[#35D69A]'
-              : 'bg-[#36111F]/80 border-[#F05B70]/45 text-[#F05B70]'
+              ? 'bg-[#49B88A]/12 border-[#49B88A]/45 text-[#49B88A]'
+              : 'bg-[#D65C66]/12 border-[#D65C66]/45 text-[#D65C66]'
           }`}
         >
           <span>{feedback.text}</span>
@@ -763,1167 +750,1170 @@ export const RivalsView: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 1: ARENA & MATCHMAKING QUEUE */}
-      {arenaTab === 'queue' && (
-        <div className="space-y-5">
-          {queueEntry && queueEntry.status === 'searching' && (
-            <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#FFAA45]/55 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-[0_0_24px_rgba(255,170,69,0.16)]">
-              <div className="space-y-1">
-                <div className="text-xs font-['Cinzel'] font-bold uppercase tracking-wider text-[#FFAA45]">
-                  Live Matchmaking Queue · Real Players Only
+      <RpgSubTabTransition tabKey={arenaTab}>
+        {/* TAB 1: ARENA & MATCHMAKING QUEUE */}
+        {arenaTab === 'queue' && (
+          <div className="space-y-5">
+            {queueEntry && queueEntry.status === 'searching' && (
+              <div className="lq-card-gold rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="text-xs font-['Cinzel'] font-bold uppercase tracking-wider text-[#E8C777]">
+                    Live Matchmaking Queue · Real Players Only
+                  </div>
+                  <p className="text-sm font-bold text-[#F2EDF7]">
+                    Searching for {COMPETITIVE_RIVAL_MODES.find(m => m.id === queueEntry.mode)?.title || queueEntry.mode} opponent
+                  </p>
+                  <p className="text-xs text-[#A69AAF] font-mono tabular-nums">
+                    Your Rating: {queueEntry.ratingSnapshot} · Bracket: {queueEntry.minRating} – {queueEntry.maxRating} · Expanding +75 every 10s
+                  </p>
                 </div>
-                <p className="text-sm font-bold text-[#F2F7FF]">
-                  Searching for {COMPETITIVE_RIVAL_MODES.find(m => m.id === queueEntry.mode)?.title || queueEntry.mode} opponent
-                </p>
-                <p className="text-xs text-[#94A8C7] font-mono tabular-nums">
-                  Your Rating: {queueEntry.ratingSnapshot} · Bracket: {queueEntry.minRating} – {queueEntry.maxRating} · Expanding +75 every 10s
-                </p>
+                <button
+                  type="button"
+                  disabled={busyId === 'queue-cancel'}
+                  onClick={() => void handleCancelQueue()}
+                  className="lq-btn px-4 py-2 rounded-xl bg-[#D65C66]/15 hover:bg-[#D65C66]/25 border border-[#D65C66]/45 text-[#D65C66] text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  Leave Queue
+                </button>
               </div>
-              <button
-                type="button"
-                disabled={busyId === 'queue-cancel'}
-                onClick={() => void handleCancelQueue()}
-                className="px-4 py-2 rounded-xl bg-[#36111F]/90 hover:bg-[#4e182c] border border-[#F05B70]/45 text-[#F05B70] text-xs font-bold whitespace-nowrap shrink-0 transition-colors cursor-pointer"
-              >
-                Leave Queue
-              </button>
-            </div>
-          )}
+            )}
 
-          <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#F05B70]/35 p-5 space-y-4 shadow-[0_12px_32px_rgba(4,12,28,0.65)]">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF]">
-                  Select Competitive Match Format
-                </h2>
-                <p className="text-xs text-[#94A8C7] mt-0.5">
-                  Pairs you with a real player inside your Elo window (zero AI bots or simulated opponents).
-                </p>
+            <div className="lq-surface rounded-2xl p-5 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7]">
+                    Select Competitive Match Format
+                  </h2>
+                  <p className="text-xs text-[#A69AAF] mt-0.5">
+                    Pairs you with a real player inside your Elo window (zero AI bots or simulated opponents).
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  disabled={busyId === 'queue' || queueEntry?.status === 'searching'}
+                  onClick={() => void handleJoinQueue()}
+                  className="lq-btn lq-btn-gold px-5 py-2.5 rounded-xl disabled:opacity-50 font-['Cinzel'] font-bold text-xs tracking-wider uppercase whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  {queueEntry?.status === 'searching'
+                    ? 'Searching Queue...'
+                    : busyId === 'queue'
+                    ? 'Entering...'
+                    : 'Find Ranked Match'}
+                </button>
               </div>
-              <button
-                type="button"
-                disabled={busyId === 'queue' || queueEntry?.status === 'searching'}
-                onClick={() => void handleJoinQueue()}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#F05B70] to-[#FFAA45] hover:from-[#ff6b80] hover:to-[#FFD978] disabled:opacity-50 text-[#061225] shadow-[0_0_16px_rgba(240,91,112,0.35)] font-['Cinzel'] font-bold text-xs tracking-wider uppercase whitespace-nowrap shrink-0 transition-all cursor-pointer"
-              >
-                {queueEntry?.status === 'searching'
-                  ? 'Searching Queue...'
-                  : busyId === 'queue'
-                  ? 'Entering...'
-                  : 'Find Ranked Match'}
-              </button>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-              {COMPETITIVE_RIVAL_MODES.map(mode => {
-                const selected = queueMode === mode.id;
-                return (
-                  <button
-                    key={mode.id}
-                    type="button"
-                    onClick={() => setQueueMode(mode.id)}
-                    className={`text-left rounded-xl p-4 border transition-all space-y-1.5 cursor-pointer ${
-                      selected
-                        ? 'bg-[#0A1930] border-[#FFAA45] shadow-[0_0_16px_rgba(255,170,69,0.2)]'
-                        : 'bg-[#061225] border-[#1677FF]/30 hover:border-[#F05B70]/50'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-2 text-xs">
-                      <span className="font-['Cinzel'] font-bold text-[#F2F7FF]">
-                        {mode.title}
-                      </span>
-                      <span className="font-mono text-[11px] text-[#FFD978] tabular-nums">
-                        {mode.defaultDurationDays}d
-                      </span>
-                    </div>
-                    <p className="text-[11px] font-medium text-[#F05B70]">{mode.subtitle}</p>
-                    <p className="text-xs text-[#94A8C7] leading-relaxed">
-                      {mode.description}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 2: DIRECT CHALLENGE */}
-      {arenaTab === 'challenge' && (
-        <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#F05B70]/35 p-5 space-y-5 shadow-[0_12px_32px_rgba(4,12,28,0.65)]">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF]">
-                Direct Rival Challenge
-              </h2>
-              <p className="text-xs text-[#94A8C7] mt-0.5">
-                Issue a customized head-to-head challenge to an accepted friend or open-challenge player.
-              </p>
-            </div>
-            <div className="relative w-full sm:w-64">
-              <Search className="w-3.5 h-3.5 text-[#94A8C7]/60 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={candidateSearch}
-                onChange={e => setCandidateSearch(e.target.value)}
-                placeholder="Filter opponents..."
-                className="w-full rounded-xl bg-[#061225] border border-[#1677FF]/40 pl-8 pr-3 py-2 text-xs text-[#F2F7FF] placeholder-[#94A8C7]/50 focus:outline-none focus:border-[#FFAA45]"
-              />
-            </div>
-          </div>
-
-          {selectableOpponents.length === 0 ? (
-            <div className="rounded-xl bg-[#061225] border border-[#1677FF]/30 p-5 text-xs text-[#94A8C7] flex items-center gap-3">
-              <Users className="w-4 h-4 text-[#FFAA45] shrink-0" />
-              No eligible opponents matched right now. Add friends in the Friends tab or discover open-challenge champions as more players enter the Arena.
-            </div>
-          ) : (
-            <form onSubmit={handleSendDirectChallenge} className="space-y-4">
-              {/* Opponent Selector Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-60 overflow-y-auto pr-1">
-                {selectableOpponents.map(opp => {
-                  const presence = getPlayerPresence(opp.id);
-                  const chosen = selectedOpponentId === opp.id;
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                {COMPETITIVE_RIVAL_MODES.map(mode => {
+                  const selected = queueMode === mode.id;
                   return (
                     <button
-                      key={opp.id}
+                      key={mode.id}
                       type="button"
-                      onClick={() => setSelectedOpponentId(opp.id)}
-                      className={`text-left rounded-xl p-3 border flex items-center justify-between gap-2 transition-all cursor-pointer ${
-                        chosen
-                          ? 'bg-[#0A1930] border-[#FFAA45] shadow-[0_0_12px_rgba(255,170,69,0.2)]'
-                          : 'bg-[#061225] border-[#1677FF]/30 hover:border-[#F05B70]/50'
+                      onClick={() => setQueueMode(mode.id)}
+                      className={`text-left rounded-xl p-4 border transition-all space-y-1.5 cursor-pointer ${
+                        selected
+                          ? 'bg-[#21152F] border-[#D6A84B] shadow-[0_0_16px_rgba(214,168,75,0.16)]'
+                          : 'bg-[#100D18] border-[#362B45] hover:border-[#7045A0]'
                       }`}
                     >
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <PresenceBadge status={presence.status} size="xs" />
-                          <span className="text-xs font-bold text-[#F2F7FF] truncate">
-                            {opp.username}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-[#94A8C7] tabular-nums mt-0.5">
-                          Lv.{opp.level} · {opp.characterClass} · {opp.isFriend ? 'Friend' : 'Open Arena'}
-                        </p>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <span className="text-xs font-mono font-bold text-[#FFD978] tabular-nums block">
-                          {opp.rating}
+                      <div className="flex items-center justify-between gap-2 text-xs">
+                        <span className="font-['Cinzel'] font-bold text-[#F2EDF7]">
+                          {mode.title}
                         </span>
-                        <span className="text-[10px] text-[#94A8C7]/75">{opp.tier}</span>
+                        <span className="font-mono text-[11px] text-[#E8C777] tabular-nums">
+                          {mode.defaultDurationDays}d
+                        </span>
                       </div>
+                      <p className="text-[11px] font-medium text-[#D65C66]">{mode.subtitle}</p>
+                      <p className="text-xs text-[#A69AAF] leading-relaxed">
+                        {mode.description}
+                      </p>
                     </button>
                   );
                 })}
               </div>
+            </div>
+          </div>
+        )}
 
-              {/* Match Rule Configuration */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2 border-t border-[#F05B70]/25">
-                <div>
-                  <label className="text-[11px] text-[#94A8C7] font-semibold block mb-1">
-                    Duel Mode
-                  </label>
-                  <select
-                    value={challengeMode}
-                    onChange={e => {
-                      const nextMode = e.target.value as CompetitiveRivalMode;
-                      setChallengeMode(nextMode);
-                      const def = COMPETITIVE_RIVAL_MODES.find(m => m.id === nextMode);
-                      if (def) {
-                        setDurationDays(def.defaultDurationDays);
-                        setTargetScore(def.defaultTargetScore);
-                      }
-                    }}
-                    className="w-full rounded-xl bg-[#061225] border border-[#1677FF]/40 px-3 py-2 text-xs text-[#F2F7FF] focus:outline-none focus:border-[#FFAA45]"
-                  >
-                    {COMPETITIVE_RIVAL_MODES.map(m => (
-                      <option key={m.id} value={m.id}>
-                        {m.title}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="text-[11px] text-[#94A8C7] font-semibold block mb-1">
-                    Duration (3–14 Days)
-                  </label>
-                  <input
-                    type="number"
-                    min={3}
-                    max={14}
-                    value={durationDays}
-                    onChange={e => setDurationDays(Math.max(3, Math.min(14, Number(e.target.value) || 7)))}
-                    className="w-full rounded-xl bg-[#061225] border border-[#1677FF]/40 px-3 py-2 text-xs text-[#F2F7FF] font-mono tabular-nums focus:outline-none focus:border-[#FFAA45]"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[11px] text-[#94A8C7] font-semibold block mb-1">
-                    Target Score Cap (100–2000)
-                  </label>
-                  <input
-                    type="number"
-                    min={100}
-                    max={2000}
-                    step={25}
-                    value={targetScore}
-                    onChange={e => setTargetScore(Math.max(100, Math.min(2000, Number(e.target.value) || 500)))}
-                    className="w-full rounded-xl bg-[#061225] border border-[#1677FF]/40 px-3 py-2 text-xs text-[#F2F7FF] font-mono tabular-nums focus:outline-none focus:border-[#FFAA45]"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[11px] text-[#94A8C7] font-semibold block mb-1">
-                    Visibility
-                  </label>
-                  <select
-                    value={visibility}
-                    onChange={e => setVisibility(e.target.value as CompetitiveMatchVisibility)}
-                    className="w-full rounded-xl bg-[#061225] border border-[#1677FF]/40 px-3 py-2 text-xs text-[#F2F7FF] focus:outline-none focus:border-[#FFAA45]"
-                  >
-                    <option value="friends">Friends Visible</option>
-                    <option value="public">Public Arena Log</option>
-                    <option value="private">Private (Participants Only)</option>
-                  </select>
-                </div>
+        {/* TAB 2: DIRECT CHALLENGE */}
+        {arenaTab === 'challenge' && (
+          <div className="lq-surface rounded-2xl p-5 space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7]">
+                  Direct Rival Challenge
+                </h2>
+                <p className="text-xs text-[#A69AAF] mt-0.5">
+                  Issue a customized head-to-head challenge to an accepted friend or open-challenge player.
+                </p>
               </div>
-
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex flex-wrap items-center gap-4 text-xs text-[#94A8C7]">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={isRanked}
-                      onChange={e => setIsRanked(e.target.checked)}
-                      className="accent-[#F05B70]"
-                    />
-                    <span>Ranked Elo Match</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={allowRestDays}
-                      onChange={e => setAllowRestDays(e.target.checked)}
-                      className="accent-[#F05B70]"
-                    />
-                    <span>Healthy Recovery Rest Days Allowed</span>
-                  </label>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={busyId === 'challenge-send' || !selectedOpponentId}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#F05B70] to-[#FFAA45] hover:from-[#ff6b80] hover:to-[#FFD978] disabled:opacity-50 text-[#061225] shadow-[0_0_16px_rgba(240,91,112,0.35)] font-['Cinzel'] font-bold text-xs tracking-wider uppercase whitespace-nowrap shrink-0 transition-all cursor-pointer"
-                >
-                  {busyId === 'challenge-send' ? 'Sending...' : 'Send Direct Challenge'}
-                </button>
+              <div className="relative w-full sm:w-64">
+                <Search className="w-3.5 h-3.5 text-[#766D82] absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={candidateSearch}
+                  onChange={e => setCandidateSearch(e.target.value)}
+                  placeholder="Filter opponents..."
+                  className="lq-input w-full pl-8 pr-3 py-2 text-xs"
+                />
               </div>
+            </div>
 
-              {challengeMode === 'custom' && (
-                <div>
-                  <label className="text-[11px] text-[#94A8C7] font-semibold block mb-1">
-                    Custom Match Stipulation (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    maxLength={120}
-                    value={customNote}
-                    onChange={e => setCustomNote(e.target.value)}
-                    placeholder="e.g. Clean form workouts & minimum 1 recovery stretch"
-                    className="w-full rounded-xl bg-[#061225] border border-[#1677FF]/40 px-3 py-2 text-xs text-[#F2F7FF] placeholder-[#94A8C7]/50 focus:outline-none focus:border-[#FFAA45]"
-                  />
-                </div>
-              )}
-            </form>
-          )}
-        </div>
-      )}
-
-      {/* TAB 3: ACTIVE & PENDING MATCHES */}
-      {arenaTab === 'matches' && (
-        <div className="space-y-5">
-          {(incomingInvites.length > 0 || outgoingInvites.length > 0) && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {incomingInvites.length > 0 && (
-                <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#F05B70]/35 p-5 space-y-3 shadow-[0_12px_32px_rgba(4,12,28,0.65)]">
-                  <h3 className="font-['Cinzel'] font-bold text-sm text-[#FFAA45]">
-                    Incoming Challenges ({incomingInvites.length})
-                  </h3>
-                  {incomingInvites.map(inv => {
-                    const presence = getPlayerPresence(inv.challengerId);
+            {selectableOpponents.length === 0 ? (
+              <div className="rounded-xl bg-[#100D18] border border-[#362B45] p-5 text-xs text-[#A69AAF] flex items-center gap-3">
+                <Users className="w-4 h-4 text-[#D6A84B] shrink-0" />
+                No eligible opponents matched right now. Add friends in the Friends tab or discover open-challenge champions as more players enter the Arena.
+              </div>
+            ) : (
+              <form onSubmit={handleSendDirectChallenge} className="space-y-4">
+                {/* Opponent Selector Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-60 overflow-y-auto pr-1">
+                  {selectableOpponents.map(opp => {
+                    const presence = getPlayerPresence(opp.id);
+                    const chosen = selectedOpponentId === opp.id;
                     return (
-                      <div
-                        key={inv.id}
-                        className="rounded-xl bg-[#061225] border border-[#1677FF]/35 p-3.5 flex items-center justify-between gap-3"
+                      <button
+                        key={opp.id}
+                        type="button"
+                        onClick={() => setSelectedOpponentId(opp.id)}
+                        className={`text-left rounded-xl p-3 border flex items-center justify-between gap-2 transition-all cursor-pointer ${
+                          chosen
+                            ? 'bg-[#21152F] border-[#D6A84B]'
+                            : 'bg-[#100D18] border-[#362B45] hover:border-[#7045A0]'
+                        }`}
                       >
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
                             <PresenceBadge status={presence.status} size="xs" />
-                            <button
-                              type="button"
-                              onClick={() => openPublicProfile(inv.challengerId)}
-                              className="text-xs font-bold text-[#F2F7FF] hover:text-[#FFAA45] truncate transition-colors cursor-pointer"
-                            >
-                              {inv.challengerName}
-                            </button>
-                            <span className="text-xs text-[#94A8C7]">
-                              · {inv.challengeTitle}
+                            <span className="text-xs font-bold text-[#F2EDF7] truncate">
+                              {opp.username}
                             </span>
                           </div>
-                          <p className="text-[11px] text-[#94A8C7]/80 font-mono tabular-nums mt-0.5">
-                            {inv.isRanked ? 'Ranked Elo' : 'Casual'} · {inv.rules.durationDays}d · Target {inv.rules.targetScore} pts
-                            {inv.challengerRatingSnapshot ? ` · ${inv.challengerRatingSnapshot} Elo` : ''}
+                          <p className="text-[11px] text-[#A69AAF] tabular-nums mt-0.5">
+                            Lv.{opp.level} · {opp.characterClass} · {opp.isFriend ? 'Friend' : 'Open Arena'}
                           </p>
                         </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <button
-                            type="button"
-                            disabled={busyId === inv.id}
-                            onClick={() => void handleRespond(inv.id, 'accept')}
-                            className="px-2.5 py-1.5 rounded-lg bg-[#35D69A] hover:bg-[#49e3aa] text-[#061225] text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
-                          >
-                            <Check className="w-3.5 h-3.5" /> Accept
-                          </button>
-                          <button
-                            type="button"
-                            disabled={busyId === inv.id}
-                            onClick={() => void handleRespond(inv.id, 'decline')}
-                            className="px-2.5 py-1.5 rounded-lg bg-[#0A1930] hover:bg-[#36111F] border border-[#F05B70]/40 text-[#F05B70] text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
-                          >
-                            <X className="w-3.5 h-3.5" /> Decline
-                          </button>
+                        <div className="text-right shrink-0">
+                          <span className="text-xs font-mono font-bold text-[#E8C777] tabular-nums block">
+                            {opp.rating}
+                          </span>
+                          <span className="text-[10px] text-[#766D82]">{opp.tier}</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Match Rule Configuration */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2 border-t border-[#362B45]">
+                  <div>
+                    <label className="text-[11px] text-[#A69AAF] font-semibold block mb-1">
+                      Duel Mode
+                    </label>
+                    <select
+                      value={challengeMode}
+                      onChange={e => {
+                        const nextMode = e.target.value as CompetitiveRivalMode;
+                        setChallengeMode(nextMode);
+                        const def = COMPETITIVE_RIVAL_MODES.find(m => m.id === nextMode);
+                        if (def) {
+                          setDurationDays(def.defaultDurationDays);
+                          setTargetScore(def.defaultTargetScore);
+                        }
+                      }}
+                      className="lq-input w-full px-3 py-2 text-xs"
+                    >
+                      {COMPETITIVE_RIVAL_MODES.map(m => (
+                        <option key={m.id} value={m.id}>
+                          {m.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] text-[#A69AAF] font-semibold block mb-1">
+                      Duration (3–14 Days)
+                    </label>
+                    <input
+                      type="number"
+                      min={3}
+                      max={14}
+                      value={durationDays}
+                      onChange={e => setDurationDays(Math.max(3, Math.min(14, Number(e.target.value) || 7)))}
+                      className="lq-input w-full px-3 py-2 text-xs font-mono tabular-nums"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] text-[#A69AAF] font-semibold block mb-1">
+                      Target Score Cap (100–2000)
+                    </label>
+                    <input
+                      type="number"
+                      min={100}
+                      max={2000}
+                      step={25}
+                      value={targetScore}
+                      onChange={e => setTargetScore(Math.max(100, Math.min(2000, Number(e.target.value) || 500)))}
+                      className="lq-input w-full px-3 py-2 text-xs font-mono tabular-nums"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] text-[#A69AAF] font-semibold block mb-1">
+                      Visibility
+                    </label>
+                    <select
+                      value={visibility}
+                      onChange={e => setVisibility(e.target.value as CompetitiveMatchVisibility)}
+                      className="lq-input w-full px-3 py-2 text-xs"
+                    >
+                      <option value="friends">Friends Visible</option>
+                      <option value="public">Public Arena Log</option>
+                      <option value="private">Private (Participants Only)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-[#A69AAF]">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={isRanked}
+                        onChange={e => setIsRanked(e.target.checked)}
+                        className="accent-[#7045A0]"
+                      />
+                      <span>Ranked Elo Match</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={allowRestDays}
+                        onChange={e => setAllowRestDays(e.target.checked)}
+                        className="accent-[#7045A0]"
+                      />
+                      <span>Healthy Recovery Rest Days Allowed</span>
+                    </label>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={busyId === 'challenge-send' || !selectedOpponentId}
+                    className="lq-btn lq-btn-gold px-5 py-2.5 rounded-xl disabled:opacity-50 font-['Cinzel'] font-bold text-xs tracking-wider uppercase whitespace-nowrap shrink-0 cursor-pointer"
+                  >
+                    {busyId === 'challenge-send' ? 'Sending...' : 'Send Direct Challenge'}
+                  </button>
+                </div>
+
+                {challengeMode === 'custom' && (
+                  <div>
+                    <label className="text-[11px] text-[#A69AAF] font-semibold block mb-1">
+                      Custom Match Stipulation (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      maxLength={120}
+                      value={customNote}
+                      onChange={e => setCustomNote(e.target.value)}
+                      placeholder="e.g. Clean form workouts & minimum 1 recovery stretch"
+                      className="lq-input w-full px-3 py-2 text-xs"
+                    />
+                  </div>
+                )}
+              </form>
+            )}
+          </div>
+        )}
+
+        {/* TAB 3: ACTIVE & PENDING MATCHES */}
+        {arenaTab === 'matches' && (
+          <div className="space-y-5">
+            {(incomingInvites.length > 0 || outgoingInvites.length > 0) && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {incomingInvites.length > 0 && (
+                  <div className="lq-surface rounded-2xl p-5 space-y-3">
+                    <h3 className="font-['Cinzel'] font-bold text-sm text-[#E8C777]">
+                      Incoming Challenges ({incomingInvites.length})
+                    </h3>
+                    {incomingInvites.map(inv => {
+                      const presence = getPlayerPresence(inv.challengerId);
+                      return (
+                        <div
+                          key={inv.id}
+                          className="rounded-xl bg-[#100D18] border border-[#362B45] p-3.5 flex items-center justify-between gap-3"
+                        >
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <PresenceBadge status={presence.status} size="xs" />
+                              <button
+                                type="button"
+                                onClick={() => openPublicProfile(inv.challengerId)}
+                                className="text-xs font-bold text-[#F2EDF7] hover:text-[#E8C777] truncate transition-colors cursor-pointer"
+                              >
+                                {inv.challengerName}
+                              </button>
+                              <span className="text-xs text-[#A69AAF]">
+                                · {inv.challengeTitle}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-[#766D82] font-mono tabular-nums mt-0.5">
+                              {inv.isRanked ? 'Ranked Elo' : 'Casual'} · {inv.rules.durationDays}d · Target {inv.rules.targetScore} pts
+                              {inv.challengerRatingSnapshot ? ` · ${inv.challengerRatingSnapshot} Elo` : ''}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button
+                              type="button"
+                              disabled={busyId === inv.id}
+                              onClick={() => void handleRespond(inv.id, 'accept')}
+                              className="lq-btn px-2.5 py-1.5 rounded-lg bg-[#49B88A] hover:brightness-110 text-[#100D18] text-xs font-bold flex items-center gap-1 cursor-pointer"
+                            >
+                              <Check className="w-3.5 h-3.5" /> Accept
+                            </button>
+                            <button
+                              type="button"
+                              disabled={busyId === inv.id}
+                              onClick={() => void handleRespond(inv.id, 'decline')}
+                              className="lq-btn px-2.5 py-1.5 rounded-lg bg-[#171220] hover:bg-[#D65C66]/15 border border-[#D65C66]/45 text-[#D65C66] text-xs font-semibold flex items-center gap-1 cursor-pointer"
+                            >
+                              <X className="w-3.5 h-3.5" /> Decline
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {outgoingInvites.length > 0 && (
+                  <div className="lq-surface rounded-2xl p-5 space-y-3">
+                    <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2EDF7]">
+                      Sent Challenges ({outgoingInvites.length})
+                    </h3>
+                    {outgoingInvites.map(inv => (
+                      <div
+                        key={inv.id}
+                        className="rounded-xl bg-[#100D18] border border-[#362B45] p-3.5 flex items-center justify-between gap-3"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-[#F2EDF7] truncate">
+                            To {inv.opponentName} · {inv.challengeTitle}
+                          </p>
+                          <p className="text-[11px] text-[#766D82] font-mono tabular-nums mt-0.5">
+                            {inv.isRanked ? 'Ranked' : 'Casual'} · {inv.rules.durationDays}d · Awaiting response
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => void cancelRivalInvite(inv.id)}
+                          className="lq-btn px-3 py-1.5 rounded-lg bg-[#171220] hover:bg-[#D65C66]/15 border border-[#D65C66]/45 text-xs text-[#D65C66] font-semibold shrink-0 cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Active Head-to-Head Duels */}
+            <div className="lq-surface rounded-2xl p-5 space-y-4">
+              <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
+                <Dumbbell className="w-4 h-4 text-[#D65C66]" />
+                Active Competitive Matches
+              </h2>
+
+              {activeDuels.length === 0 ? (
+                <div className="py-8 text-center space-y-3">
+                  <p className="text-xs text-[#A69AAF]">
+                    No active matches right now. Enter the matchmaking queue or challenge a rival directly.
+                  </p>
+                  <div className="flex items-center justify-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setArenaTab('queue')}
+                      className="lq-btn lq-btn-gold px-4 py-2 rounded-xl text-xs font-bold cursor-pointer"
+                    >
+                      Matchmaking Queue
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setArenaTab('challenge')}
+                      className="lq-btn lq-btn-secondary px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer"
+                    >
+                      Direct Challenge
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {activeDuels.map(m => {
+                    const amChallenger = m.challengerId === user?.id;
+                    const myScore = amChallenger ? m.challengerScore : m.opponentScore;
+                    const theirScore = amChallenger ? m.opponentScore : m.challengerScore;
+                    const theirName = amChallenger ? m.opponentName : m.challengerName;
+                    const theirId = amChallenger ? m.opponentId : m.challengerId;
+                    const theirRating = amChallenger
+                      ? m.opponentRatingSnapshot
+                      : m.challengerRatingSnapshot;
+                    const total = Math.max(1, myScore + theirScore);
+                    const myShare = Math.round((myScore / total) * 100);
+                    const theirPresence = getPlayerPresence(theirId);
+
+                    return (
+                      <div
+                        key={m.id}
+                        className="lq-card rounded-xl p-4 space-y-3"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="text-[11px] font-['Cinzel'] font-bold text-[#E8C777]">
+                              {m.challengeTitle} · {m.isRanked ? 'Ranked' : 'Unranked'}
+                            </p>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className="text-sm font-bold text-[#F2EDF7]">You vs</span>
+                              <PresenceBadge status={theirPresence.status} size="xs" />
+                              <button
+                                type="button"
+                                onClick={() => openPublicProfile(theirId)}
+                                className="text-sm font-bold text-[#E8C777] hover:underline truncate cursor-pointer"
+                              >
+                                {theirName}
+                              </button>
+                              {theirRating && (
+                                <span className="text-[11px] font-mono text-[#A69AAF] tabular-nums">
+                                  ({theirRating})
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <span className="text-[11px] font-mono text-[#A69AAF] flex items-center gap-1 tabular-nums shrink-0">
+                            <Clock className="w-3 h-3" /> {formatRemainingTime(m.endsAt)}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between text-sm font-mono font-bold tabular-nums">
+                          <span className="text-[#49B88A]">
+                            {myScore} pts <span className="text-[10px] font-sans font-normal text-[#A69AAF]">(You)</span>
+                          </span>
+                          <span className="text-[11px] text-[#766D82] font-sans">
+                            Goal {m.rules.targetScore} pts
+                          </span>
+                          <span className="text-[#D65C66]">
+                            {theirScore} pts <span className="text-[10px] font-sans font-normal text-[#A69AAF]">({theirName})</span>
+                          </span>
+                        </div>
+
+                        <AnimatedProgressBar
+                          percentage={myShare}
+                          className="h-2 w-full rounded-full bg-[#100D18] border border-[#362B45] overflow-hidden"
+                          barClassName="bg-[#49B88A]"
+                          shimmer={false}
+                        />
+
+                        <div className="flex items-center justify-between gap-2 pt-1 text-[11px] text-[#A69AAF]">
+                          <span>
+                            {m.rules.allowRestDays ? 'Rest-day safe scoring' : 'Full active output'}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => void endActiveRivalry(m.id)}
+                              className="lq-btn lq-btn-secondary px-2.5 py-1 rounded-lg font-semibold cursor-pointer"
+                            >
+                              Settle Match
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => void blockRivalUser(theirId)}
+                              className="lq-btn px-2.5 py-1 rounded-lg bg-[#D65C66]/12 hover:bg-[#D65C66]/22 text-[#D65C66] font-semibold flex items-center gap-1 cursor-pointer"
+                            >
+                              <Ban className="w-3 h-3" /> Block
+                            </button>
+                          </div>
                         </div>
                       </div>
                     );
                   })}
                 </div>
               )}
+            </div>
+          </div>
+        )}
 
-              {outgoingInvites.length > 0 && (
-                <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#F05B70]/35 p-5 space-y-3 shadow-[0_12px_32px_rgba(4,12,28,0.65)]">
-                  <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF]">
-                    Sent Challenges ({outgoingInvites.length})
-                  </h3>
-                  {outgoingInvites.map(inv => (
+        {/* TAB 4: MATCH ARCHIVE & HEAD-TO-HEAD MATRIX */}
+        {arenaTab === 'history' && (
+          <div className="space-y-5">
+            <div className="lq-surface rounded-2xl p-5 space-y-3">
+              <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
+                <Scale className="w-4 h-4 text-[#D6A84B]" />
+                Head-to-Head Rivalries ({h2hRecords.length})
+              </h2>
+              {h2hRecords.length === 0 ? (
+                <p className="text-xs text-[#A69AAF]">
+                  Complete matches against rivals to build your lifetime Head-to-Head ledger.
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {h2hRecords.map(h => (
                     <div
-                      key={inv.id}
-                      className="rounded-xl bg-[#061225] border border-[#1677FF]/35 p-3.5 flex items-center justify-between gap-3"
+                      key={h.opponentId}
+                      className="rounded-xl bg-[#100D18] border border-[#362B45] p-3.5 flex items-center justify-between gap-2"
                     >
                       <div className="min-w-0">
-                        <p className="text-xs font-bold text-[#F2F7FF] truncate">
-                          To {inv.opponentName} · {inv.challengeTitle}
-                        </p>
-                        <p className="text-[11px] text-[#94A8C7]/80 font-mono tabular-nums mt-0.5">
-                          {inv.isRanked ? 'Ranked' : 'Casual'} · {inv.rules.durationDays}d · Awaiting response
-                        </p>
+                        <button
+                          type="button"
+                          onClick={() => openPublicProfile(h.opponentId)}
+                          className="text-xs font-bold text-[#F2EDF7] hover:text-[#E8C777] truncate block transition-colors cursor-pointer"
+                        >
+                          {h.opponentName}
+                        </button>
+                        <span className="text-[11px] text-[#A69AAF] font-mono tabular-nums">
+                          {h.opponentRating} Elo · {h.opponentTier}
+                        </span>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => void cancelRivalInvite(inv.id)}
-                        className="px-3 py-1.5 rounded-lg bg-[#0A1930] hover:bg-[#36111F] border border-[#F05B70]/40 text-xs text-[#F05B70] font-semibold shrink-0 transition-colors cursor-pointer"
-                      >
-                        Cancel
-                      </button>
+                      <div className="text-right font-mono tabular-nums shrink-0">
+                        <span className="text-sm font-bold text-[#E8C777]">
+                          {h.wins}W - {h.losses}L - {h.ties}T
+                        </span>
+                        <span className="text-[10px] text-[#766D82] block">
+                          {h.totalMatches} matches
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
               )}
             </div>
-          )}
 
-          {/* Active Head-to-Head Duels */}
-          <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#F05B70]/35 p-5 space-y-4 shadow-[0_12px_32px_rgba(4,12,28,0.65)]">
-            <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
-              <Dumbbell className="w-4 h-4 text-[#F05B70]" />
-              Active Competitive Matches
-            </h2>
+            <div className="lq-surface rounded-2xl p-5 space-y-3">
+              <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
+                <Award className="w-4 h-4 text-[#D6A84B]" />
+                Completed &amp; Archived Matches ({historyDuels.length})
+              </h2>
+              {historyDuels.length === 0 ? (
+                <p className="text-xs text-[#A69AAF]">No finished matches archived yet.</p>
+              ) : (
+                <div className="space-y-2">
+                  {historyDuels.slice(0, 20).map(m => {
+                    const amChallenger = m.challengerId === user?.id;
+                    const myScore = amChallenger ? m.challengerScore : m.opponentScore;
+                    const theirScore = amChallenger ? m.opponentScore : m.challengerScore;
+                    const theirName = amChallenger ? m.opponentName : m.challengerName;
+                    const theirId = amChallenger ? m.opponentId : m.challengerId;
+                    const myDelta = amChallenger
+                      ? m.challengerRatingDelta
+                      : m.opponentRatingDelta;
+                    const verdict =
+                      m.status === 'completed'
+                        ? m.isTie
+                          ? 'Draw'
+                          : m.winnerId === user?.id
+                          ? 'Victory'
+                          : 'Defeat'
+                        : m.status.toUpperCase();
 
-            {activeDuels.length === 0 ? (
-              <div className="py-8 text-center space-y-3">
-                <p className="text-xs text-[#94A8C7]">
-                  No active matches right now. Enter the matchmaking queue or challenge a rival directly.
-                </p>
-                <div className="flex items-center justify-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setArenaTab('queue')}
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#F05B70] to-[#FFAA45] hover:from-[#ff6b80] hover:to-[#FFD978] text-[#061225] shadow-[0_0_16px_rgba(240,91,112,0.35)] text-xs font-bold transition-all cursor-pointer"
-                  >
-                    Matchmaking Queue
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setArenaTab('challenge')}
-                    className="px-4 py-2 rounded-xl bg-[#0A1930] hover:bg-[#152E52] border border-[#F05B70]/40 hover:border-[#FFAA45]/55 text-[#F2F7FF] text-xs font-semibold transition-all cursor-pointer"
-                  >
-                    Direct Challenge
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {activeDuels.map(m => {
-                  const amChallenger = m.challengerId === user?.id;
-                  const myScore = amChallenger ? m.challengerScore : m.opponentScore;
-                  const theirScore = amChallenger ? m.opponentScore : m.challengerScore;
-                  const theirName = amChallenger ? m.opponentName : m.challengerName;
-                  const theirId = amChallenger ? m.opponentId : m.challengerId;
-                  const theirRating = amChallenger
-                    ? m.opponentRatingSnapshot
-                    : m.challengerRatingSnapshot;
-                  const total = Math.max(1, myScore + theirScore);
-                  const myShare = Math.round((myScore / total) * 100);
-                  const theirPresence = getPlayerPresence(theirId);
-
-                  return (
-                    <div
-                      key={m.id}
-                      className="rounded-xl bg-[#061225] border border-[#1677FF]/40 p-4 space-y-3"
-                    >
-                      <div className="flex items-start justify-between gap-2">
+                    return (
+                      <div
+                        key={m.id}
+                        className="rounded-xl bg-[#100D18] border border-[#362B45] px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                      >
                         <div className="min-w-0">
-                          <p className="text-[11px] font-['Cinzel'] font-bold text-[#FFAA45]">
-                            {m.challengeTitle} · {m.isRanked ? 'Ranked' : 'Unranked'}
-                          </p>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-sm font-bold text-[#F2F7FF]">You vs</span>
-                            <PresenceBadge status={theirPresence.status} size="xs" />
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="font-bold text-[#F2EDF7]">{m.challengeTitle}</span>
+                            <span className="text-[#A69AAF]">vs</span>
                             <button
                               type="button"
                               onClick={() => openPublicProfile(theirId)}
-                              className="text-sm font-bold text-[#FFAA45] hover:underline truncate cursor-pointer"
+                              className="font-semibold text-[#E8C777] hover:underline cursor-pointer"
                             >
                               {theirName}
                             </button>
-                            {theirRating && (
-                              <span className="text-[11px] font-mono text-[#94A8C7] tabular-nums">
-                                ({theirRating})
-                              </span>
-                            )}
+                            <span className="text-[11px] font-mono text-[#766D82]">
+                              {m.isRanked ? 'Ranked' : 'Unranked'}
+                            </span>
                           </div>
+                          {m.disputeReason && (
+                            <p className="text-[11px] text-[#E8C777] mt-0.5">
+                              Dispute note: {m.disputeReason}
+                            </p>
+                          )}
                         </div>
-                        <span className="text-[11px] font-mono text-[#94A8C7] flex items-center gap-1 tabular-nums shrink-0">
-                          <Clock className="w-3 h-3" /> {formatRemainingTime(m.endsAt)}
-                        </span>
-                      </div>
 
-                      <div className="flex items-center justify-between text-sm font-mono font-bold tabular-nums">
-                        <span className="text-[#35D69A]">
-                          {myScore} pts <span className="text-[10px] font-sans font-normal text-[#94A8C7]">(You)</span>
-                        </span>
-                        <span className="text-[11px] text-[#94A8C7]/70 font-sans">
-                          Goal {m.rules.targetScore} pts
-                        </span>
-                        <span className="text-[#F05B70]">
-                          {theirScore} pts <span className="text-[10px] font-sans font-normal text-[#94A8C7]">({theirName})</span>
-                        </span>
-                      </div>
-
-                      <div className="h-2 w-full rounded-full bg-[#0A1930] overflow-hidden flex">
-                        <div className="bg-[#35D69A] h-full transition-all" style={{ width: `${myShare}%` }} />
-                      </div>
-
-                      <div className="flex items-center justify-between gap-2 pt-1 text-[11px] text-[#94A8C7]/80">
-                        <span>
-                          {m.rules.allowRestDays ? 'Rest-day safe scoring' : 'Full active output'}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => void endActiveRivalry(m.id)}
-                            className="px-2.5 py-1 rounded-lg bg-[#0A1930] hover:bg-[#152E52] border border-[#FFAA45]/40 text-[#F2F7FF] font-semibold transition-colors cursor-pointer"
+                        <div className="flex flex-wrap items-center gap-3 font-mono tabular-nums shrink-0">
+                          <span className="text-[#F2EDF7]">
+                            {myScore} – {theirScore}
+                          </span>
+                          {typeof myDelta === 'number' && m.isRanked && m.status === 'completed' && (
+                            <span
+                              className={
+                                myDelta >= 0 ? 'text-[#49B88A] font-bold' : 'text-[#D65C66] font-bold'
+                              }
+                            >
+                              {myDelta >= 0 ? `+${myDelta}` : myDelta} Elo
+                            </span>
+                          )}
+                          <span
+                            className={`font-bold ${
+                              verdict === 'Victory'
+                                ? 'text-[#49B88A]'
+                                : verdict === 'Defeat'
+                                ? 'text-[#D65C66]'
+                                : verdict === 'DISPUTED'
+                                ? 'text-[#E8C777]'
+                                : 'text-[#D6A84B]'
+                            }`}
                           >
-                            Settle Match
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => void blockRivalUser(theirId)}
-                            className="px-2.5 py-1 rounded-lg bg-[#36111F]/70 hover:bg-[#36111F] text-[#F05B70] font-semibold flex items-center gap-1 transition-colors cursor-pointer"
-                          >
-                            <Ban className="w-3 h-3" /> Block
-                          </button>
+                            {verdict}
+                          </span>
+                          {m.status === 'completed' && (
+                            <div className="flex items-center gap-1.5 font-sans">
+                              <button
+                                type="button"
+                                disabled={busyId === `rematch-${m.id}`}
+                                onClick={() => void handleRematch(m.id)}
+                                className="lq-btn lq-btn-secondary px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
+                              >
+                                <RotateCcw className="w-3 h-3 text-[#E8C777]" /> Rematch
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setDisputeTarget(m);
+                                  setDisputeReason('');
+                                }}
+                                className="lq-btn lq-btn-secondary px-2 py-1 rounded-lg hover:text-[#D65C66] text-[11px] cursor-pointer"
+                              >
+                                Dispute
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {events.length > 0 && (
+              <div className="lq-surface rounded-2xl p-5 space-y-2.5">
+                <h3 className="font-['Cinzel'] font-bold text-sm text-[#E8C777]">
+                  Recent Server-Verified Match Telemetry
+                </h3>
+                <div className="divide-y divide-[#362B45]">
+                  {events.slice(0, 10).map(ev => (
+                    <div key={ev.id} className="py-2 flex items-center justify-between text-xs">
+                      <span className="text-[#A69AAF]">
+                        {ev.label} · {ev.activityType.replace(/_/g, ' ')}
+                      </span>
+                      <span className="font-mono font-bold text-[#49B88A] tabular-nums">
+                        +{ev.pointsAwarded} match pts
+                      </span>
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
             )}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* TAB 4: MATCH ARCHIVE & HEAD-TO-HEAD MATRIX */}
-      {arenaTab === 'history' && (
-        <div className="space-y-5">
-          {/* Head-to-Head Matrix */}
-          <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#F05B70]/35 p-5 space-y-3 shadow-[0_12px_32px_rgba(4,12,28,0.65)]">
-            <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
-              <Scale className="w-4 h-4 text-[#FFAA45]" />
-              Head-to-Head Rivalries ({h2hRecords.length})
-            </h2>
-            {h2hRecords.length === 0 ? (
-              <p className="text-xs text-[#94A8C7]">
-                Complete matches against rivals to build your lifetime Head-to-Head ledger.
-              </p>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {h2hRecords.map(h => (
-                  <div
-                    key={h.opponentId}
-                    className="rounded-xl bg-[#061225] border border-[#1677FF]/35 p-3.5 flex items-center justify-between gap-2"
-                  >
-                    <div className="min-w-0">
-                      <button
-                        type="button"
-                        onClick={() => openPublicProfile(h.opponentId)}
-                        className="text-xs font-bold text-[#F2F7FF] hover:text-[#FFAA45] truncate block transition-colors cursor-pointer"
-                      >
-                        {h.opponentName}
-                      </button>
-                      <span className="text-[11px] text-[#94A8C7] font-mono tabular-nums">
-                        {h.opponentRating} Elo · {h.opponentTier}
-                      </span>
-                    </div>
-                    <div className="text-right font-mono tabular-nums shrink-0">
-                      <span className="text-sm font-bold text-[#FFD978]">
-                        {h.wins}W - {h.losses}L - {h.ties}T
-                      </span>
-                      <span className="text-[10px] text-[#94A8C7]/70 block">
-                        {h.totalMatches} matches
-                      </span>
-                    </div>
-                  </div>
-                ))}
+        {/* TAB: COMMUNITY TOURNAMENTS */}
+        {arenaTab === 'tournaments' && (
+          <div className="space-y-5">
+            <div className="lq-surface rounded-2xl p-5 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
+                    <Award className="w-4 h-4 text-[#D6A84B]" />
+                    Community Tournaments
+                  </h2>
+                  <p className="text-xs text-[#A69AAF] mt-0.5">
+                    Multi-round brackets composed strictly of real verified LIFEQUEST competitors (zero AI bots or simulated opponents).
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void refreshTournaments()}
+                  className="lq-btn lq-btn-secondary px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  Refresh Brackets
+                </button>
               </div>
-            )}
-          </div>
 
-          {/* Match History Archive */}
-          <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#F05B70]/35 p-5 space-y-3 shadow-[0_12px_32px_rgba(4,12,28,0.65)]">
-            <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
-              <Award className="w-4 h-4 text-[#FFAA45]" />
-              Completed &amp; Archived Matches ({historyDuels.length})
-            </h2>
-            {historyDuels.length === 0 ? (
-              <p className="text-xs text-[#94A8C7]">No finished matches archived yet.</p>
+              <form
+                onSubmit={handleCreateTournament}
+                className="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-3 border-t border-[#362B45]"
+              >
+                <input
+                  type="text"
+                  maxLength={60}
+                  value={newTourneyTitle}
+                  onChange={e => setNewTourneyTitle(e.target.value)}
+                  placeholder="Host Tournament Title..."
+                  className="lq-input px-3 py-2 text-xs"
+                />
+                <input
+                  type="text"
+                  maxLength={80}
+                  value={newTourneySubtitle}
+                  onChange={e => setNewTourneySubtitle(e.target.value)}
+                  placeholder="Theme or stipulation (optional)"
+                  className="lq-input px-3 py-2 text-xs"
+                />
+                <select
+                  value={newTourneyMode}
+                  onChange={e => setNewTourneyMode(e.target.value as CompetitiveRivalMode)}
+                  className="lq-input px-3 py-2 text-xs"
+                >
+                  {COMPETITIVE_RIVAL_MODES.map(m => (
+                    <option key={m.id} value={m.id}>
+                      {m.title}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="submit"
+                  disabled={busyId === 'create-tourney'}
+                  className="lq-btn lq-btn-gold px-4 py-2 rounded-xl disabled:opacity-50 font-['Cinzel'] font-bold text-xs flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  {busyId === 'create-tourney' ? 'Opening...' : 'Host Bracket'}
+                </button>
+              </form>
+            </div>
+
+            {tournaments.length === 0 ? (
+              <div className="lq-surface rounded-2xl p-8 text-center text-xs text-[#A69AAF]">
+                No active community brackets yet. Host the first verified tournament above!
+              </div>
             ) : (
-              <div className="space-y-2">
-                {historyDuels.slice(0, 20).map(m => {
-                  const amChallenger = m.challengerId === user?.id;
-                  const myScore = amChallenger ? m.challengerScore : m.opponentScore;
-                  const theirScore = amChallenger ? m.opponentScore : m.challengerScore;
-                  const theirName = amChallenger ? m.opponentName : m.challengerName;
-                  const theirId = amChallenger ? m.opponentId : m.challengerId;
-                  const myDelta = amChallenger
-                    ? m.challengerRatingDelta
-                    : m.opponentRatingDelta;
-                  const verdict =
-                    m.status === 'completed'
-                      ? m.isTie
-                        ? 'Draw'
-                        : m.winnerId === user?.id
-                        ? 'Victory'
-                        : 'Defeat'
-                      : m.status.toUpperCase();
-
+              <div className="space-y-4">
+                {tournaments.map(t => {
+                  const isJoined = t.participants.some(p => p.userId === user?.id);
                   return (
                     <div
-                      key={m.id}
-                      className="rounded-xl bg-[#061225] border border-[#1677FF]/35 px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                      key={t.id}
+                      className="lq-card rounded-2xl p-5 space-y-4"
                     >
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-bold text-[#F2F7FF]">{m.challengeTitle}</span>
-                          <span className="text-[#94A8C7]">vs</span>
-                          <button
-                            type="button"
-                            onClick={() => openPublicProfile(theirId)}
-                            className="font-semibold text-[#FFAA45] hover:underline cursor-pointer"
-                          >
-                            {theirName}
-                          </button>
-                          <span className="text-[11px] font-mono text-[#94A8C7]/70">
-                            {m.isRanked ? 'Ranked' : 'Unranked'}
-                          </span>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                          <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider font-semibold text-[#E8C777]">
+                            <span>{t.status}</span>
+                            <span>·</span>
+                            <span>{t.mode.replace('_', ' ')}</span>
+                            <span>·</span>
+                            <span className="tabular-nums font-mono">{t.participants.length} Real Competitors</span>
+                          </div>
+                          <h3 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] mt-0.5">
+                            {t.title}
+                          </h3>
+                          {t.subtitle && (
+                            <p className="text-xs text-[#A69AAF] mt-0.5">{t.subtitle}</p>
+                          )}
                         </div>
-                        {m.disputeReason && (
-                          <p className="text-[11px] text-[#FFAA45] mt-0.5">
-                            Dispute note: {m.disputeReason}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-3 font-mono tabular-nums shrink-0">
-                        <span className="text-[#F2F7FF]">
-                          {myScore} – {theirScore}
-                        </span>
-                        {typeof myDelta === 'number' && m.isRanked && m.status === 'completed' && (
-                          <span
-                            className={
-                              myDelta >= 0 ? 'text-[#35D69A] font-bold' : 'text-[#F05B70] font-bold'
-                            }
-                          >
-                            {myDelta >= 0 ? `+${myDelta}` : myDelta} Elo
-                          </span>
-                        )}
-                        <span
-                          className={`font-bold ${
-                            verdict === 'Victory'
-                              ? 'text-[#35D69A]'
-                              : verdict === 'Defeat'
-                              ? 'text-[#F05B70]'
-                              : verdict === 'DISPUTED'
-                              ? 'text-[#FFAA45]'
-                              : 'text-[#FFD978]'
+                        <button
+                          type="button"
+                          disabled={isJoined || busyId === `join-tourney-${t.id}`}
+                          onClick={() => void handleJoinTournament(t.id)}
+                          className={`lq-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 ${
+                            isJoined
+                              ? 'bg-[#49B88A]/12 border border-[#49B88A]/45 text-[#49B88A]'
+                              : 'lq-btn-gold cursor-pointer'
                           }`}
                         >
-                          {verdict}
-                        </span>
-                        {m.status === 'completed' && (
-                          <div className="flex items-center gap-1.5 font-sans">
-                            <button
-                              type="button"
-                              disabled={busyId === `rematch-${m.id}`}
-                              onClick={() => void handleRematch(m.id)}
-                              className="px-2.5 py-1 rounded-lg bg-[#0A1930] hover:bg-[#152E52] border border-[#FFAA45]/40 text-[#FFAA45] text-[11px] font-semibold flex items-center gap-1 transition-colors cursor-pointer"
-                            >
-                              <RotateCcw className="w-3 h-3" /> Rematch
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setDisputeTarget(m);
-                                setDisputeReason('');
-                              }}
-                              className="px-2 py-1 rounded-lg bg-[#0A1930] hover:bg-[#36111F] border border-[#1677FF]/30 text-[#94A8C7] hover:text-[#FFAA45] text-[11px] transition-colors cursor-pointer"
-                            >
-                              Dispute
-                            </button>
-                          </div>
-                        )}
+                          {isJoined
+                            ? 'Registered'
+                            : busyId === `join-tourney-${t.id}`
+                            ? 'Joining...'
+                            : 'Join Tournament'}
+                        </button>
                       </div>
+
+                      {t.matches.length > 0 && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3 border-t border-[#362B45]">
+                          {t.matches.map(bm => (
+                            <div
+                              key={bm.id}
+                              className="rounded-xl bg-[#100D18] border border-[#362B45] p-3 text-xs space-y-1.5"
+                            >
+                              <div className="flex items-center justify-between text-[10px] text-[#E8C777] uppercase font-semibold">
+                                <span>{bm.roundLabel}</span>
+                                <span>{bm.status}</span>
+                              </div>
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="font-bold text-[#F2EDF7] truncate">
+                                  {bm.playerAName}{' '}
+                                  <span className="text-[10px] font-mono text-[#766D82]">
+                                    ({bm.playerARating})
+                                  </span>
+                                </span>
+                                <span className="font-mono font-bold text-[#E8C777] tabular-nums">
+                                  {bm.playerAScore}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="font-bold text-[#A69AAF] truncate">
+                                  {bm.playerBId ? bm.playerBName : 'Awaiting Opponent'}
+                                  {bm.playerBRating ? (
+                                    <span className="text-[10px] font-mono text-[#766D82] ml-1">
+                                      ({bm.playerBRating})
+                                    </span>
+                                  ) : null}
+                                </span>
+                                <span className="font-mono font-bold text-[#D65C66] tabular-nums">
+                                  {bm.playerBScore}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
               </div>
             )}
           </div>
+        )}
 
-          {/* Verified Match Activity Events */}
-          {events.length > 0 && (
-            <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#F05B70]/35 p-5 space-y-2.5 shadow-[0_12px_32px_rgba(4,12,28,0.65)]">
-              <h3 className="font-['Cinzel'] font-bold text-sm text-[#FFAA45]">
-                Recent Server-Verified Match Telemetry
-              </h3>
-              <div className="divide-y divide-[#1677FF]/25">
-                {events.slice(0, 10).map(ev => (
-                  <div key={ev.id} className="py-2 flex items-center justify-between text-xs">
-                    <span className="text-[#94A8C7]">
-                      {ev.label} · {ev.activityType.replace(/_/g, ' ')}
-                    </span>
-                    <span className="font-mono font-bold text-[#35D69A] tabular-nums">
-                      +{ev.pointsAwarded} match pts
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* TAB: COMMUNITY TOURNAMENTS (REAL COMPETITORS ONLY) */}
-      {arenaTab === 'tournaments' && (
-        <div className="space-y-5">
-          <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#F05B70]/35 p-5 space-y-4 shadow-[0_12px_32px_rgba(4,12,28,0.65)]">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        {/* TAB: READ-ONLY SPECTATOR MODE & CHEERING */}
+        {arenaTab === 'spectate' && (
+          <div className="space-y-4">
+            <div className="lq-surface rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
-                  <Award className="w-4 h-4 text-[#FFD978]" />
-                  Community Tournaments
+                <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
+                  <Eye className="w-4 h-4 text-[#D6A84B]" />
+                  Arena Spectator Gallery
                 </h2>
-                <p className="text-xs text-[#94A8C7] mt-0.5">
-                  Multi-round brackets composed strictly of real verified LIFEQUEST competitors (zero AI bots or simulated opponents).
+                <p className="text-xs text-[#A69AAF] mt-0.5">
+                  Follow top competitors and watch live public/friends Rivals matches in read-only mode. Send encouraging cheers without influencing match scores.
                 </p>
               </div>
               <button
                 type="button"
-                onClick={() => void refreshTournaments()}
-                className="px-3 py-1.5 rounded-xl bg-[#0A1930] hover:bg-[#152E52] border border-[#F05B70]/40 hover:border-[#FFAA45]/55 text-xs font-semibold text-[#FFAA45] whitespace-nowrap shrink-0 transition-all cursor-pointer"
+                onClick={() => void refreshSpectatorMatches()}
+                className="lq-btn lq-btn-secondary px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 cursor-pointer"
               >
-                Refresh Brackets
+                Refresh Live Matches
               </button>
             </div>
 
-            <form
-              onSubmit={handleCreateTournament}
-              className="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-3 border-t border-[#F05B70]/25"
-            >
-              <input
-                type="text"
-                maxLength={60}
-                value={newTourneyTitle}
-                onChange={e => setNewTourneyTitle(e.target.value)}
-                placeholder="Host Tournament Title..."
-                className="rounded-xl bg-[#061225] border border-[#1677FF]/40 px-3 py-2 text-xs text-[#F2F7FF] placeholder-[#94A8C7]/50 focus:outline-none focus:border-[#FFAA45]"
-              />
-              <input
-                type="text"
-                maxLength={80}
-                value={newTourneySubtitle}
-                onChange={e => setNewTourneySubtitle(e.target.value)}
-                placeholder="Theme or stipulation (optional)"
-                className="rounded-xl bg-[#061225] border border-[#1677FF]/40 px-3 py-2 text-xs text-[#F2F7FF] placeholder-[#94A8C7]/50 focus:outline-none focus:border-[#FFAA45]"
-              />
-              <select
-                value={newTourneyMode}
-                onChange={e => setNewTourneyMode(e.target.value as CompetitiveRivalMode)}
-                className="rounded-xl bg-[#061225] border border-[#1677FF]/40 px-3 py-2 text-xs text-[#F2F7FF] focus:outline-none focus:border-[#FFAA45]"
-              >
-                {COMPETITIVE_RIVAL_MODES.map(m => (
-                  <option key={m.id} value={m.id}>
-                    {m.title}
-                  </option>
-                ))}
-              </select>
-              <button
-                type="submit"
-                disabled={busyId === 'create-tourney'}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#F05B70] to-[#FFAA45] hover:from-[#ff6b80] hover:to-[#FFD978] disabled:opacity-50 text-[#061225] shadow-[0_0_16px_rgba(240,91,112,0.35)] font-['Cinzel'] font-bold text-xs flex items-center justify-center gap-1.5 whitespace-nowrap transition-all cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                {busyId === 'create-tourney' ? 'Opening...' : 'Host Bracket'}
-              </button>
-            </form>
-          </div>
-
-          {tournaments.length === 0 ? (
-            <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#F05B70]/35 p-8 text-center text-xs text-[#94A8C7]">
-              No active community brackets yet. Host the first verified tournament above!
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {tournaments.map(t => {
-                const isJoined = t.participants.some(p => p.userId === user?.id);
-                return (
-                  <div
-                    key={t.id}
-                    className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#F05B70]/35 p-5 space-y-4 shadow-[0_12px_32px_rgba(4,12,28,0.65)]"
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div>
-                        <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider font-semibold text-[#FFAA45]">
-                          <span>{t.status}</span>
-                          <span>·</span>
-                          <span>{t.mode.replace('_', ' ')}</span>
-                          <span>·</span>
-                          <span className="tabular-nums">{t.participants.length} Real Competitors</span>
-                        </div>
-                        <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] mt-0.5">
-                          {t.title}
-                        </h3>
-                        {t.subtitle && (
-                          <p className="text-xs text-[#94A8C7] mt-0.5">{t.subtitle}</p>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        disabled={isJoined || busyId === `join-tourney-${t.id}`}
-                        onClick={() => void handleJoinTournament(t.id)}
-                        className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
-                          isJoined
-                            ? 'bg-[#35D69A]/15 border border-[#35D69A]/45 text-[#35D69A]'
-                            : 'bg-gradient-to-r from-[#F05B70] to-[#FFAA45] hover:from-[#ff6b80] hover:to-[#FFD978] text-[#061225] shadow-[0_0_16px_rgba(240,91,112,0.35)] cursor-pointer'
-                        }`}
-                      >
-                        {isJoined
-                          ? 'Registered'
-                          : busyId === `join-tourney-${t.id}`
-                          ? 'Joining...'
-                          : 'Join Tournament'}
-                      </button>
-                    </div>
-
-                    {t.matches.length > 0 && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3 border-t border-[#F05B70]/25">
-                        {t.matches.map(bm => (
-                          <div
-                            key={bm.id}
-                            className="rounded-xl bg-[#061225] border border-[#1677FF]/35 p-3 text-xs space-y-1.5"
-                          >
-                            <div className="flex items-center justify-between text-[10px] text-[#FFAA45] uppercase font-semibold">
-                              <span>{bm.roundLabel}</span>
-                              <span>{bm.status}</span>
-                            </div>
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="font-bold text-[#F2F7FF] truncate">
-                                {bm.playerAName}{' '}
-                                <span className="text-[10px] font-mono text-[#94A8C7]/70">
-                                  ({bm.playerARating})
-                                </span>
-                              </span>
-                              <span className="font-mono font-bold text-[#FFD978] tabular-nums">
-                                {bm.playerAScore}
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="font-bold text-[#94A8C7] truncate">
-                                {bm.playerBId ? bm.playerBName : 'Awaiting Opponent'}
-                                {bm.playerBRating ? (
-                                  <span className="text-[10px] font-mono text-[#94A8C7]/70 ml-1">
-                                    ({bm.playerBRating})
-                                  </span>
-                                ) : null}
-                              </span>
-                              <span className="font-mono font-bold text-[#F05B70] tabular-nums">
-                                {bm.playerBScore}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* TAB: READ-ONLY SPECTATOR MODE & CHEERING */}
-      {arenaTab === 'spectate' && (
-        <div className="space-y-4">
-          <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#F05B70]/35 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-[0_12px_32px_rgba(4,12,28,0.65)]">
-            <div>
-              <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
-                <Eye className="w-4 h-4 text-[#FFAA45]" />
-                Arena Spectator Gallery
-              </h2>
-              <p className="text-xs text-[#94A8C7] mt-0.5">
-                Follow top competitors and watch live public/friends Rivals matches in read-only mode. Send encouraging cheers without influencing match scores.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => void refreshSpectatorMatches()}
-              className="px-3.5 py-2 rounded-xl bg-[#0A1930] hover:bg-[#152E52] border border-[#F05B70]/40 hover:border-[#FFAA45]/55 text-xs font-semibold text-[#FFAA45] whitespace-nowrap shrink-0 transition-all cursor-pointer"
-            >
-              Refresh Live Matches
-            </button>
-          </div>
-
-          {spectatorMatches.length === 0 ? (
-            <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#F05B70]/35 p-8 text-center text-xs text-[#94A8C7]">
-              No public or friends-visible matches are currently live to spectate.
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {spectatorMatches.map(m => {
-                const total = Math.max(1, m.challengerScore + m.opponentScore);
-                const cShare = Math.round((m.challengerScore / total) * 100);
-                const followingChallenger = followedCompetitorIds.includes(m.challengerId);
-                const followingOpponent = followedCompetitorIds.includes(m.opponentId);
-                return (
-                  <div
-                    key={m.matchId}
-                    className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#F05B70]/35 p-5 space-y-4 shadow-[0_12px_32px_rgba(4,12,28,0.65)]"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <span className="text-[11px] font-['Cinzel'] font-bold text-[#FFAA45]">
-                          {m.challengeTitle} · {m.isRanked ? 'Ranked' : 'Casual'} · Read-Only
-                        </span>
-                        <p className="text-xs text-[#94A8C7] mt-0.5 tabular-nums">
-                          Target {m.targetScore} pts · {formatRemainingTime(m.endsAt)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 text-xs">
-                      <div className="rounded-xl bg-[#061225] border border-[#1677FF]/35 p-3 space-y-2">
-                        <div className="flex items-center justify-between gap-1">
-                          <button
-                            type="button"
-                            onClick={() => openPublicProfile(m.challengerId)}
-                            className="font-bold text-[#F2F7FF] hover:text-[#FFAA45] truncate transition-colors cursor-pointer"
-                          >
-                            {m.challengerName}
-                          </button>
-                          {m.challengerId !== user?.id && (
-                            <button
-                              type="button"
-                              disabled={busyId === `follow-${m.challengerId}`}
-                              onClick={() => void handleToggleFollow(m.challengerId)}
-                              className={`text-[10px] px-2 py-0.5 rounded border whitespace-nowrap transition-colors cursor-pointer ${
-                                followingChallenger
-                                  ? 'border-[#35D69A]/50 text-[#35D69A] bg-[#35D69A]/15'
-                                  : 'border-[#F05B70]/40 text-[#FFAA45] hover:border-[#FFAA45]/60'
-                              }`}
-                            >
-                              {followingChallenger ? 'Following' : 'Follow'}
-                            </button>
-                          )}
-                        </div>
-                        <p className="text-[11px] text-[#94A8C7] font-mono tabular-nums">
-                          {m.challengerDivision} ({m.challengerRating}) · {m.challengerScore} pts
-                        </p>
-                        <div className="flex flex-wrap gap-1">
-                          {(['🔥', '⚔️', '🏆', '💪'] as const).map(emoji => (
-                            <button
-                              key={emoji}
-                              type="button"
-                              onClick={() => void handleCheer(m.matchId, m.challengerId, emoji)}
-                              className="px-2 py-1 rounded-lg bg-[#0A1930] hover:bg-[#152E52] border border-[#1677FF]/30 text-xs transition-colors cursor-pointer"
-                              title={`Cheer ${m.challengerName}`}
-                            >
-                              {emoji}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="rounded-xl bg-[#061225] border border-[#1677FF]/35 p-3 space-y-2">
-                        <div className="flex items-center justify-between gap-1">
-                          <button
-                            type="button"
-                            onClick={() => openPublicProfile(m.opponentId)}
-                            className="font-bold text-[#FFAA45] hover:text-[#F2F7FF] truncate transition-colors cursor-pointer"
-                          >
-                            {m.opponentName}
-                          </button>
-                          {m.opponentId !== user?.id && (
-                            <button
-                              type="button"
-                              disabled={busyId === `follow-${m.opponentId}`}
-                              onClick={() => void handleToggleFollow(m.opponentId)}
-                              className={`text-[10px] px-2 py-0.5 rounded border whitespace-nowrap transition-colors cursor-pointer ${
-                                followingOpponent
-                                  ? 'border-[#35D69A]/50 text-[#35D69A] bg-[#35D69A]/15'
-                                  : 'border-[#F05B70]/40 text-[#FFAA45] hover:border-[#FFAA45]/60'
-                              }`}
-                            >
-                              {followingOpponent ? 'Following' : 'Follow'}
-                            </button>
-                          )}
-                        </div>
-                        <p className="text-[11px] text-[#94A8C7] font-mono tabular-nums">
-                          {m.opponentDivision} ({m.opponentRating}) · {m.opponentScore} pts
-                        </p>
-                        <div className="flex flex-wrap gap-1">
-                          {(['🔥', '⚔️', '🏆', '💪'] as const).map(emoji => (
-                            <button
-                              key={emoji}
-                              type="button"
-                              onClick={() => void handleCheer(m.matchId, m.opponentId, emoji)}
-                              className="px-2 py-1 rounded-lg bg-[#0A1930] hover:bg-[#152E52] border border-[#1677FF]/30 text-xs transition-colors cursor-pointer"
-                              title={`Cheer ${m.opponentName}`}
-                            >
-                              {emoji}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="h-2 w-full rounded-full bg-[#0A1930] overflow-hidden flex">
-                      <div className="bg-[#35D69A] h-full transition-all" style={{ width: `${cShare}%` }} />
-                    </div>
-
-                    {m.recentCheers && m.recentCheers.length > 0 && (
-                      <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#94A8C7]">
-                        <Heart className="w-3 h-3 text-[#F05B70] shrink-0" />
-                        {m.recentCheers.slice(0, 4).map(ch => (
-                          <span key={ch.id} className="px-2 py-0.5 rounded bg-[#061225] border border-[#1677FF]/30">
-                            {ch.emoji} {ch.spectatorName}
+            {spectatorMatches.length === 0 ? (
+              <div className="lq-surface rounded-2xl p-8 text-center text-xs text-[#A69AAF]">
+                No public or friends-visible matches are currently live to spectate.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {spectatorMatches.map(m => {
+                  const total = Math.max(1, m.challengerScore + m.opponentScore);
+                  const cShare = Math.round((m.challengerScore / total) * 100);
+                  const followingChallenger = followedCompetitorIds.includes(m.challengerId);
+                  const followingOpponent = followedCompetitorIds.includes(m.opponentId);
+                  return (
+                    <div
+                      key={m.matchId}
+                      className="lq-card rounded-2xl p-5 space-y-4"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <span className="text-[11px] font-['Cinzel'] font-bold text-[#E8C777]">
+                            {m.challengeTitle} · {m.isRanked ? 'Ranked' : 'Casual'} · Read-Only
                           </span>
-                        ))}
+                          <p className="text-xs text-[#A69AAF] mt-0.5 font-mono tabular-nums">
+                            Target {m.targetScore} pts · {formatRemainingTime(m.endsAt)}
+                          </p>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
 
-      {/* TAB 5: COMPETITIVE ELO RANKINGS (ISOLATED FROM XP LEADERBOARDS) */}
-      {arenaTab === 'rankings' && (
-        <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#F05B70]/35 overflow-hidden shadow-[0_12px_32px_rgba(4,12,28,0.65)]">
-          <div className="p-5 border-b border-[#F05B70]/25 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-            <div>
-              <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
-                <Crown className="w-4 h-4 text-[#FFD978]" />
-                Competitive Arena Rankings
-              </h2>
-              <p className="text-xs text-[#94A8C7] mt-0.5">
-                Ranked strictly by Arena Elo and Seasonal Match Performance—separate from Realm XP standings.
-              </p>
-            </div>
+                      <div className="grid grid-cols-2 gap-3 text-xs">
+                        <div className="rounded-xl bg-[#100D18] border border-[#362B45] p-3 space-y-2">
+                          <div className="flex items-center justify-between gap-1">
+                            <button
+                              type="button"
+                              onClick={() => openPublicProfile(m.challengerId)}
+                              className="font-bold text-[#F2EDF7] hover:text-[#E8C777] truncate transition-colors cursor-pointer"
+                            >
+                              {m.challengerName}
+                            </button>
+                            {m.challengerId !== user?.id && (
+                              <button
+                                type="button"
+                                disabled={busyId === `follow-${m.challengerId}`}
+                                onClick={() => void handleToggleFollow(m.challengerId)}
+                                className={`text-[10px] px-2 py-0.5 rounded border whitespace-nowrap transition-colors cursor-pointer ${
+                                  followingChallenger
+                                    ? 'border-[#49B88A]/50 text-[#49B88A] bg-[#49B88A]/12'
+                                    : 'border-[#362B45] text-[#E8C777] hover:border-[#D6A84B]'
+                                }`}
+                              >
+                                {followingChallenger ? 'Following' : 'Follow'}
+                              </button>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-[#A69AAF] font-mono tabular-nums">
+                            {m.challengerDivision} ({m.challengerRating}) · {m.challengerScore} pts
+                          </p>
+                          <div className="flex flex-wrap gap-1">
+                            {(['🔥', '⚔️', '🏆', '💪'] as const).map(emoji => (
+                              <button
+                                key={emoji}
+                                type="button"
+                                onClick={() => void handleCheer(m.matchId, m.challengerId, emoji)}
+                                className="px-2 py-1 rounded-lg bg-[#171220] hover:bg-[#21152F] border border-[#362B45] text-xs transition-colors cursor-pointer"
+                                title={`Cheer ${m.challengerName}`}
+                              >
+                                {emoji}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center gap-1 p-1 bg-[#061225] rounded-lg border border-[#1677FF]/35">
-                {(['global', 'friends', 'seasonal', 'weekly'] as const).map(s => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => setLbScope(s)}
-                    className={`px-2.5 py-1 rounded text-[11px] font-semibold capitalize transition-all cursor-pointer ${
-                      lbScope === s
-                        ? 'bg-gradient-to-r from-[#F05B70] to-[#FFAA45] text-[#061225] font-bold shadow-[0_0_10px_rgba(240,91,112,0.35)]'
-                        : 'text-[#94A8C7] hover:text-[#F2F7FF]'
-                    }`}
-                  >
-                    {s}
-                  </button>
-                ))}
+                        <div className="rounded-xl bg-[#100D18] border border-[#362B45] p-3 space-y-2">
+                          <div className="flex items-center justify-between gap-1">
+                            <button
+                              type="button"
+                              onClick={() => openPublicProfile(m.opponentId)}
+                              className="font-bold text-[#E8C777] hover:text-[#F2EDF7] truncate transition-colors cursor-pointer"
+                            >
+                              {m.opponentName}
+                            </button>
+                            {m.opponentId !== user?.id && (
+                              <button
+                                type="button"
+                                disabled={busyId === `follow-${m.opponentId}`}
+                                onClick={() => void handleToggleFollow(m.opponentId)}
+                                className={`text-[10px] px-2 py-0.5 rounded border whitespace-nowrap transition-colors cursor-pointer ${
+                                  followingOpponent
+                                    ? 'border-[#49B88A]/50 text-[#49B88A] bg-[#49B88A]/12'
+                                    : 'border-[#362B45] text-[#E8C777] hover:border-[#D6A84B]'
+                                }`}
+                              >
+                                {followingOpponent ? 'Following' : 'Follow'}
+                              </button>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-[#A69AAF] font-mono tabular-nums">
+                            {m.opponentDivision} ({m.opponentRating}) · {m.opponentScore} pts
+                          </p>
+                          <div className="flex flex-wrap gap-1">
+                            {(['🔥', '⚔️', '🏆', '💪'] as const).map(emoji => (
+                              <button
+                                key={emoji}
+                                type="button"
+                                onClick={() => void handleCheer(m.matchId, m.opponentId, emoji)}
+                                className="px-2 py-1 rounded-lg bg-[#171220] hover:bg-[#21152F] border border-[#362B45] text-xs transition-colors cursor-pointer"
+                                title={`Cheer ${m.opponentName}`}
+                              >
+                                {emoji}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <AnimatedProgressBar
+                        percentage={cShare}
+                        className="h-2 w-full rounded-full bg-[#100D18] border border-[#362B45] overflow-hidden"
+                        barClassName="bg-[#49B88A]"
+                        shimmer={false}
+                      />
+
+                      {m.recentCheers && m.recentCheers.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#A69AAF]">
+                          <Heart className="w-3 h-3 text-[#D65C66] shrink-0" />
+                          {m.recentCheers.slice(0, 4).map(ch => (
+                            <span key={ch.id} className="text-[11px] text-[#F2EDF7]">
+                              {ch.emoji} {ch.spectatorName}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 5: COMPETITIVE ELO RANKINGS */}
+        {arenaTab === 'rankings' && (
+          <div className="lq-surface rounded-2xl overflow-hidden">
+            <div className="p-5 border-b border-[#362B45] flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+              <div>
+                <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
+                  <Crown className="w-4 h-4 text-[#D6A84B]" />
+                  Competitive Arena Rankings
+                </h2>
+                <p className="text-xs text-[#A69AAF] mt-0.5">
+                  Ranked strictly by Arena Elo and Seasonal Match Performance—separate from Realm XP standings.
+                </p>
               </div>
 
-              <select
-                value={lbDivision}
-                onChange={e => setLbDivision(e.target.value as RankedDivisionName | 'all')}
-                className="rounded-lg bg-[#061225] border border-[#1677FF]/40 px-2.5 py-1.5 text-xs text-[#F2F7FF] focus:outline-none focus:border-[#FFAA45]"
-              >
-                <option value="all">All Divisions</option>
-                {RANKED_DIVISIONS_CATALOG.map(d => (
-                  <option key={d.division} value={d.division}>
-                    {d.division}
-                  </option>
-                ))}
-              </select>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-1 p-1 bg-[#100D18] rounded-lg border border-[#362B45]">
+                  {(['global', 'friends', 'seasonal', 'weekly'] as const).map(s => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setLbScope(s)}
+                      className={`px-2.5 py-1 rounded text-[11px] font-semibold capitalize transition-all cursor-pointer ${
+                        lbScope === s
+                          ? 'bg-[#7045A0] text-[#F2EDF7] font-bold'
+                          : 'text-[#A69AAF] hover:text-[#F2EDF7]'
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
 
-              <select
-                value={lbMode}
-                onChange={e => setLbMode(e.target.value as CompetitiveRivalMode | 'all')}
-                className="rounded-lg bg-[#061225] border border-[#1677FF]/40 px-2.5 py-1.5 text-xs text-[#F2F7FF] focus:outline-none focus:border-[#FFAA45]"
-              >
-                <option value="all">All Modes</option>
-                {COMPETITIVE_RIVAL_MODES.map(m => (
-                  <option key={m.id} value={m.id}>
-                    {m.title}
-                  </option>
-                ))}
-              </select>
+                <select
+                  value={lbDivision}
+                  onChange={e => setLbDivision(e.target.value as RankedDivisionName | 'all')}
+                  className="lq-input px-2.5 py-1.5 text-xs"
+                >
+                  <option value="all">All Divisions</option>
+                  {RANKED_DIVISIONS_CATALOG.map(d => (
+                    <option key={d.division} value={d.division}>
+                      {d.division}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={lbMode}
+                  onChange={e => setLbMode(e.target.value as CompetitiveRivalMode | 'all')}
+                  className="lq-input px-2.5 py-1.5 text-xs"
+                >
+                  <option value="all">All Modes</option>
+                  {COMPETITIVE_RIVAL_MODES.map(m => (
+                    <option key={m.id} value={m.id}>
+                      {m.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="bg-[#100D18] border-b border-[#362B45] text-[11px] uppercase tracking-wider text-[#E8C777]">
+                    <th className="py-3 px-4 w-20 text-center">Rank</th>
+                    <th className="py-3 px-4">Competitor</th>
+                    <th className="py-3 px-4">Tier</th>
+                    <th className="py-3 px-4 text-center">Record</th>
+                    <th className="py-3 px-4 text-center">Win %</th>
+                    <th className="py-3 px-4 text-right">Elo</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#362B45]">
+                  {lbLoading ? (
+                    <tr>
+                      <td colSpan={6} className="py-8 text-center text-[#A69AAF]">
+                        Loading competitive standings...
+                      </td>
+                    </tr>
+                  ) : displayedLeaderboard.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-8 text-center text-[#A69AAF]">
+                        No ranked competitors in this bracket yet.
+                      </td>
+                    </tr>
+                  ) : (
+                    displayedLeaderboard.map(row => {
+                      const pStatus = getPlayerPresence(row.userId).status;
+                      const rowTierHex = TIER_ACCENT_MAP[row.tier] || '#E8C777';
+                      return (
+                        <tr
+                          key={row.userId}
+                          onClick={() => openPublicProfile(row.userId)}
+                          className={`cursor-pointer transition-colors ${
+                            row.isCurrent
+                              ? 'bg-[#21152F] hover:bg-[#2A1C3C]'
+                              : 'hover:bg-[#21152F]/60'
+                          }`}
+                        >
+                          <td className="py-3 px-4 text-center font-mono font-bold tabular-nums">
+                            <span
+                              className={
+                                row.rank === 1
+                                  ? 'text-[#D6A84B]'
+                                  : row.rank === 2
+                                  ? 'text-[#F2EDF7]'
+                                  : row.rank === 3
+                                  ? 'text-[#E8C777]'
+                                  : 'text-[#A69AAF]'
+                              }
+                            >
+                              #{row.rank}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-2">
+                              <PresenceBadge status={pStatus} size="xs" />
+                              <span className="font-bold text-[#F2EDF7]">{row.username}</span>
+                              <span className="text-[11px] text-[#A69AAF]">
+                                · {row.characterClass}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4 font-semibold" style={{ color: rowTierHex }}>
+                            {row.tier}
+                          </td>
+                          <td className="py-3 px-4 text-center font-mono tabular-nums text-[#A69AAF]">
+                            {row.wins}-{row.losses}-{row.ties}
+                          </td>
+                          <td className="py-3 px-4 text-center font-mono tabular-nums text-[#A69AAF]">
+                            {row.winRate}%
+                          </td>
+                          <td className="py-3 px-4 text-right font-mono font-bold text-[#E8C777] tabular-nums">
+                            {row.rating}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="bg-[#0A1930] border-b border-[#F05B70]/25 text-[11px] uppercase tracking-wider text-[#FFAA45]">
-                  <th className="py-3 px-4 w-20 text-center">Rank</th>
-                  <th className="py-3 px-4">Competitor</th>
-                  <th className="py-3 px-4">Tier</th>
-                  <th className="py-3 px-4 text-center">Record</th>
-                  <th className="py-3 px-4 text-center">Win %</th>
-                  <th className="py-3 px-4 text-right">Elo</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#1677FF]/20">
-                {lbLoading ? (
-                  <tr>
-                    <td colSpan={6} className="py-8 text-center text-[#94A8C7]">
-                      Loading competitive standings...
-                    </td>
-                  </tr>
-                ) : displayedLeaderboard.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="py-8 text-center text-[#94A8C7]">
-                      No ranked competitors in this bracket yet.
-                    </td>
-                  </tr>
-                ) : (
-                  displayedLeaderboard.map(row => {
-                    const pStatus = getPlayerPresence(row.userId).status;
-                    const rowTierHex = TIER_ACCENT_MAP[row.tier] || '#FFAA45';
-                    return (
-                      <tr
-                        key={row.userId}
-                        onClick={() => openPublicProfile(row.userId)}
-                        className={`cursor-pointer transition-colors ${
-                          row.isCurrent
-                            ? 'bg-[#F05B70]/15 hover:bg-[#F05B70]/25'
-                            : 'hover:bg-[#0A1930]/80'
-                        }`}
-                      >
-                        <td className="py-3 px-4 text-center font-mono font-bold tabular-nums">
-                          <span
-                            className={
-                              row.rank === 1
-                                ? 'text-[#FFD978]'
-                                : row.rank === 2
-                                ? 'text-[#F2F7FF]'
-                                : row.rank === 3
-                                ? 'text-[#FFAA45]'
-                                : 'text-[#94A8C7]'
-                            }
-                          >
-                            #{row.rank}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-2">
-                            <PresenceBadge status={pStatus} size="xs" />
-                            <span className="font-bold text-[#F2F7FF]">{row.username}</span>
-                            <span className="text-[11px] text-[#94A8C7]">
-                              · {row.characterClass}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4 font-semibold" style={{ color: rowTierHex }}>
-                          {row.tier}
-                        </td>
-                        <td className="py-3 px-4 text-center font-mono tabular-nums text-[#94A8C7]">
-                          {row.wins}-{row.losses}-{row.ties}
-                        </td>
-                        <td className="py-3 px-4 text-center font-mono tabular-nums text-[#94A8C7]">
-                          {row.winRate}%
-                        </td>
-                        <td className="py-3 px-4 text-right font-mono font-bold text-[#FFD978] tabular-nums">
-                          {row.rating}
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+        )}
+      </RpgSubTabTransition>
 
       {/* Dispute Modal */}
-      {disputeTarget && (
-        <div
-          className="fixed inset-0 z-50 bg-[#061225]/85 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setDisputeTarget(null)}
-        >
-          <div
-            className="w-full max-w-md rounded-2xl bg-[#102440] border border-[#F05B70]/45 p-6 space-y-4 shadow-[0_20px_50px_rgba(4,12,28,0.85)]"
-            onClick={e => e.stopPropagation()}
-          >
+      <RpgModalWrapper
+        isOpen={Boolean(disputeTarget)}
+        onClose={() => setDisputeTarget(null)}
+        panelClassName="w-full max-w-md"
+      >
+        {disputeTarget && (
+          <div className="lq-surface-elevated border border-[#D65C66]/45 rounded-2xl p-6 space-y-4">
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-[#FFAA45]">
+              <div className="flex items-center gap-2 text-[#E8C777]">
                 <AlertTriangle className="w-5 h-5" />
-                <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF]">
+                <h3 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7]">
                   File Match Integrity Dispute
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setDisputeTarget(null)}
-                className="text-[#94A8C7] hover:text-[#F2F7FF] cursor-pointer"
+                className="text-[#A69AAF] hover:text-[#F2EDF7] cursor-pointer"
                 aria-label="Close dispute dialog"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <p className="text-xs text-[#94A8C7]">
+            <p className="text-xs text-[#A69AAF]">
               Filing a dispute for{' '}
-              <strong className="text-[#F2F7FF]">{disputeTarget.challengeTitle}</strong> safely freezes
+              <strong className="text-[#F2EDF7]">{disputeTarget.challengeTitle}</strong> safely freezes
               and reverts any Elo rating shift pending verification.
             </p>
             <form onSubmit={handleSubmitDispute} className="space-y-3">
@@ -1933,28 +1923,28 @@ export const RivalsView: React.FC = () => {
                 value={disputeReason}
                 onChange={e => setDisputeReason(e.target.value)}
                 placeholder="Describe the synchronization discrepancy or scoring concern..."
-                className="w-full rounded-xl bg-[#061225] border border-[#1677FF]/40 px-3 py-2 text-xs text-[#F2F7FF] placeholder-[#94A8C7]/50 focus:outline-none focus:border-[#FFAA45]"
+                className="lq-input w-full px-3 py-2 text-xs"
               />
               <div className="flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setDisputeTarget(null)}
-                  className="px-4 py-2 rounded-xl bg-[#0A1930] hover:bg-[#152E52] border border-[#1677FF]/35 text-xs text-[#94A8C7] hover:text-[#F2F7FF] transition-colors cursor-pointer"
+                  className="lq-btn lq-btn-secondary px-4 py-2 rounded-xl text-xs cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={busyId === `dispute-${disputeTarget.id}`}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#F05B70] to-[#FFAA45] hover:from-[#ff6b80] hover:to-[#FFD978] text-[#061225] font-bold text-xs shadow-[0_0_16px_rgba(240,91,112,0.35)] transition-all cursor-pointer"
+                  className="lq-btn px-4 py-2 rounded-xl bg-[#D65C66] hover:brightness-110 text-[#100D18] font-bold text-xs cursor-pointer"
                 >
                   Submit Dispute
                 </button>
               </div>
             </form>
           </div>
-        </div>
-      )}
+        )}
+      </RpgModalWrapper>
     </div>
   );
 };

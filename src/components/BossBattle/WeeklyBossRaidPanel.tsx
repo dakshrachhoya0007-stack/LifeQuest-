@@ -3,17 +3,19 @@ import { useGame } from '../../context/GameContext';
 import { weeklyBossTitanImg } from '../../assets/images';
 import {
   Award,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Clock,
-  Crown,
   Dumbbell,
   Flame,
-  Sparkles,
   Trophy,
   Users,
 } from 'lucide-react';
+import {
+  AnimatedCounter,
+  AnimatedProgressBar,
+  RpgScrollReveal,
+} from '../Motion/RpgMotionPrimitives';
 
 const formatCountdown = (endsAtIso: string, nowMs: number): string => {
   const diff = Math.max(0, Date.parse(endsAtIso) - nowMs);
@@ -82,7 +84,7 @@ export const WeeklyBossRaidPanel: React.FC = () => {
 
   if (weeklyBossLoading && !event) {
     return (
-      <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#F05B70]/35 p-8 text-center text-sm text-[#94A8C7]">
+      <div className="lq-card rounded-2xl p-8 text-center text-sm text-[#A69AAF]">
         Summoning Weekly Community Raid status...
       </div>
     );
@@ -90,12 +92,12 @@ export const WeeklyBossRaidPanel: React.FC = () => {
 
   if (!event || !summary) {
     return (
-      <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#F05B70]/35 p-8 text-center space-y-3">
-        <p className="text-sm text-[#94A8C7]">Unable to load the Weekly Community Boss.</p>
+      <div className="lq-card rounded-2xl p-8 text-center space-y-3">
+        <p className="text-sm text-[#A69AAF]">Unable to load the Weekly Community Boss.</p>
         <button
           type="button"
           onClick={() => void refreshWeeklyBossState(1)}
-          className="px-4 py-2 rounded-lg bg-[#0A1930] hover:bg-[#152E52] border border-[#F05B70]/45 text-xs font-semibold text-[#FFAA45] transition-all cursor-pointer"
+          className="lq-btn lq-btn-secondary px-4 py-2 rounded-lg text-xs font-semibold text-[#E8C777] cursor-pointer"
         >
           Retry Raid Sync
         </button>
@@ -110,7 +112,7 @@ export const WeeklyBossRaidPanel: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Cinematic Raid Hero Banner */}
-      <div className="relative rounded-2xl overflow-hidden border border-[#F05B70]/40 bg-[#102440] shadow-[0_12px_32px_rgba(4,12,28,0.65)]">
+      <div className="lq-card rounded-2xl overflow-hidden border border-[#D65C66]/35">
         <div className="relative h-64 sm:h-72 overflow-hidden">
           <img
             src={weeklyBossTitanImg}
@@ -118,33 +120,33 @@ export const WeeklyBossRaidPanel: React.FC = () => {
             referrerPolicy="no-referrer"
             className="w-full h-full object-cover object-center brightness-90"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#061225] via-[#0A1930]/65 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#061225]/90 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#100D18] via-[#171220]/65 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#100D18]/90 via-transparent to-transparent" />
 
           <div className="absolute bottom-5 left-5 right-5 flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div className="space-y-1.5 max-w-2xl">
-              <div className="flex flex-wrap items-center gap-2 text-xs font-semibold tracking-wider uppercase text-[#FFAA45]">
+              <div className="flex flex-wrap items-center gap-2 text-xs font-semibold tracking-wider uppercase text-[#E8C777]">
                 <span className="font-['Cinzel']">{event.bossTitle}</span>
-                <span className="text-[#94A8C7]/45" aria-hidden="true">·</span>
+                <span className="text-[#766D82]" aria-hidden="true">·</span>
                 <span>{event.difficulty} Tier</span>
-                <span className="text-[#94A8C7]/45" aria-hidden="true">·</span>
+                <span className="text-[#766D82]" aria-hidden="true">·</span>
                 <span className="tabular-nums">{event.weekKey}</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2F7FF] tracking-wide">
+              <h2 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2EDF7] tracking-wide">
                 {event.bossName}
               </h2>
-              <p className="text-xs sm:text-sm text-[#94A8C7] leading-relaxed">
+              <p className="text-xs sm:text-sm text-[#A69AAF] leading-relaxed">
                 {event.bossDescription}
               </p>
             </div>
 
-            <div className="flex items-center gap-4 bg-[#061225]/90 backdrop-blur-md border border-[#F05B70]/40 rounded-xl px-4 py-3 shrink-0">
+            <div className="flex items-center gap-4 bg-[#100D18]/90 backdrop-blur-md border border-[#D65C66]/40 rounded-xl px-4 py-3 shrink-0">
               <div>
-                <span className="text-[10px] uppercase tracking-wider text-[#94A8C7] block">
+                <span className="text-[10px] uppercase tracking-wider text-[#A69AAF] block">
                   {isDefeated ? 'Status' : isExpired ? 'Raid Window' : 'Time Remaining'}
                 </span>
-                <span className="text-sm font-bold font-mono text-[#FFAA45] flex items-center gap-1.5 tabular-nums">
-                  <Clock className="w-3.5 h-3.5 text-[#F05B70]" />
+                <span className="text-sm font-bold font-mono text-[#E8C777] flex items-center gap-1.5 tabular-nums">
+                  <Clock className="w-3.5 h-3.5 text-[#D65C66]" />
                   {isDefeated
                     ? 'DEFEATED'
                     : isExpired
@@ -152,14 +154,14 @@ export const WeeklyBossRaidPanel: React.FC = () => {
                     : formatCountdown(event.endsAt, nowMs)}
                 </span>
               </div>
-              <div className="h-8 w-px bg-[#F05B70]/25" />
+              <div className="h-8 w-px bg-[#362B45]" />
               <div>
-                <span className="text-[10px] uppercase tracking-wider text-[#94A8C7] block">
+                <span className="text-[10px] uppercase tracking-wider text-[#A69AAF] block">
                   Raiders
                 </span>
-                <span className="text-sm font-bold font-mono text-[#F2F7FF] flex items-center gap-1.5 tabular-nums">
-                  <Users className="w-3.5 h-3.5 text-[#F05B70]" />
-                  {event.totalParticipants}
+                <span className="text-sm font-bold font-mono text-[#F2EDF7] flex items-center gap-1.5 tabular-nums">
+                  <Users className="w-3.5 h-3.5 text-[#D65C66]" />
+                  <AnimatedCounter value={event.totalParticipants} />
                 </span>
               </div>
             </div>
@@ -167,51 +169,50 @@ export const WeeklyBossRaidPanel: React.FC = () => {
         </div>
 
         {/* Health Bar + Player Strike Summary */}
-        <div className="p-5 sm:p-6 border-t border-[#F05B70]/25 space-y-4">
+        <div className="p-5 sm:p-6 border-t border-[#362B45] space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-            <span className="font-['Cinzel'] font-bold uppercase tracking-wider text-[#F2F7FF]">
+            <span className="font-['Cinzel'] font-bold uppercase tracking-wider text-[#F2EDF7]">
               Shared Realm Boss Health
             </span>
-            <span className="font-mono font-bold text-[#F05B70] tabular-nums">
+            <span className="font-mono font-bold text-[#D65C66] tabular-nums">
               {event.currentHealth.toLocaleString()} / {event.totalHealth.toLocaleString()} HP ({hpPercent.toFixed(1)}%)
             </span>
           </div>
-          <div className="h-3.5 w-full rounded-full bg-[#061225] border border-[#F05B70]/35 overflow-hidden">
-            <div
-              className={`h-full transition-all duration-700 ${
-                isDefeated
-                  ? 'bg-[#35D69A]'
-                  : 'bg-gradient-to-r from-[#F05B70] via-[#FFAA45] to-[#FFD978]'
-              }`}
-              style={{ width: `${hpPercent}%` }}
-            />
-          </div>
+          <AnimatedProgressBar
+            percentage={hpPercent}
+            className="h-3.5 w-full rounded-full bg-[#100D18] border border-[#362B45] overflow-hidden"
+            barClassName={
+              isDefeated
+                ? 'bg-[#49B88A]'
+                : 'bg-gradient-to-r from-[#D65C66] via-[#7045A0] to-[#D6A84B]'
+            }
+          />
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
-            <div className="rounded-xl bg-[#0A1930] border border-[#1677FF]/35 p-3">
-              <span className="text-[11px] text-[#94A8C7] block">Your Raid Damage</span>
-              <span className="text-lg font-bold font-mono text-[#F2F7FF] tabular-nums">
-                {summary.totalDamage.toLocaleString()}
+            <div className="lq-surface rounded-xl p-3">
+              <span className="text-[11px] text-[#A69AAF] block">Your Raid Damage</span>
+              <span className="text-lg font-bold font-mono text-[#F2EDF7] tabular-nums">
+                <AnimatedCounter value={summary.totalDamage} />
               </span>
             </div>
-            <div className="rounded-xl bg-[#0A1930] border border-[#1677FF]/35 p-3">
-              <span className="text-[11px] text-[#94A8C7] block">Verified Strikes</span>
-              <span className="text-lg font-bold font-mono text-[#FFAA45] tabular-nums">
-                {summary.contributionsCount}
+            <div className="lq-surface rounded-xl p-3">
+              <span className="text-[11px] text-[#A69AAF] block">Verified Strikes</span>
+              <span className="text-lg font-bold font-mono text-[#E8C777] tabular-nums">
+                <AnimatedCounter value={summary.contributionsCount} />
               </span>
             </div>
-            <div className="rounded-xl bg-[#0A1930] border border-[#1677FF]/35 p-3">
-              <span className="text-[11px] text-[#94A8C7] block">Daily Safety Budget</span>
-              <span className="text-lg font-bold font-mono text-[#35D69A] tabular-nums">
+            <div className="lq-surface rounded-xl p-3">
+              <span className="text-[11px] text-[#A69AAF] block">Daily Safety Budget</span>
+              <span className="text-lg font-bold font-mono text-[#49B88A] tabular-nums">
                 {summary.dailyDamageDealt}/{summary.dailyDamageCap}
               </span>
             </div>
-            <div className="rounded-xl bg-[#0A1930] border border-[#1677FF]/35 p-3">
-              <span className="text-[11px] text-[#94A8C7] block">How to Strike</span>
+            <div className="lq-surface rounded-xl p-3">
+              <span className="text-[11px] text-[#A69AAF] block">How to Strike</span>
               <button
                 type="button"
                 onClick={() => setActiveTab('fitness')}
-                className="text-xs font-semibold text-[#FFAA45] hover:text-[#FFD978] hover:underline mt-1 text-left cursor-pointer"
+                className="text-xs font-semibold text-[#E8C777] hover:text-[#F2EDF7] hover:underline mt-1 text-left cursor-pointer"
               >
                 Log Verified Activity →
               </button>
@@ -222,8 +223,8 @@ export const WeeklyBossRaidPanel: React.FC = () => {
             <div
               className={`rounded-xl px-4 py-3 text-xs border ${
                 feedback.type === 'success'
-                  ? 'bg-[#35D69A]/15 border-[#35D69A]/45 text-[#35D69A]'
-                  : 'bg-[#36111F]/80 border-[#F05B70]/45 text-[#F05B70]'
+                  ? 'bg-[#49B88A]/10 border-[#49B88A]/45 text-[#49B88A]'
+                  : 'bg-[#D65C66]/12 border-[#D65C66]/45 text-[#D65C66]'
               }`}
             >
               {feedback.text}
@@ -231,12 +232,12 @@ export const WeeklyBossRaidPanel: React.FC = () => {
           )}
 
           {isDefeated && (
-            <div className="rounded-xl bg-gradient-to-r from-[#35D69A]/15 to-[#0A1930] border border-[#35D69A]/45 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="rounded-xl bg-[#49B88A]/10 border border-[#49B88A]/45 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <p className="font-['Cinzel'] font-bold text-sm text-[#35D69A]">
+                <p className="font-['Cinzel'] font-bold text-sm text-[#49B88A]">
                   VICTORY — {event.bossName} Has Fallen!
                 </p>
-                <p className="text-xs text-[#94A8C7] mt-0.5">
+                <p className="text-xs text-[#A69AAF] mt-0.5">
                   Verified raid contributors can claim Victory Spoils and Top Contributor honors below.
                 </p>
               </div>
@@ -245,7 +246,7 @@ export const WeeklyBossRaidPanel: React.FC = () => {
                   type="button"
                   disabled={summary.defeatRewardClaimed || summary.contributionsCount < 1 || claimingKey === 'defeat:reward'}
                   onClick={() => void handleClaim('defeat', 'reward')}
-                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#FFE7A3] disabled:opacity-45 text-[#061225] font-bold text-xs whitespace-nowrap shrink-0 shadow-[0_0_14px_rgba(231,185,79,0.35)] transition-all cursor-pointer"
+                  className="lq-btn lq-btn-gold px-4 py-2 rounded-lg disabled:opacity-45 font-bold text-xs whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   {summary.defeatRewardClaimed
                     ? 'Victory Spoils Claimed'
@@ -256,7 +257,7 @@ export const WeeklyBossRaidPanel: React.FC = () => {
                     type="button"
                     disabled={summary.topContributorClaimed || claimingKey === 'top_contributor:reward'}
                     onClick={() => void handleClaim('top_contributor', 'reward')}
-                    className="px-4 py-2 rounded-lg bg-[#0A1930] hover:bg-[#152E52] border border-[#FFD978]/50 disabled:opacity-45 text-[#FFD978] font-bold text-xs whitespace-nowrap shrink-0 transition-all cursor-pointer"
+                    className="lq-btn lq-btn-secondary px-4 py-2 rounded-lg border-[#D6A84B]/50 disabled:opacity-45 text-[#E8C777] font-bold text-xs whitespace-nowrap shrink-0 cursor-pointer"
                   >
                     {summary.topContributorClaimed ? 'Top 3 Honor Claimed' : `Claim Top #${myRankEntry.rank} Bonus`}
                   </button>
@@ -266,12 +267,12 @@ export const WeeklyBossRaidPanel: React.FC = () => {
           )}
 
           {isExpired && !isDefeated && (
-            <div className="rounded-xl bg-[#0A1930] border border-[#FFAA45]/40 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="lq-surface rounded-xl border border-[#D6A84B]/40 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <p className="font-['Cinzel'] font-bold text-sm text-[#FFAA45]">
+                <p className="font-['Cinzel'] font-bold text-sm text-[#E8C777]">
                   Weekly Raid Window Concluded
                 </p>
-                <p className="text-xs text-[#94A8C7] mt-0.5">
+                <p className="text-xs text-[#A69AAF] mt-0.5">
                   This titan endured until the weekly reset. Contributors may still claim Participation Honors.
                 </p>
               </div>
@@ -279,7 +280,7 @@ export const WeeklyBossRaidPanel: React.FC = () => {
                 type="button"
                 disabled={summary.participationClaimed || summary.contributionsCount < 1}
                 onClick={() => void handleClaim('participation', 'reward')}
-                className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#F05B70] to-[#FFAA45] hover:from-[#ff6b80] hover:to-[#FFD978] disabled:opacity-45 text-xs font-bold text-[#061225] whitespace-nowrap shrink-0 shadow-[0_0_14px_rgba(240,91,112,0.35)] transition-all cursor-pointer"
+                className="lq-btn lq-btn-gold px-4 py-2 rounded-lg disabled:opacity-45 text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer"
               >
                 {summary.participationClaimed ? 'Participation Claimed' : 'Claim Participation'}
               </button>
@@ -289,17 +290,17 @@ export const WeeklyBossRaidPanel: React.FC = () => {
       </div>
 
       {/* Main Content Split: Raid Missions & Milestones vs Paginated Leaderboard & Strike Feed */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <RpgScrollReveal className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Missions & Milestones */}
         <div className="lg:col-span-6 space-y-5">
-          <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#F05B70]/35 p-5 space-y-4">
+          <div className="lq-card rounded-2xl p-5 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
-                <Dumbbell className="w-4 h-4 text-[#F05B70]" />
+              <h3 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
+                <Dumbbell className="w-4 h-4 text-[#D65C66]" />
                 Weekly Raid Missions
               </h3>
-              <span className="text-[11px] text-[#94A8C7]">
-                Rest & recovery count safely
+              <span className="text-[11px] text-[#A69AAF]">
+                Rest &amp; recovery count safely
               </span>
             </div>
 
@@ -315,37 +316,37 @@ export const WeeklyBossRaidPanel: React.FC = () => {
                 return (
                   <div
                     key={m.id}
-                    className="rounded-xl bg-[#0A1930] border border-[#1677FF]/35 p-3.5 space-y-2.5"
+                    className="lq-surface rounded-xl p-3.5 space-y-2.5"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="text-sm font-bold text-[#F2F7FF]">{m.title}</p>
-                        <p className="text-xs text-[#94A8C7] mt-0.5">{m.description}</p>
-                        <p className="text-[11px] text-[#FFAA45] mt-1 font-mono tabular-nums">
+                        <p className="text-sm font-bold text-[#F2EDF7]">{m.title}</p>
+                        <p className="text-xs text-[#A69AAF] mt-0.5">{m.description}</p>
+                        <p className="text-[11px] text-[#E8C777] mt-1 font-mono tabular-nums">
                           +{m.damageReward} Siege Strike · +{m.playerXpReward} XP · +{m.goldReward}g
                         </p>
                       </div>
-                      <span className="text-xs font-mono font-bold text-[#F2F7FF] tabular-nums shrink-0">
+                      <span className="text-xs font-mono font-bold text-[#F2EDF7] tabular-nums shrink-0">
                         {prog.current}/{prog.target}
                       </span>
                     </div>
-                    <div className="h-1.5 w-full rounded-full bg-[#061225] overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-[#F05B70] to-[#FFAA45] transition-all"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
+                    <AnimatedProgressBar
+                      percentage={pct}
+                      className="h-1.5 w-full rounded-full bg-[#100D18] overflow-hidden"
+                      barClassName="bg-gradient-to-r from-[#D65C66] to-[#D6A84B]"
+                      shimmer={false}
+                    />
                     <div className="flex justify-end">
                       <button
                         type="button"
                         disabled={!prog.completed || prog.claimed || claimingKey === `mission:${m.id}`}
                         onClick={() => void handleClaim('mission', m.id)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
+                        className={`lq-btn px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 ${
                           prog.claimed
-                            ? 'bg-[#35D69A]/15 text-[#35D69A] border border-[#35D69A]/40'
+                            ? 'bg-[#49B88A]/15 text-[#49B88A] border border-[#49B88A]/40'
                             : prog.completed
-                            ? 'bg-gradient-to-r from-[#F05B70] to-[#FFAA45] hover:from-[#ff6b80] hover:to-[#FFD978] text-[#061225] font-bold shadow-[0_0_14px_rgba(240,91,112,0.35)] cursor-pointer'
-                            : 'bg-[#061225] text-[#94A8C7]/45 border border-[#1677FF]/25 cursor-not-allowed'
+                            ? 'lq-btn-gold font-bold cursor-pointer'
+                            : 'lq-btn-secondary opacity-45 cursor-not-allowed'
                         }`}
                       >
                         {prog.claimed ? 'Claimed' : prog.completed ? 'Claim Mission Reward' : 'In Progress'}
@@ -358,10 +359,10 @@ export const WeeklyBossRaidPanel: React.FC = () => {
           </div>
 
           {/* Individual Damage Milestones & Rewards Preview */}
-          <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#F05B70]/35 p-5 space-y-4">
-            <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
-              <Award className="w-4 h-4 text-[#FFD978]" />
-              Damage Milestones & Participation
+          <div className="lq-card rounded-2xl p-5 space-y-4">
+            <h3 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
+              <Award className="w-4 h-4 text-[#D6A84B]" />
+              Damage Milestones &amp; Participation
             </h3>
             <div className="space-y-2.5">
               {event.milestones.map(mil => {
@@ -370,11 +371,11 @@ export const WeeklyBossRaidPanel: React.FC = () => {
                 return (
                   <div
                     key={mil.id}
-                    className="flex items-center justify-between gap-3 rounded-xl bg-[#0A1930] border border-[#1677FF]/35 p-3"
+                    className="lq-surface flex items-center justify-between gap-3 rounded-xl p-3"
                   >
                     <div>
-                      <p className="text-xs font-bold text-[#F2F7FF]">{mil.title}</p>
-                      <p className="text-[11px] text-[#94A8C7] font-mono tabular-nums">
+                      <p className="text-xs font-bold text-[#F2EDF7]">{mil.title}</p>
+                      <p className="text-[11px] text-[#A69AAF] font-mono tabular-nums">
                         {mil.damageRequired} DMG · +{mil.playerXpReward} XP · +{mil.goldReward}g
                       </p>
                     </div>
@@ -382,12 +383,12 @@ export const WeeklyBossRaidPanel: React.FC = () => {
                       type="button"
                       disabled={!reached || claimed || claimingKey === `milestone:${mil.id}`}
                       onClick={() => void handleClaim('milestone', mil.id)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
+                      className={`lq-btn px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 ${
                         claimed
-                          ? 'bg-[#35D69A]/15 text-[#35D69A] border border-[#35D69A]/40'
+                          ? 'bg-[#49B88A]/15 text-[#49B88A] border border-[#49B88A]/40'
                           : reached
-                          ? 'bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#FFE7A3] text-[#061225] font-bold shadow-[0_0_12px_rgba(231,185,79,0.35)] cursor-pointer'
-                          : 'bg-[#061225] text-[#94A8C7]/45 border border-[#1677FF]/25 cursor-not-allowed'
+                          ? 'lq-btn-gold font-bold cursor-pointer'
+                          : 'lq-btn-secondary opacity-45 cursor-not-allowed'
                       }`}
                     >
                       {claimed ? 'Claimed' : reached ? 'Claim' : 'Locked'}
@@ -396,10 +397,10 @@ export const WeeklyBossRaidPanel: React.FC = () => {
                 );
               })}
 
-              <div className="flex items-center justify-between gap-3 rounded-xl bg-[#0A1930] border border-[#FFAA45]/35 p-3">
+              <div className="lq-surface-gold flex items-center justify-between gap-3 rounded-xl p-3">
                 <div>
-                  <p className="text-xs font-bold text-[#FFD978]">Vanguard Participation Spoils</p>
-                  <p className="text-[11px] text-[#94A8C7] font-mono tabular-nums">
+                  <p className="text-xs font-bold text-[#E8C777]">Vanguard Participation Spoils</p>
+                  <p className="text-[11px] text-[#A69AAF] font-mono tabular-nums">
                     1+ Verified Strike · +{event.rewards.participationXp} XP · +{event.rewards.participationGold}g
                   </p>
                 </div>
@@ -407,12 +408,12 @@ export const WeeklyBossRaidPanel: React.FC = () => {
                   type="button"
                   disabled={summary.contributionsCount < 1 || summary.participationClaimed}
                   onClick={() => void handleClaim('participation', 'reward')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
+                  className={`lq-btn px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 ${
                     summary.participationClaimed
-                      ? 'bg-[#35D69A]/15 text-[#35D69A] border border-[#35D69A]/40'
+                      ? 'bg-[#49B88A]/15 text-[#49B88A] border border-[#49B88A]/40'
                       : summary.contributionsCount >= 1
-                      ? 'bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#FFE7A3] text-[#061225] font-bold shadow-[0_0_12px_rgba(231,185,79,0.35)] cursor-pointer'
-                      : 'bg-[#061225] text-[#94A8C7]/45 border border-[#1677FF]/25 cursor-not-allowed'
+                      ? 'lq-btn-gold font-bold cursor-pointer'
+                      : 'lq-btn-secondary opacity-45 cursor-not-allowed'
                   }`}
                 >
                   {summary.participationClaimed ? 'Claimed' : 'Claim'}
@@ -424,18 +425,18 @@ export const WeeklyBossRaidPanel: React.FC = () => {
 
         {/* Paginated Global Leaderboard & Contribution History */}
         <div className="lg:col-span-6 space-y-5">
-          <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#F05B70]/35 p-5 space-y-4">
+          <div className="lq-card rounded-2xl p-5 space-y-4">
             <div className="flex items-center justify-between gap-3">
-              <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
-                <Trophy className="w-4 h-4 text-[#FFD978]" />
+              <h3 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-[#D6A84B]" />
                 Global Raid Contributors
               </h3>
-              <div className="flex items-center gap-2 text-xs font-mono tabular-nums text-[#94A8C7]">
+              <div className="flex items-center gap-2 text-xs font-mono tabular-nums text-[#A69AAF]">
                 <button
                   type="button"
                   disabled={page <= 1}
                   onClick={() => void refreshWeeklyBossState(page - 1)}
-                  className="p-1.5 rounded-lg bg-[#0A1930] border border-[#1677FF]/40 disabled:opacity-35 hover:border-[#FFAA45]/50 cursor-pointer"
+                  className="lq-btn lq-btn-secondary p-1.5 rounded-lg disabled:opacity-35 cursor-pointer"
                   aria-label="Previous leaderboard page"
                 >
                   <ChevronLeft className="w-3.5 h-3.5" />
@@ -447,7 +448,7 @@ export const WeeklyBossRaidPanel: React.FC = () => {
                   type="button"
                   disabled={page >= totalPages}
                   onClick={() => void refreshWeeklyBossState(page + 1)}
-                  className="p-1.5 rounded-lg bg-[#0A1930] border border-[#1677FF]/40 disabled:opacity-35 hover:border-[#FFAA45]/50 cursor-pointer"
+                  className="lq-btn lq-btn-secondary p-1.5 rounded-lg disabled:opacity-35 cursor-pointer"
                   aria-label="Next leaderboard page"
                 >
                   <ChevronRight className="w-3.5 h-3.5" />
@@ -456,7 +457,7 @@ export const WeeklyBossRaidPanel: React.FC = () => {
             </div>
 
             {leaderboard.length === 0 ? (
-              <div className="py-8 text-center text-xs text-[#94A8C7]">
+              <div className="py-8 text-center text-xs text-[#A69AAF]">
                 No verified raid strikes logged yet this week. Complete a workout, habit, or recovery session to claim #1.
               </div>
             ) : (
@@ -466,34 +467,32 @@ export const WeeklyBossRaidPanel: React.FC = () => {
                   return (
                     <div
                       key={entry.userId}
-                      className={`flex items-center justify-between gap-3 rounded-xl px-3.5 py-2.5 border ${
-                        isMe
-                          ? 'bg-[#152E52]/90 border-[#FFAA45]/55'
-                          : 'bg-[#0A1930] border-[#1677FF]/25'
+                      className={`flex items-center justify-between gap-3 rounded-xl px-3.5 py-2.5 ${
+                        isMe ? 'lq-surface-gold' : 'lq-surface'
                       }`}
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <span
                           className={`w-6 text-center font-mono font-bold text-xs tabular-nums ${
                             entry.rank === 1
-                              ? 'text-[#FFD978]'
+                              ? 'text-[#E8C777]'
                               : entry.rank <= 3
-                              ? 'text-[#FFAA45]'
-                              : 'text-[#94A8C7]'
+                              ? 'text-[#D6A84B]'
+                              : 'text-[#A69AAF]'
                           }`}
                         >
                           #{entry.rank}
                         </span>
                         <div className="min-w-0">
-                          <p className="text-xs font-bold text-[#F2F7FF] truncate">
-                            {entry.username} {isMe && <span className="text-[#FFAA45]">(You)</span>}
+                          <p className="text-xs font-bold text-[#F2EDF7] truncate">
+                            {entry.username} {isMe && <span className="text-[#E8C777]">(You)</span>}
                           </p>
-                          <p className="text-[11px] text-[#94A8C7] tabular-nums">
+                          <p className="text-[11px] text-[#A69AAF] tabular-nums">
                             {entry.contributionsCount} strikes · {entry.missionsCompleted} missions
                           </p>
                         </div>
                       </div>
-                      <span className="text-xs font-mono font-bold text-[#F05B70] tabular-nums shrink-0">
+                      <span className="text-xs font-mono font-bold text-[#D65C66] tabular-nums shrink-0">
                         {entry.totalDamage.toLocaleString()} DMG
                       </span>
                     </div>
@@ -503,25 +502,25 @@ export const WeeklyBossRaidPanel: React.FC = () => {
             )}
           </div>
 
-          <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#F05B70]/35 p-5 space-y-3">
-            <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
-              <Flame className="w-4 h-4 text-[#FFAA45]" />
+          <div className="lq-card rounded-2xl p-5 space-y-3">
+            <h3 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
+              <Flame className="w-4 h-4 text-[#D65C66]" />
               Recent Verified Strikes
             </h3>
             {recentContributions.length === 0 ? (
-              <p className="text-xs text-[#94A8C7]">Strike log awaits your first verified action.</p>
+              <p className="text-xs text-[#A69AAF]">Strike log awaits your first verified action.</p>
             ) : (
               <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
                 {recentContributions.map(c => (
                   <div
                     key={c.id}
-                    className="flex items-center justify-between gap-2 text-xs py-2 border-b border-[#1677FF]/20 last:border-0"
+                    className="flex items-center justify-between gap-2 text-xs py-2 border-b border-[#362B45] last:border-0"
                   >
                     <div className="min-w-0">
-                      <span className="font-semibold text-[#F2F7FF]">{c.username}</span>
-                      <span className="text-[#94A8C7]"> · {c.actionLabel}</span>
+                      <span className="font-semibold text-[#F2EDF7]">{c.username}</span>
+                      <span className="text-[#A69AAF]"> · {c.actionLabel}</span>
                     </div>
-                    <span className="font-mono font-bold text-[#F05B70] tabular-nums shrink-0">
+                    <span className="font-mono font-bold text-[#D65C66] tabular-nums shrink-0">
                       -{c.damageDealt} HP
                     </span>
                   </div>
@@ -530,7 +529,7 @@ export const WeeklyBossRaidPanel: React.FC = () => {
             )}
           </div>
         </div>
-      </div>
+      </RpgScrollReveal>
     </div>
   );
 };

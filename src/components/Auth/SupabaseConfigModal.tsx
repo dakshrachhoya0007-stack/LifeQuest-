@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   X,
   Database,
@@ -9,7 +9,6 @@ import {
   ExternalLink,
   ShieldCheck,
   RefreshCw,
-  Terminal,
 } from 'lucide-react';
 import {
   getSupabaseConfig,
@@ -18,6 +17,8 @@ import {
   testSupabaseConnection,
   isSupabaseConfigured,
 } from '../../lib/supabase';
+import { RpgModalWrapper } from '../Motion/RpgMotionPrimitives';
+import { FeatureTabBar } from '../Theme/FeatureThemePrimitives';
 
 interface SupabaseConfigModalProps {
   isOpen: boolean;
@@ -41,7 +42,14 @@ export const SupabaseConfigModal: React.FC<SupabaseConfigModalProps> = ({
   const [copiedSql, setCopiedSql] = useState(false);
   const [activeTab, setActiveTab] = useState<'credentials' | 'sql'>('credentials');
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isOpen, onClose]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -169,82 +177,94 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-[#061225]/85 backdrop-blur-md animate-in fade-in">
-      <div className="relative w-full max-w-xl bg-[#102440]/95 backdrop-blur-xl border border-[#1677FF]/45 rounded-2xl p-6 sm:p-8 shadow-[0_24px_64px_rgba(4,12,28,0.85)] max-h-[90vh] overflow-y-auto">
+    <RpgModalWrapper
+      isOpen={isOpen}
+      onClose={onClose}
+      zIndexClass="z-[60]"
+      panelClassName="w-full max-w-xl"
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="supabase-config-title"
+        className="relative w-full lq-card-gold p-6 sm:p-8 max-h-[90vh] overflow-y-auto"
+      >
         <button
+          type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-[#94A8C7] hover:text-white rounded-lg hover:bg-[#0A1930] transition-colors"
+          aria-label="Close Supabase configuration modal"
+          className="absolute top-4 right-4 p-2 text-[#A69AAF] hover:text-[#F2EDF7] rounded-lg hover:bg-[#21152F] transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-[#1677FF]/20 border border-[#FFD978]/45 flex items-center justify-center text-[#FFD978]">
+          <div className="w-10 h-10 rounded-xl bg-[#7045A0]/25 border border-[#D6A84B]/45 flex items-center justify-center text-[#E8C777]">
             <Database className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-xl font-black font-['Cinzel'] text-white">
-              SUPABASE CLOUD PERSISTENCE
+            <h2
+              id="supabase-config-title"
+              className="text-xl font-bold font-['Cinzel'] text-[#F2EDF7]"
+            >
+              Supabase Cloud Persistence
             </h2>
-            <p className="text-xs text-[#94A8C7]">
-              Connect your PostgreSQL & Supabase Auth database for cross-device progression
+            <p className="text-xs text-[#A69AAF]">
+              Connect your PostgreSQL &amp; Supabase Auth database for cross-device progression
             </p>
           </div>
         </div>
 
         {/* Tab switch */}
-        <div className="flex p-1 mb-5 bg-[#061225] rounded-xl border border-[#1677FF]/30">
-          <button
-            type="button"
-            onClick={() => setActiveTab('credentials')}
-            className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-              activeTab === 'credentials'
-                ? 'bg-[#1677FF] text-white shadow'
-                : 'text-[#94A8C7] hover:text-white'
-            }`}
-          >
-            Credentials & Status
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('sql')}
-            className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-              activeTab === 'sql'
-                ? 'bg-[#1677FF] text-white shadow'
-                : 'text-[#94A8C7] hover:text-white'
-            }`}
-          >
-            SQL Database Schema
-          </button>
+        <div className="mb-5">
+          <FeatureTabBar
+            themeId="dashboard"
+            layoutId="supabase-config-tab-pill"
+            ariaLabel="Supabase configuration tabs"
+            activeId={activeTab}
+            onSelect={setActiveTab}
+            tabs={[
+              { id: 'credentials', label: 'Credentials & Status' },
+              { id: 'sql', label: 'SQL Database Schema' },
+            ]}
+          />
         </div>
 
         {activeTab === 'credentials' ? (
           <div className="space-y-4">
-            <div className="p-3.5 rounded-xl bg-[#0A1930] border border-[#1677FF]/35 flex items-center justify-between">
+            <div className="p-3.5 rounded-xl bg-[#100D18] border border-[#362B45] flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 {isSupabaseConfigured() ? (
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                  <CheckCircle2 className="w-5 h-5 text-[#49B88A] shrink-0" />
                 ) : (
-                  <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
+                  <AlertCircle className="w-5 h-5 text-[#E8C777] shrink-0" />
                 )}
                 <div>
-                  <div className="text-xs font-bold text-white">
-                    {isSupabaseConfigured() ? 'Supabase Credentials Configured' : 'Credentials Needed'}
+                  <div className="text-xs font-bold text-[#F2EDF7]">
+                    {isSupabaseConfigured()
+                      ? 'Supabase Credentials Configured'
+                      : 'Credentials Needed'}
                   </div>
-                  <div className="text-[11px] text-[#94A8C7]">
-                    Source: {currentConfig.source === 'env' ? 'Environment Variables (.env)' : currentConfig.source === 'storage' ? 'Custom In-App Storage' : 'Not Configured'}
+                  <div className="text-[11px] text-[#A69AAF]">
+                    Source:{' '}
+                    {currentConfig.source === 'env'
+                      ? 'Environment Variables (.env)'
+                      : currentConfig.source === 'storage'
+                      ? 'Custom In-App Storage'
+                      : 'Not Configured'}
                   </div>
                 </div>
               </div>
 
               {isSupabaseConfigured() && (
                 <button
+                  type="button"
                   onClick={handleTestExisting}
                   disabled={testing}
-                  className="px-3 py-1.5 rounded-lg border border-[#1677FF]/45 bg-[#102440] text-[#FFD978] hover:border-[#FFD978] text-xs font-semibold flex items-center gap-1.5 transition-all"
+                  className="lq-btn lq-btn-secondary px-3 py-1.5 text-xs"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${testing ? 'animate-spin' : ''}`} />
-                  Test
+                  <span>Test</span>
                 </button>
               )}
             </div>
@@ -253,14 +273,14 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
               <div
                 className={`p-3 rounded-xl border text-xs flex items-start gap-2.5 ${
                   testResult.success
-                    ? 'bg-emerald-950/70 border-emerald-700 text-emerald-200'
-                    : 'bg-rose-950/70 border-rose-700 text-rose-200'
+                    ? 'bg-[#49B88A]/12 border-[#49B88A]/45 text-[#F2EDF7]'
+                    : 'bg-[#D65C66]/12 border-[#D65C66]/45 text-[#F2EDF7]'
                 }`}
               >
                 {testResult.success ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-[#49B88A] shrink-0 mt-0.5" />
                 ) : (
-                  <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                  <AlertCircle className="w-4 h-4 text-[#D65C66] shrink-0 mt-0.5" />
                 )}
                 <div className="leading-relaxed">{testResult.message}</div>
               </div>
@@ -268,7 +288,7 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
 
             <form onSubmit={handleSave} className="space-y-3 pt-2">
               <div>
-                <label className="block text-xs font-medium text-[#94A8C7] mb-1">
+                <label className="block text-xs font-medium text-[#A69AAF] mb-1">
                   Supabase Project URL (VITE_SUPABASE_URL)
                 </label>
                 <input
@@ -276,12 +296,12 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
                   value={url}
                   onChange={e => setUrl(e.target.value)}
                   placeholder="https://xyzcompany.supabase.co"
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 rounded-xl px-3 py-2 text-xs text-white placeholder-[#94A8C7]/50 font-mono focus:outline-none focus:border-[#FFD978]"
+                  className="lq-input font-mono text-xs"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#94A8C7] mb-1">
+                <label className="block text-xs font-medium text-[#A69AAF] mb-1">
                   Supabase Anon Public Key (VITE_SUPABASE_ANON_KEY)
                 </label>
                 <input
@@ -289,7 +309,7 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
                   value={anonKey}
                   onChange={e => setAnonKey(e.target.value)}
                   placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                  className="w-full bg-[#0A1930] border border-[#1677FF]/35 rounded-xl px-3 py-2 text-xs text-white placeholder-[#94A8C7]/50 font-mono focus:outline-none focus:border-[#FFD978]"
+                  className="lq-input font-mono text-xs"
                 />
               </div>
 
@@ -297,17 +317,17 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
                 <button
                   type="submit"
                   disabled={testing}
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:brightness-110 border border-[#FFD978]/45 text-white font-semibold text-xs transition-all flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(22,119,255,0.4)]"
+                  className="lq-btn lq-btn-gold flex-1 py-2.5 text-xs"
                 >
                   {testing ? (
                     <>
                       <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                      Connecting...
+                      <span>Connecting...</span>
                     </>
                   ) : (
                     <>
                       <ShieldCheck className="w-4 h-4" />
-                      Save & Verify Connection
+                      <span>Save &amp; Verify Connection</span>
                     </>
                   )}
                 </button>
@@ -316,7 +336,7 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
                   <button
                     type="button"
                     onClick={handleClear}
-                    className="px-3 py-2.5 rounded-xl border border-rose-800/60 text-rose-300 hover:bg-rose-950/40 text-xs font-semibold transition-colors"
+                    className="lq-btn lq-btn-danger px-3 py-2.5 text-xs"
                   >
                     Clear
                   </button>
@@ -324,24 +344,26 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
               </div>
             </form>
 
-            <div className="text-[11px] text-[#94A8C7] bg-[#0A1930] border border-[#1677FF]/25 rounded-xl p-3">
-              <span className="font-semibold text-[#FFD978]">Tip:</span> You can also add credentials directly to your{' '}
-              <code className="text-amber-300 font-mono">.env</code> file:
-              <pre className="mt-1.5 p-2 bg-[#061225] rounded border border-[#1677FF]/25 font-mono text-[10px] text-[#94A8C7]">
-                VITE_SUPABASE_URL="https://your-project.supabase.co"{"\n"}
-                VITE_SUPABASE_ANON_KEY="your-anon-key"
+            <div className="text-[11px] text-[#A69AAF] bg-[#100D18] border border-[#362B45] rounded-xl p-3">
+              <span className="font-semibold text-[#E8C777]">Tip:</span> You can also add
+              credentials directly to your{' '}
+              <code className="text-[#E8C777] font-mono">.env</code> file:
+              <pre className="mt-1.5 p-2 bg-[#171220] rounded border border-[#362B45] font-mono text-[10px] text-[#A69AAF] overflow-x-auto">
+                VITE_SUPABASE_URL=&quot;https://your-project.supabase.co&quot;{'\n'}
+                VITE_SUPABASE_ANON_KEY=&quot;your-anon-key&quot;
               </pre>
             </div>
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="text-xs text-[#94A8C7] leading-relaxed">
-              Run this SQL script in your Supabase project's{' '}
-              <span className="text-[#FFD978] font-semibold">SQL Editor</span> to automatically provision the required tables, Row Level Security policies, and user triggers:
+            <div className="text-xs text-[#A69AAF] leading-relaxed">
+              Run this SQL script in your Supabase project&apos;s{' '}
+              <span className="text-[#E8C777] font-semibold">SQL Editor</span> to automatically
+              provision the required tables, Row Level Security policies, and user triggers:
             </div>
 
             <div className="relative">
-              <div className="p-3 bg-[#061225] rounded-xl border border-[#1677FF]/35 font-mono text-[10px] text-[#94A8C7] max-h-60 overflow-y-auto whitespace-pre">
+              <div className="p-3 bg-[#100D18] rounded-xl border border-[#362B45] font-mono text-[10px] text-[#A69AAF] max-h-60 overflow-y-auto whitespace-pre">
                 {`-- LIFEQUEST CLOUD SCHEMA TABLES
 1. profiles (id, username, avatar_url, updated_at)
 2. game_states (id, user_id, game_data JSONB, updated_at)
@@ -356,37 +378,40 @@ CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXEC
               <button
                 type="button"
                 onClick={copyMigrationSql}
-                className="absolute top-2 right-2 px-3 py-1.5 rounded-lg bg-[#0A1930] hover:bg-[#1677FF]/30 border border-[#1677FF]/50 text-white text-xs font-semibold flex items-center gap-1.5 shadow transition-all"
+                className="lq-btn lq-btn-secondary absolute top-2 right-2 px-3 py-1.5 text-xs"
               >
                 {copiedSql ? (
                   <>
-                    <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    Copied SQL!
+                    <Check className="w-3.5 h-3.5 text-[#49B88A]" />
+                    <span>Copied SQL!</span>
                   </>
                 ) : (
                   <>
-                    <Copy className="w-3.5 h-3.5 text-[#FFD978]" />
-                    Copy Full Migration SQL
+                    <Copy className="w-3.5 h-3.5 text-[#E8C777]" />
+                    <span>Copy Full Migration SQL</span>
                   </>
                 )}
               </button>
             </div>
 
-            <div className="flex items-center justify-between text-xs text-[#94A8C7]">
-              <span>SQL file saved locally at <code className="text-[#FFD978] font-mono">/supabase/schema.sql</code></span>
+            <div className="flex items-center justify-between text-xs text-[#A69AAF]">
+              <span>
+                SQL file saved locally at{' '}
+                <code className="text-[#E8C777] font-mono">/supabase/schema.sql</code>
+              </span>
               <a
                 href="https://supabase.com/dashboard"
                 target="_blank"
                 rel="noreferrer"
-                className="text-[#FFD978] hover:text-white flex items-center gap-1 font-semibold"
+                className="text-[#E8C777] hover:text-[#F2EDF7] flex items-center gap-1 font-semibold"
               >
-                Open Supabase Dashboard
+                <span>Open Supabase Dashboard</span>
                 <ExternalLink className="w-3 h-3" />
               </a>
             </div>
           </div>
         )}
       </div>
-    </div>
+    </RpgModalWrapper>
   );
 };

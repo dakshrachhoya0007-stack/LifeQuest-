@@ -2,6 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { NOTIFICATION_CATEGORY_META } from '../../data/polish2Data';
 import type { NotificationCategory, ServerNotificationPreferences } from '../../types/game';
+import { FeatureBanner, FeatureTabBar, FeatureTabOption } from '../Theme/FeatureThemePrimitives';
+import {
+  AnimatedCounter,
+  RpgStaggerGrid,
+  RpgStaggerItem,
+  RpgSubTabTransition,
+} from '../Motion/RpgMotionPrimitives';
 import {
   Bell,
   BellOff,
@@ -83,10 +90,21 @@ const formatAlertTimestamp = (iso: string): string => {
 
 const inferCategory = (type: string, category?: NotificationCategory): NotificationCategory => {
   if (category) return category;
-  if (type === 'friend_request' || type === 'friend_accepted' || type === 'guild_invite' || type === 'rival_invite' || type === 'rival_accepted') {
+  if (
+    type === 'friend_request' ||
+    type === 'friend_accepted' ||
+    type === 'guild_invite' ||
+    type === 'rival_invite' ||
+    type === 'rival_accepted'
+  ) {
     return 'social';
   }
-  if (type === 'weekly_boss_defeated' || type === 'boss_update' || type === 'community_milestone' || type === 'season_milestone') {
+  if (
+    type === 'weekly_boss_defeated' ||
+    type === 'boss_update' ||
+    type === 'community_milestone' ||
+    type === 'season_milestone'
+  ) {
     return 'game_world';
   }
   if (type === 'museum_personal_best' || type === 'fitness_milestone') {
@@ -122,6 +140,24 @@ export const NotificationCenterView: React.FC = () => {
     return inferCategory(n.type, n.category) === selectedCategory;
   });
 
+  const activeAlertCount = notifications.filter(n => !n.dismissedAt).length;
+
+  const categoryTabOptions: FeatureTabOption<FilterTab>[] = CATEGORY_TABS.map(tab => {
+    const unread =
+      tab.id === 'all'
+        ? unreadNotificationsCount
+        : notificationCategoryCounts[tab.id]?.unread ??
+          notifications.filter(
+            n => !n.dismissedAt && !n.readAt && inferCategory(n.type, n.category) === tab.id
+          ).length;
+    return {
+      id: tab.id,
+      label: tab.label,
+      icon: tab.icon,
+      badge: unread > 0 ? unread : undefined,
+    };
+  });
+
   const handleTogglePreference = async (
     key: keyof ServerNotificationPreferences,
     nextVal: boolean
@@ -142,28 +178,28 @@ export const NotificationCenterView: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in pb-12 max-w-[1400px] mx-auto">
+    <div className="space-y-6 pb-12 max-w-[1400px] mx-auto">
       {/* Header Banner */}
-      <div className="rounded-2xl bg-gradient-to-r from-[#0A1930] via-[#102440] to-[#0A1930] border border-[#1677FF]/40 shadow-[0_12px_32px_rgba(4,12,28,0.65)] p-5 sm:p-6">
+      <FeatureBanner themeId="dashboard">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2 text-xs mb-1">
-              <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#FFD978]">
+              <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#E8C777]">
                 Aetheria Herald
               </span>
-              <span className="text-[#94A8C7]/45" aria-hidden="true">·</span>
-              <span className="text-[#94A8C7] font-medium tabular-nums">
-                {unreadNotificationsCount} Unread
+              <span className="text-[#A69AAF]/45" aria-hidden="true">·</span>
+              <span className="text-[#A69AAF] font-mono font-medium tabular-nums">
+                <AnimatedCounter value={unreadNotificationsCount} /> Unread
               </span>
-              <span className="text-[#94A8C7]/45" aria-hidden="true">·</span>
-              <span className="text-[#94A8C7]/85 font-medium tabular-nums">
-                {notifications.filter(n => !n.dismissedAt).length} Active Alerts
+              <span className="text-[#A69AAF]/45" aria-hidden="true">·</span>
+              <span className="text-[#A69AAF]/85 font-mono font-medium tabular-nums">
+                <AnimatedCounter value={activeAlertCount} /> Active Alerts
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2F7FF] tracking-wide">
+            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2EDF7] tracking-wide">
               NOTIFICATION CENTER
             </h1>
-            <p className="text-xs sm:text-sm text-[#94A8C7] max-w-2xl mt-1">
+            <p className="text-xs sm:text-sm text-[#A69AAF] max-w-2xl mt-1">
               Follow progression breakthroughs, social invitations, raid updates, and verified fitness records without noise or duplicate clutter.
             </p>
           </div>
@@ -173,9 +209,9 @@ export const NotificationCenterView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => void markNotificationRead(undefined, selectedCategory)}
-                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#0099FF] hover:from-[#0099FF] hover:to-[#38D9F5] text-[#F2F7FF] shadow-[0_0_16px_rgba(22,119,255,0.35)] text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all"
+                className="lq-btn lq-btn-primary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
               >
-                <CheckCheck className="w-4 h-4 text-[#F2F7FF]" />
+                <CheckCheck className="w-4 h-4 text-[#E8C777]" />
                 {selectedCategory === 'all' ? 'Mark All Read' : 'Mark Category Read'}
               </button>
             )}
@@ -183,153 +219,125 @@ export const NotificationCenterView: React.FC = () => {
         </div>
 
         {/* Category Filter Tabs */}
-        <div
-          role="tablist"
-          aria-label="Notification categories"
-          className="mt-5 flex flex-wrap sm:flex-nowrap items-center gap-1.5 p-1.5 bg-[#061225]/90 border border-[#1677FF]/30 rounded-xl overflow-x-auto max-w-full"
-        >
-          {CATEGORY_TABS.map(tab => {
-            const Icon = tab.icon;
-            const isActive = selectedCategory === tab.id;
-            const unread =
-              tab.id === 'all'
-                ? unreadNotificationsCount
-                : notificationCategoryCounts[tab.id]?.unread ??
-                  notifications.filter(
-                    n => !n.dismissedAt && !n.readAt && inferCategory(n.type, n.category) === tab.id
-                  ).length;
-
-            return (
-              <button
-                key={tab.id}
-                role="tab"
-                aria-selected={isActive}
-                type="button"
-                onClick={() => setSelectedCategory(tab.id)}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap shrink-0 ${
-                  isActive
-                    ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-[#F2F7FF] border border-[#00D9FF]/55 shadow-[0_0_14px_rgba(0,217,255,0.3)]'
-                    : 'text-[#94A8C7] hover:text-[#F2F7FF] hover:bg-[#102440]/80 border border-transparent'
-                }`}
-              >
-                <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-[#F2F7FF]' : 'text-[#94A8C7]/75'}`} />
-                <span>{tab.label}</span>
-                {unread > 0 && (
-                  <span className="font-mono text-[11px] font-bold tabular-nums text-[#FFD978]">
-                    ({unread})
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+        <FeatureTabBar
+          themeId="dashboard"
+          layoutId="notifications-category-pill"
+          ariaLabel="Notification categories"
+          tabs={categoryTabOptions}
+          activeId={selectedCategory}
+          onSelect={setSelectedCategory}
+          className="mt-5"
+        />
+      </FeatureBanner>
 
       {/* Main Two-Column Layout: Alert Stream + Preferences */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Alert Feed */}
-        <div className="lg:col-span-8 bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/35 rounded-2xl p-5 sm:p-6 shadow-[0_12px_32px_rgba(4,12,28,0.65)] space-y-3">
-          <div className="flex items-center justify-between gap-2 pb-3 border-b border-[#1677FF]/30">
-            <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
-              <Bell className="w-4 h-4 text-[#FFD978]" />
+        <div className="lg:col-span-8 lq-card rounded-2xl p-5 sm:p-6 space-y-3">
+          <div className="flex items-center justify-between gap-2 pb-3 border-b border-[#362B45]">
+            <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
+              <Bell className="w-4 h-4 text-[#E8C777]" />
               {selectedCategory === 'all'
                 ? 'ALL NOTIFICATIONS'
                 : `${NOTIFICATION_CATEGORY_META[selectedCategory].label.toUpperCase()} ALERTS`}
             </h2>
-            <span className="text-xs text-[#94A8C7] tabular-nums">
+            <span className="text-xs font-mono text-[#A69AAF] tabular-nums">
               {visibleNotifications.length} {visibleNotifications.length === 1 ? 'entry' : 'entries'}
             </span>
           </div>
 
-          {visibleNotifications.length === 0 ? (
-            <div className="py-12 text-center space-y-2.5">
-              <div className="w-11 h-11 rounded-xl bg-[#0A1930] border border-[#1677FF]/35 flex items-center justify-center mx-auto text-[#FFD978]">
-                <BellOff className="w-5 h-5" />
+          <RpgSubTabTransition tabKey={selectedCategory}>
+            {visibleNotifications.length === 0 ? (
+              <div className="py-12 text-center space-y-2.5">
+                <div className="w-11 h-11 rounded-xl bg-[#100D18] border border-[#362B45] flex items-center justify-center mx-auto text-[#E8C777]">
+                  <BellOff className="w-5 h-5" />
+                </div>
+                <p className="text-sm font-semibold text-[#F2EDF7]">No alerts in this category</p>
+                <p className="text-xs text-[#A69AAF] max-w-md mx-auto">
+                  Complete verified workouts, unlock titles or rare badges, battle Weekly Raid Bosses, or connect with companions to receive meaningful updates here.
+                </p>
               </div>
-              <p className="text-sm font-semibold text-[#F2F7FF]">No alerts in this category</p>
-              <p className="text-xs text-[#94A8C7] max-w-md mx-auto">
-                Complete verified workouts, unlock titles or rare badges, battle Weekly Raid Bosses, or connect with companions to receive meaningful updates here.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2.5">
-              {visibleNotifications.map(notif => {
-                const cat = inferCategory(notif.type, notif.category);
-                const catLabel = NOTIFICATION_CATEGORY_META[cat]?.label || 'Realm';
-                const isUnread = !notif.readAt;
+            ) : (
+              <RpgStaggerGrid className="space-y-2.5">
+                {visibleNotifications.map(notif => {
+                  const cat = inferCategory(notif.type, notif.category);
+                  const catLabel = NOTIFICATION_CATEGORY_META[cat]?.label || 'Realm';
+                  const isUnread = !notif.readAt;
 
-                return (
-                  <div
-                    key={notif.id}
-                    className={`p-4 rounded-xl border transition-colors flex flex-col sm:flex-row sm:items-start justify-between gap-3 ${
-                      isUnread
-                        ? 'bg-[#0A1930] border-[#E7B94F]/50 shadow-[0_0_14px_rgba(231,185,79,0.14)]'
-                        : 'bg-[#061225]/80 border-[#1677FF]/25 opacity-85 hover:border-[#00D9FF]/45'
-                    }`}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => navigateFromNotification(notif)}
-                      className="min-w-0 flex-1 text-left group space-y-1"
-                    >
-                      <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-                        <span className="font-semibold uppercase tracking-wider text-[#FFD978]">
-                          {catLabel}
-                        </span>
-                        <span className="text-[#94A8C7]/45" aria-hidden="true">·</span>
-                        <span className="text-[#94A8C7] tabular-nums">
-                          {formatAlertTimestamp(notif.createdAt)}
-                        </span>
-                        {isUnread && (
-                          <>
-                            <span className="text-[#94A8C7]/45" aria-hidden="true">·</span>
-                            <span className="font-semibold text-[#00D9FF]">Unread</span>
-                          </>
-                        )}
-                      </div>
-                      <h3 className="text-sm font-bold text-[#F2F7FF] group-hover:text-[#FFD978] transition-colors">
-                        {notif.title}
-                      </h3>
-                      <p className="text-xs text-[#94A8C7] leading-relaxed">{notif.body}</p>
-                    </button>
-
-                    <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-start">
-                      {isUnread && (
+                  return (
+                    <RpgStaggerItem key={notif.id}>
+                      <div
+                        className={`p-4 rounded-xl border transition-colors flex flex-col sm:flex-row sm:items-start justify-between gap-3 ${
+                          isUnread
+                            ? 'bg-[#21152F] border-[#D6A84B]/55 shadow-[0_0_16px_-6px_rgba(214,168,75,0.22)]'
+                            : 'bg-[#100D18]/85 border-[#362B45] opacity-85 hover:border-[#7045A0]/70'
+                        }`}
+                      >
                         <button
                           type="button"
-                          onClick={() => void markNotificationRead(notif.id)}
-                          className="px-2.5 py-1.5 rounded-lg bg-[#102440] hover:bg-[#152E52] border border-[#1677FF]/45 hover:border-[#E7B94F]/55 text-[11px] font-semibold text-[#F2F7FF] flex items-center gap-1 whitespace-nowrap shrink-0 transition-colors"
-                          title="Mark as read"
+                          onClick={() => navigateFromNotification(notif)}
+                          className="min-w-0 flex-1 text-left group space-y-1 cursor-pointer"
                         >
-                          <Check className="w-3.5 h-3.5 text-[#FFD978]" />
-                          Read
+                          <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+                            <span className="font-semibold uppercase tracking-wider text-[#E8C777]">
+                              {catLabel}
+                            </span>
+                            <span className="text-[#A69AAF]/45" aria-hidden="true">·</span>
+                            <span className="text-[#A69AAF] font-mono tabular-nums">
+                              {formatAlertTimestamp(notif.createdAt)}
+                            </span>
+                            {isUnread && (
+                              <>
+                                <span className="text-[#A69AAF]/45" aria-hidden="true">·</span>
+                                <span className="font-semibold text-[#9A72CC]">Unread</span>
+                              </>
+                            )}
+                          </div>
+                          <h3 className="text-sm font-bold text-[#F2EDF7] group-hover:text-[#E8C777] transition-colors">
+                            {notif.title}
+                          </h3>
+                          <p className="text-xs text-[#A69AAF] leading-relaxed">{notif.body}</p>
                         </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => void dismissNotification(notif.id)}
-                        className="p-1.5 rounded-lg bg-[#0A1930] hover:bg-[#36111F]/80 border border-[#1677FF]/30 hover:border-[#F05B70]/60 text-[#94A8C7] hover:text-[#F05B70] transition-colors"
-                        title="Dismiss notification"
-                        aria-label="Dismiss notification"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+
+                        <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-start">
+                          {isUnread && (
+                            <button
+                              type="button"
+                              onClick={() => void markNotificationRead(notif.id)}
+                              className="lq-btn lq-btn-secondary px-2.5 py-1.5 rounded-lg text-[11px] font-semibold flex items-center gap-1 whitespace-nowrap shrink-0 cursor-pointer"
+                              title="Mark as read"
+                            >
+                              <Check className="w-3.5 h-3.5 text-[#E8C777]" />
+                              Read
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => void dismissNotification(notif.id)}
+                            className="p-1.5 rounded-lg bg-[#100D18] hover:bg-[#D65C66]/15 border border-[#362B45] hover:border-[#D65C66]/60 text-[#A69AAF] hover:text-[#D65C66] transition-colors cursor-pointer"
+                            title="Dismiss notification"
+                            aria-label="Dismiss notification"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    </RpgStaggerItem>
+                  );
+                })}
+              </RpgStaggerGrid>
+            )}
+          </RpgSubTabTransition>
         </div>
 
         {/* Preferences Panel */}
-        <div className="lg:col-span-4 bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/35 rounded-2xl p-5 sm:p-6 shadow-[0_12px_32px_rgba(4,12,28,0.65)] space-y-4">
-          <div className="pb-3 border-b border-[#1677FF]/30">
-            <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
-              <SlidersHorizontal className="w-4 h-4 text-[#FFD978]" />
+        <div className="lg:col-span-4 lq-card rounded-2xl p-5 sm:p-6 space-y-4">
+          <div className="pb-3 border-b border-[#362B45]">
+            <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
+              <SlidersHorizontal className="w-4 h-4 text-[#E8C777]" />
               ALERT PREFERENCES
             </h2>
-            <p className="text-xs text-[#94A8C7] mt-1">
+            <p className="text-xs text-[#A69AAF] mt-1">
               Control which events generate notifications across your account.
             </p>
           </div>
@@ -338,8 +346,8 @@ export const NotificationCenterView: React.FC = () => {
             <div
               className={`p-2.5 rounded-xl border text-xs ${
                 prefNotice.type === 'error'
-                  ? 'bg-[#36111F]/85 border-[#F05B70]/45 text-[#F05B70]'
-                  : 'bg-[#35D69A]/15 border-[#35D69A]/45 text-[#35D69A]'
+                  ? 'bg-[#D65C66]/15 border-[#D65C66]/45 text-[#D65C66]'
+                  : 'bg-[#49B88A]/15 border-[#49B88A]/45 text-[#49B88A]'
               }`}
             >
               {prefNotice.text}
@@ -347,13 +355,13 @@ export const NotificationCenterView: React.FC = () => {
           )}
 
           {/* Master Toggle */}
-          <label className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-[#0A1930] border border-[#1677FF]/40 cursor-pointer">
+          <label className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-[#100D18] border border-[#7045A0]/45 cursor-pointer hover:border-[#D6A84B]/50 transition-colors">
             <div className="min-w-0">
-              <span className="text-xs font-bold text-[#F2F7FF] flex items-center gap-1.5">
-                <Shield className="w-3.5 h-3.5 text-[#FFD978]" />
+              <span className="text-xs font-bold text-[#F2EDF7] flex items-center gap-1.5">
+                <Shield className="w-3.5 h-3.5 text-[#E8C777]" />
                 All Notifications Enabled
               </span>
-              <span className="text-[11px] text-[#94A8C7] block mt-0.5">
+              <span className="text-[11px] text-[#A69AAF] block mt-0.5">
                 Pause or resume every notification channel at once.
               </span>
             </div>
@@ -362,7 +370,7 @@ export const NotificationCenterView: React.FC = () => {
               disabled={savingPref}
               checked={notificationPreferences.masterEnabled}
               onChange={e => void handleTogglePreference('masterEnabled', e.target.checked)}
-              className="w-4 h-4 accent-[#00D9FF] cursor-pointer shrink-0"
+              className="w-4 h-4 accent-[#7045A0] cursor-pointer shrink-0"
             />
           </label>
 
@@ -376,13 +384,13 @@ export const NotificationCenterView: React.FC = () => {
                   key={item.key}
                   className={`flex items-start justify-between gap-3 p-3 rounded-xl border transition-colors ${
                     disabled
-                      ? 'bg-[#061225]/70 border-[#1677FF]/20 opacity-55 cursor-not-allowed'
-                      : 'bg-[#0A1930] border-[#1677FF]/30 hover:border-[#E7B94F]/45 cursor-pointer'
+                      ? 'bg-[#100D18]/60 border-[#362B45]/50 opacity-55 cursor-not-allowed'
+                      : 'bg-[#100D18] border-[#362B45] hover:border-[#D6A84B]/45 cursor-pointer'
                   }`}
                 >
                   <div className="min-w-0">
-                    <span className="text-xs font-semibold text-[#F2F7FF] block">{item.label}</span>
-                    <span className="text-[11px] text-[#94A8C7] block mt-0.5 leading-snug">
+                    <span className="text-xs font-semibold text-[#F2EDF7] block">{item.label}</span>
+                    <span className="text-[11px] text-[#A69AAF] block mt-0.5 leading-snug">
                       {item.description}
                     </span>
                   </div>
@@ -391,7 +399,7 @@ export const NotificationCenterView: React.FC = () => {
                     disabled={disabled}
                     checked={checked}
                     onChange={e => void handleTogglePreference(item.key, e.target.checked)}
-                    className="w-4 h-4 mt-0.5 accent-[#00D9FF] cursor-pointer shrink-0"
+                    className="w-4 h-4 mt-0.5 accent-[#7045A0] cursor-pointer shrink-0"
                   />
                 </label>
               );

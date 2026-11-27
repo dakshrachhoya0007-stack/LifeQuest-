@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { getRpgAvatarForClass } from '../../assets/images';
 import type { FeedCommentPermission, FeedFilter, FeedReactionKey } from '../../types/game';
+import { FeatureTabBar } from '../Theme/FeatureThemePrimitives';
 import {
   CheckCircle2,
   Flame,
-  MessageSquare,
   Send,
   Shield,
   Trash2,
@@ -104,43 +104,34 @@ export const AdventurersFeedView: React.FC = () => {
   const posts = feedData?.posts || [];
 
   return (
-    <div className="space-y-6 animate-in fade-in">
+    <div className="space-y-6">
       {/* Filter Toolbar */}
-      <div className="rounded-2xl bg-[#102440]/95 backdrop-blur-md border border-[#65A9FF]/30 p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-[0_12px_32px_rgba(4,12,28,0.65)]">
+      <div className="lq-surface p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <h2 className="font-['Cinzel'] font-bold text-lg text-[#F2F7FF] flex items-center gap-2">
-            <Flame className="w-5 h-5 text-[#65A9FF]" />
+          <h2 className="font-['Cinzel'] font-bold text-lg text-[#F2EDF7] flex items-center gap-2">
+            <Flame className="w-5 h-5 text-[#E8C777]" />
             Adventurer’s Activity Feed
           </h2>
-          <p className="text-xs text-[#94A8C7] mt-0.5">
-            Live stream of verified workouts, personal bests, achievements, level-ups, and Rivals results—respecting privacy & blocks.
+          <p className="text-xs text-[#A69AAF] mt-0.5">
+            Live stream of verified workouts, personal bests, achievements, level-ups, and Rivals results—respecting privacy &amp; blocks.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1.5">
-          {FEED_FILTERS.map(f => (
-            <button
-              key={f.id}
-              type="button"
-              onClick={() => void refreshActivityFeed(f.id, 1)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
-                feedFilter === f.id
-                  ? 'bg-gradient-to-r from-[#1677FF] to-[#65A9FF] text-[#F2F7FF] border border-[#65A9FF]/50 shadow-[0_0_12px_rgba(101,169,255,0.35)]'
-                  : 'bg-[#0A1930] text-[#94A8C7] border border-[#00D9FF]/25 hover:text-[#F2F7FF] hover:border-[#65A9FF]/45'
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
+        <FeatureTabBar
+          tabs={FEED_FILTERS}
+          activeId={feedFilter}
+          onSelect={id => void refreshActivityFeed(id, 1)}
+          ariaLabel="Activity feed filters"
+          layoutId="feed-filter-tab"
+        />
       </div>
 
       {notice && (
         <div
           className={`rounded-xl px-4 py-3 text-xs border ${
             notice.type === 'success'
-              ? 'bg-[#35D69A]/15 border-[#35D69A]/45 text-[#35D69A]'
-              : 'bg-[#36111F]/85 border-[#F05B70]/45 text-[#F05B70]'
+              ? 'bg-[#49B88A]/15 border-[#49B88A]/45 text-[#49B88A]'
+              : 'bg-[#D65C66]/15 border-[#D65C66]/45 text-[#D65C66]'
           }`}
         >
           {notice.text}
@@ -150,19 +141,19 @@ export const AdventurersFeedView: React.FC = () => {
       {/* Share Verified Workout Reflection */}
       <form
         onSubmit={handleShareNote}
-        className="rounded-2xl bg-[#102440]/95 backdrop-blur-md border border-[#00D9FF]/30 p-5 space-y-3 shadow-[0_12px_32px_rgba(4,12,28,0.6)]"
+        className="lq-surface p-5 space-y-3"
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="font-['Cinzel'] font-bold text-sm text-[#65A9FF]">
+          <h3 className="font-['Cinzel'] font-bold text-sm text-[#E8C777]">
             Share Verified Training Milestone
           </h3>
-          <span className="text-[11px] text-[#94A8C7]">
+          <span className="text-[11px] text-[#A69AAF]">
             Requires a logged fitness session—prevents duplicate or unverified posts
           </span>
         </div>
 
         {fitnessSessions.length === 0 ? (
-          <p className="text-xs text-[#94A8C7]">
+          <p className="text-xs text-[#A69AAF]">
             Log a workout in Fitness Log first to unlock sharing training reflections with companions.
           </p>
         ) : (
@@ -170,7 +161,7 @@ export const AdventurersFeedView: React.FC = () => {
             <select
               value={selectedSessionId}
               onChange={e => setSelectedSessionId(e.target.value)}
-              className="md:col-span-4 rounded-xl bg-[#061225] border border-[#00D9FF]/35 focus:border-[#65A9FF] focus:outline-none px-3 py-2 text-xs text-[#F2F7FF]"
+              className="md:col-span-4 lq-input py-2 px-3 text-xs"
             >
               {fitnessSessions.slice(0, 12).map(s => (
                 <option key={s.id} value={s.id}>
@@ -184,12 +175,12 @@ export const AdventurersFeedView: React.FC = () => {
               onChange={e => setNoteTitle(e.target.value)}
               placeholder="Headline (optional)"
               maxLength={70}
-              className="md:col-span-4 rounded-xl bg-[#061225] border border-[#00D9FF]/35 focus:border-[#65A9FF] focus:outline-none px-3 py-2 text-xs text-[#F2F7FF] placeholder-[#94A8C7]/50"
+              className="md:col-span-4 lq-input py-2 px-3 text-xs"
             />
             <select
               value={commentPerm}
               onChange={e => setCommentPerm(e.target.value as FeedCommentPermission)}
-              className="md:col-span-4 rounded-xl bg-[#061225] border border-[#00D9FF]/35 focus:border-[#65A9FF] focus:outline-none px-3 py-2 text-xs text-[#F2F7FF]"
+              className="md:col-span-4 lq-input py-2 px-3 text-xs"
             >
               <option value="everyone">Comments: Everyone</option>
               <option value="friends">Comments: Friends Only</option>
@@ -203,13 +194,13 @@ export const AdventurersFeedView: React.FC = () => {
                 value={noteSummary}
                 onChange={e => setNoteSummary(e.target.value)}
                 placeholder="Share how the session felt or what milestone you reached..."
-                className="w-full rounded-xl bg-[#061225] border border-[#00D9FF]/35 focus:border-[#65A9FF] focus:outline-none px-3 py-2 text-xs text-[#F2F7FF] placeholder-[#94A8C7]/50"
+                className="lq-input py-2 px-3 text-xs"
               />
             </div>
             <button
               type="submit"
               disabled={busyId === 'share-note'}
-              className="md:col-span-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#65A9FF] hover:from-[#0099FF] hover:to-[#7bb6ff] text-[#F2F7FF] text-xs font-bold whitespace-nowrap shadow-[0_0_14px_rgba(101,169,255,0.35)] transition-all cursor-pointer"
+              className="md:col-span-2 lq-btn lq-btn-primary text-xs whitespace-nowrap"
             >
               {busyId === 'share-note' ? 'Posting...' : 'Share Post'}
             </button>
@@ -219,13 +210,13 @@ export const AdventurersFeedView: React.FC = () => {
 
       {/* Posts List */}
       {feedLoading && posts.length === 0 ? (
-        <div className="rounded-2xl bg-[#102440]/95 border border-[#00D9FF]/25 p-8 text-center text-xs text-[#94A8C7]">
+        <div className="lq-surface p-8 text-center text-xs text-[#A69AAF]">
           Loading Adventurer’s Activity Feed...
         </div>
       ) : posts.length === 0 ? (
-        <div className="rounded-2xl bg-[#102440]/95 border border-[#00D9FF]/25 p-10 text-center space-y-2">
-          <p className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF]">No Activity Posts Yet</p>
-          <p className="text-xs text-[#94A8C7]">
+        <div className="lq-surface p-10 text-center space-y-2">
+          <p className="font-['Cinzel'] font-bold text-sm text-[#F2EDF7]">No Activity Posts Yet</p>
+          <p className="text-xs text-[#A69AAF]">
             Real verified workouts, personal records, level-ups, and achievements from you and your companions will appear here automatically.
           </p>
         </div>
@@ -236,7 +227,7 @@ export const AdventurersFeedView: React.FC = () => {
             return (
               <article
                 key={post.id}
-                className="rounded-2xl bg-[#102440]/95 backdrop-blur-md border border-[#00D9FF]/30 hover:border-[#65A9FF]/50 p-5 space-y-4 transition-all shadow-[0_12px_32px_rgba(4,12,28,0.6)]"
+                className="lq-card p-5 space-y-4"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
@@ -249,7 +240,7 @@ export const AdventurersFeedView: React.FC = () => {
                         src={getRpgAvatarForClass(post.authorClass)}
                         alt={post.authorUsername}
                         referrerPolicy="no-referrer"
-                        className="w-10 h-10 rounded-xl object-cover object-top border border-[#65A9FF]/55"
+                        className="w-10 h-10 rounded-xl object-cover object-top border border-[#7045A0]/60"
                       />
                     </button>
                     <div>
@@ -257,20 +248,20 @@ export const AdventurersFeedView: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => openPublicProfile(post.authorId)}
-                          className="font-bold text-[#F2F7FF] hover:text-[#65A9FF] cursor-pointer"
+                          className="font-bold text-[#F2EDF7] hover:text-[#E8C777] transition-colors cursor-pointer"
                         >
                           {post.authorUsername}
                         </button>
-                        <span className="text-[#94A8C7]/40" aria-hidden="true">·</span>
-                        <span className="text-[#65A9FF] capitalize">{post.category.replace('_', ' ')}</span>
-                        <span className="text-[#94A8C7]/40" aria-hidden="true">·</span>
-                        <span className="text-[#94A8C7]/75 tabular-nums">
+                        <span className="text-[#766D82]" aria-hidden="true">·</span>
+                        <span className="text-[#9A72CC] capitalize">{post.category.replace('_', ' ')}</span>
+                        <span className="text-[#766D82]" aria-hidden="true">·</span>
+                        <span className="text-[#766D82] tabular-nums">
                           {new Date(post.createdAt).toLocaleString()}
                         </span>
                       </div>
-                      <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] mt-0.5 flex items-center gap-1.5">
+                      <h3 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] mt-0.5 flex items-center gap-1.5">
                         {post.verified && (
-                          <CheckCircle2 className="w-4 h-4 text-[#35D69A] shrink-0" />
+                          <CheckCircle2 className="w-4 h-4 text-[#49B88A] shrink-0" />
                         )}
                         {post.title}
                       </h3>
@@ -288,7 +279,7 @@ export const AdventurersFeedView: React.FC = () => {
                           )
                         }
                         aria-label="Comment permission"
-                        className="rounded-lg bg-[#061225] border border-[#00D9FF]/30 px-2 py-1 text-[11px] text-[#94A8C7]"
+                        className="lq-input py-1 px-2 text-[11px] w-auto"
                       >
                         <option value="everyone">Comments: All</option>
                         <option value="friends">Comments: Friends</option>
@@ -298,7 +289,7 @@ export const AdventurersFeedView: React.FC = () => {
                         type="button"
                         onClick={() => void deleteFeedPost(post.id)}
                         aria-label="Delete post"
-                        className="p-1.5 rounded-lg bg-[#061225] hover:bg-[#36111F] text-[#F05B70] border border-[#00D9FF]/30 hover:border-[#F05B70]/45 cursor-pointer"
+                        className="p-1.5 rounded-lg bg-[#100D18] hover:bg-[#D65C66]/15 text-[#D65C66] border border-[#362B45] hover:border-[#D65C66]/45 transition-colors cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -306,17 +297,17 @@ export const AdventurersFeedView: React.FC = () => {
                   )}
                 </div>
 
-                <p className="text-xs sm:text-sm text-[#94A8C7] leading-relaxed">
+                <p className="text-xs sm:text-sm text-[#A69AAF] leading-relaxed">
                   {post.summary}
                   {post.highlightValue ? (
-                    <span className="ml-2 font-mono font-bold text-[#65A9FF] tabular-nums">
+                    <span className="ml-2 font-mono font-bold text-[#D6A84B] tabular-nums">
                       ({post.highlightValue})
                     </span>
                   ) : null}
                 </p>
 
                 {/* Reactions Bar */}
-                <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#00D9FF]/20">
+                <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#362B45]">
                   {REACTION_BUTTONS.map(rb => {
                     const count = post.reactions[rb.key] || 0;
                     const active = post.myReactions.includes(rb.key);
@@ -327,8 +318,8 @@ export const AdventurersFeedView: React.FC = () => {
                         onClick={() => void reactToFeedPost(post.id, rb.key)}
                         className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all flex items-center gap-1 tabular-nums cursor-pointer ${
                           active
-                            ? 'bg-[#1677FF]/35 border-[#65A9FF]/70 text-[#F2F7FF] shadow-[0_0_10px_rgba(101,169,255,0.25)]'
-                            : 'bg-[#061225] border-[#00D9FF]/25 text-[#94A8C7] hover:text-[#F2F7FF] hover:border-[#65A9FF]/45'
+                            ? 'bg-[#7045A0] border-[#9A72CC] text-[#F2EDF7] shadow-[0_4px_12px_rgba(112,69,160,0.3)]'
+                            : 'bg-[#100D18] border-[#362B45] text-[#A69AAF] hover:text-[#F2EDF7] hover:border-[#7045A0]'
                         }`}
                       >
                         <span>{rb.label}</span>
@@ -341,11 +332,11 @@ export const AdventurersFeedView: React.FC = () => {
                 {/* Comments Thread */}
                 <div className="space-y-2.5 pt-1">
                   {post.comments.length > 0 && (
-                    <div className="space-y-1.5 pl-3 border-l border-[#65A9FF]/35">
+                    <div className="space-y-1.5 rounded-xl bg-[#100D18] border border-[#362B45] p-3">
                       {post.comments.map(c => (
                         <div key={c.id} className="text-xs">
-                          <span className="font-semibold text-[#F2F7FF]">{c.authorUsername}: </span>
-                          <span className="text-[#94A8C7]">{c.body}</span>
+                          <span className="font-semibold text-[#F2EDF7]">{c.authorUsername}: </span>
+                          <span className="text-[#A69AAF]">{c.body}</span>
                         </div>
                       ))}
                     </div>
@@ -361,20 +352,20 @@ export const AdventurersFeedView: React.FC = () => {
                           setCommentDrafts(prev => ({ ...prev, [post.id]: e.target.value }))
                         }
                         placeholder="Write an encouraging comment..."
-                        className="flex-1 rounded-xl bg-[#061225] border border-[#00D9FF]/30 px-3 py-1.5 text-xs text-[#F2F7FF] placeholder-[#94A8C7]/50 focus:outline-none focus:border-[#65A9FF]"
+                        className="lq-input flex-1 py-1.5 px-3 text-xs"
                       />
                       <button
                         type="button"
                         disabled={busyId === `comment-${post.id}`}
                         onClick={() => void handleCommentSubmit(post.id)}
-                        className="px-3 py-1.5 rounded-xl bg-[#0A1930] hover:bg-[#152E52] border border-[#65A9FF]/40 hover:border-[#65A9FF]/70 text-[#F2F7FF] text-xs font-semibold flex items-center gap-1 whitespace-nowrap shrink-0 transition-all cursor-pointer"
+                        className="lq-btn lq-btn-secondary py-1.5 px-3 text-xs flex items-center gap-1 whitespace-nowrap shrink-0"
                       >
-                        <Send className="w-3 h-3 text-[#65A9FF]" />
+                        <Send className="w-3 h-3 text-[#9A72CC]" />
                         Reply
                       </button>
                     </div>
                   ) : (
-                    <p className="text-[11px] text-[#94A8C7]/65 flex items-center gap-1">
+                    <p className="text-[11px] text-[#766D82] flex items-center gap-1">
                       <Shield className="w-3 h-3" />
                       Comments restricted by author privacy settings.
                     </p>
@@ -390,7 +381,7 @@ export const AdventurersFeedView: React.FC = () => {
                 type="button"
                 disabled={feedLoading}
                 onClick={() => void refreshActivityFeed(feedFilter, (feedData.page || 1) + 1)}
-                className="px-5 py-2.5 rounded-xl bg-[#0A1930] hover:bg-[#152E52] border border-[#65A9FF]/40 hover:border-[#65A9FF]/70 text-xs font-semibold text-[#F2F7FF] transition-all cursor-pointer"
+                className="lq-btn lq-btn-secondary text-xs"
               >
                 {feedLoading ? 'Loading More...' : 'Load Older Activity'}
               </button>
@@ -401,3 +392,4 @@ export const AdventurersFeedView: React.FC = () => {
     </div>
   );
 };
+
