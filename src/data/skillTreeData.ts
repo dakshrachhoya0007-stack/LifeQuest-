@@ -647,9 +647,9 @@ export const SKILL_TREE_ATTRIBUTES: SkillTreeAttributeDefinition[] = [
     verifiedSources: [
       'Verified Study & Focus Timer / Reflection sessions',
       'Mindfulness & reading habit completions',
-      'Intellectual AI Quest evidence submissions',
+      'Intellectual Daily Quest evidence submissions',
     ],
-    accentHex: '#A78BFA',
+    accentHex: '#00D9FF',
     dailySafetyCapXp: DAILY_ATTRIBUTE_XP_CAPS.focus,
     branches: [
       {

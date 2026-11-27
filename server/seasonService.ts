@@ -78,6 +78,7 @@ export function createSeasonService(
     onGrantFragments?: (userId: string, amount: number, source: string, key?: string) => Promise<any>;
     onGrantCard?: (userId: string, cardId: string, sourceRef: string) => Promise<any>;
     onGrantTitle?: (params: { userId: string; titleId: string; sourceRef: string }) => Promise<any>;
+    onGetWallet?: (userId: string) => any;
   }
 ) {
   const LEDGER_PATH = path.join(rootDir, '.lifequest_seasons.json');
@@ -735,6 +736,10 @@ export function createSeasonService(
           userId: auth.userId!,
           ...result.notifyInfo,
         });
+      }
+
+      if (result.status === 200 && opts?.onGetWallet && auth.userId) {
+        (result.payload as any).wallet = opts.onGetWallet(auth.userId);
       }
 
       res.status(result.status).json(result.payload);

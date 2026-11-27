@@ -205,7 +205,7 @@ export const CharacterCustomizationView: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in">
       {/* Studio Hero Stage */}
-      <div className="relative rounded-2xl overflow-hidden border border-[#6638B8]/40 bg-[#24143D] shadow-[0_12px_32px_rgba(10,6,20,0.6)]">
+      <div className="relative rounded-2xl overflow-hidden border border-[#1677FF]/40 bg-[#102440] shadow-[0_12px_32px_rgba(4,12,28,0.6)]">
         <img
           src={wardrobeSanctumBgImg}
           alt="Wardrobe Sanctum backdrop"
@@ -214,7 +214,7 @@ export const CharacterCustomizationView: React.FC = () => {
         />
         <div
           aria-hidden="true"
-          className="absolute inset-0 bg-gradient-to-r from-[#100D1C]/95 via-[#19122B]/88 to-[#100D1C]/92"
+          className="absolute inset-0 bg-gradient-to-r from-[#061225]/95 via-[#0A1930]/88 to-[#061225]/92"
         />
 
         <div className="relative z-10 p-6 flex flex-col lg:flex-row items-center justify-between gap-6">
@@ -232,10 +232,10 @@ export const CharacterCustomizationView: React.FC = () => {
               <div className="text-xs font-['Cinzel'] font-bold uppercase tracking-widest text-[#E7B94F]">
                 2D Appearance Studio & Presets
               </div>
-              <h2 className="text-2xl font-black font-['Cinzel'] text-[#F7F4FF]">
+              <h2 className="text-2xl font-black font-['Cinzel'] text-[#F2F7FF]">
                 {user?.characterName || user?.username || 'Champion'}
               </h2>
-              <div className="text-xs text-[#BEB4D6] space-y-1">
+              <div className="text-xs text-[#94A8C7] space-y-1">
                 <p>
                   Primary Title:{' '}
                   <span className="text-[#FFD978] font-semibold">
@@ -247,13 +247,13 @@ export const CharacterCustomizationView: React.FC = () => {
                 {identityState?.equippedSecondaryTitleId && (
                   <p>
                     Secondary Title:{' '}
-                    <span className="text-[#A875FF] font-semibold">
+                    <span className="text-[#00D9FF] font-semibold">
                       {PLAYER_TITLES_CATALOG.find(t => t.id === identityState.equippedSecondaryTitleId)?.name}
                     </span>
                   </p>
                 )}
               </div>
-              <div className="text-xs text-[#BEB4D6] tabular-nums pt-1">
+              <div className="text-xs text-[#94A8C7] tabular-nums pt-1">
                 <span>{unlockedSet.size} / {COSMETICS_CATALOG.length} 2D Cosmetics Unlocked</span>
                 <span aria-hidden="true" className="mx-2">·</span>
                 <span>{loadouts.length} / {maxLoadoutSlots} Loadout Slots</span>
@@ -265,7 +265,7 @@ export const CharacterCustomizationView: React.FC = () => {
           <div
             role="tablist"
             aria-label="Customization studio sections"
-            className="flex flex-wrap items-center gap-1.5 p-1.5 rounded-xl bg-[#100D1C]/95 border border-[#6638B8]/35"
+            className="flex flex-wrap items-center gap-1.5 p-1.5 rounded-xl bg-[#061225]/95 border border-[#1677FF]/35"
           >
             {[
               { id: 'wardrobe', label: '2D Wardrobe', icon: Palette },
@@ -283,8 +283,8 @@ export const CharacterCustomizationView: React.FC = () => {
                   onClick={() => setStudioSection(tab.id as typeof studioSection)}
                   className={`px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all whitespace-nowrap shrink-0 ${
                     active
-                      ? 'bg-gradient-to-r from-[#6638B8] to-[#A875FF] text-white shadow-[0_0_16px_rgba(168,117,255,0.35)] border border-[#FFD978]/45'
-                      : 'text-[#BEB4D6] hover:text-[#F7F4FF] hover:bg-[#24143D] border border-transparent'
+                      ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white shadow-[0_0_16px_rgba(0,217,255,0.35)] border border-[#FFD978]/45'
+                      : 'text-[#94A8C7] hover:text-[#F2F7FF] hover:bg-[#102440] border border-transparent'
                   }`}
                 >
                   <Icon className="w-4 h-4 shrink-0" />
@@ -312,7 +312,7 @@ export const CharacterCustomizationView: React.FC = () => {
       {studioSection === 'wardrobe' && (
         <div className="space-y-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-[#100D1C] border border-[#6638B8]/35">
+            <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-[#061225] border border-[#1677FF]/35">
               {SLOT_TABS.map(slot => (
                 <button
                   key={slot.id}
@@ -320,8 +320,8 @@ export const CharacterCustomizationView: React.FC = () => {
                   onClick={() => setActiveSlot(slot.id)}
                   className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
                     activeSlot === slot.id
-                      ? 'bg-gradient-to-r from-[#6638B8] to-[#A875FF] text-white shadow-[0_0_12px_rgba(168,117,255,0.35)] border border-[#FFD978]/45'
-                      : 'text-[#BEB4D6] hover:text-[#F7F4FF] hover:bg-[#24143D] border border-transparent'
+                      ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white shadow-[0_0_12px_rgba(0,217,255,0.35)] border border-[#FFD978]/45'
+                      : 'text-[#94A8C7] hover:text-[#F2F7FF] hover:bg-[#102440] border border-transparent'
                   }`}
                 >
                   {slot.label}
@@ -333,7 +333,7 @@ export const CharacterCustomizationView: React.FC = () => {
               type="button"
               disabled={busyId === `unequip-${activeSlot}`}
               onClick={() => void handleUnequipSlot(activeSlot)}
-              className="px-3.5 py-2 rounded-lg bg-[#19122B] hover:bg-[#2F1B4E] border border-[#6638B8]/40 hover:border-[#A875FF]/55 text-xs text-[#F7F4FF] whitespace-nowrap shrink-0 transition-all"
+              className="px-3.5 py-2 rounded-lg bg-[#0A1930] hover:bg-[#152E52] border border-[#1677FF]/40 hover:border-[#00D9FF]/55 text-xs text-[#F2F7FF] whitespace-nowrap shrink-0 transition-all"
             >
               Reset {activeSlot}
             </button>
@@ -362,8 +362,8 @@ export const CharacterCustomizationView: React.FC = () => {
                   key={item.id}
                   className={`rounded-2xl p-4 border transition-all flex flex-col justify-between gap-4 ${
                     isEquipped
-                      ? 'bg-[#24143D] border-[#FFD978]/60 shadow-[0_0_20px_rgba(255,217,120,0.16)]'
-                      : 'bg-[#24143D]/90 border-[#6638B8]/30 hover:border-[#A875FF]/50'
+                      ? 'bg-[#102440] border-[#FFD978]/60 shadow-[0_0_20px_rgba(255,217,120,0.16)]'
+                      : 'bg-[#102440]/90 border-[#1677FF]/30 hover:border-[#00D9FF]/50'
                   }`}
                 >
                   <div className="space-y-3">
@@ -381,8 +381,8 @@ export const CharacterCustomizationView: React.FC = () => {
                     </div>
 
                     <div>
-                      <h3 className="font-['Cinzel'] font-bold text-sm text-[#F7F4FF]">{item.name}</h3>
-                      <p className="text-xs text-[#BEB4D6] mt-1 leading-relaxed">
+                      <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF]">{item.name}</h3>
+                      <p className="text-xs text-[#94A8C7] mt-1 leading-relaxed">
                         {item.description}
                       </p>
                       <p className="text-[11px] text-[#E7B94F]/90 mt-2">
@@ -398,15 +398,15 @@ export const CharacterCustomizationView: React.FC = () => {
                       onClick={() => void handleEquipCosmetic(item.id)}
                       className={`w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 transition-all ${
                         isEquipped
-                          ? 'bg-[#6638B8]/25 text-[#FFD978] border border-[#FFD978]/55 cursor-default'
-                          : 'bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#100D1C] shadow-[0_0_16px_rgba(231,185,79,0.35)]'
+                          ? 'bg-[#1677FF]/25 text-[#FFD978] border border-[#FFD978]/55 cursor-default'
+                          : 'bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#061225] shadow-[0_0_16px_rgba(231,185,79,0.35)]'
                       }`}
                     >
                       <Check className="w-3.5 h-3.5" />
                       {isEquipped ? 'Equipped' : 'Equip Cosmetic'}
                     </button>
                   ) : (
-                    <div className="w-full py-2 px-3 rounded-xl bg-[#19122B] border border-[#6638B8]/25 text-xs text-[#BEB4D6]/60 flex items-center justify-center gap-1.5">
+                    <div className="w-full py-2 px-3 rounded-xl bg-[#0A1930] border border-[#1677FF]/25 text-xs text-[#94A8C7]/60 flex items-center justify-center gap-1.5">
                       <Lock className="w-3.5 h-3.5" />
                       Locked
                     </div>
@@ -417,13 +417,13 @@ export const CharacterCustomizationView: React.FC = () => {
           </div>
 
           {/* Wardrobe Collection Milestones */}
-          <div className="rounded-2xl bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 p-5 space-y-4">
+          <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/35 p-5 space-y-4">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="font-['Cinzel'] font-bold text-sm text-[#F7F4FF] flex items-center gap-2">
+              <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF] flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-[#FFD978]" />
                 Cosmetic Collection Milestones
               </h3>
-              <span className="text-xs font-mono text-[#BEB4D6] tabular-nums">
+              <span className="text-xs font-mono text-[#94A8C7] tabular-nums">
                 {unlockedSet.size} Cosmetics Owned
               </span>
             </div>
@@ -434,16 +434,16 @@ export const CharacterCustomizationView: React.FC = () => {
                 return (
                   <div
                     key={ms.id}
-                    className="rounded-xl bg-[#19122B] border border-[#6638B8]/30 p-4 flex flex-col justify-between gap-3"
+                    className="rounded-xl bg-[#0A1930] border border-[#1677FF]/30 p-4 flex flex-col justify-between gap-3"
                   >
                     <div>
                       <p className="text-xs text-[#E7B94F] font-semibold tabular-nums">
                         {ms.requiredUnlocked}+ Cosmetics
                       </p>
-                      <h4 className="font-['Cinzel'] font-bold text-sm text-[#F7F4FF] mt-0.5">
+                      <h4 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF] mt-0.5">
                         {ms.title}
                       </h4>
-                      <p className="text-xs text-[#BEB4D6] mt-1">{ms.rewardLabel}</p>
+                      <p className="text-xs text-[#94A8C7] mt-1">{ms.rewardLabel}</p>
                     </div>
                     <button
                       type="button"
@@ -453,8 +453,8 @@ export const CharacterCustomizationView: React.FC = () => {
                         claimed
                           ? 'bg-emerald-950/60 text-[#35D69A] border border-[#35D69A]/45'
                           : ready
-                          ? 'bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#100D1C] shadow-[0_0_16px_rgba(231,185,79,0.35)]'
-                          : 'bg-[#100D1C] text-[#BEB4D6]/50 border border-[#6638B8]/25'
+                          ? 'bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#061225] shadow-[0_0_16px_rgba(231,185,79,0.35)]'
+                          : 'bg-[#061225] text-[#94A8C7]/50 border border-[#1677FF]/25'
                       }`}
                     >
                       {claimed ? 'Claimed' : ready ? 'Claim Reward' : 'In Progress'}
@@ -473,17 +473,17 @@ export const CharacterCustomizationView: React.FC = () => {
           <div className="lg:col-span-7 space-y-4">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <h3 className="font-['Cinzel'] font-bold text-base text-[#F7F4FF]">
+                <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF]">
                   Saved Cosmetic Loadouts
                 </h3>
-                <p className="text-xs text-[#BEB4D6]">
+                <p className="text-xs text-[#94A8C7]">
                   Combine 2D appearance, primary and secondary titles, and up to 4 badges. Strictly cosmetic—zero combat impact.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={beginNewLoadout}
-                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#100D1C] shadow-[0_0_16px_rgba(231,185,79,0.35)] text-xs font-bold flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all"
+                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#061225] shadow-[0_0_16px_rgba(231,185,79,0.35)] text-xs font-bold flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all"
               >
                 <Plus className="w-3.5 h-3.5" />
                 New Preset
@@ -491,7 +491,7 @@ export const CharacterCustomizationView: React.FC = () => {
             </div>
 
             {loadouts.length === 0 ? (
-              <div className="rounded-2xl bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 p-8 text-center text-xs text-[#BEB4D6]">
+              <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/35 p-8 text-center text-xs text-[#94A8C7]">
                 No saved loadouts yet. Snapshot your current 2D appearance and titles using the editor.
               </div>
             ) : (
@@ -506,7 +506,7 @@ export const CharacterCustomizationView: React.FC = () => {
                   return (
                     <div
                       key={preset.id}
-                      className="rounded-2xl bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 hover:border-[#A875FF]/50 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all"
+                      className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/35 hover:border-[#00D9FF]/50 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all"
                     >
                       <div className="flex items-center gap-3.5 min-w-0">
                         <Character2DAvatar
@@ -516,10 +516,10 @@ export const CharacterCustomizationView: React.FC = () => {
                           size="sm"
                         />
                         <div className="min-w-0">
-                          <h4 className="font-['Cinzel'] font-bold text-sm text-[#F7F4FF] truncate">
+                          <h4 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF] truncate">
                             {preset.name}
                           </h4>
-                          <div className="text-[11px] text-[#BEB4D6] flex flex-wrap items-center gap-1.5 mt-0.5">
+                          <div className="text-[11px] text-[#94A8C7] flex flex-wrap items-center gap-1.5 mt-0.5">
                             <span>{preset.context === 'competition' ? 'Competition Context' : 'Profile Default'}</span>
                             <span aria-hidden="true">·</span>
                             <span>{titleName}</span>
@@ -541,7 +541,7 @@ export const CharacterCustomizationView: React.FC = () => {
                           type="button"
                           disabled={busyId === `eq-${preset.id}`}
                           onClick={() => void handleEquipLoadout(preset.id, 'default')}
-                          className="px-2.5 py-1.5 rounded-lg bg-[#6638B8]/25 hover:bg-[#6638B8]/40 border border-[#A875FF]/45 text-[#FFD978] text-xs font-semibold whitespace-nowrap shrink-0 transition-all"
+                          className="px-2.5 py-1.5 rounded-lg bg-[#1677FF]/25 hover:bg-[#1677FF]/40 border border-[#00D9FF]/45 text-[#FFD978] text-xs font-semibold whitespace-nowrap shrink-0 transition-all"
                         >
                           Equip Profile
                         </button>
@@ -549,14 +549,14 @@ export const CharacterCustomizationView: React.FC = () => {
                           type="button"
                           disabled={busyId === `eq-${preset.id}`}
                           onClick={() => void handleEquipLoadout(preset.id, 'competition')}
-                          className="px-2.5 py-1.5 rounded-lg bg-[#19122B] hover:bg-[#2F1B4E] border border-[#E7B94F]/40 text-[#E7B94F] text-xs font-semibold whitespace-nowrap shrink-0 transition-all"
+                          className="px-2.5 py-1.5 rounded-lg bg-[#0A1930] hover:bg-[#152E52] border border-[#E7B94F]/40 text-[#E7B94F] text-xs font-semibold whitespace-nowrap shrink-0 transition-all"
                         >
                           Bind Arena
                         </button>
                         <button
                           type="button"
                           onClick={() => loadPresetForEdit(preset)}
-                          className="px-2.5 py-1.5 rounded-lg bg-[#19122B] hover:bg-[#2F1B4E] border border-[#6638B8]/30 text-xs text-[#F7F4FF] whitespace-nowrap shrink-0 transition-all"
+                          className="px-2.5 py-1.5 rounded-lg bg-[#0A1930] hover:bg-[#152E52] border border-[#1677FF]/30 text-xs text-[#F2F7FF] whitespace-nowrap shrink-0 transition-all"
                         >
                           Edit
                         </button>
@@ -564,7 +564,7 @@ export const CharacterCustomizationView: React.FC = () => {
                           type="button"
                           onClick={() => void duplicateLoadout(preset.id)}
                           aria-label={`Duplicate ${preset.name}`}
-                          className="p-1.5 rounded-lg bg-[#19122B] hover:bg-[#2F1B4E] border border-[#6638B8]/30 text-[#BEB4D6] hover:text-[#F7F4FF] transition-all"
+                          className="p-1.5 rounded-lg bg-[#0A1930] hover:bg-[#152E52] border border-[#1677FF]/30 text-[#94A8C7] hover:text-[#F2F7FF] transition-all"
                         >
                           <Copy className="w-3.5 h-3.5" />
                         </button>
@@ -572,7 +572,7 @@ export const CharacterCustomizationView: React.FC = () => {
                           type="button"
                           onClick={() => void deleteLoadout(preset.id)}
                           aria-label={`Delete ${preset.name}`}
-                          className="p-1.5 rounded-lg bg-[#19122B] hover:bg-[#36111F]/70 border border-[#6638B8]/30 text-[#F05B70] transition-all"
+                          className="p-1.5 rounded-lg bg-[#0A1930] hover:bg-[#36111F]/70 border border-[#1677FF]/30 text-[#F05B70] transition-all"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -586,14 +586,14 @@ export const CharacterCustomizationView: React.FC = () => {
 
           <form
             onSubmit={handleSaveLoadout}
-            className="lg:col-span-5 rounded-2xl bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 p-5 space-y-4 self-start"
+            className="lg:col-span-5 rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/35 p-5 space-y-4 self-start"
           >
-            <h3 className="font-['Cinzel'] font-bold text-base text-[#F7F4FF]">
+            <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF]">
               {editingLoadoutId ? 'Update Loadout Preset' : 'Save Current Look as Loadout'}
             </h3>
 
             <div>
-              <label className="block text-xs text-[#BEB4D6] mb-1">Loadout Name</label>
+              <label className="block text-xs text-[#94A8C7] mb-1">Loadout Name</label>
               <input
                 type="text"
                 required
@@ -601,16 +601,16 @@ export const CharacterCustomizationView: React.FC = () => {
                 value={loadoutName}
                 onChange={e => setLoadoutName(e.target.value)}
                 placeholder="e.g. Duskwarden Competition"
-                className="w-full rounded-xl bg-[#19122B] border border-[#6638B8]/40 px-3 py-2 text-xs text-[#F7F4FF] placeholder-[#BEB4D6]/50 focus:outline-none focus:border-[#FFD978]"
+                className="w-full rounded-xl bg-[#0A1930] border border-[#1677FF]/40 px-3 py-2 text-xs text-[#F2F7FF] placeholder-[#94A8C7]/50 focus:outline-none focus:border-[#FFD978]"
               />
             </div>
 
             <div>
-              <label className="block text-xs text-[#BEB4D6] mb-1">Target Context</label>
+              <label className="block text-xs text-[#94A8C7] mb-1">Target Context</label>
               <select
                 value={loadoutContext}
                 onChange={e => setLoadoutContext(e.target.value as 'default' | 'competition')}
-                className="w-full rounded-xl bg-[#19122B] border border-[#6638B8]/40 px-3 py-2 text-xs text-[#F7F4FF] focus:outline-none focus:border-[#FFD978]"
+                className="w-full rounded-xl bg-[#0A1930] border border-[#1677FF]/40 px-3 py-2 text-xs text-[#F2F7FF] focus:outline-none focus:border-[#FFD978]"
               >
                 <option value="default">Profile Default</option>
                 <option value="competition">Rivals & Tournament Arena</option>
@@ -618,11 +618,11 @@ export const CharacterCustomizationView: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs text-[#BEB4D6] mb-1">Primary Title</label>
+              <label className="block text-xs text-[#94A8C7] mb-1">Primary Title</label>
               <select
                 value={loadoutPrimaryTitle || ''}
                 onChange={e => setLoadoutPrimaryTitle(e.target.value || null)}
-                className="w-full rounded-xl bg-[#19122B] border border-[#6638B8]/40 px-3 py-2 text-xs text-[#F7F4FF] focus:outline-none focus:border-[#FFD978]"
+                className="w-full rounded-xl bg-[#0A1930] border border-[#1677FF]/40 px-3 py-2 text-xs text-[#F2F7FF] focus:outline-none focus:border-[#FFD978]"
               >
                 <option value="">None</option>
                 {PLAYER_TITLES_CATALOG.filter(t => unlockedTitleSet.has(t.id)).map(t => (
@@ -634,11 +634,11 @@ export const CharacterCustomizationView: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs text-[#BEB4D6] mb-1">Secondary Title (Optional)</label>
+              <label className="block text-xs text-[#94A8C7] mb-1">Secondary Title (Optional)</label>
               <select
                 value={loadoutSecondaryTitle || ''}
                 onChange={e => setLoadoutSecondaryTitle(e.target.value || null)}
-                className="w-full rounded-xl bg-[#19122B] border border-[#6638B8]/40 px-3 py-2 text-xs text-[#F7F4FF] focus:outline-none focus:border-[#FFD978]"
+                className="w-full rounded-xl bg-[#0A1930] border border-[#1677FF]/40 px-3 py-2 text-xs text-[#F2F7FF] focus:outline-none focus:border-[#FFD978]"
               >
                 <option value="">None</option>
                 {PLAYER_TITLES_CATALOG.filter(t => unlockedTitleSet.has(t.id)).map(t => (
@@ -650,12 +650,12 @@ export const CharacterCustomizationView: React.FC = () => {
             </div>
 
             <div>
-              <span className="block text-xs text-[#BEB4D6] mb-1.5">
+              <span className="block text-xs text-[#94A8C7] mb-1.5">
                 Featured Badges ({loadoutBadges.length}/4)
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {unlockedBadgeList.length === 0 ? (
-                  <span className="text-xs text-[#BEB4D6]/60">Unlock badges to attach them here.</span>
+                  <span className="text-xs text-[#94A8C7]/60">Unlock badges to attach them here.</span>
                 ) : (
                   unlockedBadgeList.map(badge => {
                     const selected = loadoutBadges.includes(badge.id);
@@ -672,8 +672,8 @@ export const CharacterCustomizationView: React.FC = () => {
                         }}
                         className={`px-2.5 py-1.5 rounded-lg text-xs border transition-all whitespace-nowrap shrink-0 ${
                           selected
-                            ? 'bg-[#6638B8]/30 border-[#FFD978]/60 text-[#FFD978]'
-                            : 'bg-[#19122B] border-[#6638B8]/30 text-[#BEB4D6] hover:text-[#F7F4FF]'
+                            ? 'bg-[#1677FF]/30 border-[#FFD978]/60 text-[#FFD978]'
+                            : 'bg-[#0A1930] border-[#1677FF]/30 text-[#94A8C7] hover:text-[#F2F7FF]'
                         }`}
                       >
                         {badge.name}
@@ -687,7 +687,7 @@ export const CharacterCustomizationView: React.FC = () => {
             <button
               type="submit"
               disabled={busyId === 'save-loadout'}
-              className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#100D1C] shadow-[0_0_16px_rgba(231,185,79,0.35)] text-xs font-bold whitespace-nowrap transition-all"
+              className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#061225] shadow-[0_0_16px_rgba(231,185,79,0.35)] text-xs font-bold whitespace-nowrap transition-all"
             >
               {editingLoadoutId ? 'Save Changes' : 'Save Loadout'}
             </button>
@@ -698,12 +698,12 @@ export const CharacterCustomizationView: React.FC = () => {
       {/* SECTION 3: ADVANCED TITLE VAULT (DUAL TITLE SLOTS) */}
       {studioSection === 'titles' && (
         <div className="space-y-4">
-          <div className="rounded-2xl bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/35 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h3 className="font-['Cinzel'] font-bold text-base text-[#F7F4FF]">
+              <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF]">
                 Player Title Collection ({unlockedTitleSet.size} / {PLAYER_TITLES_CATALOG.length})
               </h3>
-              <p className="text-xs text-[#BEB4D6] mt-0.5">
+              <p className="text-xs text-[#94A8C7] mt-0.5">
                 Equip a Primary Title and an optional Secondary Title to display across Hero Command Center, Social Directory, Leaderboards, and Rivals.
               </p>
             </div>
@@ -711,14 +711,14 @@ export const CharacterCustomizationView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => void handleTitleSlotSelect('primary', null)}
-                className="px-3 py-1.5 rounded-lg bg-[#19122B] hover:bg-[#2F1B4E] border border-[#6638B8]/40 text-xs text-[#F7F4FF] whitespace-nowrap shrink-0 transition-all"
+                className="px-3 py-1.5 rounded-lg bg-[#0A1930] hover:bg-[#152E52] border border-[#1677FF]/40 text-xs text-[#F2F7FF] whitespace-nowrap shrink-0 transition-all"
               >
                 Clear Primary
               </button>
               <button
                 type="button"
                 onClick={() => void handleTitleSlotSelect('secondary', null)}
-                className="px-3 py-1.5 rounded-lg bg-[#19122B] hover:bg-[#2F1B4E] border border-[#6638B8]/40 text-xs text-[#F7F4FF] whitespace-nowrap shrink-0 transition-all"
+                className="px-3 py-1.5 rounded-lg bg-[#0A1930] hover:bg-[#152E52] border border-[#1677FF]/40 text-xs text-[#F2F7FF] whitespace-nowrap shrink-0 transition-all"
               >
                 Clear Secondary
               </button>
@@ -737,20 +737,20 @@ export const CharacterCustomizationView: React.FC = () => {
                   key={title.id}
                   className={`rounded-2xl p-4 border flex flex-col justify-between gap-3 transition-all ${
                     isPrimary || isSecondary
-                      ? 'bg-[#24143D] border-[#FFD978]/60 shadow-[0_0_20px_rgba(255,217,120,0.16)]'
-                      : 'bg-[#24143D]/90 border-[#6638B8]/30 hover:border-[#A875FF]/50'
+                      ? 'bg-[#102440] border-[#FFD978]/60 shadow-[0_0_20px_rgba(255,217,120,0.16)]'
+                      : 'bg-[#102440]/90 border-[#1677FF]/30 hover:border-[#00D9FF]/50'
                   }`}
                 >
                   <div>
                     <div className="flex items-center justify-between gap-2 text-xs mb-1">
                       <span className={`font-semibold ${style.text}`}>{title.rarity}</span>
-                      <span className="text-[#BEB4D6] capitalize">{title.category}</span>
+                      <span className="text-[#94A8C7] capitalize">{title.category}</span>
                     </div>
-                    <h4 className="font-['Cinzel'] font-bold text-sm text-[#F7F4FF] flex items-center gap-1.5">
+                    <h4 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF] flex items-center gap-1.5">
                       <Award className="w-3.5 h-3.5 text-[#FFD978] shrink-0" />
                       {title.name}
                     </h4>
-                    <p className="text-xs text-[#BEB4D6] mt-1 leading-relaxed">{title.description}</p>
+                    <p className="text-xs text-[#94A8C7] mt-1 leading-relaxed">{title.description}</p>
                     <p className="text-[11px] text-[#E7B94F]/90 mt-2">
                       Unlock: {title.unlockRequirement}
                       {title.limitedEdition ? ' · Limited Edition' : ''}
@@ -765,8 +765,8 @@ export const CharacterCustomizationView: React.FC = () => {
                         onClick={() => void handleTitleSlotSelect('primary', title.id)}
                         className={`flex-1 py-1.5 px-2.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
                           isPrimary
-                            ? 'bg-gradient-to-r from-[#6638B8] to-[#A875FF] text-white shadow-[0_0_12px_rgba(168,117,255,0.35)]'
-                            : 'bg-[#19122B] hover:bg-[#2F1B4E] text-[#F7F4FF] border border-[#6638B8]/40'
+                            ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white shadow-[0_0_12px_rgba(0,217,255,0.35)]'
+                            : 'bg-[#0A1930] hover:bg-[#152E52] text-[#F2F7FF] border border-[#1677FF]/40'
                         }`}
                       >
                         {isPrimary ? 'Primary Equipped' : 'Set Primary'}
@@ -777,15 +777,15 @@ export const CharacterCustomizationView: React.FC = () => {
                         onClick={() => void handleTitleSlotSelect('secondary', title.id)}
                         className={`flex-1 py-1.5 px-2.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
                           isSecondary
-                            ? 'bg-[#FFD978] text-[#100D1C]'
-                            : 'bg-[#100D1C] hover:bg-[#2F1B4E] text-[#FFD978] border border-[#6638B8]/40'
+                            ? 'bg-[#FFD978] text-[#061225]'
+                            : 'bg-[#061225] hover:bg-[#152E52] text-[#FFD978] border border-[#1677FF]/40'
                         }`}
                       >
                         {isSecondary ? 'Secondary Equipped' : 'Set Secondary'}
                       </button>
                     </div>
                   ) : (
-                    <div className="py-1.5 px-3 rounded-lg bg-[#19122B] border border-[#6638B8]/25 text-xs text-[#BEB4D6]/60 flex items-center justify-center gap-1.5">
+                    <div className="py-1.5 px-3 rounded-lg bg-[#0A1930] border border-[#1677FF]/25 text-xs text-[#94A8C7]/60 flex items-center justify-center gap-1.5">
                       <Lock className="w-3.5 h-3.5" />
                       Locked
                     </div>

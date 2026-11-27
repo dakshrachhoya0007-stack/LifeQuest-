@@ -182,7 +182,7 @@ export function createLeatherTexture(baseHex = '#141420', grainHex = '#090910'):
 /**
  * Arcane embroidered tunic & rune trim texture.
  */
-export function createArcaneClothTexture(baseHex = '#141420', accentHex = '#8B5CF6'): ProceduralTextureSet {
+export function createArcaneClothTexture(baseHex = '#141420', accentHex = '#1677FF'): ProceduralTextureSet {
   const size = 256;
   const [canvas, ctx] = makeCanvas(size, size);
   ctx.fillStyle = baseHex;

@@ -26,11 +26,13 @@ test('initialData.ts has zeroed starter progression and no static fake timers', 
   assert.equal(initialDataSrc.includes('14h remaining'), false);
   assert.equal(initialDataSrc.includes('4 days remaining'), false);
 
+  const questCatalogSrc = fs.readFileSync(path.join(ROOT, 'src/data/questCatalogData.ts'), 'utf8');
+
   // Ensure INITIAL_ACHIEVEMENTS does not pre-unlock or pre-claim any achievement
-  const achMatch = initialDataSrc.match(
+  const achMatch = questCatalogSrc.match(
     /export const INITIAL_ACHIEVEMENTS:\s*Achievement\[\]\s*=\s*\[([\s\S]*?)\];/
   );
-  assert.ok(achMatch, 'INITIAL_ACHIEVEMENTS must exist');
+  assert.ok(achMatch, 'INITIAL_ACHIEVEMENTS must exist in questCatalogData.ts');
   assert.equal(/unlocked:\s*true/.test(achMatch[1]), false, 'No initial achievement may be unlocked');
   assert.equal(/claimed:\s*true/.test(achMatch[1]), false, 'No initial achievement may be claimed');
 });

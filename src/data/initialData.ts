@@ -18,6 +18,8 @@ import {
   characterWarriorAvatarImg,
   heroAetheriaWorldImg,
 } from '../assets/images';
+import { INITIAL_ACHIEVEMENTS, INITIAL_QUESTS } from './questCatalogData';
+export { INITIAL_ACHIEVEMENTS, INITIAL_QUESTS };
 
 
 export const AETHER_RANK_STAGES: {
@@ -44,7 +46,7 @@ export const AETHER_RANK_STAGES: {
     nextPoints: 350,
     description: 'Steady habit streaks awaken explosive upper- and lower-body strength.',
     perk: '+15% Bodyweight Strike Power and sharper hand/leg form.',
-    glow: 'from-[#6638B8] to-[#24143D]',
+    glow: 'from-[#1677FF] to-[#102440]',
     symbol: 'ᚱ',
   },
   {
@@ -71,7 +73,7 @@ export const AETHER_RANK_STAGES: {
     nextPoints: 2000,
     description: 'The supreme pinnacle of holistic wellness and unarmed bodyweight mastery.',
     perk: '+80% All Combat Statistics and peak bodyweight conditioning.',
-    glow: 'from-[#38D9F5] via-[#A875FF] to-[#FFD978]',
+    glow: 'from-[#38D9F5] via-[#00D9FF] to-[#FFD978]',
     symbol: 'ᛞ',
   },
 ];
@@ -80,8 +82,8 @@ export const getEvolutionVisual = (stage: AetherRankStage) => {
   switch (stage) {
     case 'Awakened':
       return {
-        glowColor: '#A875FF',
-        auraStyle: 'border-[#A875FF] shadow-[#6638B8]/70 shadow-xl ring-2 ring-[#A875FF]/50',
+        glowColor: '#00D9FF',
+        auraStyle: 'border-[#00D9FF] shadow-[#1677FF]/70 shadow-xl ring-2 ring-[#00D9FF]/50',
         runeSymbol: 'ᚱ',
         titlePrefix: 'Awakened',
       };
@@ -102,14 +104,14 @@ export const getEvolutionVisual = (stage: AetherRankStage) => {
     case 'Transcendent':
       return {
         glowColor: '#FFD978',
-        auraStyle: 'border-[#FFD978] shadow-[#6638B8]/90 shadow-2xl ring-4 ring-[#A875FF]/70',
+        auraStyle: 'border-[#FFD978] shadow-[#1677FF]/90 shadow-2xl ring-4 ring-[#00D9FF]/70',
         runeSymbol: 'ᛞ',
         titlePrefix: 'Transcendent',
       };
     default:
       return {
         glowColor: '#9CA3AF',
-        auraStyle: 'border-[#6638B8]/40',
+        auraStyle: 'border-[#1677FF]/40',
         runeSymbol: 'ᚠ',
         titlePrefix: 'Dormant',
       };
@@ -305,68 +307,6 @@ export const INITIAL_HABITS: Habit[] = [
   },
 ];
 
-export const INITIAL_QUESTS: Quest[] = [
-  {
-    id: 'q-1',
-    title: 'Morning Patrol of the Grove',
-    description: 'Complete at least 2 healthy morning habits to strengthen your connection to Aetheria.',
-    type: 'daily',
-    category: 'habit',
-    progress: 0,
-    maxProgress: 2,
-    playerXpReward: 30,
-    completed: false,
-    claimed: false,
-  },
-  {
-    id: 'q-2',
-    title: 'Aether Vision Trial: Squat Drill',
-    description: 'Perform 10 verified squats using the Aether Vision AI motion tracker.',
-    type: 'daily',
-    category: 'fitness',
-    progress: 0,
-    maxProgress: 10,
-    playerXpReward: 40,
-    completed: false,
-    claimed: false,
-  },
-  {
-    id: 'q-3',
-    title: 'Nourishment of the Wardens',
-    description: 'Log 2 balanced meals with protein and hydration today.',
-    type: 'daily',
-    category: 'nutrition',
-    progress: 0,
-    maxProgress: 2,
-    playerXpReward: 25,
-    completed: false,
-    claimed: false,
-  },
-  {
-    id: 'q-4',
-    title: 'Weekly Endurance Expedition',
-    description: 'Accumulate 120 total minutes of verified physical activity or workout logging this week.',
-    type: 'weekly',
-    category: 'fitness',
-    progress: 0,
-    maxProgress: 120,
-    playerXpReward: 100,
-    completed: false,
-    claimed: false,
-  },
-  {
-    id: 'q-6',
-    title: 'Confront the Void Stalker',
-    description: 'Build your conditioning and engage the boss of Forest of Discipline using bodyweight combat.',
-    type: 'special',
-    category: 'boss',
-    progress: 0,
-    maxProgress: 1,
-    playerXpReward: 120,
-    completed: false,
-    claimed: false,
-  },
-];
 
 export const INITIAL_BUFFS: Buff[] = [
   {
@@ -437,7 +377,7 @@ export const INITIAL_KINGDOMS: Kingdom[] = [
     unlocked: true,
     cleared: false,
     loreIntro: 'Warden Sylas greets you at the Verdant Gate: "Hero, our forest withers when routines falter. Reclaim the rhythm of your days, and the ancient canopy will shield your strikes."',
-    colorGradient: 'from-[#0E3328] via-[#1B1433] to-[#100D1C]',
+    colorGradient: 'from-[#0E3328] via-[#0A1930] to-[#061225]',
     boss: {
       id: 'boss-void-stalker',
       name: 'Void Beast Mal’Drak',
@@ -517,7 +457,7 @@ export const INITIAL_KINGDOMS: Kingdom[] = [
     unlocked: false,
     cleared: false,
     loreIntro: 'High Trainer Torin bellows from the High Foundry: "The mountain tests every muscle. Lift your heart rate, power your legs and fists, and the stones will bow to your iron will."',
-    colorGradient: 'from-[#3A2210] via-[#24143D] to-[#100D1C]',
+    colorGradient: 'from-[#3A2210] via-[#102440] to-[#061225]',
     boss: {
       id: 'boss-mountain-titan',
       name: 'Titan Ignar-Golgoth',
@@ -599,7 +539,7 @@ export const INITIAL_KINGDOMS: Kingdom[] = [
     unlocked: false,
     cleared: false,
     loreIntro: 'High Priestess Coralina whispers: "The tides do not rush; they nourish. Feed your temple wholesome foods, drink deep from pure waters, and your vitality will never empty."',
-    colorGradient: 'from-[#0F2C3D] via-[#24143D] to-[#100D1C]',
+    colorGradient: 'from-[#0F2C3D] via-[#102440] to-[#061225]',
     boss: {
       id: 'boss-abyssal-hydra',
       name: 'Abyssal Hydra Thalassos',
@@ -759,7 +699,7 @@ export const INITIAL_KINGDOMS: Kingdom[] = [
     unlocked: false,
     cleared: false,
     loreIntro: 'High Archon Valerius declares: "You have walked the forest, climbed the crags, braved the tides and endured the dunes. Now take your place among the immortal Champions!"',
-    colorGradient: 'from-[#24143D] via-[#3A1E5A] to-[#3B2610]',
+    colorGradient: 'from-[#102440] via-[#16325C] to-[#3B2610]',
     boss: {
       id: 'boss-void-sovereign',
       name: 'Void Sovereign Malakor',
@@ -811,7 +751,7 @@ export const INITIAL_KINGDOMS: Kingdom[] = [
           thresholdPercent: 66,
           description: 'Hurls dark matter orbs and void lances.',
           attackMultiplier: 1.0,
-          auraColor: 'text-[#A875FF]',
+          auraColor: 'text-[#00D9FF]',
         },
         {
           phaseNumber: 2,
@@ -834,80 +774,6 @@ export const INITIAL_KINGDOMS: Kingdom[] = [
   },
 ];
 
-export const INITIAL_ACHIEVEMENTS: Achievement[] = [
-  {
-    id: 'ach-1',
-    name: 'First Quest',
-    description: 'Complete and claim your very first quest in Aetheria.',
-    category: 'quests',
-    icon: 'Scroll',
-    progress: 0,
-    maxProgress: 1,
-    unlocked: false,
-    claimed: false,
-    rewardPlayerXp: 40,
-  },
-  {
-    id: 'ach-2',
-    name: 'The Consistent',
-    description: 'Maintain a 3-day consecutive healthy habit streak.',
-    category: 'consistency',
-    icon: 'Flame',
-    progress: 0,
-    maxProgress: 3,
-    unlocked: false,
-    claimed: false,
-    rewardPlayerXp: 80,
-  },
-  {
-    id: 'ach-4',
-    name: 'Boss Slayer',
-    description: 'Defeat your first Kingdom boss in turn-based bodyweight combat.',
-    category: 'combat',
-    icon: 'Flame',
-    progress: 0,
-    maxProgress: 1,
-    unlocked: false,
-    claimed: false,
-    rewardPlayerXp: 150,
-  },
-  {
-    id: 'ach-5',
-    name: 'Aether Vision Master',
-    description: 'Complete a workout session verified with camera AI motion tracking.',
-    category: 'consistency',
-    icon: 'Camera',
-    progress: 0,
-    maxProgress: 1,
-    unlocked: false,
-    claimed: false,
-    rewardPlayerXp: 100,
-  },
-  {
-    id: 'ach-6',
-    name: 'Kingdom Explorer',
-    description: 'Unlock and advance through all 5 realms of Aetheria.',
-    category: 'exploration',
-    icon: 'Compass',
-    progress: 1,
-    maxProgress: 5,
-    unlocked: false,
-    claimed: false,
-    rewardPlayerXp: 200,
-  },
-  {
-    id: 'ach-7',
-    name: 'Team Player',
-    description: 'Contribute to a guild quest alongside fellow adventurers.',
-    category: 'multiplayer',
-    icon: 'Users',
-    progress: 0,
-    maxProgress: 1,
-    unlocked: false,
-    claimed: false,
-    rewardPlayerXp: 80,
-  },
-];
 
 // Zero fake guilds or fabricated chat messages — populated exclusively from real Supabase records
 export const INITIAL_GUILDS: Guild[] = [];

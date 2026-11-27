@@ -7,21 +7,21 @@ import {
   resolveFeatureThemeId,
 } from '../src/theme/featureTheme.ts';
 
-test('GLOBAL_BRAND defines the AAA dark-fantasy midnight purple, royal violet, and gold tokens', () => {
-  assert.equal(GLOBAL_BRAND.bgBase, '#100D1C');
-  assert.equal(GLOBAL_BRAND.bgSurface, '#24143D');
-  assert.equal(GLOBAL_BRAND.brandPrimary, '#6638B8');
-  assert.equal(GLOBAL_BRAND.brandBright, '#A875FF');
+test('GLOBAL_BRAND defines the midnight navy, electric blue, cyan, and gold tokens', () => {
+  assert.equal(GLOBAL_BRAND.bgBase, '#061225');
+  assert.equal(GLOBAL_BRAND.bgSurface, '#102440');
+  assert.equal(GLOBAL_BRAND.brandPrimary, '#1677FF');
+  assert.equal(GLOBAL_BRAND.brandBright, '#00D9FF');
   assert.equal(GLOBAL_BRAND.brandSecondary, '#E7B94F');
   assert.equal(GLOBAL_BRAND.brandGoldGlow, '#FFD978');
-  assert.equal(GLOBAL_BRAND.accentCyan, '#38D9F5');
+  assert.equal(GLOBAL_BRAND.accentCyan, '#00D9FF');
   assert.equal(GLOBAL_BRAND.accentEmerald, '#35D69A');
   assert.equal(GLOBAL_BRAND.accentRuby, '#F05B70');
   assert.equal(GLOBAL_BRAND.accentIce, '#65A9FF');
   assert.equal(GLOBAL_BRAND.accentAmber, '#FFAA45');
 });
 
-test('All 12 feature themes have distinct, non-navy AAA dark-fantasy hex palettes', () => {
+test('All 12 feature themes avoid legacy purple hex palettes', () => {
   const expectedIds = [
     'dashboard',
     'fitness',
@@ -39,12 +39,12 @@ test('All 12 feature themes have distinct, non-navy AAA dark-fantasy hex palette
 
   assert.deepEqual(Object.keys(FEATURE_THEMES), expectedIds);
 
-  const bannedHexes = new Set(['#061225', '#0A1930', '#102440', '#1677FF', '#00D9FF', '#0099FF']);
+  const bannedPurpleHexes = new Set(['#100D1C', '#19122B', '#24143D', '#6638B8', '#A875FF']);
   for (const theme of Object.values(FEATURE_THEMES)) {
     assert.ok(/^#[0-9A-Fa-f]{6}$/.test(theme.primaryHex), `${theme.id} primaryHex valid`);
     assert.ok(/^#[0-9A-Fa-f]{6}$/.test(theme.secondaryHex), `${theme.id} secondaryHex valid`);
-    assert.equal(bannedHexes.has(theme.primaryHex.toUpperCase()), false);
-    assert.equal(bannedHexes.has(theme.secondaryHex.toUpperCase()), false);
+    assert.equal(bannedPurpleHexes.has(theme.primaryHex.toUpperCase()), false);
+    assert.equal(bannedPurpleHexes.has(theme.secondaryHex.toUpperCase()), false);
   }
 });
 
@@ -68,9 +68,10 @@ test('resolveFeatureThemeId maps primary tabs and progression sub-tabs to their 
   assert.equal(resolveFeatureThemeId({ activeTab: 'museum' }), 'museum');
   assert.equal(resolveFeatureThemeId({ activeTab: 'character' }), 'character');
 
+  assert.equal(resolveFeatureTheme({ activeTab: 'dashboard' }).primaryHex, '#1677FF');
   assert.equal(resolveFeatureTheme({ activeTab: 'boss-battles' }).primaryHex, '#F05B70');
   assert.equal(resolveFeatureTheme({ activeTab: 'fitness' }).primaryHex, '#35D69A');
-  assert.equal(resolveFeatureTheme({ activeTab: 'skill-tree' }).primaryHex, '#38D9F5');
+  assert.equal(resolveFeatureTheme({ activeTab: 'skill-tree' }).primaryHex, '#00D9FF');
   assert.equal(resolveFeatureTheme({ activeTab: 'social' }).primaryHex, '#65A9FF');
   assert.equal(resolveFeatureTheme({ activeTab: 'quests' }).primaryHex, '#E7B94F');
 });

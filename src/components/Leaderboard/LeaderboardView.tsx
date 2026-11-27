@@ -200,19 +200,19 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
   return (
     <div className="space-y-6 animate-in fade-in pb-12">
       {/* Header & 12-Category Filter Selector */}
-      <div className="rounded-2xl bg-[#24143D]/90 backdrop-blur-md border border-[#A875FF]/30 p-5 sm:p-6 shadow-[0_12px_32px_rgba(10,5,24,0.65)] space-y-4">
+      <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#00D9FF]/30 p-5 sm:p-6 shadow-[0_12px_32px_rgba(4,12,28,0.65)] space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           <div>
             <div className="flex flex-wrap items-center gap-2 text-xs mb-1">
               <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#65A9FF]">
                 Honor of the Realm
               </span>
-              <span className="text-[#BEB4D6]/40" aria-hidden="true">·</span>
-              <span className="text-[#F7F4FF] font-medium">{scopeTitle}</span>
+              <span className="text-[#94A8C7]/40" aria-hidden="true">·</span>
+              <span className="text-[#F2F7FF] font-medium">{scopeTitle}</span>
               {boardData?.resetLabel && (
                 <>
-                  <span className="text-[#BEB4D6]/40" aria-hidden="true">·</span>
-                  <span className="text-[#BEB4D6] flex items-center gap-1">
+                  <span className="text-[#94A8C7]/40" aria-hidden="true">·</span>
+                  <span className="text-[#94A8C7] flex items-center gap-1">
                     <Clock className="w-3 h-3 text-[#65A9FF]" />
                     {boardData.resetLabel}
                   </span>
@@ -220,15 +220,15 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
               )}
             </div>
             {embedded ? (
-              <h2 className="font-['Cinzel'] font-bold text-lg sm:text-xl text-[#F7F4FF]">
+              <h2 className="font-['Cinzel'] font-bold text-lg sm:text-xl text-[#F2F7FF]">
                 Aetheria Hall of Champions
               </h2>
             ) : (
-              <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F7F4FF]">
+              <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2F7FF]">
                 AETHERIA HALL OF CHAMPIONS
               </h1>
             )}
-            <p className="text-xs text-[#BEB4D6] mt-1 max-w-2xl">
+            <p className="text-xs text-[#94A8C7] mt-1 max-w-2xl">
               Compare verified real-life workouts, Skill Tree mastery, consistency streaks, seasonal dedication, and Weekly Raid Boss strikes across 12 competitive categories.
             </p>
           </div>
@@ -239,7 +239,7 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
           {LEADERBOARD_SCOPE_GROUPS.map(group => (
             <div
               key={group.group}
-              className="p-2 rounded-xl bg-[#100D1C]/90 border border-[#A875FF]/25 space-y-1.5"
+              className="p-2 rounded-xl bg-[#061225]/90 border border-[#00D9FF]/25 space-y-1.5"
             >
               <span className="px-1.5 text-[10px] font-['Cinzel'] font-bold uppercase tracking-wider text-[#65A9FF] block">
                 {group.group}
@@ -254,8 +254,8 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                       onClick={() => handleScopeChange(tab.id)}
                       className={`px-2.5 py-1.5 text-[11px] font-semibold rounded-lg transition-all whitespace-nowrap shrink-0 ${
                         isActive
-                          ? 'bg-gradient-to-r from-[#6638B8] to-[#65A9FF] text-[#F7F4FF] shadow-[0_0_12px_rgba(101,169,255,0.3)]'
-                          : 'text-[#BEB4D6] hover:text-[#F7F4FF] hover:bg-[#19122B] border border-transparent'
+                          ? 'bg-gradient-to-r from-[#1677FF] to-[#65A9FF] text-[#F2F7FF] shadow-[0_0_12px_rgba(101,169,255,0.3)]'
+                          : 'text-[#94A8C7] hover:text-[#F2F7FF] hover:bg-[#0A1930] border border-transparent'
                       }`}
                     >
                       {tab.label}
@@ -279,9 +279,9 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
 
       {/* Your Standing Highlight Banner */}
       {currentUserEntry && (
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-[#19122B] via-[#24143D] to-[#19122B] border border-[#65A9FF]/45 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-[0_8px_24px_rgba(101,169,255,0.12)]">
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-[#0A1930] via-[#102440] to-[#0A1930] border border-[#65A9FF]/45 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-[0_8px_24px_rgba(101,169,255,0.12)]">
           <div className="flex items-center gap-3.5 min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-[#100D1C] border border-[#65A9FF]/50 flex flex-col items-center justify-center shrink-0">
+            <div className="w-11 h-11 rounded-xl bg-[#061225] border border-[#65A9FF]/50 flex flex-col items-center justify-center shrink-0">
               <span className="font-mono font-black text-sm text-[#65A9FF] tabular-nums">
                 #{currentUserEntry.rank}
               </span>
@@ -293,30 +293,30 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                   Your Standing
                 </span>
                 {currentUserEntry.equippedTitleName && (
-                  <span className="text-[11px] text-[#BEB4D6] font-semibold">
+                  <span className="text-[11px] text-[#94A8C7] font-semibold">
                     · {currentUserEntry.equippedTitleName}
                   </span>
                 )}
               </div>
-              <p className="text-sm font-bold text-[#F7F4FF] truncate">{currentUserEntry.name}</p>
+              <p className="text-sm font-bold text-[#F2F7FF] truncate">{currentUserEntry.name}</p>
             </div>
           </div>
 
           <div className="flex items-center gap-5 text-xs shrink-0">
             <div>
-              <span className="text-[10px] text-[#BEB4D6]/80 uppercase block">Level</span>
-              <span className="font-mono font-bold text-[#F7F4FF] tabular-nums">
+              <span className="text-[10px] text-[#94A8C7]/80 uppercase block">Level</span>
+              <span className="font-mono font-bold text-[#F2F7FF] tabular-nums">
                 Lv.{currentUserEntry.level}
               </span>
             </div>
             <div>
-              <span className="text-[10px] text-[#BEB4D6]/80 uppercase block">Streak</span>
+              <span className="text-[10px] text-[#94A8C7]/80 uppercase block">Streak</span>
               <span className="font-mono font-bold text-[#FFD978] tabular-nums">
                 {currentUserEntry.streak}d
               </span>
             </div>
             <div className="text-right">
-              <span className="text-[10px] text-[#BEB4D6]/80 uppercase block">
+              <span className="text-[10px] text-[#94A8C7]/80 uppercase block">
                 {scopeTitle}
               </span>
               <span className="font-mono font-black text-base text-[#65A9FF] tabular-nums">
@@ -328,11 +328,11 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
       )}
 
       {/* Leaderboard Table */}
-      <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#A875FF]/30 rounded-2xl overflow-hidden shadow-[0_12px_32px_rgba(10,5,24,0.65)]">
+      <div className="bg-[#102440]/90 backdrop-blur-md border border-[#00D9FF]/30 rounded-2xl overflow-hidden shadow-[0_12px_32px_rgba(4,12,28,0.65)]">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-[#A875FF]/25 bg-[#19122B] text-[11px] font-semibold uppercase tracking-wider text-[#65A9FF]">
+              <tr className="border-b border-[#00D9FF]/25 bg-[#0A1930] text-[11px] font-semibold uppercase tracking-wider text-[#65A9FF]">
                 <th className="py-3.5 px-4 w-24 text-center">Rank</th>
                 <th className="py-3.5 px-4">Champion</th>
                 <th className="py-3.5 px-4">Class</th>
@@ -341,10 +341,10 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                 <th className="py-3.5 px-4 text-right">{scoreUnit.toUpperCase()}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#A875FF]/15 text-xs">
+            <tbody className="divide-y divide-[#00D9FF]/15 text-xs">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="py-10 text-center text-[#BEB4D6]">
+                  <td colSpan={6} className="py-10 text-center text-[#94A8C7]">
                     <span className="inline-flex items-center gap-2">
                       <Loader2 className="w-4 h-4 animate-spin text-[#65A9FF]" />
                       Loading standings...
@@ -353,7 +353,7 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                 </tr>
               ) : entries.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-10 text-center text-[#BEB4D6]">
+                  <td colSpan={6} className="py-10 text-center text-[#94A8C7]">
                     {activeScope === 'guild'
                       ? 'Join a guild in the Guilds tab to see your fellowship leaderboard!'
                       : activeScope === 'friends'
@@ -374,8 +374,8 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                       onClick={() => openPublicProfile(player.userId)}
                       className={`transition-colors cursor-pointer ${
                         player.isCurrent
-                          ? 'bg-[#6638B8]/30 font-semibold text-[#F7F4FF] hover:bg-[#6638B8]/40'
-                          : 'hover:bg-[#19122B]/80 text-[#BEB4D6]'
+                          ? 'bg-[#1677FF]/30 font-semibold text-[#F2F7FF] hover:bg-[#1677FF]/40'
+                          : 'hover:bg-[#0A1930]/80 text-[#94A8C7]'
                       }`}
                     >
                       <td className="py-3.5 px-4 text-center font-mono font-bold tabular-nums">
@@ -386,9 +386,9 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                               #1
                             </span>
                           )}
-                          {player.rank === 2 && <span className="text-[#F7F4FF]">#2</span>}
+                          {player.rank === 2 && <span className="text-[#F2F7FF]">#2</span>}
                           {player.rank === 3 && <span className="text-[#FFAA45]">#3</span>}
-                          {player.rank > 3 && <span className="text-[#BEB4D6]">#{player.rank}</span>}
+                          {player.rank > 3 && <span className="text-[#94A8C7]">#{player.rank}</span>}
                           {renderRankDelta(player.rankDelta)}
                         </div>
                       </td>
@@ -404,7 +404,7 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                           <img
                             src={getRpgAvatarForClass(player.characterClass)}
                             alt={player.name}
-                            className="w-8 h-8 rounded-lg object-cover object-top border border-[#A875FF]/60 shrink-0"
+                            className="w-8 h-8 rounded-lg object-cover object-top border border-[#00D9FF]/60 shrink-0"
                           />
                           <div className="min-w-0">
                             <div className="flex flex-wrap items-center gap-1.5">
@@ -413,7 +413,7 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                                 if (player.identityHidden || liveP.hidden) return null;
                                 return <PresenceBadge status={player.presenceStatus || liveP.status} size="xs" />;
                               })()}
-                              <span className="font-bold text-[#F7F4FF] group-hover:text-[#65A9FF] transition-colors">
+                              <span className="font-bold text-[#F2F7FF] group-hover:text-[#65A9FF] transition-colors">
                                 {player.name}
                               </span>
                               <LegendTitleBadge
@@ -423,7 +423,7 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                                 size="xs"
                               />
                               {player.isCurrent && (
-                                <span className="text-[10px] bg-[#65A9FF] text-[#100D1C] px-1.5 py-0.5 rounded font-mono font-bold">
+                                <span className="text-[10px] bg-[#65A9FF] text-[#061225] px-1.5 py-0.5 rounded font-mono font-bold">
                                   YOU
                                 </span>
                               )}
@@ -443,7 +443,7 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                         </button>
                       </td>
                       <td className="py-3.5 px-4 text-[#65A9FF]">{player.characterClass}</td>
-                      <td className="py-3.5 px-4 text-center font-mono font-bold text-[#F7F4FF] tabular-nums">
+                      <td className="py-3.5 px-4 text-center font-mono font-bold text-[#F2F7FF] tabular-nums">
                         {player.levelHidden ? 'Private' : `Lv.${player.level}`}
                       </td>
                       <td className="py-3.5 px-4 text-center font-mono text-[#FFD978] tabular-nums">
@@ -462,8 +462,8 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
 
         {/* Pagination Footer */}
         {totalPages > 1 && (
-          <div className="px-4 py-3 border-t border-[#A875FF]/20 bg-[#19122B] flex items-center justify-between gap-2 text-xs">
-            <span className="text-[#BEB4D6] tabular-nums">
+          <div className="px-4 py-3 border-t border-[#00D9FF]/20 bg-[#0A1930] flex items-center justify-between gap-2 text-xs">
+            <span className="text-[#94A8C7] tabular-nums">
               Page {page} of {totalPages} · {boardData?.totalEntries || entries.length} ranked
             </span>
             <div className="flex items-center gap-2">
@@ -471,7 +471,7 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                 type="button"
                 disabled={page <= 1}
                 onClick={() => setPage(p => Math.max(1, p - 1))}
-                className="px-3 py-1.5 rounded-lg bg-[#100D1C] border border-[#A875FF]/35 hover:border-[#65A9FF]/50 text-[#F7F4FF] disabled:opacity-40 flex items-center gap-1 whitespace-nowrap transition-colors"
+                className="px-3 py-1.5 rounded-lg bg-[#061225] border border-[#00D9FF]/35 hover:border-[#65A9FF]/50 text-[#F2F7FF] disabled:opacity-40 flex items-center gap-1 whitespace-nowrap transition-colors"
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
                 Prev
@@ -480,7 +480,7 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                 type="button"
                 disabled={page >= totalPages}
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                className="px-3 py-1.5 rounded-lg bg-[#100D1C] border border-[#A875FF]/35 hover:border-[#65A9FF]/50 text-[#F7F4FF] disabled:opacity-40 flex items-center gap-1 whitespace-nowrap transition-colors"
+                className="px-3 py-1.5 rounded-lg bg-[#061225] border border-[#00D9FF]/35 hover:border-[#65A9FF]/50 text-[#F2F7FF] disabled:opacity-40 flex items-center gap-1 whitespace-nowrap transition-colors"
               >
                 Next
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -492,13 +492,13 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
 
       {/* Historical Snapshots */}
       {historicalSnapshots.length > 0 && (
-        <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#A875FF]/30 rounded-2xl p-5 space-y-3 shadow-[0_12px_32px_rgba(10,5,24,0.65)]">
+        <div className="bg-[#102440]/90 backdrop-blur-md border border-[#00D9FF]/30 rounded-2xl p-5 space-y-3 shadow-[0_12px_32px_rgba(4,12,28,0.65)]">
           <div className="flex items-center justify-between gap-2">
-            <h3 className="font-['Cinzel'] font-bold text-sm text-[#F7F4FF] flex items-center gap-2">
+            <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF] flex items-center gap-2">
               <History className="w-4 h-4 text-[#65A9FF]" />
               HISTORICAL LEADERBOARD SNAPSHOTS
             </h3>
-            <span className="text-[11px] text-[#BEB4D6] tabular-nums">
+            <span className="text-[11px] text-[#94A8C7] tabular-nums">
               {historicalSnapshots.length} Archived Periods
             </span>
           </div>
@@ -506,20 +506,20 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
             {historicalSnapshots.slice(0, 6).map(snap => (
               <div
                 key={`${snap.scope}-${snap.periodKey}-${snap.capturedAt}`}
-                className="p-3.5 rounded-xl bg-[#100D1C] border border-[#A875FF]/25 space-y-1.5"
+                className="p-3.5 rounded-xl bg-[#061225] border border-[#00D9FF]/25 space-y-1.5"
               >
                 <div className="flex items-center justify-between text-[11px]">
                   <span className="font-['Cinzel'] font-bold text-[#65A9FF]">
                     {snap.periodKey}
                   </span>
-                  <span className="text-[#BEB4D6]/75 tabular-nums">
+                  <span className="text-[#94A8C7]/75 tabular-nums">
                     {new Date(snap.capturedAt).toLocaleDateString()}
                   </span>
                 </div>
                 <div className="space-y-1 text-xs">
                   {snap.topThree.map(row => (
                     <div key={`${snap.periodKey}-${row.userId}`} className="flex items-center justify-between gap-2">
-                      <span className="text-[#F7F4FF]/90 truncate">
+                      <span className="text-[#F2F7FF]/90 truncate">
                         #{row.rank} {row.name}
                       </span>
                       <span className="font-mono text-[#65A9FF] tabular-nums shrink-0">
@@ -537,16 +537,16 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
       {/* Companions & Friend Requests Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Search Champions */}
-        <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#A875FF]/30 rounded-2xl p-5 space-y-4 shadow-[0_12px_32px_rgba(10,5,24,0.65)]">
+        <div className="bg-[#102440]/90 backdrop-blur-md border border-[#00D9FF]/30 rounded-2xl p-5 space-y-4 shadow-[0_12px_32px_rgba(4,12,28,0.65)]">
           <div className="flex items-center justify-between gap-2">
-            <h3 className="font-['Cinzel'] font-bold text-sm text-[#F7F4FF] flex items-center gap-2">
+            <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF] flex items-center gap-2">
               <UserPlus className="w-4 h-4 text-[#65A9FF]" />
               FIND CHAMPIONS
             </h3>
             <button
               type="button"
               onClick={() => setAppTab('friends')}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#19122B] hover:bg-[#2F1B4E] border border-[#A875FF]/40 hover:border-[#65A9FF]/50 text-[11px] font-semibold text-[#F7F4FF] whitespace-nowrap shrink-0 transition-all"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0A1930] hover:bg-[#152E52] border border-[#00D9FF]/40 hover:border-[#65A9FF]/50 text-[11px] font-semibold text-[#F2F7FF] whitespace-nowrap shrink-0 transition-all"
             >
               <Compass className="w-3.5 h-3.5 text-[#65A9FF]" />
               Discover Players
@@ -559,12 +559,12 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search champion username..."
-              className="flex-1 bg-[#100D1C] border border-[#A875FF]/35 rounded-xl px-3 py-2 text-xs text-[#F7F4FF] placeholder-[#BEB4D6]/50 focus:outline-none focus:border-[#65A9FF]"
+              className="flex-1 bg-[#061225] border border-[#00D9FF]/35 rounded-xl px-3 py-2 text-xs text-[#F2F7FF] placeholder-[#94A8C7]/50 focus:outline-none focus:border-[#65A9FF]"
             />
             <button
               type="submit"
               disabled={searching}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#6638B8] to-[#65A9FF] hover:from-[#7849cc] hover:to-[#7bb6ff] text-[#F7F4FF] shadow-[0_0_16px_rgba(101,169,255,0.35)] text-xs font-bold flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#65A9FF] hover:from-[#0099FF] hover:to-[#7bb6ff] text-[#F2F7FF] shadow-[0_0_16px_rgba(101,169,255,0.35)] text-xs font-bold flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all"
             >
               <Search className="w-3.5 h-3.5" />
               {searching ? '...' : 'Search'}
@@ -598,7 +598,7 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
               return (
                 <div
                   key={champ.id}
-                  className="p-2.5 rounded-xl bg-[#100D1C] border border-[#A875FF]/25 flex items-center justify-between gap-2"
+                  className="p-2.5 rounded-xl bg-[#061225] border border-[#00D9FF]/25 flex items-center justify-between gap-2"
                 >
                   <button
                     type="button"
@@ -608,11 +608,11 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                     <img
                       src={getRpgAvatarForClass(champ.characterClass)}
                       alt={champ.username}
-                      className="w-8 h-8 rounded-full object-cover object-top border border-[#A875FF]/60 shrink-0"
+                      className="w-8 h-8 rounded-full object-cover object-top border border-[#00D9FF]/60 shrink-0"
                     />
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <p className="text-xs font-bold text-[#F7F4FF] truncate group-hover:text-[#65A9FF] transition-colors">
+                        <p className="text-xs font-bold text-[#F2F7FF] truncate group-hover:text-[#65A9FF] transition-colors">
                           {champ.username}
                         </p>
                         <LegendTitleBadge
@@ -622,7 +622,7 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                           size="xs"
                         />
                       </div>
-                      <p className="text-[10px] text-[#BEB4D6]">
+                      <p className="text-[10px] text-[#94A8C7]">
                         Lv.{champ.level} {champ.characterClass} · {champ.aetherRank}
                       </p>
                     </div>
@@ -633,8 +633,8 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                     onClick={() => handleAddFriend(champ.id, champ.username)}
                     className={`px-3 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap shrink-0 transition-all ${
                       linked
-                        ? 'bg-[#19122B] text-[#BEB4D6]/60 cursor-default border border-[#A875FF]/15'
-                        : 'bg-gradient-to-r from-[#6638B8] to-[#65A9FF] hover:from-[#7849cc] hover:to-[#7bb6ff] text-[#F7F4FF]'
+                        ? 'bg-[#0A1930] text-[#94A8C7]/60 cursor-default border border-[#00D9FF]/15'
+                        : 'bg-gradient-to-r from-[#1677FF] to-[#65A9FF] hover:from-[#0099FF] hover:to-[#7bb6ff] text-[#F2F7FF]'
                     }`}
                   >
                     {relationLabel}
@@ -646,16 +646,16 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
         </div>
 
         {/* Friend Requests & Accepted Companions */}
-        <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#A875FF]/30 rounded-2xl p-5 space-y-4 shadow-[0_12px_32px_rgba(10,5,24,0.65)]">
+        <div className="bg-[#102440]/90 backdrop-blur-md border border-[#00D9FF]/30 rounded-2xl p-5 space-y-4 shadow-[0_12px_32px_rgba(4,12,28,0.65)]">
           <div className="flex items-center justify-between gap-2">
-            <h3 className="font-['Cinzel'] font-bold text-sm text-[#F7F4FF] flex items-center gap-2">
+            <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF] flex items-center gap-2">
               <Users className="w-4 h-4 text-[#65A9FF]" />
               COMPANIONS &amp; REQUESTS ({acceptedFriends.length})
             </h3>
             <button
               type="button"
               onClick={() => setAppTab('friends')}
-              className="text-[11px] font-semibold text-[#65A9FF] hover:text-[#F7F4FF] transition-colors whitespace-nowrap shrink-0"
+              className="text-[11px] font-semibold text-[#65A9FF] hover:text-[#F2F7FF] transition-colors whitespace-nowrap shrink-0"
             >
               Manage All →
             </button>
@@ -669,7 +669,7 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
               {pendingIncoming.map(req => (
                 <div
                   key={req.friendshipId}
-                  className="p-2.5 rounded-xl bg-[#19122B] border border-[#65A9FF]/40 flex items-center justify-between gap-2"
+                  className="p-2.5 rounded-xl bg-[#0A1930] border border-[#65A9FF]/40 flex items-center justify-between gap-2"
                 >
                   <button
                     type="button"
@@ -683,7 +683,7 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                     />
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <p className="text-xs font-bold text-[#F7F4FF] truncate group-hover:text-[#65A9FF] transition-colors">
+                        <p className="text-xs font-bold text-[#F2F7FF] truncate group-hover:text-[#65A9FF] transition-colors">
                           {req.champion.username}
                         </p>
                         <LegendTitleBadge
@@ -693,7 +693,7 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                           size="xs"
                         />
                       </div>
-                      <p className="text-[10px] text-[#BEB4D6]">
+                      <p className="text-[10px] text-[#94A8C7]">
                         Lv.{req.champion.level} {req.champion.characterClass}
                       </p>
                     </div>
@@ -701,7 +701,7 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                   <div className="flex items-center gap-1.5 shrink-0">
                     <button
                       onClick={() => respondFriendRequest(req.friendshipId, true)}
-                      className="px-2.5 py-1 rounded-lg bg-[#35D69A] hover:bg-[#49e3a9] text-[#100D1C] text-[11px] font-bold flex items-center gap-1 whitespace-nowrap"
+                      className="px-2.5 py-1 rounded-lg bg-[#35D69A] hover:bg-[#49e3a9] text-[#061225] text-[11px] font-bold flex items-center gap-1 whitespace-nowrap"
                     >
                       <Check className="w-3 h-3" /> Accept
                     </button>
@@ -719,14 +719,14 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
 
           <div className="space-y-2 max-h-56 overflow-y-auto">
             {acceptedFriends.length === 0 ? (
-              <p className="text-xs text-[#BEB4D6] text-center py-6">
+              <p className="text-xs text-[#94A8C7] text-center py-6">
                 No companions added yet. Visit Discover Players or search on the left!
               </p>
             ) : (
               acceptedFriends.map(f => (
                 <div
                   key={f.friendshipId}
-                  className="p-2.5 rounded-xl bg-[#100D1C] border border-[#A875FF]/25 flex items-center justify-between gap-2"
+                  className="p-2.5 rounded-xl bg-[#061225] border border-[#00D9FF]/25 flex items-center justify-between gap-2"
                 >
                   <button
                     type="button"
@@ -736,11 +736,11 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                     <img
                       src={getRpgAvatarForClass(f.champion.characterClass)}
                       alt={f.champion.username}
-                      className="w-8 h-8 rounded-full object-cover object-top border border-[#A875FF]/60 shrink-0"
+                      className="w-8 h-8 rounded-full object-cover object-top border border-[#00D9FF]/60 shrink-0"
                     />
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <p className="text-xs font-bold text-[#F7F4FF] truncate group-hover:text-[#65A9FF] transition-colors">
+                        <p className="text-xs font-bold text-[#F2F7FF] truncate group-hover:text-[#65A9FF] transition-colors">
                           {f.champion.username}
                         </p>
                         <LegendTitleBadge
@@ -750,14 +750,14 @@ export const LeaderboardView: React.FC<{ embedded?: boolean }> = ({ embedded = f
                           size="xs"
                         />
                       </div>
-                      <p className="text-[10px] text-[#BEB4D6]">
+                      <p className="text-[10px] text-[#94A8C7]">
                         Lv.{f.champion.level} {f.champion.characterClass} · {f.champion.currentStreak}d streak
                       </p>
                     </div>
                   </button>
                   <button
                     onClick={() => removeFriend(f.friendshipId)}
-                    className="p-1.5 rounded-lg text-[#BEB4D6] hover:text-[#F05B70] hover:bg-[#36111F]/60 shrink-0 transition-colors"
+                    className="p-1.5 rounded-lg text-[#94A8C7] hover:text-[#F05B70] hover:bg-[#36111F]/60 shrink-0 transition-colors"
                     title="Remove friend"
                   >
                     <UserMinus className="w-3.5 h-3.5" />

@@ -364,20 +364,34 @@ interface GameContextType {
   unreadNotificationsCount: number;
   unifiedBackendReady: boolean;
   activeTab: string;
-  socialSubTab: 'leaderboard' | 'friends' | 'chat' | 'activity-feed' | 'workout-parties' | 'friendships';
+  socialSubTab:
+    | 'battle-pass'
+    | 'leaderboard'
+    | 'friends'
+    | 'chat'
+    | 'activity-feed'
+    | 'workout-parties'
+    | 'friendships';
   setSocialSubTab: (
-    subTab: 'leaderboard' | 'friends' | 'chat' | 'activity-feed' | 'workout-parties' | 'friendships'
+    subTab:
+      | 'battle-pass'
+      | 'leaderboard'
+      | 'friends'
+      | 'chat'
+      | 'activity-feed'
+      | 'workout-parties'
+      | 'friendships'
   ) => void;
-  characterSubTab: 'overview' | 'customization' | 'cards' | 'trophies';
-  setCharacterSubTab: (subTab: 'overview' | 'customization' | 'cards' | 'trophies') => void;
+  characterSubTab: 'overview' | 'trophies';
+  setCharacterSubTab: (subTab: 'overview' | 'trophies') => void;
   storeSubTab: 'bazaar' | 'marketplace';
   setStoreSubTab: (subTab: 'bazaar' | 'marketplace') => void;
   guildsSubTab: 'directory' | 'territory-wars';
   setGuildsSubTab: (subTab: 'directory' | 'territory-wars') => void;
   eventsSubTab: 'events' | 'decisions';
   setEventsSubTab: (subTab: 'events' | 'decisions') => void;
-  progressionSubTab: 'quests' | 'skill-tree' | 'seasons';
-  setProgressionSubTab: (subTab: 'quests' | 'skill-tree' | 'seasons') => void;
+  progressionSubTab: 'quests' | 'skill-tree';
+  setProgressionSubTab: (subTab: 'quests' | 'skill-tree') => void;
   questHubSubTab: 'board' | 'calendar' | 'achievements';
   setQuestHubSubTab: (subTab: 'board' | 'calendar' | 'achievements') => void;
   // Polish 2.0 Phase 1: Advanced Player Identity
@@ -656,7 +670,7 @@ interface GameContextType {
     focusNote?: string;
   }) => Promise<{ success: boolean; error?: string }>;
   submitDynamicQuestEvidence: (questId: string, evidenceNote: string) => Promise<{ success: boolean; error?: string }>;
-  claimDynamicQuest: (questId: string) => Promise<{ success: boolean; error?: string }>;
+  claimDynamicQuest: (questId: string) => Promise<{ success: boolean; error?: string; xpAwarded?: number; goldAwarded?: number }>;
   // Feature 11: Daily Quest Report
   dailyReport: DailyQuestReportData | null;
   isGeneratingDailyReport: boolean;
@@ -674,7 +688,7 @@ interface GameContextType {
   refreshHallOfLegends: () => Promise<void>;
   claimGlobalExclusiveAchievement: (
     achievementId: string
-  ) => Promise<{ success: boolean; error?: string; ownerUsername?: string }>;
+  ) => Promise<{ success: boolean; error?: string; ownerUsername?: string; goldAwarded?: number }>;
   equipGlobalLegendTitle: (achievementId: string | null) => Promise<{ success: boolean; error?: string }>;
   dismissGlobalUnlockCelebration: () => void;
   showAuthModal: boolean;
@@ -714,7 +728,7 @@ interface GameContextType {
   deleteHabit: (habitId: string) => Promise<void>;
   isHabitClaimedForCurrentPeriod: (habit: Habit) => boolean;
   // Quest Actions
-  claimQuest: (questId: string) => Promise<{ success: boolean; error?: string }>;
+  claimQuest: (questId: string) => Promise<{ success: boolean; error?: string; xpAwarded?: number; goldAwarded?: number }>;
   // Shop Actions
   purchaseShopItem: (itemId: string) => Promise<{ success: boolean; error?: string }>;
   // Buff Actions
@@ -786,7 +800,7 @@ interface GameContextType {
   discoverBossWeakness: (kingdomId: string) => void;
   resetBossBattle: (kingdomId: string) => void;
   // Achievement Actions
-  claimAchievement: (achievementId: string) => Promise<{ success: boolean; error?: string }>;
+  claimAchievement: (achievementId: string) => Promise<{ success: boolean; error?: string; xpAwarded?: number; goldAwarded?: number }>;
   // Social, Friend Discovery, Guilds, Leaderboard & Notifications Actions
   openPublicProfile: (userId: string) => void;
   closePublicProfile: () => void;
@@ -1075,17 +1089,19 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [activeTab, setActiveTabState] = useState<string>('dashboard');
   const [socialSubTab, setSocialSubTabState] = useState<
-    'leaderboard' | 'friends' | 'chat' | 'activity-feed' | 'workout-parties' | 'friendships'
+    | 'battle-pass'
+    | 'leaderboard'
+    | 'friends'
+    | 'chat'
+    | 'activity-feed'
+    | 'workout-parties'
+    | 'friendships'
   >('leaderboard');
-  const [characterSubTab, setCharacterSubTabState] = useState<
-    'overview' | 'customization' | 'cards' | 'trophies'
-  >('overview');
+  const [characterSubTab, setCharacterSubTabState] = useState<'overview' | 'trophies'>('overview');
   const [storeSubTab, setStoreSubTabState] = useState<'bazaar' | 'marketplace'>('bazaar');
   const [guildsSubTab, setGuildsSubTabState] = useState<'directory' | 'territory-wars'>('directory');
   const [eventsSubTab, setEventsSubTabState] = useState<'events' | 'decisions'>('events');
-  const [progressionSubTab, setProgressionSubTabState] = useState<
-    'quests' | 'skill-tree' | 'seasons'
-  >('quests');
+  const [progressionSubTab, setProgressionSubTabState] = useState<'quests' | 'skill-tree'>('quests');
   const [questHubSubTab, setQuestHubSubTabState] = useState<
     'board' | 'calendar' | 'achievements'
   >('board');
@@ -1363,13 +1379,20 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const setSocialSubTab = (
-    subTab: 'leaderboard' | 'friends' | 'chat' | 'activity-feed' | 'workout-parties' | 'friendships'
+    subTab:
+      | 'battle-pass'
+      | 'leaderboard'
+      | 'friends'
+      | 'chat'
+      | 'activity-feed'
+      | 'workout-parties'
+      | 'friendships'
   ) => {
     sound.playClick();
     setSocialSubTabState(subTab);
   };
 
-  const setCharacterSubTab = (subTab: 'overview' | 'customization' | 'cards' | 'trophies') => {
+  const setCharacterSubTab = (subTab: 'overview' | 'trophies') => {
     sound.playClick();
     setCharacterSubTabState(subTab);
   };
@@ -1389,7 +1412,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setEventsSubTabState(subTab);
   };
 
-  const setProgressionSubTab = (subTab: 'quests' | 'skill-tree' | 'seasons') => {
+  const setProgressionSubTab = (subTab: 'quests' | 'skill-tree') => {
     sound.playClick();
     setProgressionSubTabState(subTab);
     if (subTab === 'quests') {
@@ -1410,7 +1433,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     sound.playClick();
 
     // Unified hub routing while keeping Rivals Arena & Hall of Legends cleanly routed
-    if (
+    if (tab === 'seasons' || tab === 'battle-pass') {
+      setSocialSubTabState('battle-pass');
+      setActiveTabState('social');
+    } else if (
       tab === 'leaderboard' ||
       tab === 'friends' ||
       tab === 'chat' ||
@@ -1420,8 +1446,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     ) {
       setSocialSubTabState(tab);
       setActiveTabState('social');
-    } else if (tab === 'customization' || tab === 'cards' || tab === 'trophies') {
-      setCharacterSubTabState(tab);
+    } else if (tab === 'trophies') {
+      setCharacterSubTabState('trophies');
+      setActiveTabState('character');
+      updateReclaimHonorObjective('view_attributes');
+    } else if (tab === 'customization' || tab === 'cards') {
+      setCharacterSubTabState('overview');
       setActiveTabState('character');
       updateReclaimHonorObjective('view_attributes');
     } else if (tab === 'marketplace') {
@@ -1452,8 +1482,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setQuestHubSubTabState('achievements');
       setProgressionSubTabState('quests');
       setActiveTabState('progression');
-    } else if (tab === 'skill-tree' || tab === 'seasons') {
-      setProgressionSubTabState(tab);
+    } else if (tab === 'skill-tree') {
+      setProgressionSubTabState('skill-tree');
       setActiveTabState('progression');
     } else if (tab === 'progression') {
       setActiveTabState('progression');
@@ -2212,7 +2242,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Hydrate Expansion 3.0 + AAA-15 server states in background without blocking initial login
         const initialGold = Number(srvProf?.gold_balance ?? gsStats?.gold ?? 0);
         void Promise.all([
-          syncInitialWalletGoldServer(sbUser.id, initialGold).then(r => {
+          syncInitialWalletGoldServer(sbUser.id, initialGold, Boolean(srvProf)).then(r => {
             if (r.ok && r.wallet) {
               setWalletState(r.wallet);
               setStats(prev => ({ ...prev, gold: r.wallet!.goldBalance }));
@@ -2375,11 +2405,202 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const LOCAL_ACCOUNTS_KEY = 'lifequest_local_accounts_v1';
+  const LOCAL_ACTIVE_SESSION_KEY = 'lifequest_local_active_user_v1';
+
+  interface StoredLocalAccount {
+    id: string;
+    email: string;
+    password: string;
+    user: UserAccount;
+  }
+
+  const readLocalAccounts = (): StoredLocalAccount[] => {
+    try {
+      const raw = localStorage.getItem(LOCAL_ACCOUNTS_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const writeLocalAccounts = (accounts: StoredLocalAccount[]) => {
+    try {
+      localStorage.setItem(LOCAL_ACCOUNTS_KEY, JSON.stringify(accounts));
+    } catch {
+      // ignore storage quota errors
+    }
+  };
+
+  const loadLocalRealmSessionData = async (account: UserAccount) => {
+    resetPrivateGameState();
+    activeSessionUserIdRef.current = account.id;
+    setUser(account);
+    setIsAuthenticated(true);
+    setCloudStatus('unconfigured');
+
+    const tz = account.timezone || getUserTimezone();
+    let localSnap: any = null;
+    try {
+      const savedRaw = localStorage.getItem(`${STORAGE_KEY_PREFIX}local_state_${account.id}`);
+      if (savedRaw) localSnap = JSON.parse(savedRaw);
+    } catch {
+      localSnap = null;
+    }
+
+    if (localSnap?.stats) {
+      setStats({ ...INITIAL_PLAYER_STATS, ...localSnap.stats });
+    }
+    if (Array.isArray(localSnap?.habits)) setHabits(localSnap.habits);
+    if (Array.isArray(localSnap?.quests)) setQuests(localSnap.quests);
+    if (Array.isArray(localSnap?.achievements)) setAchievements(localSnap.achievements);
+    if (Array.isArray(localSnap?.transactions)) setTransactions(localSnap.transactions);
+    if (Array.isArray(localSnap?.dynamicDailyQuests)) setDynamicDailyQuests(localSnap.dynamicDailyQuests);
+    if (Array.isArray(localSnap?.dynamicQuestHistory)) setDynamicQuestHistory(localSnap.dynamicQuestHistory);
+    if (localSnap?.aiMentorMemory) setAiMentorMemory(prev => ({ ...prev, ...localSnap.aiMentorMemory }));
+    if (typeof localSnap?.mentorGreeting === 'string' || localSnap?.mentorGreeting === null) {
+      setMentorGreeting(localSnap.mentorGreeting);
+    }
+    if (localSnap?.reclaimHonorQuest) setReclaimHonorQuest(localSnap.reclaimHonorQuest);
+    if (localSnap?.campaignProgress) setCampaignProgress(localSnap.campaignProgress);
+    if (localSnap?.attributeBonuses) setAttributeBonuses(localSnap.attributeBonuses);
+    if (Array.isArray(localSnap?.fitnessSessions)) setFitnessSessions(localSnap.fitnessSessions);
+    if (Array.isArray(localSnap?.meals)) setMeals(localSnap.meals);
+    if (typeof localSnap?.waterGlasses === 'number') setWaterGlasses(localSnap.waterGlasses);
+    if (localSnap?.tutorialState) {
+      setTutorialState(prev => ({ ...prev, ...localSnap.tutorialState }));
+    }
+    if (localSnap?.selectedHeroId) {
+      setSelectedHeroId(getHeroById(localSnap.selectedHeroId).id);
+    } else if (account.characterClass) {
+      setSelectedHeroId(mapClassToDefaultHeroId(account.characterClass));
+    }
+    const localHeroLocked = Boolean(localSnap?.heroLocked);
+    setHeroLocked(localHeroLocked);
+    if (account.isOnboarded && !localHeroLocked) {
+      setShowHeroSelectModalState(true);
+    } else {
+      setShowHeroSelectModalState(false);
+    }
+
+    cloudHydratedRef.current = true;
+
+    const [
+      skillRes,
+      seasonRes,
+      hallRes,
+      calRes,
+      walletRes,
+      claimsRes,
+    ] = await Promise.all([
+      fetchSkillTreeStateServer(account.id, tz).catch(() => ({ ok: false as const })),
+      fetchSeasonStateServer(account.id, 1, 10).catch(() => ({ ok: false as const })),
+      fetchHallOfLegendsServer().catch(() => ({ ok: false as const })),
+      fetchDailyCalendarStateServer(account.id, tz).catch(() => ({ ok: false as const })),
+      syncInitialWalletGoldServer(account.id, Number(localSnap?.stats?.gold ?? INITIAL_PLAYER_STATS.gold)).catch(() => ({ ok: false as const })),
+      fetch('/api/quests/claims-state', {
+        headers: { 'x-lifequest-user-id': account.id },
+      })
+        .then(r => r.json())
+        .catch(() => null),
+    ]);
+
+    if ('ok' in skillRes && skillRes.ok && (skillRes as any).data?.state) {
+      setSkillTreeState(normalizeSkillTreeState((skillRes as any).data.state));
+    }
+    if ('ok' in seasonRes && seasonRes.ok && (seasonRes as any).data) {
+      setSeasonState((seasonRes as any).data);
+    }
+    if ('ok' in hallRes && hallRes.ok && (hallRes as any).data) {
+      const hData = (hallRes as any).data;
+      setLegendClaims(hData.claims);
+      setLegendAnnouncements(hData.announcements);
+      if (hData.metrics) setServerLegendMetrics(hData.metrics);
+      if (hData.equippedByUser) setEquippedLegendMap(hData.equippedByUser);
+    }
+    if ('ok' in calRes && calRes.ok && (calRes as any).state) {
+      setDailyCalendarState((calRes as any).state);
+    }
+    if ('ok' in walletRes && walletRes.ok && (walletRes as any).wallet) {
+      const w = (walletRes as any).wallet;
+      setWalletState(w);
+      setStats(prev => ({ ...prev, gold: w.goldBalance }));
+    }
+    if (claimsRes?.success) {
+      const claimedQuestIds = new Set(
+        (claimsRes.questClaims || []).map((c: any) => String(c.questId))
+      );
+      const claimedDynamicKeys = new Set(
+        (claimsRes.dynamicClaims || []).map((c: any) => `${String(c.questId)}:${String(c.periodKey)}`)
+      );
+      const claimedAchIds = new Set(
+        (claimsRes.achievementClaims || []).map((a: any) => String(a.achievementId))
+      );
+      if (claimedQuestIds.size > 0) {
+        setQuests(prev =>
+          prev.map(q => (claimedQuestIds.has(q.id) ? { ...q, claimed: true, completed: true } : q))
+        );
+      }
+      if (claimedDynamicKeys.size > 0) {
+        setDynamicDailyQuests(prev =>
+          prev.map(q =>
+            claimedDynamicKeys.has(`${q.id}:${q.periodKey}`)
+              ? { ...q, progress: q.maxProgress, completed: true, claimed: true }
+              : q
+          )
+        );
+      }
+      if (claimedAchIds.size > 0) {
+        setAchievements(prev =>
+          prev.map(a => (claimedAchIds.has(a.id) ? { ...a, claimed: true, unlocked: true } : a))
+        );
+      }
+    }
+  };
+
   const verifyAuthSession = async () => {
     isVerifyingSessionRef.current = true;
     setIsAuthLoading(true);
     const supabase = getSupabase();
     if (!supabase) {
+      try {
+        const activeId = localStorage.getItem(LOCAL_ACTIVE_SESSION_KEY);
+        const accounts = readLocalAccounts();
+        const found = activeId ? accounts.find(a => a.id === activeId) : undefined;
+        if (found) {
+          await loadLocalRealmSessionData(found.user);
+          const routeTab = resolveTabFromPathname(window.location.pathname);
+          if (routeTab === 'hall-of-legends') {
+            setActiveTabState('hall-of-legends');
+          } else if (routeTab === 'seasons') {
+            setSocialSubTabState('battle-pass');
+            setActiveTabState('social');
+          } else if (routeTab === 'skill-tree') {
+            setProgressionSubTabState('skill-tree');
+            setActiveTabState('progression');
+          } else if (routeTab === 'daily-calendar') {
+            setQuestHubSubTabState('calendar');
+            setProgressionSubTabState('quests');
+            setActiveTabState('progression');
+          } else if (routeTab === 'achievements') {
+            setQuestHubSubTabState('achievements');
+            setProgressionSubTabState('quests');
+            setActiveTabState('progression');
+          } else if (routeTab === 'quests') {
+            setQuestHubSubTabState('board');
+            setProgressionSubTabState('quests');
+            setActiveTabState('progression');
+          } else if (routeTab) {
+            setActiveTabState(routeTab);
+          }
+          setIsAuthLoading(false);
+          isVerifyingSessionRef.current = false;
+          return;
+        }
+      } catch {
+        // ignore local session read failure
+      }
       localStorage.removeItem(STORAGE_KEY_PREFIX + 'user');
       activeSessionUserIdRef.current = null;
       setUser(null);
@@ -2483,8 +2704,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setQuestHubSubTabState('achievements');
           setProgressionSubTabState('quests');
           setActiveTabState('progression');
-        } else if (routeTab === 'skill-tree' || routeTab === 'seasons') {
-          setProgressionSubTabState(routeTab);
+        } else if (routeTab === 'seasons') {
+          setSocialSubTabState('battle-pass');
+          setActiveTabState('social');
+        } else if (routeTab === 'skill-tree') {
+          setProgressionSubTabState('skill-tree');
           setActiveTabState('progression');
         } else {
           setActiveTabState(routeTab || 'dashboard');
@@ -2644,14 +2868,68 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [isAuthenticated, user?.id, unifiedBackendReady]);
 
+  useEffect(() => {
+    if (!isAuthenticated || !user || !cloudHydratedRef.current) return;
+    if (isSupabaseConfigured()) return;
+    setCloudStatus('unconfigured');
+    try {
+      localStorage.setItem(
+        `${STORAGE_KEY_PREFIX}local_state_${user.id}`,
+        JSON.stringify({
+          stats,
+          habits,
+          quests,
+          achievements,
+          transactions,
+          dynamicDailyQuests,
+          dynamicQuestHistory: dynamicQuestHistory.slice(0, 100),
+          aiMentorMemory,
+          mentorGreeting,
+          reclaimHonorQuest,
+          campaignProgress,
+          attributeBonuses,
+          fitnessSessions: fitnessSessions.slice(0, 100),
+          meals: meals.slice(0, 100),
+          waterGlasses,
+          selectedHeroId,
+          heroLocked,
+          tutorialState: {
+            completed: tutorialState.completed,
+            skipped: tutorialState.skipped,
+          },
+        })
+      );
+    } catch {
+      // ignore quota errors
+    }
+  }, [
+    isAuthenticated,
+    user,
+    stats,
+    habits,
+    quests,
+    achievements,
+    transactions,
+    dynamicDailyQuests,
+    dynamicQuestHistory,
+    aiMentorMemory,
+    mentorGreeting,
+    reclaimHonorQuest,
+    campaignProgress,
+    attributeBonuses,
+    fitnessSessions,
+    meals,
+    waterGlasses,
+    selectedHeroId,
+    heroLocked,
+    tutorialState.completed,
+    tutorialState.skipped,
+  ]);
+
   // Debounced Saving of Safe Client Preferences Only (Authoritative progression lives in normalized tables)
   useEffect(() => {
     if (!isAuthenticated || !user || !cloudHydratedRef.current) return;
-
-    if (!isSupabaseConfigured()) {
-      setCloudStatus('unconfigured');
-      return;
-    }
+    if (!isSupabaseConfigured()) return;
 
     if (cloudSaveTimerRef.current) {
       clearTimeout(cloudSaveTimerRef.current);
@@ -2847,7 +3125,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           particleCount: 95,
           spread: 75,
           origin: { y: 0.55 },
-          colors: ['#FFD978', '#A875FF', '#38D9F5', '#35D69A'],
+          colors: ['#FFD978', '#00D9FF', '#38D9F5', '#35D69A'],
         });
       }
       return {
@@ -3082,7 +3360,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Quest Claiming (Strictly Server-Authoritative & In-Flight Locked)
-  const claimQuest = async (questId: string): Promise<{ success: boolean; error?: string }> => {
+  const claimQuest = async (
+    questId: string
+  ): Promise<{ success: boolean; error?: string; xpAwarded?: number; goldAwarded?: number }> => {
     const lockKey = `quest:${questId}`;
     if (claimingLocksRef.current.has(lockKey)) {
       return { success: false, error: 'Claim already in progress.' };
@@ -3091,24 +3371,51 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!q || !q.completed || q.claimed) {
       return { success: false, error: 'Quest is not eligible to claim.' };
     }
-    if (!unifiedBackendReady) {
+    if (!unifiedBackendReady && !user?.id) {
       return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
 
     claimingLocksRef.current.add(lockKey);
     try {
-      const res = await claimQuestServer(questId);
+      const res = await claimQuestServer(questId, undefined, user?.id);
       if (!res.ok || res.data?.success === false) {
         return { success: false, error: res.data?.error || res.error || 'Unable to claim quest reward right now.' };
       }
 
+      const xpAwarded = Number(res.data?.rewards?.playerXpReward ?? q.playerXpReward);
+      const goldAwarded = Number(res.data?.rewards?.goldReward ?? 0);
+
       sound.playVictory();
-      if (res.data?.profile) syncProfileWithCelebration(res.data.profile);
+      if (res.data?.profile) {
+        syncProfileWithCelebration(res.data.profile);
+      } else if (res.data?.isFallbackLedger || res.data?.wallet) {
+        const walletGold = typeof res.data?.wallet?.goldBalance === 'number' ? res.data.wallet.goldBalance : undefined;
+        setStats(prev => {
+          let nextXp = prev.playerXP + xpAwarded;
+          let nextLevel = prev.level;
+          let nextReq = prev.playerXPNextLevel;
+          while (nextXp >= nextReq) {
+            nextXp -= nextReq;
+            nextLevel += 1;
+            nextReq = Math.floor(nextReq * 1.25);
+          }
+          return {
+            ...prev,
+            level: nextLevel,
+            playerXP: nextXp,
+            playerXPNextLevel: nextReq,
+            gold: walletGold ?? prev.gold + goldAwarded,
+          };
+        });
+      }
+      if (res.data?.wallet) {
+        setWalletState(res.data.wallet);
+      }
       confetti({
         particleCount: 50,
         spread: 60,
         origin: { y: 0.7 },
-        colors: ['#FFD978', '#A875FF', '#38D9F5'],
+        colors: ['#FFD978', '#00D9FF', '#38D9F5'],
       });
 
       setQuests(prev => prev.map(item => (item.id === questId ? { ...item, claimed: true } : item)));
@@ -3119,13 +3426,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           id: 'tx-q-' + Date.now(),
           type: 'PLAYER_XP',
           source: `Quest Claimed: ${q.title}`,
-          amount: q.playerXpReward,
+          amount: xpAwarded,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         },
         ...prev.slice(0, 49),
       ]);
 
-      return { success: true };
+      return { success: true, xpAwarded, goldAwarded };
     } finally {
       claimingLocksRef.current.delete(lockKey);
     }
@@ -3176,7 +3483,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       particleCount: 70,
       spread: 65,
       origin: { y: 0.6 },
-      colors: ['#FFD978', '#A875FF', '#38D9F5'],
+      colors: ['#FFD978', '#00D9FF', '#38D9F5'],
     });
 
     return { success: true };
@@ -3636,7 +3943,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         particleCount: 110,
         spread: 85,
         origin: { y: 0.5 },
-        colors: ['#FFD978', '#35D69A', '#A875FF', '#38D9F5'],
+        colors: ['#FFD978', '#35D69A', '#00D9FF', '#38D9F5'],
       });
 
       const vic = await completeBossVictoryServer(kingdomId);
@@ -3722,7 +4029,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Achievement Claiming (Strictly Server-Authoritative & In-Flight Locked)
   const claimAchievement = async (
     achievementId: string
-  ): Promise<{ success: boolean; error?: string }> => {
+  ): Promise<{ success: boolean; error?: string; xpAwarded?: number; goldAwarded?: number }> => {
     const lockKey = `ach:${achievementId}`;
     if (claimingLocksRef.current.has(lockKey)) {
       return { success: false, error: 'Claim already in progress.' };
@@ -3731,23 +4038,65 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!a || !a.unlocked || a.claimed) {
       return { success: false, error: 'Achievement is not eligible to claim.' };
     }
-    if (!unifiedBackendReady) {
+    if (!unifiedBackendReady && !user?.id) {
       return { success: false, error: 'Unable to connect to realm services right now. Please try again shortly.' };
     }
 
     claimingLocksRef.current.add(lockKey);
     try {
-      const res = await claimAchievementServer(achievementId);
+      const res = await claimAchievementServer(achievementId, user?.id);
       if (!res.ok || res.data?.success === false) {
         return { success: false, error: res.data?.error || res.error || 'Unable to claim achievement reward right now.' };
       }
 
+      const xpAwarded = Number(res.data?.rewards?.playerXpReward ?? a.rewardPlayerXp);
+      const goldAwarded = Number(res.data?.rewards?.goldReward ?? 0);
+
       sound.playVictory();
-      if (res.data?.profile) syncProfileWithCelebration(res.data.profile);
-      confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
+      if (res.data?.profile) {
+        syncProfileWithCelebration(res.data.profile);
+      } else if (res.data?.isFallbackLedger || res.data?.wallet) {
+        const walletGold = typeof res.data?.wallet?.goldBalance === 'number' ? res.data.wallet.goldBalance : undefined;
+        setStats(prev => {
+          let nextXp = prev.playerXP + xpAwarded;
+          let nextLevel = prev.level;
+          let nextReq = prev.playerXPNextLevel;
+          while (nextXp >= nextReq) {
+            nextXp -= nextReq;
+            nextLevel += 1;
+            nextReq = Math.floor(nextReq * 1.25);
+          }
+          return {
+            ...prev,
+            level: nextLevel,
+            playerXP: nextXp,
+            playerXPNextLevel: nextReq,
+            gold: walletGold ?? prev.gold + goldAwarded,
+          };
+        });
+      }
+      if (res.data?.wallet) {
+        setWalletState(res.data.wallet);
+      }
+      confetti({
+        particleCount: 60,
+        spread: 60,
+        origin: { y: 0.6 },
+        colors: ['#1677FF', '#00D9FF', '#FFFFFF'],
+      });
       setAchievements(prev => prev.map(item => (item.id === achievementId ? { ...item, claimed: true } : item)));
+      setTransactions(prev => [
+        {
+          id: 'tx-ach-' + Date.now(),
+          type: 'PLAYER_XP',
+          source: `Achievement: ${a.name}`,
+          amount: xpAwarded,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        },
+        ...prev.slice(0, 49),
+      ]);
       void syncVerifiedIdentitySnapshot();
-      return { success: true };
+      return { success: true, xpAwarded, goldAwarded };
     } finally {
       claimingLocksRef.current.delete(lockKey);
     }
@@ -4278,17 +4627,34 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  // Real Supabase Authentication Methods (No hardcoded/demo fallbacks)
+  // Supabase Authentication Methods (with Local Realm Express fallback when Supabase env vars are absent)
   const loginWithSupabase = async (
     email: string,
     password: string
   ): Promise<{ success: boolean; error?: string }> => {
     const supabase = getSupabase();
     if (!supabase) {
-      return {
-        success: false,
-        error: 'Account services are temporarily unavailable. Please try again later.',
-      };
+      const normalizedEmail = email.trim().toLowerCase();
+      const accounts = readLocalAccounts();
+      const found = accounts.find(a => a.email === normalizedEmail);
+      if (!found || found.password !== password) {
+        return {
+          success: false,
+          error: 'Invalid realm email or password. Create an account if you have not enlisted yet.',
+        };
+      }
+      localStorage.setItem(LOCAL_ACTIVE_SESSION_KEY, found.id);
+      sound.playVictory();
+      setAuthError(null);
+      setAuthCallbackError(null);
+      await loadLocalRealmSessionData(found.user);
+      setActiveTabState('dashboard');
+      setProgressionSubTabState('quests');
+      setQuestHubSubTabState('board');
+      setCharacterSubTabState('overview');
+      setSocialSubTabState('leaderboard');
+      setShowAuthModalState(false);
+      return { success: true };
     }
 
     try {
@@ -4307,6 +4673,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAuthCallbackError(null);
         await loadUserCloudData(data.user);
         setActiveTabState('dashboard');
+        setProgressionSubTabState('quests');
+        setQuestHubSubTabState('board');
+        setCharacterSubTabState('overview');
+        setSocialSubTabState('leaderboard');
         if (window.location.pathname !== '/') {
           window.history.replaceState(null, '', '/');
         }
@@ -4361,10 +4731,64 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }): Promise<{ success: boolean; requiresEmailConfirmation?: boolean; error?: string }> => {
     const supabase = getSupabase();
     if (!supabase) {
-      return {
-        success: false,
-        error: 'Account services are temporarily unavailable. Please try again later.',
+      const normalizedEmail = email.trim().toLowerCase();
+      const cleanName = username.trim();
+      const accounts = readLocalAccounts();
+      if (accounts.some(a => a.email === normalizedEmail)) {
+        return { success: false, error: 'An account with this email already exists in the local realm.' };
+      }
+      const userId = `local-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+      const newUser: UserAccount = {
+        id: userId,
+        username: cleanName,
+        characterName: cleanName,
+        email: normalizedEmail,
+        avatar: characterWarriorAvatarImg,
+        characterClass: 'Warrior',
+        bio: '',
+        profileVisibility: 'public',
+        showAchievements: true,
+        showEquipment: true,
+        showStats: true,
+        showGuild: true,
+        preferredUnits: 'metric',
+        activityLevel: 'moderate',
+        preferredActivities: ['Walking', 'Home workouts'],
+        experienceLevel: 'intermediate',
+        dietaryPreference: 'vegetarian',
+        foodAllergiesList: [],
+        foodIntolerances: [],
+        dislikedFoods: '',
+        selectedHabits: ['h-1', 'h-2', 'h-3'],
+        personalGoals: ['Build consistency'],
+        notificationPreferences: {
+          dailyReminders: true,
+          weeklySummary: true,
+          guildUpdates: true,
+          questAlerts: true,
+        },
+        timezone: getUserTimezone(),
+        leaderboardVisible: true,
+        createdAt: new Date().toISOString(),
+        isOnboarded: false,
+        presenceStatus: 'online',
+        autoAwayEnabled: true,
+        autoAwayMinutes: 5,
       };
+      accounts.push({ id: userId, email: normalizedEmail, password, user: newUser });
+      writeLocalAccounts(accounts);
+      localStorage.setItem(LOCAL_ACTIVE_SESSION_KEY, userId);
+      sound.playVictory();
+      setAuthError(null);
+      setAuthCallbackError(null);
+      await loadLocalRealmSessionData(newUser);
+      setActiveTabState('dashboard');
+      setProgressionSubTabState('quests');
+      setQuestHubSubTabState('board');
+      setCharacterSubTabState('overview');
+      setSocialSubTabState('leaderboard');
+      setShowAuthModalState(false);
+      return { success: true };
     }
 
     try {
@@ -4393,6 +4817,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await updateCloudProfile(data.user.id, { username });
           await loadUserCloudData(data.user);
           setActiveTabState('dashboard');
+          setProgressionSubTabState('quests');
+          setQuestHubSubTabState('board');
+          setCharacterSubTabState('overview');
+          setSocialSubTabState('leaderboard');
           if (window.location.pathname !== '/') {
             window.history.replaceState(null, '', '/');
           }
@@ -4450,11 +4878,17 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (e) {
         console.warn('Supabase signOut error:', e);
       }
+    } else {
+      localStorage.removeItem(LOCAL_ACTIVE_SESSION_KEY);
     }
     setUser(null);
     setIsAuthenticated(false);
     resetPrivateGameState();
     setActiveTabState('dashboard');
+    setProgressionSubTabState('quests');
+    setQuestHubSubTabState('board');
+    setCharacterSubTabState('overview');
+    setSocialSubTabState('leaderboard');
     setAuthMode('login');
     setShowAuthModalState(false);
     setCloudStatus(isSupabaseConfigured() ? 'saved' : 'unconfigured');
@@ -4713,6 +5147,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         biologicalSex: updated.biologicalSex ?? null,
         savedAt: new Date().toISOString(),
       });
+    } else {
+      const accounts = readLocalAccounts();
+      const idx = accounts.findIndex(a => a.id === updated.id);
+      if (idx >= 0) {
+        accounts[idx] = { ...accounts[idx], user: updated };
+        writeLocalAccounts(accounts);
+      }
     }
     setShowHeroSelectModalState(true);
     setActiveTabState('dashboard');
@@ -4723,7 +5164,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       particleCount: 90,
       spread: 70,
       origin: { y: 0.5 },
-      colors: ['#FFD978', '#A875FF', '#38D9F5'],
+      colors: ['#FFD978', '#00D9FF', '#38D9F5'],
     });
     return { success: true };
   };
@@ -4926,7 +5367,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     sound.playVictory();
-    confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 }, colors: ['#FFD978', '#A875FF', '#38D9F5'] });
+    confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 }, colors: ['#FFD978', '#00D9FF', '#38D9F5'] });
 
     setReclaimHonorQuest(prev => ({
       ...prev,
@@ -5031,7 +5472,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     sound.playVictory();
-    confetti({ particleCount: 80, spread: 75, origin: { y: 0.6 }, colors: ['#FFD978', '#A875FF', '#38D9F5'] });
+    confetti({ particleCount: 80, spread: 75, origin: { y: 0.6 }, colors: ['#FFD978', '#00D9FF', '#38D9F5'] });
 
     const nextIdx = CAMPAIGN_CHAPTERS.findIndex(c => c.id === ch.id) + 1;
     const nextChapterId = CAMPAIGN_CHAPTERS[nextIdx]?.id || ch.id;
@@ -5313,7 +5754,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { success: true };
   };
 
-  const claimDynamicQuest = async (questId: string): Promise<{ success: boolean; error?: string }> => {
+  const claimDynamicQuest = async (
+    questId: string
+  ): Promise<{ success: boolean; error?: string; xpAwarded?: number; goldAwarded?: number }> => {
     const lockKey = `dyn:${questId}`;
     if (claimingLocksRef.current.has(lockKey)) {
       return { success: false, error: 'Claim already in progress.' };
@@ -5328,11 +5771,28 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     claimingLocksRef.current.add(lockKey);
     try {
       let creditedViaRpc = false;
-      if (unifiedBackendReady) {
-        const rpcRes = await claimDynamicQuestServer(questId, q.periodKey);
+      let resolvedXp = q.playerXpReward;
+      let resolvedGold = q.goldReward;
+      let resolvedWalletGold: number | undefined;
+      if (unifiedBackendReady || user?.id) {
+        const rpcRes = await claimDynamicQuestServer(questId, q.periodKey, {
+          userId: user?.id,
+          title: q.title,
+          playerXpReward: q.playerXpReward,
+          goldReward: q.goldReward,
+        });
         if (rpcRes.ok && rpcRes.data?.profile) {
           syncProfileWithCelebration(rpcRes.data.profile);
           creditedViaRpc = true;
+        } else if (rpcRes.ok && (rpcRes.data?.isFallbackLedger || rpcRes.data?.wallet)) {
+          resolvedXp = Number(rpcRes.data?.rewards?.playerXpReward ?? q.playerXpReward);
+          resolvedGold = Number(rpcRes.data?.rewards?.goldReward ?? q.goldReward);
+          if (rpcRes.data?.wallet) {
+            setWalletState(rpcRes.data.wallet);
+            if (typeof rpcRes.data.wallet.goldBalance === 'number') {
+              resolvedWalletGold = rpcRes.data.wallet.goldBalance;
+            }
+          }
         } else if (rpcRes.ok && rpcRes.data?.success === false) {
           return { success: false, error: rpcRes.data.error || 'Could not claim quest.' };
         } else if (!rpcRes.schemaMissing && !rpcRes.ok) {
@@ -5342,7 +5802,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (!creditedViaRpc) {
         setStats(prev => {
-          let nextXp = prev.playerXP + q.playerXpReward;
+          let nextXp = prev.playerXP + resolvedXp;
           let nextLevel = prev.level;
           let nextReq = prev.playerXPNextLevel;
           while (nextXp >= nextReq) {
@@ -5355,7 +5815,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             level: nextLevel,
             playerXP: nextXp,
             playerXPNextLevel: nextReq,
-            gold: prev.gold + q.goldReward,
+            gold: resolvedWalletGold ?? prev.gold + resolvedGold,
           };
         });
       }
@@ -5366,7 +5826,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         particleCount: q.isSpecialChallenge ? 95 : 55,
         spread: 70,
         origin: { y: 0.65 },
-        colors: ['#FFD978', '#A875FF', '#35D69A'],
+        colors: ['#FFD978', '#00D9FF', '#35D69A'],
       });
 
       setDynamicDailyQuests(prev =>
@@ -5409,7 +5869,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ...prev.slice(0, 49),
       ]);
 
-      return { success: true };
+      return { success: true, xpAwarded: q.playerXpReward, goldAwarded: q.goldReward };
     } finally {
       claimingLocksRef.current.delete(lockKey);
     }
@@ -5645,7 +6105,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const claimGlobalExclusiveAchievement = async (
     achievementId: string
-  ): Promise<{ success: boolean; error?: string; ownerUsername?: string }> => {
+  ): Promise<{ success: boolean; error?: string; ownerUsername?: string; goldAwarded?: number }> => {
     const lockKey = `legend:${achievementId}`;
     if (claimingLocksRef.current.has(lockKey)) {
       return { success: false, error: 'Verification already in progress.' };
@@ -5700,6 +6160,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           ...prev,
           gold: prev.gold + entry.rewardGold,
         }));
+      }
+      if ((res.data as any).wallet) {
+        setWalletState((res.data as any).wallet);
       }
 
     const ownership: GlobalAchievementOwnership = res.data.ownership || {
@@ -5769,10 +6232,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         particleCount: 160,
         spread: 110,
         origin: { y: 0.5 },
-        colors: ['#F59E0B', '#38BDF8', '#A855F7', '#F43F5E', '#34D399'],
+        colors: ['#00D9FF', '#1677FF', '#FFFFFF', '#38BDF8', '#34D399'],
       });
 
-      return { success: true };
+      return { success: true, goldAwarded: entry.rewardGold };
     } finally {
       claimingLocksRef.current.delete(lockKey);
     }
@@ -6377,7 +6840,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         particleCount: 45,
         spread: 60,
         origin: { y: 0.65 },
-        colors: ['#FFD978', '#A875FF', '#35D69A'],
+        colors: ['#FFD978', '#00D9FF', '#35D69A'],
       });
       void archiveSkillNodeMuseumServer(uid, nodeId).then(() => refreshMuseumRecords());
       return { success: true };
@@ -6461,7 +6924,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           particleCount: 90,
           spread: 75,
           origin: { y: 0.55 },
-          colors: ['#FFD978', '#A875FF', '#38D9F5'],
+          colors: ['#FFD978', '#00D9FF', '#38D9F5'],
         });
       }
       return {
@@ -7010,7 +7473,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (res.ok && res.state) {
       setIdentityState(res.state);
       sound.playVictory();
-      confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 }, colors: ['#FFD978', '#A875FF', '#38D9F5'] });
+      confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 }, colors: ['#FFD978', '#00D9FF', '#38D9F5'] });
       void refreshNotificationsState();
       return { success: true };
     }
@@ -7136,8 +7599,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await claimSeasonMilestoneServer(uid, milestoneId, track);
       if (res.ok && res.data) {
         setSeasonState(res.data);
+        if (res.wallet) {
+          setWalletState(res.wallet);
+          setStats(prev => ({ ...prev, gold: res.wallet!.goldBalance }));
+        }
         sound.playVictory();
-        confetti({ particleCount: 75, spread: 70, origin: { y: 0.6 }, colors: ['#FFD978', '#A875FF', '#35D69A'] });
+        confetti({ particleCount: 75, spread: 70, origin: { y: 0.6 }, colors: ['#FFD978', '#00D9FF', '#35D69A'] });
         void refreshMarketplaceState();
         void refreshIdentityState();
         void refreshCosmeticsState();
@@ -7756,7 +8223,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (res.ok && res.state) {
       setPrestigeState(res.state);
       sound.playVictory();
-      confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 }, colors: ['#FFD978', '#A875FF', '#38D9F5'] });
+      confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 }, colors: ['#FFD978', '#00D9FF', '#38D9F5'] });
       void refreshIdentityState();
       void refreshCosmeticsState();
       return { success: true };

@@ -393,14 +393,59 @@ export const logNutritionServer = async (params: {
 export const logWaterGlassServer = () => callRpc<any>('rpc_log_water_glass');
 export const resetWaterDailyServer = () => callRpc<any>('rpc_reset_water_daily');
 
-export const claimQuestServer = (questId: string, periodKey?: string) =>
-  callRpc<any>('rpc_claim_quest', {
+export const claimQuestServer = async (
+  questId: string,
+  periodKey?: string,
+  userId?: string
+): Promise<RpcResult<any>> => {
+  const res = await callRpc<any>('rpc_claim_quest', {
     p_quest_id: questId,
     p_period_key: periodKey ?? null,
   });
+  if (res.ok || (!res.schemaMissing && getSupabase())) {
+    return res;
+  }
+  try {
+    const headers = await getLifequestAuthHeaders(userId, true);
+    const httpRes = await fetchWithTimeout('/api/quests/claim', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ questId, periodKey }),
+    });
+    const payload = await httpRes.json().catch(() => ({}));
+    if (!httpRes.ok || payload?.success === false) {
+      return { ok: false, error: payload?.error || 'Could not claim quest.', data: payload };
+    }
+    return { ok: true, data: payload };
+  } catch (err: any) {
+    return { ok: false, error: err?.message || 'Unable to claim quest.' };
+  }
+};
 
-export const claimAchievementServer = (achievementId: string) =>
-  callRpc<any>('rpc_claim_achievement', { p_achievement_id: achievementId });
+export const claimAchievementServer = async (
+  achievementId: string,
+  userId?: string
+): Promise<RpcResult<any>> => {
+  const res = await callRpc<any>('rpc_claim_achievement', { p_achievement_id: achievementId });
+  if (res.ok || (!res.schemaMissing && getSupabase())) {
+    return res;
+  }
+  try {
+    const headers = await getLifequestAuthHeaders(userId, true);
+    const httpRes = await fetchWithTimeout('/api/achievements/claim', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ achievementId }),
+    });
+    const payload = await httpRes.json().catch(() => ({}));
+    if (!httpRes.ok || payload?.success === false) {
+      return { ok: false, error: payload?.error || 'Could not claim achievement.', data: payload };
+    }
+    return { ok: true, data: payload };
+  } catch (err: any) {
+    return { ok: false, error: err?.message || 'Unable to claim achievement.' };
+  }
+};
 
 export const purchaseShopItemServer = (itemId: string, idempotencyKey = createIdempotencyKey()) =>
   callRpc<any>('rpc_purchase_shop_item', {
@@ -1277,11 +1322,40 @@ export const updateDynamicQuestProgressServer = (
     p_updates: updates,
   });
 
-export const claimDynamicQuestServer = (questId: string, periodKey: string) =>
-  callRpc<any>('rpc_claim_dynamic_quest', {
+export const claimDynamicQuestServer = async (
+  questId: string,
+  periodKey: string,
+  meta?: { userId?: string; title?: string; playerXpReward?: number; goldReward?: number }
+): Promise<RpcResult<any>> => {
+  const res = await callRpc<any>('rpc_claim_dynamic_quest', {
     p_quest_id: questId,
     p_period_key: periodKey,
   });
+  if (res.ok || (!res.schemaMissing && getSupabase())) {
+    return res;
+  }
+  try {
+    const headers = await getLifequestAuthHeaders(meta?.userId, true);
+    const httpRes = await fetchWithTimeout('/api/quests/claim-dynamic', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        questId,
+        periodKey,
+        title: meta?.title,
+        playerXpReward: meta?.playerXpReward,
+        goldReward: meta?.goldReward,
+      }),
+    });
+    const payload = await httpRes.json().catch(() => ({}));
+    if (!httpRes.ok || payload?.success === false) {
+      return { ok: false, error: payload?.error || 'Could not claim daily quest.', data: payload };
+    }
+    return { ok: true, data: payload };
+  } catch (err: any) {
+    return { ok: false, error: err?.message || 'Unable to claim daily quest.' };
+  }
+};
 
 export const saveDailyReportServer = (reportDate: string, reportData: DailyQuestReportData) =>
   callRpc<any>('rpc_save_daily_report', {
@@ -1428,7 +1502,11 @@ export const claimGlobalAchievementServer = async (params: {
       const httpRes = await fetch('/api/legends/claim', {
         method: 'POST',
         headers,
-        body: JSON.stringify(params),
+        body: JSON.stringify({
+          achievementId: params.achievementId,
+          ownerId: params.ownerId,
+          ownerUsername: params.ownerUsername,
+        }),
       });
       const payload = await httpRes.json().catch(() => ({}));
       if (!httpRes.ok || payload?.success === false) {

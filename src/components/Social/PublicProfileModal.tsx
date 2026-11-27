@@ -348,24 +348,24 @@ export const PublicProfileModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#100D1C]/85 backdrop-blur-sm animate-in fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#061225]/85 backdrop-blur-sm animate-in fade-in"
       onClick={closePublicProfile}
       role="dialog"
       aria-modal="true"
       aria-label="Player Profile"
     >
       <div
-        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#24143D] border border-[#A875FF]/45 rounded-2xl shadow-[0_20px_60px_rgba(16,13,28,0.85)]"
+        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#102440] border border-[#00D9FF]/45 rounded-2xl shadow-[0_20px_60px_rgba(4,12,28,0.85)]"
         onClick={e => e.stopPropagation()}
       >
         {/* Header Bar */}
-        <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-[#19122B]/95 backdrop-blur-md border-b border-[#A875FF]/30">
-          <h2 className="font-['Cinzel'] font-bold text-base text-[#F7F4FF] tracking-wide">
+        <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-[#0A1930]/95 backdrop-blur-md border-b border-[#00D9FF]/30">
+          <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] tracking-wide">
             Champion Profile
           </h2>
           <button
             onClick={closePublicProfile}
-            className="p-2 rounded-lg text-[#BEB4D6] hover:text-[#F7F4FF] hover:bg-[#2F1B4E] transition-colors cursor-pointer"
+            className="p-2 rounded-lg text-[#94A8C7] hover:text-[#F2F7FF] hover:bg-[#152E52] transition-colors cursor-pointer"
             aria-label="Close player profile"
           >
             <X className="w-4 h-4" />
@@ -386,7 +386,7 @@ export const PublicProfileModal: React.FC = () => {
           )}
 
           {loading ? (
-            <div className="py-16 flex flex-col items-center justify-center gap-3 text-[#BEB4D6] text-xs">
+            <div className="py-16 flex flex-col items-center justify-center gap-3 text-[#94A8C7] text-xs">
               <Loader2 className="w-6 h-6 animate-spin text-[#65A9FF]" />
               <span>Loading champion dossier...</span>
             </div>
@@ -395,7 +395,7 @@ export const PublicProfileModal: React.FC = () => {
               <p className="text-sm text-[#F05B70]">{error}</p>
               <button
                 onClick={closePublicProfile}
-                className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#6638B8] to-[#65A9FF] text-[#F7F4FF] text-xs font-semibold cursor-pointer"
+                className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#1677FF] to-[#65A9FF] text-[#F2F7FF] text-xs font-semibold cursor-pointer"
               >
                 Close
               </button>
@@ -406,8 +406,8 @@ export const PublicProfileModal: React.FC = () => {
                 <Ban className="w-6 h-6" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-base font-bold text-[#F7F4FF]">Profile Unavailable</h3>
-                <p className="text-xs text-[#BEB4D6] max-w-sm mx-auto">
+                <h3 className="text-base font-bold text-[#F2F7FF]">Profile Unavailable</h3>
+                <p className="text-xs text-[#94A8C7] max-w-sm mx-auto">
                   {profile.blockedByMe
                     ? 'You have blocked this player. Unblock them if you wish to view their profile again.'
                     : 'This player profile is not accessible due to privacy or block settings.'}
@@ -417,7 +417,7 @@ export const PublicProfileModal: React.FC = () => {
                 <button
                   disabled={actionBusy}
                   onClick={handleUnblockUser}
-                  className="px-4 py-2 rounded-xl bg-[#19122B] hover:bg-[#2F1B4E] border border-[#A875FF]/40 text-[#F7F4FF] text-xs font-semibold transition-colors whitespace-nowrap cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-[#0A1930] hover:bg-[#152E52] border border-[#00D9FF]/40 text-[#F2F7FF] text-xs font-semibold transition-colors whitespace-nowrap cursor-pointer"
                 >
                   Unblock User
                 </button>
@@ -426,7 +426,7 @@ export const PublicProfileModal: React.FC = () => {
           ) : player ? (
             <>
               {/* Identity Summary (Strictly 2D RPG Avatar, never OAuth email/photo) */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#A875FF]/25">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#00D9FF]/25">
                 <div className="flex items-center gap-4 min-w-0">
                   <Character2DAvatar
                     characterClass={player.characterClass}
@@ -436,7 +436,7 @@ export const PublicProfileModal: React.FC = () => {
                   />
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-['Cinzel'] font-bold text-xl text-[#F7F4FF] truncate">
+                      <h3 className="font-['Cinzel'] font-bold text-xl text-[#F2F7FF] truncate">
                         {player.username || 'Champion'}
                       </h3>
                       {(() => {
@@ -454,7 +454,7 @@ export const PublicProfileModal: React.FC = () => {
                         />
                       )}
                       {player.characterName && player.characterName !== player.username && (
-                        <span className="text-xs text-[#BEB4D6] truncate">
+                        <span className="text-xs text-[#94A8C7] truncate">
                           ({player.characterName})
                         </span>
                       )}
@@ -476,7 +476,7 @@ export const PublicProfileModal: React.FC = () => {
                       })()}
                     </p>
                     {player.bio && (
-                      <p className="text-xs text-[#BEB4D6] mt-2 leading-relaxed max-w-md">
+                      <p className="text-xs text-[#94A8C7] mt-2 leading-relaxed max-w-md">
                         {player.bio}
                       </p>
                     )}
@@ -490,7 +490,7 @@ export const PublicProfileModal: React.FC = () => {
                       <button
                         disabled={actionBusy}
                         onClick={handleSendRequest}
-                        className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#6638B8] to-[#65A9FF] hover:from-[#7849cc] hover:to-[#7bb6ff] text-[#F7F4FF] text-xs font-semibold flex items-center gap-1.5 shadow-[0_0_14px_rgba(101,169,255,0.35)] transition-all whitespace-nowrap cursor-pointer"
+                        className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#1677FF] to-[#65A9FF] hover:from-[#0099FF] hover:to-[#7bb6ff] text-[#F2F7FF] text-xs font-semibold flex items-center gap-1.5 shadow-[0_0_14px_rgba(101,169,255,0.35)] transition-all whitespace-nowrap cursor-pointer"
                       >
                         <UserPlus className="w-3.5 h-3.5" />
                         Add Friend
@@ -501,7 +501,7 @@ export const PublicProfileModal: React.FC = () => {
                       <button
                         disabled={actionBusy}
                         onClick={handleCancelRequest}
-                        className="px-4 py-2 rounded-xl bg-[#19122B] hover:bg-[#2F1B4E] border border-[#A875FF]/35 text-[#BEB4D6] hover:text-[#F7F4FF] text-xs font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer"
+                        className="px-4 py-2 rounded-xl bg-[#0A1930] hover:bg-[#152E52] border border-[#00D9FF]/35 text-[#94A8C7] hover:text-[#F2F7FF] text-xs font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer"
                       >
                         <X className="w-3.5 h-3.5" />
                         Cancel Request
@@ -513,7 +513,7 @@ export const PublicProfileModal: React.FC = () => {
                         <button
                           disabled={actionBusy}
                           onClick={() => handleRespondRequest(true)}
-                          className="px-3.5 py-2 rounded-xl bg-[#35D69A] hover:bg-[#49e3a9] text-[#100D1C] text-xs font-bold flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+                          className="px-3.5 py-2 rounded-xl bg-[#35D69A] hover:bg-[#49e3a9] text-[#061225] text-xs font-bold flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
                         >
                           <Check className="w-3.5 h-3.5" />
                           Accept
@@ -521,7 +521,7 @@ export const PublicProfileModal: React.FC = () => {
                         <button
                           disabled={actionBusy}
                           onClick={() => handleRespondRequest(false)}
-                          className="px-3.5 py-2 rounded-xl bg-[#19122B] hover:bg-[#2F1B4E] border border-[#A875FF]/35 text-[#BEB4D6] hover:text-[#F7F4FF] text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+                          className="px-3.5 py-2 rounded-xl bg-[#0A1930] hover:bg-[#152E52] border border-[#00D9FF]/35 text-[#94A8C7] hover:text-[#F2F7FF] text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
                         >
                           <X className="w-3.5 h-3.5" />
                           Decline
@@ -533,7 +533,7 @@ export const PublicProfileModal: React.FC = () => {
                       <button
                         disabled={actionBusy}
                         onClick={() => setConfirmAction('remove')}
-                        className="px-3.5 py-2 rounded-xl bg-[#19122B] border border-[#A875FF]/35 hover:border-[#F05B70]/60 text-[#F7F4FF] hover:text-[#F05B70] text-xs font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer"
+                        className="px-3.5 py-2 rounded-xl bg-[#0A1930] border border-[#00D9FF]/35 hover:border-[#F05B70]/60 text-[#F2F7FF] hover:text-[#F05B70] text-xs font-semibold flex items-center gap-1.5 transition-colors whitespace-nowrap cursor-pointer"
                       >
                         <UserCheck className="w-3.5 h-3.5 text-[#35D69A]" />
                         Friends · Remove
@@ -547,7 +547,7 @@ export const PublicProfileModal: React.FC = () => {
                       className={`px-3 py-2 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap cursor-pointer ${
                         followedCompetitorIds.includes(player.id)
                           ? 'bg-[#35D69A]/15 border-[#35D69A]/45 text-[#35D69A]'
-                          : 'bg-[#19122B] border-[#A875FF]/35 hover:border-[#65A9FF]/60 text-[#65A9FF]'
+                          : 'bg-[#0A1930] border-[#00D9FF]/35 hover:border-[#65A9FF]/60 text-[#65A9FF]'
                       }`}
                     >
                       <Eye className="w-3.5 h-3.5" />
@@ -558,7 +558,7 @@ export const PublicProfileModal: React.FC = () => {
                       <button
                         disabled={actionBusy}
                         onClick={handleInviteToGuild}
-                        className="px-3.5 py-2 rounded-xl bg-[#19122B] border border-[#A875FF]/45 hover:bg-[#2F1B4E] hover:border-[#65A9FF]/60 text-[#F7F4FF] text-xs font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap cursor-pointer"
+                        className="px-3.5 py-2 rounded-xl bg-[#0A1930] border border-[#00D9FF]/45 hover:bg-[#152E52] hover:border-[#65A9FF]/60 text-[#F2F7FF] text-xs font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap cursor-pointer"
                       >
                         <MailPlus className="w-3.5 h-3.5 text-[#65A9FF]" />
                         Invite to Guild
@@ -568,7 +568,7 @@ export const PublicProfileModal: React.FC = () => {
                     <button
                       disabled={actionBusy}
                       onClick={() => setConfirmAction('block')}
-                      className="p-2 rounded-xl bg-[#19122B] border border-[#A875FF]/30 hover:border-[#F05B70]/60 text-[#BEB4D6] hover:text-[#F05B70] transition-colors cursor-pointer"
+                      className="p-2 rounded-xl bg-[#0A1930] border border-[#00D9FF]/30 hover:border-[#F05B70]/60 text-[#94A8C7] hover:text-[#F05B70] transition-colors cursor-pointer"
                       title="Block user"
                       aria-label="Block user"
                     >
@@ -581,7 +581,7 @@ export const PublicProfileModal: React.FC = () => {
               {/* Confirmation Prompt */}
               {confirmAction && (
                 <div className="p-4 rounded-xl bg-[#36111F]/65 border border-[#F05B70]/45 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="flex items-start gap-2.5 text-xs text-[#F7F4FF]">
+                  <div className="flex items-start gap-2.5 text-xs text-[#F2F7FF]">
                     <AlertTriangle className="w-4 h-4 text-[#F05B70] shrink-0 mt-0.5" />
                     <span>
                       {confirmAction === 'block'
@@ -592,14 +592,14 @@ export const PublicProfileModal: React.FC = () => {
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={() => setConfirmAction(null)}
-                      className="px-3 py-1.5 rounded-lg text-xs text-[#BEB4D6] hover:text-[#F7F4FF] cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg text-xs text-[#94A8C7] hover:text-[#F2F7FF] cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       disabled={actionBusy}
                       onClick={confirmAction === 'block' ? handleBlockUser : handleRemoveFriend}
-                      className="px-3.5 py-1.5 rounded-lg bg-[#F05B70] hover:bg-[#f47587] text-[#100D1C] text-xs font-bold whitespace-nowrap cursor-pointer"
+                      className="px-3.5 py-1.5 rounded-lg bg-[#F05B70] hover:bg-[#f47587] text-[#061225] text-xs font-bold whitespace-nowrap cursor-pointer"
                     >
                       {confirmAction === 'block' ? 'Confirm Block' : 'Confirm Remove'}
                     </button>
@@ -609,14 +609,14 @@ export const PublicProfileModal: React.FC = () => {
 
               {/* Restricted Notice if Private or Friends-Only */}
               {!profile.accessible ? (
-                <div className="p-6 rounded-xl bg-[#19122B] border border-[#A875FF]/30 text-center space-y-2">
+                <div className="p-6 rounded-xl bg-[#0A1930] border border-[#00D9FF]/30 text-center space-y-2">
                   <Lock className="w-6 h-6 text-[#65A9FF] mx-auto" />
-                  <h4 className="text-sm font-bold text-[#F7F4FF]">
+                  <h4 className="text-sm font-bold text-[#F2F7FF]">
                     {profile.restrictedReason === 'private'
                       ? 'Private Profile'
                       : 'Friends-Only Profile'}
                   </h4>
-                  <p className="text-xs text-[#BEB4D6] max-w-md mx-auto">
+                  <p className="text-xs text-[#94A8C7] max-w-md mx-auto">
                     {profile.restrictedReason === 'private'
                       ? `${player.username} has set their profile to private.`
                       : `Only accepted friends can view ${player.username}'s combat stance, stats, guild, and achievements. Send a friend request to connect.`}
@@ -626,16 +626,16 @@ export const PublicProfileModal: React.FC = () => {
                 <div className="space-y-6">
                   {/* Guild Affiliation */}
                   {player.showGuild !== false && player.guild && (
-                    <div className="flex items-center justify-between p-4 rounded-xl bg-[#19122B] border border-[#A875FF]/30">
+                    <div className="flex items-center justify-between p-4 rounded-xl bg-[#0A1930] border border-[#00D9FF]/30">
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-10 h-10 rounded-lg bg-[#100D1C] border border-[#65A9FF]/45 flex items-center justify-center text-[#65A9FF] shrink-0">
+                        <div className="w-10 h-10 rounded-lg bg-[#061225] border border-[#65A9FF]/45 flex items-center justify-center text-[#65A9FF] shrink-0">
                           <Shield className="w-5 h-5" />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-xs font-bold text-[#F7F4FF] truncate">
+                          <p className="text-xs font-bold text-[#F2F7FF] truncate">
                             [{player.guild.tag}] {player.guild.name}
                           </p>
-                          <p className="text-[11px] text-[#BEB4D6] capitalize tabular-nums">
+                          <p className="text-[11px] text-[#94A8C7] capitalize tabular-nums">
                             {player.guild.role} · Guild Lv.{player.guild.level}
                           </p>
                         </div>
@@ -646,9 +646,9 @@ export const PublicProfileModal: React.FC = () => {
                   {/* Bodyweight Stance & Stats */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {player.showEquipment !== false && heroProfile && (
-                      <div className="p-4 rounded-xl bg-[#19122B] border border-[#A875FF]/30 space-y-3">
+                      <div className="p-4 rounded-xl bg-[#0A1930] border border-[#00D9FF]/30 space-y-3">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="font-semibold text-[#F7F4FF] flex items-center gap-1.5">
+                          <span className="font-semibold text-[#F2F7FF] flex items-center gap-1.5">
                             <Dumbbell className="w-3.5 h-3.5 text-[#65A9FF]" />
                             Bodyweight Discipline
                           </span>
@@ -657,17 +657,17 @@ export const PublicProfileModal: React.FC = () => {
                           </span>
                         </div>
                         <div className="space-y-1.5">
-                          <p className="text-sm font-bold text-[#F7F4FF] truncate">
+                          <p className="text-sm font-bold text-[#F2F7FF] truncate">
                             {heroProfile.bodyweightDisciplines.conditioningStyle}
                           </p>
-                          <p className="text-[11px] text-[#BEB4D6]">
+                          <p className="text-[11px] text-[#94A8C7]">
                             {heroProfile.archetype} · {player.characterClass || 'Champion'}
                           </p>
                           <div className="flex flex-wrap gap-1.5 pt-1">
-                            <span className="px-2 py-0.5 rounded bg-[#100D1C] border border-[#A875FF]/35 text-[10px] text-[#BEB4D6]">
+                            <span className="px-2 py-0.5 rounded bg-[#061225] border border-[#00D9FF]/35 text-[10px] text-[#94A8C7]">
                               Hands: {heroProfile.bodyweightDisciplines.handsFocus}
                             </span>
-                            <span className="px-2 py-0.5 rounded bg-[#100D1C] border border-[#A875FF]/35 text-[10px] text-[#BEB4D6]">
+                            <span className="px-2 py-0.5 rounded bg-[#061225] border border-[#00D9FF]/35 text-[10px] text-[#94A8C7]">
                               Legs: {heroProfile.bodyweightDisciplines.legsFocus}
                             </span>
                           </div>
@@ -676,32 +676,32 @@ export const PublicProfileModal: React.FC = () => {
                     )}
 
                     {player.showStats !== false && (
-                      <div className="p-4 rounded-xl bg-[#19122B] border border-[#A875FF]/30 space-y-3">
-                        <span className="text-xs font-semibold text-[#F7F4FF] block">
+                      <div className="p-4 rounded-xl bg-[#0A1930] border border-[#00D9FF]/30 space-y-3">
+                        <span className="text-xs font-semibold text-[#F2F7FF] block">
                           Realm Record
                         </span>
                         <div className="grid grid-cols-2 gap-y-2.5 gap-x-4 text-xs">
                           <div>
-                            <span className="text-[11px] text-[#BEB4D6] block">Total XP</span>
-                            <span className="font-mono font-bold text-[#F7F4FF] tabular-nums">
+                            <span className="text-[11px] text-[#94A8C7] block">Total XP</span>
+                            <span className="font-mono font-bold text-[#F2F7FF] tabular-nums">
                               {(player.totalXp ?? 0).toLocaleString()}
                             </span>
                           </div>
                           <div>
-                            <span className="text-[11px] text-[#BEB4D6] block">Habit Streak</span>
+                            <span className="text-[11px] text-[#94A8C7] block">Habit Streak</span>
                             <span className="font-mono font-bold text-[#FFD978] tabular-nums">
                               {player.currentStreak ?? 0} days
                             </span>
                           </div>
                           <div>
-                            <span className="text-[11px] text-[#BEB4D6] block">Workouts</span>
-                            <span className="font-mono font-bold text-[#F7F4FF] tabular-nums">
+                            <span className="text-[11px] text-[#94A8C7] block">Workouts</span>
+                            <span className="font-mono font-bold text-[#F2F7FF] tabular-nums">
                               {(player.totalWorkoutsCompleted ?? 0).toLocaleString()}
                             </span>
                           </div>
                           <div>
-                            <span className="text-[11px] text-[#BEB4D6] block">Bosses Slain</span>
-                            <span className="font-mono font-bold text-[#F7F4FF] tabular-nums">
+                            <span className="text-[11px] text-[#94A8C7] block">Bosses Slain</span>
+                            <span className="font-mono font-bold text-[#F2F7FF] tabular-nums">
                               {(player.totalBossesDefeated ?? 0).toLocaleString()}
                             </span>
                           </div>
@@ -712,9 +712,9 @@ export const PublicProfileModal: React.FC = () => {
 
                   {/* Worldwide Exclusive One-of-One Legend Titles */}
                   {playerOwnedLegends.length > 0 && (
-                    <div className="p-4 rounded-xl bg-[#19122B] border border-[#E7B94F]/40 space-y-3">
+                    <div className="p-4 rounded-xl bg-[#0A1930] border border-[#E7B94F]/40 space-y-3">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-xs font-semibold text-[#F7F4FF] flex items-center gap-1.5 font-['Cinzel']">
+                        <span className="text-xs font-semibold text-[#F2F7FF] flex items-center gap-1.5 font-['Cinzel']">
                           <Crown className="w-3.5 h-3.5 text-[#FFD978]" />
                           Worldwide Exclusive Titles
                         </span>
@@ -728,7 +728,7 @@ export const PublicProfileModal: React.FC = () => {
                           return (
                             <div
                               key={lt.achievementId}
-                              className="p-2.5 rounded-lg bg-[#100D1C] border border-[#E7B94F]/30 flex items-center justify-between gap-2"
+                              className="p-2.5 rounded-lg bg-[#061225] border border-[#E7B94F]/30 flex items-center justify-between gap-2"
                             >
                               <div className="min-w-0 space-y-1">
                                 <LegendTitleBadge
@@ -737,7 +737,7 @@ export const PublicProfileModal: React.FC = () => {
                                   emblemIcon={lt.emblemIcon}
                                   size="xs"
                                 />
-                                <p className="text-[11px] text-[#BEB4D6] truncate">{lt.name}</p>
+                                <p className="text-[11px] text-[#94A8C7] truncate">{lt.name}</p>
                               </div>
                               {isSelfProfile && (
                                 <button
@@ -755,8 +755,8 @@ export const PublicProfileModal: React.FC = () => {
                                   }}
                                   className={`px-2 py-1 rounded text-[10px] font-semibold shrink-0 transition-all cursor-pointer ${
                                     equipped
-                                      ? 'bg-gradient-to-r from-[#6638B8] to-[#65A9FF] text-[#F7F4FF]'
-                                      : 'bg-[#19122B] text-[#65A9FF] border border-[#A875FF]/40 hover:bg-[#2F1B4E]'
+                                      ? 'bg-gradient-to-r from-[#1677FF] to-[#65A9FF] text-[#F2F7FF]'
+                                      : 'bg-[#0A1930] text-[#65A9FF] border border-[#00D9FF]/40 hover:bg-[#152E52]'
                                   }`}
                                 >
                                   {equipped ? 'Equipped' : 'Equip'}
@@ -774,13 +774,13 @@ export const PublicProfileModal: React.FC = () => {
                     (typeof player.reputationScore === 'number' ||
                       identitySummary ||
                       (player.featuredBadges && player.featuredBadges.length > 0)) && (
-                      <div className="p-4 rounded-xl bg-[#19122B] border border-[#A875FF]/30 space-y-3">
+                      <div className="p-4 rounded-xl bg-[#0A1930] border border-[#00D9FF]/30 space-y-3">
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <span className="text-xs font-semibold text-[#F7F4FF] flex items-center gap-1.5 font-['Cinzel']">
+                          <span className="text-xs font-semibold text-[#F2F7FF] flex items-center gap-1.5 font-['Cinzel']">
                             <Star className="w-3.5 h-3.5 text-[#FFD978]" />
                             Reputation &amp; Featured Badges
                           </span>
-                          <span className="text-xs font-mono font-bold text-[#F7F4FF] tabular-nums">
+                          <span className="text-xs font-mono font-bold text-[#F2F7FF] tabular-nums">
                             {(
                               player.reputationScore ??
                               identitySummary?.reputationScore ??
@@ -810,15 +810,15 @@ export const PublicProfileModal: React.FC = () => {
                                 return (
                                   <div
                                     key={badge.id}
-                                    className="p-2.5 rounded-lg bg-[#100D1C] border border-[#A875FF]/25"
+                                    className="p-2.5 rounded-lg bg-[#061225] border border-[#00D9FF]/25"
                                   >
                                     <span className={`text-[10px] font-bold uppercase ${rStyle.text}`}>
                                       {badge.rarity}
                                     </span>
-                                    <p className="text-xs font-semibold text-[#F7F4FF] truncate mt-0.5">
+                                    <p className="text-xs font-semibold text-[#F2F7FF] truncate mt-0.5">
                                       {badge.name}
                                     </p>
-                                    <p className="text-[11px] text-[#BEB4D6] truncate">
+                                    <p className="text-[11px] text-[#94A8C7] truncate">
                                       {badge.description}
                                     </p>
                                   </div>
@@ -826,7 +826,7 @@ export const PublicProfileModal: React.FC = () => {
                               })}
                           </div>
                         ) : (
-                          <p className="text-xs text-[#BEB4D6]">
+                          <p className="text-xs text-[#94A8C7]">
                             No rare badges featured yet.
                           </p>
                         )}
@@ -835,27 +835,27 @@ export const PublicProfileModal: React.FC = () => {
 
                   {/* Unlocked Achievements */}
                   {player.showAchievements !== false && (
-                    <div className="p-4 rounded-xl bg-[#19122B] border border-[#A875FF]/30 space-y-3">
+                    <div className="p-4 rounded-xl bg-[#0A1930] border border-[#00D9FF]/30 space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-semibold text-[#F7F4FF] flex items-center gap-1.5">
+                        <span className="text-xs font-semibold text-[#F2F7FF] flex items-center gap-1.5">
                           <Award className="w-3.5 h-3.5 text-[#FFD978]" />
                           Unlocked Achievements
                         </span>
-                        <span className="text-[11px] text-[#BEB4D6] tabular-nums">
+                        <span className="text-[11px] text-[#94A8C7] tabular-nums">
                           {player.achievements?.length || 0} earned
                         </span>
                       </div>
                       {!player.achievements || player.achievements.length === 0 ? (
-                        <p className="text-xs text-[#BEB4D6]/70">No achievements unlocked yet.</p>
+                        <p className="text-xs text-[#94A8C7]/70">No achievements unlocked yet.</p>
                       ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                           {player.achievements.slice(0, 8).map(ach => (
                             <div
                               key={ach.id}
-                              className="p-2.5 rounded-lg bg-[#100D1C] border border-[#A875FF]/25"
+                              className="p-2.5 rounded-lg bg-[#061225] border border-[#00D9FF]/25"
                             >
-                              <p className="text-xs font-semibold text-[#F7F4FF] truncate">{ach.name}</p>
-                              <p className="text-[11px] text-[#BEB4D6] truncate">{ach.description}</p>
+                              <p className="text-xs font-semibold text-[#F2F7FF] truncate">{ach.name}</p>
+                              <p className="text-[11px] text-[#94A8C7] truncate">{ach.description}</p>
                             </div>
                           ))}
                         </div>
@@ -867,14 +867,14 @@ export const PublicProfileModal: React.FC = () => {
                   {(player.personalRecords?.length || player.workoutHistory?.length || player.dailyActivity) && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {player.personalRecords && player.personalRecords.length > 0 && (
-                        <div className="p-4 rounded-xl bg-[#19122B] border border-[#A875FF]/30 space-y-2.5">
+                        <div className="p-4 rounded-xl bg-[#0A1930] border border-[#00D9FF]/30 space-y-2.5">
                           <span className="text-xs font-semibold text-[#65A9FF] block">
                             Personal Records
                           </span>
                           <div className="space-y-1.5 text-xs">
                             {player.personalRecords.slice(0, 5).map((pr, idx) => (
                               <div key={`${pr.exerciseName}-${idx}`} className="flex justify-between gap-2">
-                                <span className="text-[#F7F4FF] truncate">{pr.exerciseName}</span>
+                                <span className="text-[#F2F7FF] truncate">{pr.exerciseName}</span>
                                 <span className="font-mono text-[#65A9FF] tabular-nums shrink-0">
                                   {pr.bestReps ? `${pr.bestReps} reps` : `${pr.bestDurationMinutes ?? 0} min`}
                                 </span>
@@ -885,14 +885,14 @@ export const PublicProfileModal: React.FC = () => {
                       )}
 
                       {player.workoutHistory && player.workoutHistory.length > 0 && (
-                        <div className="p-4 rounded-xl bg-[#19122B] border border-[#A875FF]/30 space-y-2.5">
-                          <span className="text-xs font-semibold text-[#F7F4FF] block">
+                        <div className="p-4 rounded-xl bg-[#0A1930] border border-[#00D9FF]/30 space-y-2.5">
+                          <span className="text-xs font-semibold text-[#F2F7FF] block">
                             Recent Workouts
                           </span>
                           <div className="space-y-1.5 text-xs">
                             {player.workoutHistory.slice(0, 5).map(w => (
                               <div key={w.id} className="flex justify-between gap-2">
-                                <span className="text-[#BEB4D6] truncate">{w.exerciseName}</span>
+                                <span className="text-[#94A8C7] truncate">{w.exerciseName}</span>
                                 <span className="font-mono text-[#65A9FF] tabular-nums shrink-0">
                                   {w.durationMinutes}m
                                 </span>
@@ -906,10 +906,10 @@ export const PublicProfileModal: React.FC = () => {
 
                   {/* Favorite Collectible Cards Showcase */}
                   {player.showAchievements !== false && favoriteCardIds.length > 0 && (
-                    <div className="p-4 rounded-xl bg-[#19122B] border border-[#A875FF]/30 space-y-3">
+                    <div className="p-4 rounded-xl bg-[#0A1930] border border-[#00D9FF]/30 space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-semibold text-[#F7F4FF] flex items-center gap-1.5 font-['Cinzel']">
-                          <Layers className="w-3.5 h-3.5 text-[#A875FF]" />
+                        <span className="text-xs font-semibold text-[#F2F7FF] flex items-center gap-1.5 font-['Cinzel']">
+                          <Layers className="w-3.5 h-3.5 text-[#00D9FF]" />
                           Curated Collectible Cards
                         </span>
                         <span className="text-[11px] text-[#65A9FF] tabular-nums">
@@ -923,11 +923,11 @@ export const PublicProfileModal: React.FC = () => {
                           return (
                             <div
                               key={card.id}
-                              className="p-2.5 rounded-xl bg-[#100D1C] border border-[#A875FF]/30 space-y-2"
+                              className="p-2.5 rounded-xl bg-[#061225] border border-[#00D9FF]/30 space-y-2"
                             >
                               <CollectibleCardArtwork card={card} size="sm" />
                               <div className="min-w-0">
-                                <p className="text-xs font-bold text-[#F7F4FF] truncate">{card.name}</p>
+                                <p className="text-xs font-bold text-[#F2F7FF] truncate">{card.name}</p>
                                 <p className="text-[10px] text-[#65A9FF] truncate">
                                   {card.rarity} · {card.flavorStatValue}
                                 </p>
@@ -943,8 +943,8 @@ export const PublicProfileModal: React.FC = () => {
                   {player.showAchievements !== false &&
                     publicTrophyState &&
                     publicTrophyState.pinnedIds.length > 0 && (
-                      <div className="p-4 rounded-xl bg-[#19122B] border border-[#E7B94F]/35 space-y-3">
-                        <span className="text-xs font-semibold text-[#F7F4FF] flex items-center gap-1.5 font-['Cinzel']">
+                      <div className="p-4 rounded-xl bg-[#0A1930] border border-[#E7B94F]/35 space-y-3">
+                        <span className="text-xs font-semibold text-[#F2F7FF] flex items-center gap-1.5 font-['Cinzel']">
                           <Trophy className="w-3.5 h-3.5 text-[#FFD978]" />
                           Pinned Trophy Case
                         </span>
@@ -955,10 +955,10 @@ export const PublicProfileModal: React.FC = () => {
                             return (
                               <div
                                 key={tid}
-                                className="p-2.5 rounded-lg bg-[#100D1C] border border-[#A875FF]/30"
+                                className="p-2.5 rounded-lg bg-[#061225] border border-[#00D9FF]/30"
                               >
-                                <p className="text-xs font-bold text-[#F7F4FF] truncate">{tDef.title}</p>
-                                <p className="text-[11px] text-[#BEB4D6] truncate">
+                                <p className="text-xs font-bold text-[#F2F7FF] truncate">{tDef.title}</p>
+                                <p className="text-[11px] text-[#94A8C7] truncate">
                                   {tDef.rarity} · {tDef.description}
                                 </p>
                               </div>
@@ -970,9 +970,9 @@ export const PublicProfileModal: React.FC = () => {
 
                   {/* Peer Reputation & Endorsements */}
                   {endorsementSummary && (
-                    <div className="p-4 rounded-xl bg-[#19122B] border border-[#A875FF]/30 space-y-3">
+                    <div className="p-4 rounded-xl bg-[#0A1930] border border-[#00D9FF]/30 space-y-3">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-xs font-semibold text-[#F7F4FF] flex items-center gap-1.5 font-['Cinzel']">
+                        <span className="text-xs font-semibold text-[#F2F7FF] flex items-center gap-1.5 font-['Cinzel']">
                           <HeartHandshake className="w-3.5 h-3.5 text-[#65A9FF]" />
                           Peer Endorsements ({endorsementSummary.totalEndorsements})
                         </span>
@@ -980,7 +980,7 @@ export const PublicProfileModal: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => setShowReportBox(v => !v)}
-                            className="text-[11px] text-[#BEB4D6] hover:text-[#F05B70] flex items-center gap-1 cursor-pointer"
+                            className="text-[11px] text-[#94A8C7] hover:text-[#F05B70] flex items-center gap-1 cursor-pointer"
                           >
                             <Flag className="w-3 h-3" />
                             Report
@@ -995,7 +995,7 @@ export const PublicProfileModal: React.FC = () => {
                           return (
                             <div
                               key={cat}
-                              className="p-2.5 rounded-lg bg-[#100D1C] border border-[#A875FF]/25 text-center"
+                              className="p-2.5 rounded-lg bg-[#061225] border border-[#00D9FF]/25 text-center"
                             >
                               <span
                                 className="text-[10px] font-bold uppercase block"
@@ -1003,7 +1003,7 @@ export const PublicProfileModal: React.FC = () => {
                               >
                                 {meta.label}
                               </span>
-                              <span className="font-mono font-bold text-sm text-[#F7F4FF] tabular-nums">
+                              <span className="font-mono font-bold text-sm text-[#F2F7FF] tabular-nums">
                                 {count}
                               </span>
                             </div>
@@ -1012,12 +1012,12 @@ export const PublicProfileModal: React.FC = () => {
                       </div>
 
                       {!isSelfProfile && (
-                        <form onSubmit={handleGiveEndorsement} className="space-y-2 pt-2 border-t border-[#A875FF]/25">
+                        <form onSubmit={handleGiveEndorsement} className="space-y-2 pt-2 border-t border-[#00D9FF]/25">
                           <div className="flex flex-wrap items-center gap-2">
                             <select
                               value={endorseCategory}
                               onChange={e => setEndorseCategory(e.target.value as EndorsementCategory)}
-                              className="rounded-lg bg-[#100D1C] border border-[#A875FF]/35 px-2.5 py-1.5 text-xs text-[#F7F4FF] focus:outline-none focus:border-[#65A9FF]"
+                              className="rounded-lg bg-[#061225] border border-[#00D9FF]/35 px-2.5 py-1.5 text-xs text-[#F2F7FF] focus:outline-none focus:border-[#65A9FF]"
                             >
                               {(Object.keys(ENDORSEMENT_CATEGORIES_META) as EndorsementCategory[]).map(cat => (
                                 <option key={cat} value={cat}>
@@ -1031,12 +1031,12 @@ export const PublicProfileModal: React.FC = () => {
                               value={endorseNote}
                               onChange={e => setEndorseNote(e.target.value)}
                               placeholder="Optional encouragement note..."
-                              className="flex-1 min-w-[160px] rounded-lg bg-[#100D1C] border border-[#A875FF]/35 px-2.5 py-1.5 text-xs text-[#F7F4FF] placeholder-[#BEB4D6]/50 focus:outline-none focus:border-[#65A9FF]"
+                              className="flex-1 min-w-[160px] rounded-lg bg-[#061225] border border-[#00D9FF]/35 px-2.5 py-1.5 text-xs text-[#F2F7FF] placeholder-[#94A8C7]/50 focus:outline-none focus:border-[#65A9FF]"
                             />
                             <button
                               type="submit"
                               disabled={actionBusy || !endorsementSummary.canEndorseToday}
-                              className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#6638B8] to-[#65A9FF] hover:from-[#7849cc] hover:to-[#7bb6ff] disabled:opacity-45 text-[#F7F4FF] font-bold text-xs whitespace-nowrap shadow-[0_0_12px_rgba(101,169,255,0.3)] cursor-pointer"
+                              className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#1677FF] to-[#65A9FF] hover:from-[#0099FF] hover:to-[#7bb6ff] disabled:opacity-45 text-[#F2F7FF] font-bold text-xs whitespace-nowrap shadow-[0_0_12px_rgba(101,169,255,0.3)] cursor-pointer"
                             >
                               Endorse
                             </button>
@@ -1057,12 +1057,12 @@ export const PublicProfileModal: React.FC = () => {
                             value={reportReason}
                             onChange={e => setReportReason(e.target.value)}
                             placeholder="Describe inappropriate endorsement or abuse..."
-                            className="flex-1 rounded-lg bg-[#100D1C] border border-[#F05B70]/45 px-2.5 py-1.5 text-xs text-[#F7F4FF] focus:outline-none"
+                            className="flex-1 rounded-lg bg-[#061225] border border-[#F05B70]/45 px-2.5 py-1.5 text-xs text-[#F2F7FF] focus:outline-none"
                           />
                           <button
                             type="submit"
                             disabled={actionBusy}
-                            className="px-3 py-1.5 rounded-lg bg-[#F05B70] hover:bg-[#f47587] text-[#100D1C] text-xs font-bold whitespace-nowrap cursor-pointer"
+                            className="px-3 py-1.5 rounded-lg bg-[#F05B70] hover:bg-[#f47587] text-[#061225] text-xs font-bold whitespace-nowrap cursor-pointer"
                           >
                             Submit Report
                           </button>

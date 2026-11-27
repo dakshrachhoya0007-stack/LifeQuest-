@@ -27,15 +27,12 @@ const SIZE_MAP: Record<'sm' | 'md' | 'lg' | 'xl', { box: string; radius: string;
   xl: { box: 'w-40 h-40', radius: 'rounded-3xl', badge: 'md' },
 };
 
-const PRESTIGE_ROMANS = ['', 'I', 'II', 'III', 'IV', 'V'];
-
 export const Character2DAvatar: React.FC<Character2DAvatarProps> = ({
   heroId,
   characterClass,
   appearance,
   size = 'lg',
   presenceStatus,
-  prestigeTier = 0,
   showBannerBackdrop = false,
   className = '',
 }) => {
@@ -60,11 +57,10 @@ export const Character2DAvatar: React.FC<Character2DAvatarProps> = ({
     : null;
 
   const dims = SIZE_MAP[size];
-  const frameColor = frameItem?.accentHex || '#6638B8';
-  const frameSecondary = frameItem?.primaryHex || '#19122B';
-  const auraColor = auraItem?.primaryHex || '#A875FF';
+  const frameColor = frameItem?.accentHex || '#1677FF';
+  const frameSecondary = frameItem?.primaryHex || '#0A1930';
+  const auraColor = auraItem?.primaryHex || '#00D9FF';
   const colorAccent = colorItem?.accentHex || outfitItem?.accentHex || '#FFD978';
-  const romanTier = prestigeTier > 0 ? PRESTIGE_ROMANS[Math.min(5, prestigeTier)] || `P${prestigeTier}` : null;
 
   return (
     <div className={`relative inline-flex items-center justify-center shrink-0 ${className}`}>
@@ -107,10 +103,10 @@ export const Character2DAvatar: React.FC<Character2DAvatarProps> = ({
       )}
 
       <div
-        className={`relative overflow-hidden ${dims.box} ${dims.radius} bg-[#100D1C] shadow-xl`}
+        className={`relative overflow-hidden ${dims.box} ${dims.radius} bg-[#061225] shadow-xl`}
         style={{
           border: `2px solid ${frameColor}`,
-          boxShadow: `0 0 0 1px ${frameSecondary}, 0 10px 25px -8px ${auraItem ? `${auraColor}55` : 'rgba(10,6,20,0.75)'}`,
+          boxShadow: `0 0 0 1px ${frameSecondary}, 0 10px 25px -8px ${auraItem ? `${auraColor}55` : 'rgba(4,12,28,0.8)'}`,
         }}
       >
         {colorItem && (
@@ -179,15 +175,6 @@ export const Character2DAvatar: React.FC<Character2DAvatarProps> = ({
           <path d="M82 95 H95 V82" fill="none" stroke={frameColor} strokeWidth="2" opacity="0.85" />
         </svg>
       </div>
-
-      {romanTier && (
-        <span
-          title={`Prestige Tier ${romanTier}`}
-          className="absolute -top-2 -left-2 z-20 px-1.5 py-0.5 rounded-md bg-[#19122B] border border-[#FFD978]/65 font-['Cinzel'] font-black text-[10px] text-[#FFD978] shadow-[0_0_10px_rgba(255,217,120,0.28)] tabular-nums"
-        >
-          {romanTier}
-        </span>
-      )}
 
       {presenceStatus && (
         <PresenceBadge

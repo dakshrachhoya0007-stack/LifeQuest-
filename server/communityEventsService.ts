@@ -268,7 +268,7 @@ export function createCommunityEventsService(rootDir: string, deps?: CommunityEv
         title: 'Solstice Spire Endurance Rally',
         subtitle: 'Scheduled Realm-Wide Conditioning Moment',
         description: 'Prepare your guild and workout parties for a 7-day collective endurance celebration across Aetheria.',
-        themeColor: '#9C6CE0',
+        themeColor: '#1677FF',
         status: 'upcoming',
         startsAt: nextStart.toISOString(),
         endsAt: nextEnd.toISOString(),

@@ -51,14 +51,15 @@ export const purchaseBattlePassRmDisabledServer = async (
 // --- AAA 2: COLLECTIBLE CARDS & WALLET ---
 export const syncInitialWalletGoldServer = async (
   userId: string,
-  gold: number
+  gold: number,
+  fromSupabaseProfile = false
 ): Promise<{ ok: boolean; wallet?: PlayerWalletState; error?: string }> => {
   try {
     const headers = await getLifequestAuthHeaders(userId, true);
     const res = await fetch('/api/economy/sync-initial-gold', {
       method: 'POST',
       headers,
-      body: JSON.stringify({ gold }),
+      body: JSON.stringify({ gold, fromSupabaseProfile }),
     });
     const parsed = await safeJson(res);
     if (!parsed.ok) return { ok: false, error: parsed.data?.error || 'Failed to sync wallet.' };

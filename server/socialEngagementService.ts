@@ -948,6 +948,9 @@ export function createSocialEngagementService(
             dedupe
           );
         }
+        if (typeof (deps.economyCards as any).getWalletSummarySync === 'function') {
+          (outcome.payload as any).wallet = (deps.economyCards as any).getWalletSummarySync(auth.userId);
+        }
       }
 
       res.status(outcome.status).json(
@@ -1019,6 +1022,9 @@ export function createSocialEngagementService(
           `Calendar Milestone: ${ms.title}`,
           `cal_wk_f:${monthKey}:${ms.id}:${auth.userId}`
         );
+        if (typeof (deps.economyCards as any).getWalletSummarySync === 'function') {
+          (outcome.payload as any).wallet = (deps.economyCards as any).getWalletSummarySync(auth.userId);
+        }
       }
 
       res.status(outcome.status).json(
@@ -1039,7 +1045,7 @@ export function createSocialEngagementService(
         return buildSeasonalRecap(ledger, auth.userId!, seasonId, auth.userId!);
       });
       if (!recap) {
-        res.status(404).json({ success: false, error: 'No season data available yet.' });
+        res.json({ success: true, recap: null });
         return;
       }
       res.json({ success: true, recap });

@@ -114,18 +114,18 @@ export function buildHero3DModel(heroId: PlayableHeroId): Hero3DInstance {
         ? '#20422d'
         : heroId === 'paladin'
         ? '#f0ece1'
-        : '#24143D',
-      '#100D1C',
-      '#A875FF'
+        : '#102440',
+      '#061225',
+      '#00D9FF'
     )
   );
   const leatherTex = track(
     createLeatherTexture(
-      heroId === 'ranger' ? '#3a2a1d' : '#19122B',
-      '#100D1C'
+      heroId === 'ranger' ? '#3a2a1d' : '#0A1930',
+      '#061225'
     )
   );
-  const arcaneTex = track(createArcaneClothTexture('#24143D', '#6638B8'));
+  const arcaneTex = track(createArcaneClothTexture('#102440', '#1677FF'));
 
   // Materials
   const steelMat = track(

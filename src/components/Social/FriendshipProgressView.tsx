@@ -40,15 +40,15 @@ export const FriendshipProgressView: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in">
-      <div className="rounded-2xl bg-[#24143D]/95 backdrop-blur-md border border-[#A875FF]/30 p-5 sm:p-6 space-y-2 shadow-[0_12px_32px_rgba(16,13,28,0.65)]">
+      <div className="rounded-2xl bg-[#102440]/95 backdrop-blur-md border border-[#00D9FF]/30 p-5 sm:p-6 space-y-2 shadow-[0_12px_32px_rgba(4,12,28,0.65)]">
         <div className="flex flex-wrap items-center gap-2 text-xs text-[#35D69A] font-semibold">
           <ShieldCheck className="w-4 h-4 shrink-0" />
           Verified Cooperative Progression Only · Zero Chat/Like Spam &amp; Zero Competitive Rating Impact
         </div>
-        <h2 className="font-['Cinzel'] font-black text-xl text-[#F7F4FF]">
+        <h2 className="font-['Cinzel'] font-black text-xl text-[#F2F7FF]">
           MUTUAL FRIENDSHIP LEVELS
         </h2>
-        <p className="text-xs text-[#BEB4D6] max-w-3xl">
+        <p className="text-xs text-[#94A8C7] max-w-3xl">
           Build Mutual Friendship Levels (1–6) exclusively through Workout Parties, Shared Friendly Rivalries, and Cooperative Missions. Titles like Oathbound Ally (Lv.3) and Kindred Vanguard (Lv.5) unlock automatically.
         </p>
       </div>
@@ -66,10 +66,10 @@ export const FriendshipProgressView: React.FC = () => {
       )}
 
       {friendshipLevels.length === 0 ? (
-        <div className="rounded-2xl bg-[#24143D]/95 border border-[#A875FF]/30 p-10 text-center space-y-2">
+        <div className="rounded-2xl bg-[#102440]/95 border border-[#00D9FF]/30 p-10 text-center space-y-2">
           <Users className="w-7 h-7 text-[#65A9FF] mx-auto" />
-          <p className="font-['Cinzel'] font-bold text-sm text-[#F7F4FF]">No Mutual Companion Progress Yet</p>
-          <p className="text-xs text-[#BEB4D6]">
+          <p className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF]">No Mutual Companion Progress Yet</p>
+          <p className="text-xs text-[#94A8C7]">
             Add friends and complete a Workout Party or Rivals duel together to start leveling up your mutual bond.
           </p>
         </div>
@@ -88,7 +88,7 @@ export const FriendshipProgressView: React.FC = () => {
             return (
               <div
                 key={record.pairKey}
-                className="rounded-2xl bg-[#24143D]/95 backdrop-blur-md border border-[#A875FF]/30 hover:border-[#65A9FF]/50 p-5 space-y-5 transition-all shadow-[0_12px_32px_rgba(16,13,28,0.6)]"
+                className="rounded-2xl bg-[#102440]/95 backdrop-blur-md border border-[#00D9FF]/30 hover:border-[#65A9FF]/50 p-5 space-y-5 transition-all shadow-[0_12px_32px_rgba(4,12,28,0.6)]"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-3.5">
@@ -109,14 +109,14 @@ export const FriendshipProgressView: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => openPublicProfile(record.friendId)}
-                        className="font-['Cinzel'] font-bold text-base text-[#F7F4FF] hover:text-[#65A9FF] cursor-pointer"
+                        className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] hover:text-[#65A9FF] cursor-pointer"
                       >
                         {record.friendUsername}
                       </button>
                       <p className="text-xs text-[#65A9FF] font-semibold">
                         Level {record.friendshipLevel} · {tierMeta.title}
                       </p>
-                      <p className="text-[11px] text-[#BEB4D6] tabular-nums">
+                      <p className="text-[11px] text-[#94A8C7] tabular-nums">
                         {record.totalCoopActivities} Verified Shared Sessions · Unlocks: {tierMeta.rewardLabel}
                       </p>
                     </div>
@@ -124,14 +124,14 @@ export const FriendshipProgressView: React.FC = () => {
 
                   <div className="min-w-[220px] space-y-1.5">
                     <div className="flex items-center justify-between text-xs font-mono tabular-nums">
-                      <span className="text-[#BEB4D6]">Friendship XP</span>
+                      <span className="text-[#94A8C7]">Friendship XP</span>
                       <span className="text-[#65A9FF] font-bold">
                         {record.friendshipXp} / {record.nextLevelXp}
                       </span>
                     </div>
-                    <div className="h-2 rounded-full bg-[#100D1C] border border-[#A875FF]/30 overflow-hidden">
+                    <div className="h-2 rounded-full bg-[#061225] border border-[#00D9FF]/30 overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-[#6638B8] to-[#65A9FF]"
+                        className="h-full bg-gradient-to-r from-[#1677FF] to-[#65A9FF]"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
@@ -148,7 +148,7 @@ export const FriendshipProgressView: React.FC = () => {
                     return (
                       <div
                         key={m.id}
-                        className="rounded-xl bg-[#19122B] border border-[#A875FF]/25 p-3.5 flex flex-col justify-between gap-3"
+                        className="rounded-xl bg-[#0A1930] border border-[#00D9FF]/25 p-3.5 flex flex-col justify-between gap-3"
                       >
                         <div>
                           <div className="flex items-center justify-between text-[11px] text-[#65A9FF]">
@@ -160,8 +160,8 @@ export const FriendshipProgressView: React.FC = () => {
                               {Math.min(record.totalCoopActivities, m.targetActivities)}/{m.targetActivities}
                             </span>
                           </div>
-                          <h4 className="font-['Cinzel'] font-bold text-xs text-[#F7F4FF] mt-1">{m.title}</h4>
-                          <p className="text-[11px] text-[#BEB4D6] mt-1">{m.description}</p>
+                          <h4 className="font-['Cinzel'] font-bold text-xs text-[#F2F7FF] mt-1">{m.title}</h4>
+                          <p className="text-[11px] text-[#94A8C7] mt-1">{m.description}</p>
                         </div>
 
                         <button
@@ -172,8 +172,8 @@ export const FriendshipProgressView: React.FC = () => {
                             claimed
                               ? 'bg-[#35D69A]/15 border border-[#35D69A]/45 text-[#35D69A]'
                               : eligible
-                              ? 'bg-gradient-to-r from-[#6638B8] to-[#65A9FF] hover:from-[#7849cc] hover:to-[#7bb6ff] text-[#F7F4FF] shadow-[0_0_12px_rgba(101,169,255,0.35)] cursor-pointer'
-                              : 'bg-[#100D1C] border border-[#A875FF]/20 text-[#BEB4D6]/50'
+                              ? 'bg-gradient-to-r from-[#1677FF] to-[#65A9FF] hover:from-[#0099FF] hover:to-[#7bb6ff] text-[#F2F7FF] shadow-[0_0_12px_rgba(101,169,255,0.35)] cursor-pointer'
+                              : 'bg-[#061225] border border-[#00D9FF]/20 text-[#94A8C7]/50'
                           }`}
                         >
                           {claimed ? 'Completed' : eligible ? 'Claim Bond XP' : 'In Progress'}
@@ -185,15 +185,15 @@ export const FriendshipProgressView: React.FC = () => {
 
                 {/* Bond History */}
                 {record.recentHistory.length > 0 && (
-                  <div className="pt-2 border-t border-[#A875FF]/20 space-y-1.5">
-                    <p className="text-[11px] font-semibold text-[#BEB4D6] flex items-center gap-1.5">
+                  <div className="pt-2 border-t border-[#00D9FF]/20 space-y-1.5">
+                    <p className="text-[11px] font-semibold text-[#94A8C7] flex items-center gap-1.5">
                       <History className="w-3.5 h-3.5 text-[#65A9FF]" />
                       Recent Cooperative History
                     </p>
                     <div className="space-y-1 text-xs">
                       {record.recentHistory.slice(0, 4).map(h => (
                         <div key={h.id} className="flex items-center justify-between tabular-nums">
-                          <span className="text-[#BEB4D6]">{h.label}</span>
+                          <span className="text-[#94A8C7]">{h.label}</span>
                           <span className="font-mono text-[#35D69A]">+{h.xpAwarded} XP</span>
                         </div>
                       ))}

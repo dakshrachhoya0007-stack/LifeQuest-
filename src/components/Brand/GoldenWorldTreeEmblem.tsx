@@ -18,13 +18,13 @@ export const GoldenWorldTreeEmblem: React.FC<{ className?: string }> = ({
       </linearGradient>
       <radialGradient id="lqTreeHalo" cx="50%" cy="42%" r="48%">
         <stop offset="0%" stopColor="#E7B94F" stopOpacity="0.42" />
-        <stop offset="65%" stopColor="#6638B8" stopOpacity="0.28" />
-        <stop offset="100%" stopColor="#100D1C" stopOpacity="0" />
+        <stop offset="65%" stopColor="#1677FF" stopOpacity="0.28" />
+        <stop offset="100%" stopColor="#061225" stopOpacity="0" />
       </radialGradient>
     </defs>
 
     <circle cx="32" cy="32" r="29" fill="url(#lqTreeHalo)" stroke="#FFD978" strokeOpacity="0.52" strokeWidth="1" />
-    <circle cx="32" cy="32" r="25" stroke="#A875FF" strokeOpacity="0.48" strokeWidth="0.8" strokeDasharray="3 3" />
+    <circle cx="32" cy="32" r="25" stroke="#00D9FF" strokeOpacity="0.52" strokeWidth="0.8" strokeDasharray="3 3" />
 
     <path
       d="M32 52C32 45 32 39 32 31M32 46C28 49 23 51 17 52M32 46C36 49 41 51 47 52M32 50C30 53 27 55 24 56M32 50C34 53 37 55 40 56"

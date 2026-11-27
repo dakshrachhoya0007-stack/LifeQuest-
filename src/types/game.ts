@@ -2005,7 +2005,7 @@ export interface SeasonMilestoneReward {
   id: string;
   title: string;
   requiredSeasonXp: number;
-  rewardType: 'cosmetic_crest' | 'title' | 'badge' | 'achievement' | 'card' | 'fragments' | 'gold';
+  rewardType: 'cosmetic' | 'card' | 'title' | 'fragments' | 'gold';
   rewardLabel: string;
   rewardRefId?: string;
   rewardCardId?: string;
@@ -2013,7 +2013,7 @@ export interface SeasonMilestoneReward {
   rewardGold?: number;
   rewardFragments?: number;
   track?: 'free' | 'elite' | 'premium';
-  eliteRewardType?: 'cosmetic_crest' | 'title' | 'badge' | 'card' | 'fragments' | 'gold';
+  eliteRewardType?: 'cosmetic' | 'card' | 'title' | 'fragments' | 'gold';
   eliteRewardLabel?: string;
   eliteCosmeticId?: string;
   eliteCardId?: string;
@@ -2474,18 +2474,11 @@ export interface TerritoryWarsStateResponse {
 
 // --- AAA 1: 50-LEVEL BATTLE PASS EXTENSIONS ---
 export type BattlePassRewardType =
-  | 'cosmetic_crest'
-  | 'cosmetic_frame'
-  | 'cosmetic_banner'
-  | 'cosmetic_outfit'
-  | 'cosmetic_aura'
+  | 'cosmetic'
+  | 'card'
   | 'title'
-  | 'badge'
-  | 'collectible_card'
-  | 'card_pack'
   | 'fragments'
-  | 'gold'
-  | 'achievement';
+  | 'gold';
 
 // --- AAA 2: COLLECTIBLE CARD SYSTEM ---
 export type CollectibleCardRarity = 'Common' | 'Rare' | 'Epic' | 'Legendary' | 'Mythic';

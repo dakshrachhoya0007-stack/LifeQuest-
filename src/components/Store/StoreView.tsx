@@ -64,7 +64,7 @@ export const StoreView: React.FC = () => {
     } else {
       setFeedback({
         type: 'success',
-        text: `Activated ${item.name}! Buff charges added to your Active Buffs.`,
+        text: `Activated ${item.name}! Aura Blessing is now active for your training.`,
       });
     }
   };
@@ -80,30 +80,30 @@ export const StoreView: React.FC = () => {
       {/* Header Banner */}
       <div
         data-tutorial-id="shop-bazaar"
-        className="rounded-2xl bg-gradient-to-r from-[#100D1C] via-[#19122B] to-[#24143D] border border-[#6638B8]/40 p-6 shadow-[0_12px_32px_rgba(10,6,20,0.6)]"
+        className="rounded-2xl bg-gradient-to-r from-[#061225] via-[#0A1930] to-[#102440] border border-[#1677FF]/40 p-6 shadow-[0_12px_32px_rgba(4,12,28,0.6)]"
       >
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-[#FFD978] bg-[#19122B] border border-[#E7B94F]/45 px-2.5 py-0.5 rounded">
+              <span className="font-['Cinzel'] font-bold text-xs uppercase tracking-widest text-[#FFD978] bg-[#0A1930] border border-[#E7B94F]/45 px-2.5 py-0.5 rounded">
                 Aetheria Grand Bazaar
               </span>
-              <span className="text-xs text-[#BEB4D6] font-medium">
+              <span className="text-xs text-[#94A8C7] font-medium">
                 Hero Level {stats.level} · {stats.aetherRank} Rank
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F7F4FF] flex items-center gap-2.5">
+            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2F7FF] flex items-center gap-2.5">
               <ShoppingBag className="w-7 h-7 text-[#FFD978]" />
               ROYAL TREASURY &amp; COSMETIC BAZAAR
             </h1>
-            <p className="text-xs sm:text-sm text-[#BEB4D6] max-w-2xl">
+            <p className="text-xs sm:text-sm text-[#94A8C7] max-w-2xl">
               Acquire restorative Elixirs &amp; Aura Blessings to fuel your bodyweight training and boss battles, or unlock 2D outfits and realm vanity themes.
             </p>
           </div>
 
           {/* Currencies */}
           <div className="flex flex-wrap items-center gap-3">
-            <div className="bg-[#19122B]/95 border border-[#E7B94F]/50 rounded-xl px-4 py-2.5 flex items-center gap-3">
+            <div className="bg-[#0A1930]/95 border border-[#E7B94F]/50 rounded-xl px-4 py-2.5 flex items-center gap-3">
               <Coins className="w-5 h-5 text-[#FFD978]" />
               <div>
                 <span className="text-[10px] uppercase tracking-wider text-[#E7B94F] font-bold block">
@@ -115,13 +115,13 @@ export const StoreView: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-[#19122B]/95 border border-[#A875FF]/50 rounded-xl px-4 py-2.5 flex items-center gap-3">
-              <Gem className="w-5 h-5 text-[#A875FF]" />
+            <div className="bg-[#0A1930]/95 border border-[#00D9FF]/50 rounded-xl px-4 py-2.5 flex items-center gap-3">
+              <Gem className="w-5 h-5 text-[#00D9FF]" />
               <div>
-                <span className="text-[10px] uppercase tracking-wider text-[#A875FF] font-bold block">
+                <span className="text-[10px] uppercase tracking-wider text-[#00D9FF] font-bold block">
                   Fragments
                 </span>
-                <span className="font-mono text-lg font-black text-[#F7F4FF] tabular-nums">
+                <span className="font-mono text-lg font-black text-[#F2F7FF] tabular-nums">
                   {walletState?.cosmeticFragments ?? 0}
                 </span>
               </div>
@@ -130,7 +130,7 @@ export const StoreView: React.FC = () => {
         </div>
 
         {/* Store Mode Switcher */}
-        <div className="mt-5 pt-4 border-t border-[#6638B8]/30 flex flex-wrap items-center gap-2">
+        <div className="mt-5 pt-4 border-t border-[#1677FF]/30 flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => {
@@ -139,8 +139,8 @@ export const StoreView: React.FC = () => {
             }}
             className={`px-4 py-2 rounded-xl text-xs font-['Cinzel'] font-black flex items-center gap-2 transition-all whitespace-nowrap ${
               storeMode === 'bazaar'
-                ? 'bg-gradient-to-r from-[#E7B94F] to-[#FFD978] text-[#100D1C] shadow-[0_0_16px_rgba(231,185,79,0.35)]'
-                : 'bg-[#19122B] hover:bg-[#2F1B4E] border border-[#6638B8]/40 text-[#BEB4D6] hover:text-[#F7F4FF]'
+                ? 'bg-gradient-to-r from-[#E7B94F] to-[#FFD978] text-[#061225] shadow-[0_0_16px_rgba(231,185,79,0.35)]'
+                : 'bg-[#0A1930] hover:bg-[#152E52] border border-[#1677FF]/40 text-[#94A8C7] hover:text-[#F2F7FF]'
             }`}
           >
             <ShoppingBag className="w-4 h-4" />
@@ -155,8 +155,8 @@ export const StoreView: React.FC = () => {
             }}
             className={`px-4 py-2 rounded-xl text-xs font-['Cinzel'] font-black flex items-center gap-2 transition-all whitespace-nowrap ${
               storeMode === 'marketplace'
-                ? 'bg-gradient-to-r from-[#6638B8] to-[#A875FF] text-white shadow-[0_0_16px_rgba(168,117,255,0.35)]'
-                : 'bg-[#19122B] hover:bg-[#2F1B4E] border border-[#6638B8]/40 text-[#BEB4D6] hover:text-[#F7F4FF]'
+                ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white shadow-[0_0_16px_rgba(0,217,255,0.35)]'
+                : 'bg-[#0A1930] hover:bg-[#152E52] border border-[#1677FF]/40 text-[#94A8C7] hover:text-[#F2F7FF]'
             }`}
           >
             <Sparkles className="w-4 h-4" />
@@ -170,7 +170,7 @@ export const StoreView: React.FC = () => {
       ) : (
         <>
           {/* Filters Bar */}
-          <div className="bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 rounded-2xl p-4">
+          <div className="bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/35 rounded-2xl p-4">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
                 {categoryTabs.map(tab => (
@@ -183,8 +183,8 @@ export const StoreView: React.FC = () => {
                     }}
                     className={`px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
                       categoryFilter === tab.id
-                        ? 'bg-gradient-to-r from-[#6638B8] to-[#A875FF] text-white font-bold shadow-[0_0_12px_rgba(168,117,255,0.35)]'
-                        : 'bg-[#19122B] hover:bg-[#2F1B4E] text-[#BEB4D6] hover:text-[#F7F4FF] border border-[#6638B8]/30'
+                        ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white font-bold shadow-[0_0_12px_rgba(0,217,255,0.35)]'
+                        : 'bg-[#0A1930] hover:bg-[#152E52] text-[#94A8C7] hover:text-[#F2F7FF] border border-[#1677FF]/30'
                     }`}
                   >
                     {tab.label}
@@ -193,13 +193,13 @@ export const StoreView: React.FC = () => {
               </div>
 
               <div className="relative w-full md:w-64 shrink-0">
-                <Search className="w-4 h-4 text-[#BEB4D6] absolute left-3 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-[#94A8C7] absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="Search elixirs, buffs, boosts..."
-                  className="w-full bg-[#19122B] border border-[#6638B8]/40 rounded-xl pl-9 pr-3 py-2 text-xs text-[#F7F4FF] placeholder-[#BEB4D6]/55 focus:outline-none focus:border-[#FFD978]"
+                  className="w-full bg-[#0A1930] border border-[#1677FF]/40 rounded-xl pl-9 pr-3 py-2 text-xs text-[#F2F7FF] placeholder-[#94A8C7]/55 focus:outline-none focus:border-[#FFD978]"
                 />
               </div>
             </div>
@@ -218,11 +218,11 @@ export const StoreView: React.FC = () => {
           )}
 
           {filteredItems.length === 0 ? (
-            <div className="bg-[#24143D]/90 border border-[#6638B8]/35 rounded-2xl p-10 text-center space-y-2">
-              <p className="font-['Cinzel'] font-bold text-[#F7F4FF] text-base">
+            <div className="bg-[#102440]/90 border border-[#1677FF]/35 rounded-2xl p-10 text-center space-y-2">
+              <p className="font-['Cinzel'] font-bold text-[#F2F7FF] text-base">
                 No items match your current filter
               </p>
-              <p className="text-xs text-[#BEB4D6]">
+              <p className="text-xs text-[#94A8C7]">
                 Clear your search or switch category tabs to view more Aetherian wares.
               </p>
             </div>
@@ -238,12 +238,12 @@ export const StoreView: React.FC = () => {
                 return (
                   <div
                     key={item.id}
-                    className={`rounded-2xl bg-[#24143D]/90 backdrop-blur-md border-2 ${rStyle.border} ${rStyle.cardGlow} ${rStyle.ringClass} p-5 flex flex-col justify-between gap-4 transition-transform hover:-translate-y-0.5`}
+                    className={`rounded-2xl bg-[#102440]/90 backdrop-blur-md border-2 ${rStyle.border} ${rStyle.cardGlow} ${rStyle.ringClass} p-5 flex flex-col justify-between gap-4 transition-transform hover:-translate-y-0.5`}
                   >
                     <div className="space-y-3">
                       <div className="flex items-start gap-4">
                         <div
-                          className={`w-16 h-16 rounded-xl bg-[#19122B] border-2 ${rStyle.border} shrink-0 flex items-center justify-center text-[#FFD978]`}
+                          className={`w-16 h-16 rounded-xl bg-[#0A1930] border-2 ${rStyle.border} shrink-0 flex items-center justify-center text-[#FFD978]`}
                         >
                           <Sparkles className="w-7 h-7" />
                         </div>
@@ -256,7 +256,7 @@ export const StoreView: React.FC = () => {
                             <span
                               className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
                                 levelMet
-                                  ? 'bg-[#19122B] border-[#6638B8]/40 text-[#BEB4D6]'
+                                  ? 'bg-[#0A1930] border-[#1677FF]/40 text-[#94A8C7]'
                                   : 'bg-[#36111F]/70 border-[#F05B70]/50 text-rose-300'
                               }`}
                             >
@@ -264,7 +264,7 @@ export const StoreView: React.FC = () => {
                             </span>
                           </div>
 
-                          <h3 className="font-['Cinzel'] font-black text-base text-[#F7F4FF] leading-tight">
+                          <h3 className="font-['Cinzel'] font-black text-base text-[#F2F7FF] leading-tight">
                             {item.name}
                           </h3>
 
@@ -274,18 +274,18 @@ export const StoreView: React.FC = () => {
                         </div>
                       </div>
 
-                      <p className="text-xs text-[#BEB4D6] leading-relaxed">{item.description}</p>
+                      <p className="text-xs text-[#94A8C7] leading-relaxed">{item.description}</p>
 
-                      <div className="bg-[#19122B] border border-[#6638B8]/30 rounded-xl p-2.5 text-xs font-mono">
+                      <div className="bg-[#0A1930] border border-[#1677FF]/30 rounded-xl p-2.5 text-xs font-mono">
                         <span className="text-[#35D69A] font-bold flex items-center gap-1.5">
                           <Sparkles className="w-3.5 h-3.5" />+{Number(meta.uses || 2)} Battle Charges
                         </span>
                       </div>
                     </div>
 
-                    <div className="space-y-2.5 pt-2 border-t border-[#6638B8]/30">
+                    <div className="space-y-2.5 pt-2 border-t border-[#1677FF]/30">
                       <div className="flex items-center justify-between text-xs font-mono">
-                        <span className="text-[#BEB4D6]">Price:</span>
+                        <span className="text-[#94A8C7]">Price:</span>
                         <span
                           className={`font-bold flex items-center gap-1 tabular-nums ${
                             goldMet ? 'text-[#FFD978]' : 'text-[#F05B70]'
@@ -302,8 +302,8 @@ export const StoreView: React.FC = () => {
                         disabled={!canBuy}
                         className={`w-full py-2.5 rounded-xl font-['Cinzel'] font-black text-xs tracking-wider transition-all flex items-center justify-center gap-2 whitespace-nowrap ${
                           canBuy
-                            ? 'bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#100D1C] shadow-[0_0_16px_rgba(231,185,79,0.35)] hover:scale-[1.01] active:scale-95'
-                            : 'bg-[#19122B] text-[#BEB4D6]/50 border border-[#6638B8]/30 cursor-not-allowed'
+                            ? 'bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#061225] shadow-[0_0_16px_rgba(231,185,79,0.35)] hover:scale-[1.01] active:scale-95'
+                            : 'bg-[#0A1930] text-[#94A8C7]/50 border border-[#1677FF]/30 cursor-not-allowed'
                         }`}
                       >
                         {!levelMet ? (

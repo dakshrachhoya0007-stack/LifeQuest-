@@ -91,7 +91,7 @@ export const PLAYABLE_HEROES: PlayableHeroDefinition[] = [
       'Heavy-impact hand and leg strikes scale directly with bodyweight conditioning',
     ],
     accentHex: '#E7B94F',
-    secondaryHex: '#A875FF',
+    secondaryHex: '#00D9FF',
     introFlourishLabel: 'Iron-Knuckle Salute',
   },
   {
@@ -125,7 +125,7 @@ export const PLAYABLE_HEROES: PlayableHeroDefinition[] = [
       'Excels at high-cadence interval training, mobility, and daily streaks',
       'High critical kick precision against Void Sovereign phases',
     ],
-    accentHex: '#A875FF',
+    accentHex: '#00D9FF',
     secondaryHex: '#38D9F5',
     introFlourishLabel: 'Swift Stance Cross Flourish',
   },
@@ -161,7 +161,7 @@ export const PLAYABLE_HEROES: PlayableHeroDefinition[] = [
       'Amplified elemental hand-and-leg technique power',
     ],
     accentHex: '#38D9F5',
-    secondaryHex: '#6638B8',
+    secondaryHex: '#1677FF',
     introFlourishLabel: 'Astral Open-Palm Invocation',
   },
   {

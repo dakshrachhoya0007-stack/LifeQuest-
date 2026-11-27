@@ -58,11 +58,11 @@ export const FeatureBanner: React.FC<FeatureBannerProps> = ({
   return (
     <div
       {...rest}
-      className={`rounded-2xl bg-gradient-to-br from-[#24143D]/95 via-[#1B1230] to-[#130E22] p-5 sm:p-6 transition-all duration-300 ${className}`}
+      className={`rounded-2xl bg-gradient-to-br from-[#102440]/95 via-[#0A1930] to-[#061225] p-5 sm:p-6 transition-all duration-300 ${className}`}
       style={{
         border: `1px solid rgba(${theme.primaryRgb}, 0.38)`,
         backgroundImage: `radial-gradient(ellipse 75% 95% at 15% 0%, rgba(${theme.primaryRgb}, 0.16), transparent 62%), radial-gradient(ellipse 65% 85% at 92% 100%, rgba(${theme.secondaryRgb}, 0.11), transparent 60%)`,
-        boxShadow: `0 16px 38px -14px rgba(7, 4, 15, 0.86), 0 0 28px -18px rgba(${theme.primaryRgb}, 0.5)`,
+        boxShadow: `0 16px 38px -14px rgba(4, 12, 28, 0.86), 0 0 28px -18px rgba(${theme.primaryRgb}, 0.5)`,
       }}
     >
       {children}
@@ -86,12 +86,12 @@ export const FeatureSurfaceCard: React.FC<FeatureSurfaceCardProps> = ({
   const theme = useActiveFeatureTheme(themeId);
   return (
     <div
-      className={`rounded-2xl bg-gradient-to-br from-[#24143D]/88 to-[#161028]/95 backdrop-blur-md transition-all duration-300 ${className}`}
+      className={`rounded-2xl bg-gradient-to-br from-[#102440]/88 to-[#0A1930]/95 backdrop-blur-md transition-all duration-300 ${className}`}
       style={{
         border: `1px solid rgba(${theme.primaryRgb}, ${highlighted ? 0.58 : 0.24})`,
         boxShadow: highlighted
-          ? `0 16px 34px -12px rgba(7, 4, 15, 0.88), 0 0 26px -12px rgba(${theme.primaryRgb}, 0.45)`
-          : '0 12px 30px -12px rgba(7, 4, 15, 0.8)',
+          ? `0 16px 34px -12px rgba(4, 12, 28, 0.88), 0 0 26px -12px rgba(${theme.primaryRgb}, 0.45)`
+          : '0 12px 30px -12px rgba(4, 12, 28, 0.8)',
       }}
     >
       {children}
@@ -128,7 +128,7 @@ export function FeatureTabBar<T extends string>({
     <div
       role="tablist"
       aria-label={ariaLabel}
-      className={`flex flex-wrap sm:flex-nowrap items-center gap-1.5 p-1.5 rounded-xl bg-[#100D1C]/92 overflow-x-auto max-w-full ${className}`}
+      className={`flex flex-wrap sm:flex-nowrap items-center gap-1.5 p-1.5 rounded-xl bg-[#061225]/92 overflow-x-auto max-w-full ${className}`}
       style={{ border: `1px solid rgba(${theme.primaryRgb}, 0.28)` }}
     >
       {tabs.map(tab => {
@@ -151,7 +151,7 @@ export function FeatureTabBar<T extends string>({
                     boxShadow: `0 4px 18px rgba(${theme.primaryRgb}, 0.36)`,
                   }
                 : {
-                    color: '#BEB4D6',
+                    color: '#94A8C7',
                     border: '1px solid transparent',
                   }
             }
@@ -169,8 +169,8 @@ export function FeatureTabBar<T extends string>({
               <span
                 className="px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold tabular-nums"
                 style={{
-                  backgroundColor: isActive ? 'rgba(16, 13, 28, 0.24)' : theme.secondaryHex,
-                  color: isActive ? theme.contrastTextHex : '#100D1C',
+                  backgroundColor: isActive ? 'rgba(6, 18, 37, 0.24)' : theme.secondaryHex,
+                  color: isActive ? theme.contrastTextHex : '#061225',
                 }}
               >
                 {tab.badge}

@@ -43,21 +43,21 @@ export const TITLE_STYLE_META: Record<
   }
 > = {
   gold: {
-    badgeBg: 'bg-gradient-to-r from-[#24143D] via-[#3A2717] to-[#24143D]',
+    badgeBg: 'bg-gradient-to-r from-[#102440] via-[#3A2717] to-[#102440]',
     badgeBorder: 'border-[#E7B94F]/85',
     badgeText: 'text-[#FFD978]',
     glowShadow: 'shadow-[0_0_16px_rgba(231,185,79,0.3)]',
     accentHex: '#E7B94F',
   },
   celestial: {
-    badgeBg: 'bg-gradient-to-r from-[#172145] via-[#24143D] to-[#132B45]',
+    badgeBg: 'bg-gradient-to-r from-[#102440] via-[#102440] to-[#132B45]',
     badgeBorder: 'border-[#65A9FF]/80',
     badgeText: 'text-[#65A9FF]',
     glowShadow: 'shadow-[0_0_16px_rgba(101,169,255,0.28)]',
     accentHex: '#65A9FF',
   },
   crimson: {
-    badgeBg: 'bg-gradient-to-r from-[#361124] via-[#4D162E] to-[#24143D]',
+    badgeBg: 'bg-gradient-to-r from-[#361124] via-[#4D162E] to-[#102440]',
     badgeBorder: 'border-[#F05B70]/80',
     badgeText: 'text-[#F05B70]',
     glowShadow: 'shadow-[0_0_16px_rgba(240,91,112,0.3)]',
@@ -71,14 +71,14 @@ export const TITLE_STYLE_META: Record<
     accentHex: '#35D69A',
   },
   arcane: {
-    badgeBg: 'bg-gradient-to-r from-[#24143D] via-[#3B1E6E] to-[#24143D]',
-    badgeBorder: 'border-[#A875FF]/85',
-    badgeText: 'text-[#A875FF]',
-    glowShadow: 'shadow-[0_0_16px_rgba(168,117,255,0.34)]',
-    accentHex: '#A875FF',
+    badgeBg: 'bg-gradient-to-r from-[#102440] via-[#1677FF] to-[#102440]',
+    badgeBorder: 'border-[#00D9FF]/85',
+    badgeText: 'text-[#00D9FF]',
+    glowShadow: 'shadow-[0_0_16px_rgba(0,217,255,0.34)]',
+    accentHex: '#00D9FF',
   },
   prismatic: {
-    badgeBg: 'bg-gradient-to-r from-[#24143D] via-[#4D257D] to-[#263C5A]',
+    badgeBg: 'bg-gradient-to-r from-[#102440] via-[#1677FF] to-[#263C5A]',
     badgeBorder: 'border-[#FFD978]/85',
     badgeText: 'text-[#FFD978]',
     glowShadow: 'shadow-[0_0_20px_rgba(255,217,120,0.38)]',
@@ -95,9 +95,9 @@ export const RARITY_FRAME_META: Record<
   }
 > = {
   Epic: {
-    textClass: 'text-[#A875FF]',
-    borderClass: 'border-[#A875FF]/60',
-    cardGlow: 'shadow-[#6638B8]/40',
+    textClass: 'text-[#00D9FF]',
+    borderClass: 'border-[#00D9FF]/60',
+    cardGlow: 'shadow-[#1677FF]/40',
   },
   Legendary: {
     textClass: 'text-[#FFD978]',
@@ -121,8 +121,8 @@ export const RARITY_FRAME_META: Record<
   },
   Eternal: {
     textClass: 'text-[#FFD978]',
-    borderClass: 'border-[#A875FF]/65',
-    cardGlow: 'shadow-[#A875FF]/40',
+    borderClass: 'border-[#00D9FF]/65',
+    cardGlow: 'shadow-[#00D9FF]/40',
   },
 };
 

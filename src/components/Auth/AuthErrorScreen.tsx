@@ -31,10 +31,10 @@ export const AuthErrorScreen: React.FC<AuthErrorScreenProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#100D1C] text-[#FFFFFF] flex items-center justify-center p-4 sm:p-6">
-      <div className="w-full max-w-md bg-[#24143D]/90 backdrop-blur-xl border border-[#F05B70]/45 rounded-2xl p-6 sm:p-8 shadow-[0_24px_60px_rgba(10,6,20,0.85)]">
+    <div className="min-h-screen bg-[#061225] text-[#FFFFFF] flex items-center justify-center p-4 sm:p-6">
+      <div className="w-full max-w-md bg-[#102440]/90 backdrop-blur-xl border border-[#F05B70]/45 rounded-2xl p-6 sm:p-8 shadow-[0_24px_60px_rgba(4,12,28,0.85)]">
         <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#19122B] border border-[#6638B8]/45 text-[#FFD978] text-[10px] font-bold uppercase tracking-widest mb-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0A1930] border border-[#1677FF]/45 text-[#FFD978] text-[10px] font-bold uppercase tracking-widest mb-3">
             <Shield className="w-3 h-3" />
             <span>LIFEQUEST · World of Aetheria</span>
           </div>
@@ -44,7 +44,7 @@ export const AuthErrorScreen: React.FC<AuthErrorScreenProps> = ({
           <h1 className="text-xl font-black font-['Cinzel'] text-[#FFFFFF] tracking-wide">
             AUTHENTICATION INTERRUPTED
           </h1>
-          <p className="text-xs text-[#BEB4D6] mt-1">
+          <p className="text-xs text-[#94A8C7] mt-1">
             We could not finalize your sign-in session.
           </p>
         </div>
@@ -53,9 +53,9 @@ export const AuthErrorScreen: React.FC<AuthErrorScreenProps> = ({
           {retryError || message}
         </div>
 
-        <div className="p-3.5 mb-6 rounded-xl bg-[#19122B] border border-[#6638B8]/30 text-[11px] text-[#BEB4D6] space-y-1.5">
+        <div className="p-3.5 mb-6 rounded-xl bg-[#0A1930] border border-[#1677FF]/30 text-[11px] text-[#94A8C7] space-y-1.5">
           <div className="font-semibold text-[#FFD978]">What you can do:</div>
-          <ul className="list-disc pl-4 space-y-1 text-[#BEB4D6]">
+          <ul className="list-disc pl-4 space-y-1 text-[#94A8C7]">
             <li>Try signing in with Google again if consent was cancelled or timed out.</li>
             <li>Ensure cookies and storage are enabled in this browser tab.</li>
             <li>Sign in with your realm email and password instead.</li>
@@ -83,7 +83,7 @@ export const AuthErrorScreen: React.FC<AuthErrorScreenProps> = ({
             type="button"
             onClick={onBackToLogin}
             disabled={isRetrying}
-            className="w-full py-2.5 px-4 rounded-xl bg-[#19122B] hover:bg-[#6638B8]/25 border border-[#6638B8]/45 hover:border-[#FFD978]/70 text-white font-semibold text-xs flex items-center justify-center gap-2 transition-all"
+            className="w-full py-2.5 px-4 rounded-xl bg-[#0A1930] hover:bg-[#1677FF]/25 border border-[#1677FF]/45 hover:border-[#FFD978]/70 text-white font-semibold text-xs flex items-center justify-center gap-2 transition-all"
           >
             <ArrowLeft className="w-3.5 h-3.5 text-[#FFD978]" />
             <span>Back to Sign In</span>

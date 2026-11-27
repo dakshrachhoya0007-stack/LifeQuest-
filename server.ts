@@ -28,6 +28,7 @@ import { createTrophyShowcaseService } from './server/trophyShowcaseService.ts';
 import { createTerritoryWarsService } from './server/territoryWarsService.ts';
 import { createAaaEconomyCardsService } from './server/aaaEconomyCardsService.ts';
 import { createSocialEngagementService } from './server/socialEngagementService.ts';
+import { createQuestsClaimService } from './server/questsClaimService.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -710,115 +711,229 @@ async function startServer() {
         Math.max(10, Math.round(Number(checkIn.availableMinutes || 45)))
       );
 
-      const ai = getGeminiClient();
+      const buildAdaptiveFallbackDailyQuests = () => {
+        const tierLabel =
+          adaptiveTier === 'gentle_comeback'
+            ? 'gentle comeback'
+            : adaptiveTier === 'supportive'
+            ? 'supportive momentum'
+            : adaptiveTier === 'escalating'
+            ? 'escalating vanguard'
+            : 'balanced discipline';
+        const workoutMinutes =
+          adaptiveTier === 'gentle_comeback'
+            ? Math.min(15, availableMinutes)
+            : adaptiveTier === 'supportive'
+            ? Math.min(20, availableMinutes)
+            : adaptiveTier === 'escalating'
+            ? Math.min(45, availableMinutes)
+            : Math.min(30, availableMinutes);
+        const habitTarget = adaptiveTier === 'escalating' ? 2 : 1;
+        const heroName = String(player.username || 'Champion');
 
-      const systemInstruction = [
-        'You are the Aetheria Quest Architect, an intelligent, empathetic RPG Mentor generating personalized daily real-life quests for LIFEQUEST.',
-        'REQUIREMENTS:',
-        '1. Generate EXACTLY 5 daily quests covering ALL 5 distinct categories once each: physical, intellectual, discipline, personal_growth, social.',
-        '2. Difficulty balance across the 5 quests:',
-        '   - 1 easy quest (difficulty="easy", isSpecialChallenge=false)',
-        '   - 2 medium quests (difficulty="medium", isSpecialChallenge=false)',
-        '   - 1 challenging quest (difficulty="challenging", isSpecialChallenge=false)',
-        '   - 1 Special Daily Challenge (difficulty="special", isSpecialChallenge=true)',
-        '3. ADAPTIVE DIFFICULTY:',
-        `   Current computed adaptive tier: "${adaptiveTier}".`,
-        '   - If gentle_comeback: lower friction, short achievable wins (5-15 min), encouraging comeback tone.',
-        '   - If supportive: realistic medium steps tied directly to habits/incomplete tasks.',
-        '   - If balanced: brisk rewarding routine fitting the player availableMinutes.',
-        '   - If escalating: stretch goals with memorable RPG flair, never unsafe or overwhelming.',
-        '4. NEVER repeat any quest title from recentQuestTitles.',
-        '5. Map evidenceType strictly based on how progress can be verified honestly:',
-        '   - Physical workout duration: "workout_minutes" (unitLabel="min", maxProgress 10..60) or "workout_sessions" (unitLabel="session", maxProgress=1..2) or "vision_reps" (unitLabel="reps", maxProgress 15..60)',
-        '   - Discipline / habits / hydration / meals: "habit_completions" (unitLabel="habit", maxProgress=1..3), "meal_logs" (unitLabel="meal", maxProgress=1..3), or "water_glasses" (unitLabel="glasses", maxProgress=4..8)',
-        '   - Intellectual / study / reading: "study_or_skill_reflection" (unitLabel="session", maxProgress=1)',
-        '   - Personal Growth / confidence / planning: "personal_reflection" (unitLabel="milestone", maxProgress=1)',
-        '   - Social / real-world connection or fellowship: "friend_interaction" (unitLabel="connection", maxProgress=1) or "personal_reflection" (unitLabel="outreach", maxProgress=1)',
-        '6. Tailor each personalizationReason specifically to the player habits, goals, incomplete tasks, energyLevel, and availableMinutes.',
-      ].join('\n');
+        return {
+          mentorGreeting: `${heroName}, your ${tierLabel} slate is forged for today (${availableMinutes}m available, ${energyLevel} energy).`,
+          quests: [
+            {
+              title: 'Morning Kinetic Calibration',
+              description: `Complete ${workoutMinutes} minutes of purposeful bodyweight movement, brisk walking, or mobility conditioning.`,
+              category: 'physical',
+              difficulty: 'medium',
+              objectiveLabel: 'Log physical training minutes',
+              evidenceType: 'workout_minutes',
+              maxProgress: workoutMinutes,
+              unitLabel: 'min',
+              estimatedMinutes: workoutMinutes,
+              playerXpReward: 50,
+              goldReward: 35,
+              isSpecialChallenge: false,
+              personalizationReason: `Scaled to your ${availableMinutes}m schedule and ${energyLevel} energy tier.`,
+            },
+            {
+              title: 'Focused Craft & Mind Study',
+              description: 'Dedicate one uninterrupted block to reading, skill practice, or structured notes and record your key takeaway.',
+              category: 'intellectual',
+              difficulty: 'medium',
+              objectiveLabel: 'Submit 1 study reflection',
+              evidenceType: 'study_or_skill_reflection',
+              maxProgress: 1,
+              unitLabel: 'session',
+              estimatedMinutes: 20,
+              playerXpReward: 55,
+              goldReward: 38,
+              isSpecialChallenge: false,
+              personalizationReason: 'Builds tactical clarity and feeds your Skill Tree Intelligence path.',
+            },
+            {
+              title: 'Daily Oath Consistency Check',
+              description: `Complete ${habitTarget} core daily habit${habitTarget > 1 ? 's' : ''} on your Command Center to reinforce momentum.`,
+              category: 'discipline',
+              difficulty: 'easy',
+              objectiveLabel: 'Complete daily habits',
+              evidenceType: 'habit_completions',
+              maxProgress: habitTarget,
+              unitLabel: 'habit',
+              estimatedMinutes: 10,
+              playerXpReward: 40,
+              goldReward: 28,
+              isSpecialChallenge: false,
+              personalizationReason: 'Anchors your daily streak and Discipline attribute without friction.',
+            },
+            {
+              title: 'Sovereign Clarity Reflection',
+              description: 'Pause for intentional planning or mindset reflection and note one real-world bottleneck you cleared today.',
+              category: 'personal_growth',
+              difficulty: 'challenging',
+              objectiveLabel: 'Record personal growth reflection',
+              evidenceType: 'personal_reflection',
+              maxProgress: 1,
+              unitLabel: 'milestone',
+              estimatedMinutes: 15,
+              playerXpReward: 65,
+              goldReward: 45,
+              isSpecialChallenge: false,
+              personalizationReason: 'Converts daily awareness into lasting personal growth milestones.',
+            },
+            {
+              title: 'Fellowship Vanguard Outreach',
+              description: 'Encourage an ally in Tavern Chat or connect with a training partner in real life and log your outreach.',
+              category: 'social',
+              difficulty: 'special',
+              objectiveLabel: 'Log real-world or fellowship outreach',
+              evidenceType: 'friend_interaction',
+              maxProgress: 1,
+              unitLabel: 'connection',
+              estimatedMinutes: 10,
+              playerXpReward: 85,
+              goldReward: 60,
+              isSpecialChallenge: true,
+              personalizationReason: 'Special Daily Challenge honoring Aetheria solidarity and accountability.',
+            },
+          ],
+        };
+      };
 
-      const userPrompt = JSON.stringify({
-        periodKey,
-        adaptiveTier,
-        checkIn: {
-          availableMinutes,
-          energyLevel,
-          focusNote: String(checkIn.focusNote || '').slice(0, 200),
-        },
-        playerContext: {
-          username: String(player.username || 'Champion'),
-          characterClass: String(player.characterClass || 'Warrior'),
-          level,
-          currentStreak: streak,
-          personalGoals: Array.isArray(player.personalGoals) ? player.personalGoals : [],
-          preferredActivities: Array.isArray(player.preferredActivities) ? player.preferredActivities : [],
-          habits: Array.isArray(player.habits) ? player.habits.slice(0, 12) : [],
-          incompleteClassicQuests: Array.isArray(player.incompleteClassicQuests) ? player.incompleteClassicQuests : [],
-          recentAchievements: Array.isArray(player.recentAchievements) ? player.recentAchievements : [],
-          yesterdaySummary: player.yesterdaySummary || {},
-          struggleCategories: Array.isArray(player.struggleCategories) ? player.struggleCategories : [],
-          preferredCategories: Array.isArray(player.preferredCategories) ? player.preferredCategories : [],
-        },
-        recentQuestTitles: recentTitles,
-      });
+      let parsed: any = null;
+      try {
+        const ai = getGeminiClient();
 
-      const response = await ai.models.generateContent({
-        model: GEMINI_MODEL,
-        contents: { parts: [{ text: userPrompt }] },
-        config: {
-          systemInstruction,
-          responseMimeType: 'application/json',
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              mentorGreeting: { type: Type.STRING },
-              quests: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    title: { type: Type.STRING },
-                    description: { type: Type.STRING },
-                    category: { type: Type.STRING },
-                    difficulty: { type: Type.STRING },
-                    objectiveLabel: { type: Type.STRING },
-                    evidenceType: { type: Type.STRING },
-                    maxProgress: { type: Type.INTEGER },
-                    unitLabel: { type: Type.STRING },
-                    estimatedMinutes: { type: Type.INTEGER },
-                    playerXpReward: { type: Type.INTEGER },
-                    goldReward: { type: Type.INTEGER },
-                    isSpecialChallenge: { type: Type.BOOLEAN },
-                    personalizationReason: { type: Type.STRING },
+        const systemInstruction = [
+          'You are the Aetheria Quest Architect, an intelligent, empathetic RPG Mentor generating personalized daily real-life quests for LIFEQUEST.',
+          'REQUIREMENTS:',
+          '1. Generate EXACTLY 5 daily quests covering ALL 5 distinct categories once each: physical, intellectual, discipline, personal_growth, social.',
+          '2. Difficulty balance across the 5 quests:',
+          '   - 1 easy quest (difficulty="easy", isSpecialChallenge=false)',
+          '   - 2 medium quests (difficulty="medium", isSpecialChallenge=false)',
+          '   - 1 challenging quest (difficulty="challenging", isSpecialChallenge=false)',
+          '   - 1 Special Daily Challenge (difficulty="special", isSpecialChallenge=true)',
+          '3. ADAPTIVE DIFFICULTY:',
+          `   Current computed adaptive tier: "${adaptiveTier}".`,
+          '   - If gentle_comeback: lower friction, short achievable wins (5-15 min), encouraging comeback tone.',
+          '   - If supportive: realistic medium steps tied directly to habits/incomplete tasks.',
+          '   - If balanced: brisk rewarding routine fitting the player availableMinutes.',
+          '   - If escalating: stretch goals with memorable RPG flair, never unsafe or overwhelming.',
+          '4. NEVER repeat any quest title from recentQuestTitles.',
+          '5. Map evidenceType strictly based on how progress can be verified honestly:',
+          '   - Physical workout duration: "workout_minutes" (unitLabel="min", maxProgress 10..60) or "workout_sessions" (unitLabel="session", maxProgress=1..2) or "vision_reps" (unitLabel="reps", maxProgress 15..60)',
+          '   - Discipline / habits / hydration / meals: "habit_completions" (unitLabel="habit", maxProgress=1..3), "meal_logs" (unitLabel="meal", maxProgress=1..3), or "water_glasses" (unitLabel="glasses", maxProgress=4..8)',
+          '   - Intellectual / study / reading: "study_or_skill_reflection" (unitLabel="session", maxProgress=1)',
+          '   - Personal Growth / confidence / planning: "personal_reflection" (unitLabel="milestone", maxProgress=1)',
+          '   - Social / real-world connection or fellowship: "friend_interaction" (unitLabel="connection", maxProgress=1) or "personal_reflection" (unitLabel="outreach", maxProgress=1)',
+          '6. Tailor each personalizationReason specifically to the player habits, goals, incomplete tasks, energyLevel, and availableMinutes.',
+        ].join('\n');
+
+        const userPrompt = JSON.stringify({
+          periodKey,
+          adaptiveTier,
+          checkIn: {
+            availableMinutes,
+            energyLevel,
+            focusNote: String(checkIn.focusNote || '').slice(0, 200),
+          },
+          playerContext: {
+            username: String(player.username || 'Champion'),
+            characterClass: String(player.characterClass || 'Warrior'),
+            level,
+            currentStreak: streak,
+            personalGoals: Array.isArray(player.personalGoals) ? player.personalGoals : [],
+            preferredActivities: Array.isArray(player.preferredActivities) ? player.preferredActivities : [],
+            habits: Array.isArray(player.habits) ? player.habits.slice(0, 12) : [],
+            incompleteClassicQuests: Array.isArray(player.incompleteClassicQuests) ? player.incompleteClassicQuests : [],
+            recentAchievements: Array.isArray(player.recentAchievements) ? player.recentAchievements : [],
+            yesterdaySummary: player.yesterdaySummary || {},
+            struggleCategories: Array.isArray(player.struggleCategories) ? player.struggleCategories : [],
+            preferredCategories: Array.isArray(player.preferredCategories) ? player.preferredCategories : [],
+          },
+          recentQuestTitles: recentTitles,
+        });
+
+        const response = await Promise.race([
+          ai.models.generateContent({
+            model: GEMINI_MODEL,
+            contents: { parts: [{ text: userPrompt }] },
+            config: {
+              systemInstruction,
+              responseMimeType: 'application/json',
+              responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                  mentorGreeting: { type: Type.STRING },
+                  quests: {
+                    type: Type.ARRAY,
+                    items: {
+                      type: Type.OBJECT,
+                      properties: {
+                        title: { type: Type.STRING },
+                        description: { type: Type.STRING },
+                        category: { type: Type.STRING },
+                        difficulty: { type: Type.STRING },
+                        objectiveLabel: { type: Type.STRING },
+                        evidenceType: { type: Type.STRING },
+                        maxProgress: { type: Type.INTEGER },
+                        unitLabel: { type: Type.STRING },
+                        estimatedMinutes: { type: Type.INTEGER },
+                        playerXpReward: { type: Type.INTEGER },
+                        goldReward: { type: Type.INTEGER },
+                        isSpecialChallenge: { type: Type.BOOLEAN },
+                        personalizationReason: { type: Type.STRING },
+                      },
+                      required: [
+                        'title',
+                        'description',
+                        'category',
+                        'difficulty',
+                        'objectiveLabel',
+                        'evidenceType',
+                        'maxProgress',
+                        'unitLabel',
+                        'estimatedMinutes',
+                        'playerXpReward',
+                        'goldReward',
+                        'isSpecialChallenge',
+                        'personalizationReason',
+                      ],
+                    },
                   },
-                  required: [
-                    'title',
-                    'description',
-                    'category',
-                    'difficulty',
-                    'objectiveLabel',
-                    'evidenceType',
-                    'maxProgress',
-                    'unitLabel',
-                    'estimatedMinutes',
-                    'playerXpReward',
-                    'goldReward',
-                    'isSpecialChallenge',
-                    'personalizationReason',
-                  ],
                 },
+                required: ['mentorGreeting', 'quests'],
               },
             },
-            required: ['mentorGreeting', 'quests'],
-          },
-        },
-      });
+          }),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error('Gemini daily quest generation timed out after 8s')), 8000)
+          ),
+        ]);
 
-      const parsed = parseGeminiJson<any>(response.text);
-      const rawQuests = Array.isArray(parsed.quests) ? parsed.quests : [];
+        parsed = parseGeminiJson<any>(response.text);
+      } catch (aiErr: any) {
+        console.warn('[DailyQuests] Gemini unavailable, using adaptive deterministic slate:', aiErr?.message || aiErr);
+        parsed = buildAdaptiveFallbackDailyQuests();
+      }
+
+      let rawQuests = Array.isArray(parsed?.quests) ? parsed.quests : [];
       if (rawQuests.length === 0) {
-        res.status(502).json({ error: 'Quest generation returned an empty slate. Please retry.' });
-        return;
+        parsed = buildAdaptiveFallbackDailyQuests();
+        rawQuests = parsed.quests;
       }
 
       const requiredCategories = ['physical', 'intellectual', 'discipline', 'personal_growth', 'social'];
@@ -1352,8 +1467,10 @@ async function startServer() {
 
       return {
         status: 200,
+        achievementDef,
         payload: {
           success: true,
+          isFallbackLedger: true,
           ownership: claimRecord,
           rewards: {
             rewardPlayerXp: 0, // Zero XP leaderboard inflation
@@ -1364,6 +1481,17 @@ async function startServer() {
         },
       };
     });
+
+    if (result.status === 200 && result.achievementDef && aaaEconomyCardsService) {
+      const creditRes = await aaaEconomyCardsService.creditGold(
+        ownerId,
+        result.achievementDef.rewardGold,
+        `Hall of Legends: ${result.achievementDef.name}`,
+        `legend:${result.achievementDef.id}:${ownerId}`
+      );
+      (result.payload as any).wallet =
+        creditRes || aaaEconomyCardsService.getWalletSummarySync(ownerId);
+    }
 
     res.status(result.status).json(result.payload);
   });
@@ -1522,6 +1650,12 @@ async function startServer() {
     onGrantCard: (userId, cardId, sourceRef) =>
       aaaEconomyCardsService.grantCollectibleCard(userId, cardId, sourceRef),
     onGrantTitle: params => identityService.grantDirectTitle(params),
+    onGetWallet: userId => aaaEconomyCardsService.getWalletSummarySync(userId),
+  });
+  const questsClaimService = createQuestsClaimService(__dirname, {
+    creditGold: (userId, amount, source, key) =>
+      aaaEconomyCardsService.creditGold(userId, amount, source, key),
+    getWallet: userId => aaaEconomyCardsService.getWalletSummarySync(userId),
   });
   const leaderboardService = createLeaderboardService(__dirname);
 
@@ -1740,6 +1874,7 @@ async function startServer() {
   territoryWarsService.registerRoutes(app);
   aaaEconomyCardsService.registerRoutes(app);
   socialEngagementService.registerRoutes(app);
+  questsClaimService.registerRoutes(app);
 
   registerEcosystemDispatcherRoutes(app, {
     weeklyBoss: weeklyBossService,

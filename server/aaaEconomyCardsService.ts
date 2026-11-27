@@ -27,6 +27,7 @@ interface StoredWalletRecord {
   goldBalance: number;
   cosmeticFragments: number;
   initializedFromClient: boolean;
+  lastSyncedProfileGold?: number;
   recentTransactions: PlayerWalletState['recentTransactions'];
   idempotencyKeys: Record<string, boolean>;
 }
@@ -387,7 +388,7 @@ export function createAaaEconomyCardsService(
 
     const identityLedger = safeReadJson(path.join(rootDir, '.lifequest_identity_ledger.json'));
     const cosmeticsLedger = safeReadJson(path.join(rootDir, '.lifequest_cosmetics.json'));
-    const legendsLedger = safeReadJson(path.join(rootDir, '.lifequest_global_legends.json'));
+    const legendsLedger = safeReadJson(path.join(rootDir, '.lifequest_legends_ledger.json'));
     const seasonsLedger = safeReadJson(path.join(rootDir, '.lifequest_seasons.json'));
 
     const unlockedTitleSet = new Set<string>(
@@ -668,12 +669,16 @@ export function createAaaEconomyCardsService(
         return;
       }
 
-      const requestedBaseline = Math.max(0, Math.min(2000, Math.round(Number(body.gold || 0))));
+      const fromSupabaseProfile = body.fromSupabaseProfile === true;
+      const requestedBaseline = Math.max(0, Math.min(1000000, Math.round(Number(body.gold || 0))));
       const wallet = await withLock(() => {
         const ledger = readLedger();
         const w = ensureWallet(ledger, auth.userId!);
         if (!w.initializedFromClient) {
           w.initializedFromClient = true;
+          if (fromSupabaseProfile) {
+            w.lastSyncedProfileGold = requestedBaseline;
+          }
           if (requestedBaseline > w.goldBalance) {
             const delta = requestedBaseline - w.goldBalance;
             recordWalletDelta(
@@ -684,6 +689,24 @@ export function createAaaEconomyCardsService(
               `init_sync:${auth.userId}`
             );
           }
+          writeLedger(ledger);
+        } else if (
+          fromSupabaseProfile &&
+          typeof w.lastSyncedProfileGold === 'number' &&
+          requestedBaseline > w.lastSyncedProfileGold
+        ) {
+          const delta = requestedBaseline - w.lastSyncedProfileGold;
+          w.lastSyncedProfileGold = requestedBaseline;
+          recordWalletDelta(
+            w,
+            'gold',
+            delta,
+            'Profile Treasury Sync',
+            `prof_sync:${auth.userId}:${requestedBaseline}`
+          );
+          writeLedger(ledger);
+        } else if (fromSupabaseProfile && typeof w.lastSyncedProfileGold !== 'number') {
+          w.lastSyncedProfileGold = requestedBaseline;
           writeLedger(ledger);
         }
         return toWalletResponse(auth.userId!, w);
@@ -1183,6 +1206,12 @@ export function createAaaEconomyCardsService(
     });
   };
 
+  const getWalletSummarySync = (userId: string): PlayerWalletState => {
+    const ledger = readLedger();
+    const w = ensureWallet(ledger, userId);
+    return toWalletResponse(userId, w);
+  };
+
   return {
     registerRoutes,
     creditGold,
@@ -1192,5 +1221,6 @@ export function createAaaEconomyCardsService(
     getUniqueCardCountSync,
     getMarketplaceUnlockCountSync,
     getCollectionPercentSync,
+    getWalletSummarySync,
   };
 }

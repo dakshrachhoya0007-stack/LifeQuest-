@@ -6,6 +6,7 @@ import type {
   NotificationCategory,
   PlayerIdentityState,
   PlayerSeasonStateResponse,
+  PlayerWalletState,
   ServerNotificationPreferences,
 } from '../types/game';
 
@@ -398,6 +399,7 @@ export const claimSeasonMilestoneServer = async (
 ): Promise<{
   ok: boolean;
   rewardLabel?: string;
+  wallet?: PlayerWalletState;
   data?: PlayerSeasonStateResponse;
   error?: string;
 }> => {
@@ -415,6 +417,7 @@ export const claimSeasonMilestoneServer = async (
     return {
       ok: true,
       rewardLabel: parsed.data.rewardLabel,
+      wallet: parsed.data.wallet,
       data: parsed.data as PlayerSeasonStateResponse,
     };
   } catch (err: any) {

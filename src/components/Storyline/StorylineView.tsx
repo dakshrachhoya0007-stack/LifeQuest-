@@ -78,19 +78,19 @@ export const StorylineView: React.FC = () => {
   return (
     <div className="space-y-8 animate-in fade-in pb-12">
       {/* 1. Opening Lore Monologue Banner */}
-      <div className="rounded-2xl bg-gradient-to-br from-[#19122B] via-[#24143D] to-[#19122B] border border-[#6638B8]/40 p-6 sm:p-8 shadow-[0_12px_32px_rgba(10,6,20,0.6)] space-y-5">
+      <div className="rounded-2xl bg-gradient-to-br from-[#0A1930] via-[#102440] to-[#0A1930] border border-[#1677FF]/40 p-6 sm:p-8 shadow-[0_12px_32px_rgba(4,12,28,0.6)] space-y-5">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <span className="font-['Cinzel'] font-bold text-[11px] uppercase tracking-widest text-[#E7B94F] block mb-1">
               Main Story Campaign · The Fallen Knight: Rise of Aetheria
             </span>
-            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F7F4FF]">
+            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2F7FF]">
               THE GREAT FALL &amp; THE CHRONICLES OF AETHERIA
             </h1>
           </div>
 
           {heroLocked ? (
-            <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#100D1C] border border-[#FFD978]/45 text-xs font-bold font-['Cinzel'] text-[#FFD978] shrink-0">
+            <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#061225] border border-[#FFD978]/45 text-xs font-bold font-['Cinzel'] text-[#FFD978] shrink-0">
               <Lock className="w-3.5 h-3.5" />
               Hero Oath: {heroDef.name}
             </span>
@@ -98,7 +98,7 @@ export const StorylineView: React.FC = () => {
             <button
               type="button"
               onClick={() => setShowHeroSelectModal(true)}
-              className="px-4 py-2 rounded-xl bg-[#100D1C] hover:bg-[#2F1B4E] border border-[#6638B8]/45 hover:border-[#FFD978]/60 text-xs font-bold font-['Cinzel'] text-[#FFD978] shrink-0 transition-all"
+              className="px-4 py-2 rounded-xl bg-[#061225] hover:bg-[#152E52] border border-[#1677FF]/45 hover:border-[#FFD978]/60 text-xs font-bold font-['Cinzel'] text-[#FFD978] shrink-0 transition-all"
             >
               Hero Path: {heroDef.name}
             </button>
@@ -106,17 +106,17 @@ export const StorylineView: React.FC = () => {
         </div>
 
         {/* Canonical Great Fall Opening Quote */}
-        <blockquote className="p-4 sm:p-5 rounded-xl bg-[#100D1C] border border-[#6638B8]/30 text-xs sm:text-sm text-[#BEB4D6] leading-relaxed whitespace-pre-line font-serif italic">
+        <blockquote className="p-4 sm:p-5 rounded-xl bg-[#061225] border border-[#1677FF]/30 text-xs sm:text-sm text-[#94A8C7] leading-relaxed whitespace-pre-line font-serif italic">
           {FALLEN_KNIGHT_OPENING_MONOLOGUE}
         </blockquote>
 
         {/* Selected Hero's Personal Origin Thread */}
-        <div className="p-4 rounded-xl bg-[#19122B] border border-[#6638B8]/35 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="p-4 rounded-xl bg-[#0A1930] border border-[#1677FF]/35 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="space-y-1">
             <span className="text-[10px] uppercase tracking-widest text-[#E7B94F] font-bold block">
               Your Hero Origin · {heroDef.name} ({heroDef.title})
             </span>
-            <p className="text-xs text-[#BEB4D6] leading-relaxed">
+            <p className="text-xs text-[#94A8C7] leading-relaxed">
               {heroDef.greatFallOrigin}
             </p>
           </div>
@@ -141,18 +141,18 @@ export const StorylineView: React.FC = () => {
       {!reclaimHonorQuest.claimed && (
         <section
           aria-label="Reclaim Your Honor Introductory Quest"
-          className="rounded-2xl bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/40 p-5 sm:p-6 shadow-[0_12px_32px_rgba(10,6,20,0.6)] space-y-4"
+          className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/40 p-5 sm:p-6 shadow-[0_12px_32px_rgba(4,12,28,0.6)] space-y-4"
         >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#6638B8]/25 pb-3.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1677FF]/25 pb-3.5">
             <div>
               <span className="text-[10px] font-['Cinzel'] font-bold uppercase tracking-widest text-[#E7B94F] block">
                 Starter Story Trial · Awakening Chapter
               </span>
-              <h2 className="font-['Cinzel'] font-black text-lg text-[#F7F4FF] flex items-center gap-2 mt-0.5">
+              <h2 className="font-['Cinzel'] font-black text-lg text-[#F2F7FF] flex items-center gap-2 mt-0.5">
                 <Shield className="w-4 h-4 text-[#FFD978]" />
                 RECLAIM YOUR HONOR
               </h2>
-              <p className="text-xs text-[#BEB4D6] mt-0.5">
+              <p className="text-xs text-[#94A8C7] mt-0.5">
                 Complete each genuine realm action below to awaken your citadel oath and unlock your starter reward.
               </p>
             </div>
@@ -166,7 +166,7 @@ export const StorylineView: React.FC = () => {
                   type="button"
                   disabled={claimingHonor}
                   onClick={handleClaimHonor}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#100D1C] font-['Cinzel'] font-black text-xs tracking-wider shadow-[0_0_16px_rgba(231,185,79,0.35)] transition-all"
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#061225] font-['Cinzel'] font-black text-xs tracking-wider shadow-[0_0_16px_rgba(231,185,79,0.35)] transition-all"
                 >
                   {claimingHonor ? 'CLAIMING...' : 'CLAIM STARTER REWARD'}
                 </button>
@@ -184,20 +184,20 @@ export const StorylineView: React.FC = () => {
                   onClick={() => setActiveTab(obj.targetTab)}
                   className={`p-3 rounded-xl border text-left transition-all flex items-start gap-2.5 ${
                     done
-                      ? 'bg-[#19122B] border-[#35D69A]/50 text-[#F7F4FF]'
-                      : 'bg-[#19122B] border-[#6638B8]/30 hover:border-[#FFD978]/55 text-[#F7F4FF]'
+                      ? 'bg-[#0A1930] border-[#35D69A]/50 text-[#F2F7FF]'
+                      : 'bg-[#0A1930] border-[#1677FF]/30 hover:border-[#FFD978]/55 text-[#F2F7FF]'
                   }`}
                 >
                   {done ? (
                     <CheckCircle2 className="w-4 h-4 text-[#35D69A] shrink-0 mt-0.5" />
                   ) : (
-                    <Circle className="w-4 h-4 text-[#A875FF]/80 shrink-0 mt-0.5" />
+                    <Circle className="w-4 h-4 text-[#00D9FF]/80 shrink-0 mt-0.5" />
                   )}
                   <div className="min-w-0">
-                    <span className={`text-xs font-bold block ${done ? 'line-through text-[#BEB4D6]' : 'text-[#F7F4FF]'}`}>
+                    <span className={`text-xs font-bold block ${done ? 'line-through text-[#94A8C7]' : 'text-[#F2F7FF]'}`}>
                       {obj.label}
                     </span>
-                    <span className="text-[10px] text-[#BEB4D6] block mt-0.5 leading-snug">
+                    <span className="text-[10px] text-[#94A8C7] block mt-0.5 leading-snug">
                       {obj.hint}
                     </span>
                   </div>
@@ -205,11 +205,11 @@ export const StorylineView: React.FC = () => {
               );
             })}
 
-            <div className="p-3 rounded-xl bg-[#19122B] border border-[#6638B8]/35 flex flex-col justify-between">
+            <div className="p-3 rounded-xl bg-[#0A1930] border border-[#1677FF]/35 flex flex-col justify-between">
               <span className="text-[10px] uppercase tracking-wider text-[#E7B94F] font-bold flex items-center gap-1">
                 <Award className="w-3 h-3" /> Completion Reward
               </span>
-              <div className="text-xs font-mono text-[#F7F4FF] mt-1 space-y-0.5 tabular-nums">
+              <div className="text-xs font-mono text-[#F2F7FF] mt-1 space-y-0.5 tabular-nums">
                 <div>+120 Player XP · +100 Gold</div>
                 <div className="text-[#FFD978]">+2 DIS · +1 RES</div>
               </div>
@@ -221,7 +221,7 @@ export const StorylineView: React.FC = () => {
       {/* 2. Five Story Chapters */}
       <section data-tutorial-id="story-campaign" className="space-y-4">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="font-['Cinzel'] font-black text-lg sm:text-xl text-[#F7F4FF] flex items-center gap-2">
+          <h2 className="font-['Cinzel'] font-black text-lg sm:text-xl text-[#F2F7FF] flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-[#FFD978]" />
             CAMPAIGN CHAPTERS (RISE OF AETHERIA)
           </h2>
@@ -243,10 +243,10 @@ export const StorylineView: React.FC = () => {
                 key={ch.id}
                 className={`rounded-2xl border p-5 sm:p-6 transition-all ${
                   isClaimed
-                    ? 'bg-[#24143D]/95 border-[#35D69A]/45 shadow-[0_12px_32px_rgba(10,6,20,0.5)]'
+                    ? 'bg-[#102440]/95 border-[#35D69A]/45 shadow-[0_12px_32px_rgba(4,12,28,0.5)]'
                     : isUnlocked
-                    ? 'bg-[#24143D]/90 backdrop-blur-md border-[#6638B8]/40 shadow-[0_12px_32px_rgba(10,6,20,0.6)]'
-                    : 'bg-[#19122B]/80 border-[#6638B8]/20 opacity-70'
+                    ? 'bg-[#102440]/90 backdrop-blur-md border-[#1677FF]/40 shadow-[0_12px_32px_rgba(4,12,28,0.6)]'
+                    : 'bg-[#0A1930]/80 border-[#1677FF]/20 opacity-70'
                 }`}
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
@@ -254,7 +254,7 @@ export const StorylineView: React.FC = () => {
                     <span className="text-[10px] font-mono uppercase tracking-widest text-[#E7B94F] block">
                       Chapter {ch.number} of 5 · +{ch.rewards.restorationPercent}% Restoration Target
                     </span>
-                    <h3 className="font-['Cinzel'] font-black text-lg text-[#F7F4FF]">
+                    <h3 className="font-['Cinzel'] font-black text-lg text-[#F2F7FF]">
                       {ch.title} — {ch.subtitle}
                     </h3>
                   </div>
@@ -270,7 +270,7 @@ export const StorylineView: React.FC = () => {
                       Active Chapter
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#BEB4D6] self-start">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#94A8C7] self-start">
                       <Lock className="w-3.5 h-3.5" />
                       Complete Chapter {ch.number - 1} First
                     </span>
@@ -278,42 +278,42 @@ export const StorylineView: React.FC = () => {
                 </div>
 
                 {/* Chapter Narrative & NPC Dialogue */}
-                <p className="text-xs sm:text-sm text-[#BEB4D6] leading-relaxed mb-3">
+                <p className="text-xs sm:text-sm text-[#94A8C7] leading-relaxed mb-3">
                   {ch.narrationIntro}
                 </p>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-4">
-                  <div className="p-3.5 rounded-xl bg-[#19122B] border border-[#6638B8]/30 space-y-1">
+                  <div className="p-3.5 rounded-xl bg-[#0A1930] border border-[#1677FF]/30 space-y-1">
                     <span className="text-[10px] uppercase tracking-wider text-[#E7B94F] font-bold flex items-center gap-1.5">
                       <MessageSquareQuote className="w-3.5 h-3.5" />
                       {ch.npcSpeaker} · {ch.npcRole}
                     </span>
-                    <p className="text-xs italic text-[#F7F4FF]/90 leading-relaxed">
+                    <p className="text-xs italic text-[#F2F7FF]/90 leading-relaxed">
                       {ch.npcDialogue}
                     </p>
                   </div>
 
-                  <div className="p-3.5 rounded-xl bg-[#19122B] border border-[#6638B8]/30 space-y-1">
-                    <span className="text-[10px] uppercase tracking-wider text-[#A875FF] font-bold flex items-center gap-1.5">
+                  <div className="p-3.5 rounded-xl bg-[#0A1930] border border-[#1677FF]/30 space-y-1">
+                    <span className="text-[10px] uppercase tracking-wider text-[#00D9FF] font-bold flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5" />
                       Lore Discovery
                     </span>
-                    <p className="text-xs text-[#BEB4D6] leading-relaxed">
+                    <p className="text-xs text-[#94A8C7] leading-relaxed">
                       {ch.loreDiscovery}
                     </p>
                   </div>
                 </div>
 
                 {/* Real-Life Connected Mission & Milestone Action */}
-                <div className="p-4 rounded-xl bg-[#100D1C] border border-[#6638B8]/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="p-4 rounded-xl bg-[#061225] border border-[#1677FF]/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <Shield className="w-3.5 h-3.5 text-[#FFD978]" />
-                      <span className="text-xs font-bold text-[#F7F4FF]">
+                      <span className="text-xs font-bold text-[#F2F7FF]">
                         Mission: {ch.missionTitle}
                       </span>
                     </div>
-                    <p className="text-xs text-[#BEB4D6]">{ch.missionSummary}</p>
+                    <p className="text-xs text-[#94A8C7]">{ch.missionSummary}</p>
 
                     {!isClaimed && isUnlocked && reqEval.missing.length > 0 && (
                       <p className="text-[11px] text-[#FFAA45]/90 pt-1">
@@ -321,7 +321,7 @@ export const StorylineView: React.FC = () => {
                       </p>
                     )}
 
-                    <div className="text-[11px] font-mono text-[#A875FF] pt-1 tabular-nums">
+                    <div className="text-[11px] font-mono text-[#00D9FF] pt-1 tabular-nums">
                       Reward: +{ch.rewards.playerXp} Player XP · <span className="text-[#FFD978]">+{ch.rewards.gold} Gold</span>
                     </div>
                   </div>
@@ -333,8 +333,8 @@ export const StorylineView: React.FC = () => {
                       onClick={() => handleClaimChapter(ch.id)}
                       className={`px-5 py-2.5 rounded-xl font-['Cinzel'] font-bold text-xs tracking-wider shrink-0 transition-all ${
                         reqEval.met
-                          ? 'bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#100D1C] shadow-[0_0_16px_rgba(231,185,79,0.35)]'
-                          : 'bg-[#19122B] text-[#BEB4D6]/50 border border-[#6638B8]/30 cursor-not-allowed'
+                          ? 'bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#061225] shadow-[0_0_16px_rgba(231,185,79,0.35)]'
+                          : 'bg-[#0A1930] text-[#94A8C7]/50 border border-[#1677FF]/30 cursor-not-allowed'
                       }`}
                     >
                       {claimingId === ch.id
@@ -354,11 +354,11 @@ export const StorylineView: React.FC = () => {
       {/* 3. The Five Corrupted Kingdoms & Boss Liberation */}
       <section data-tutorial-id="kingdom-restoration" className="space-y-4">
         <div>
-          <h2 className="font-['Cinzel'] font-black text-lg sm:text-xl text-[#F7F4FF] flex items-center gap-2">
+          <h2 className="font-['Cinzel'] font-black text-lg sm:text-xl text-[#F2F7FF] flex items-center gap-2">
             <Crown className="w-5 h-5 text-[#FFD978]" />
             THE FIVE CORRUPTED KINGDOMS
           </h2>
-          <p className="text-xs sm:text-sm text-[#BEB4D6] mt-0.5">
+          <p className="text-xs sm:text-sm text-[#94A8C7] mt-0.5">
             Push back the Void corruption across every province to liberate Aetheria and defeat each Void Sovereign.
           </p>
         </div>
@@ -371,12 +371,12 @@ export const StorylineView: React.FC = () => {
             return (
               <div
                 key={kingdom.id}
-                className={`rounded-2xl border overflow-hidden transition-all shadow-[0_12px_32px_rgba(10,6,20,0.6)] ${
+                className={`rounded-2xl border overflow-hidden transition-all shadow-[0_12px_32px_rgba(4,12,28,0.6)] ${
                   isCleared
-                    ? 'bg-[#24143D]/95 border-[#35D69A]/45'
+                    ? 'bg-[#102440]/95 border-[#35D69A]/45'
                     : isUnlocked
-                    ? 'bg-[#24143D]/90 backdrop-blur-md border-[#6638B8]/40 hover:border-[#FFD978]/50'
-                    : 'bg-[#19122B]/80 border-[#6638B8]/25 opacity-75'
+                    ? 'bg-[#102440]/90 backdrop-blur-md border-[#1677FF]/40 hover:border-[#FFD978]/50'
+                    : 'bg-[#0A1930]/80 border-[#1677FF]/25 opacity-75'
                 }`}
               >
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-0">
@@ -387,8 +387,8 @@ export const StorylineView: React.FC = () => {
                       referrerPolicy="no-referrer"
                       className={`w-full h-full object-cover filter ${isUnlocked ? 'brightness-90' : 'grayscale brightness-50'}`}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-[#100D1C] via-transparent to-transparent" />
-                    <div className="absolute top-3 left-3 bg-[#100D1C]/90 px-2.5 py-1 rounded text-[11px] font-bold text-[#FFD978] border border-[#FFD978]/40">
+                    <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-[#061225] via-transparent to-transparent" />
+                    <div className="absolute top-3 left-3 bg-[#061225]/90 px-2.5 py-1 rounded text-[11px] font-bold text-[#FFD978] border border-[#FFD978]/40">
                       Kingdom {idx + 1} of 5
                     </div>
                   </div>
@@ -408,40 +408,40 @@ export const StorylineView: React.FC = () => {
                             UNLOCKED
                           </span>
                         ) : (
-                          <span className="text-xs font-bold text-[#BEB4D6] flex items-center gap-1">
+                          <span className="text-xs font-bold text-[#94A8C7] flex items-center gap-1">
                             <Lock className="w-3.5 h-3.5" /> LOCKED
                           </span>
                         )}
                       </div>
 
-                      <h3 className="font-['Cinzel'] font-black text-xl text-[#F7F4FF]">{kingdom.name}</h3>
-                      <p className="text-xs text-[#A875FF] font-medium mb-3">{kingdom.subtitle}</p>
+                      <h3 className="font-['Cinzel'] font-black text-xl text-[#F2F7FF]">{kingdom.name}</h3>
+                      <p className="text-xs text-[#00D9FF] font-medium mb-3">{kingdom.subtitle}</p>
 
-                      <p className="text-xs text-[#BEB4D6] leading-relaxed mb-3">
+                      <p className="text-xs text-[#94A8C7] leading-relaxed mb-3">
                         {kingdom.description}
                       </p>
 
-                      <div className="p-3 rounded-xl bg-[#19122B] border border-[#6638B8]/30 text-xs italic text-[#BEB4D6] leading-relaxed">
+                      <div className="p-3 rounded-xl bg-[#0A1930] border border-[#1677FF]/30 text-xs italic text-[#94A8C7] leading-relaxed">
                         &ldquo;{kingdom.loreIntro}&rdquo;
                       </div>
                     </div>
 
                     <div className="pt-2 flex items-center justify-between">
                       <div className="text-xs">
-                        <span className="text-[#BEB4D6]">Boss Sovereign: </span>
-                        <strong className="text-[#F7F4FF]">{kingdom.boss.name}</strong>
+                        <span className="text-[#94A8C7]">Boss Sovereign: </span>
+                        <strong className="text-[#F2F7FF]">{kingdom.boss.name}</strong>
                       </div>
 
                       {isUnlocked ? (
                         <button
                           onClick={() => setActiveTab('boss-battles')}
-                          className="px-5 py-2 rounded-xl font-['Cinzel'] font-bold text-xs tracking-wider bg-gradient-to-r from-[#F05B70] to-[#FFAA45] hover:from-[#ff6e82] hover:to-[#FFD978] text-[#100D1C] shadow-[0_0_16px_rgba(240,91,112,0.35)] flex items-center gap-1.5 transition-all"
+                          className="px-5 py-2 rounded-xl font-['Cinzel'] font-bold text-xs tracking-wider bg-gradient-to-r from-[#F05B70] to-[#FFAA45] hover:from-[#ff6e82] hover:to-[#FFD978] text-[#061225] shadow-[0_0_16px_rgba(240,91,112,0.35)] flex items-center gap-1.5 transition-all"
                         >
                           <Dumbbell className="w-3.5 h-3.5" />
                           Challenge Boss
                         </button>
                       ) : (
-                        <span className="text-xs text-[#BEB4D6]/70">Defeat previous kingdom boss to unlock</span>
+                        <span className="text-xs text-[#94A8C7]/70">Defeat previous kingdom boss to unlock</span>
                       )}
                     </div>
                   </div>

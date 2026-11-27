@@ -25,9 +25,9 @@ import {
 } from 'lucide-react';
 
 const RARITY_COLORS: Record<CollectibleCardRarity, string> = {
-  Common: 'text-[#BEB4D6]',
+  Common: 'text-[#94A8C7]',
   Rare: 'text-[#65A9FF]',
-  Epic: 'text-[#A875FF]',
+  Epic: 'text-[#00D9FF]',
   Legendary: 'text-[#FFD978]',
   Mythic: 'text-[#F05B70]',
 };
@@ -151,22 +151,22 @@ export const CollectibleCardsView: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in">
       {/* Header Summary */}
-      <div className="rounded-2xl bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/40 p-5 sm:p-6 flex flex-col xl:flex-row xl:items-center justify-between gap-5 shadow-[0_12px_32px_rgba(10,6,20,0.6)]">
+      <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/40 p-5 sm:p-6 flex flex-col xl:flex-row xl:items-center justify-between gap-5 shadow-[0_12px_32px_rgba(4,12,28,0.6)]">
         <div className="space-y-2">
           <div className="text-xs font-['Cinzel'] font-bold uppercase tracking-widest text-[#E7B94F]">
             2D Collectible Chronicle Binder
           </div>
-          <h2 className="text-2xl font-black font-['Cinzel'] text-[#F7F4FF]">
+          <h2 className="text-2xl font-black font-['Cinzel'] text-[#F2F7FF]">
             FANTASY CARD COLLECTION
           </h2>
-          <div className="flex flex-wrap items-center gap-3 text-xs text-[#BEB4D6] tabular-nums">
+          <div className="flex flex-wrap items-center gap-3 text-xs text-[#94A8C7] tabular-nums">
             <span>
-              <strong className="text-[#F7F4FF]">{ownedMap.size}</strong> / {COLLECTIBLE_CARDS_CATALOG.length} Cards Owned ({cardsState?.completionPercent || 0}%)
+              <strong className="text-[#F2F7FF]">{ownedMap.size}</strong> / {COLLECTIBLE_CARDS_CATALOG.length} Cards Owned ({cardsState?.completionPercent || 0}%)
             </span>
             <span aria-hidden="true">·</span>
             <span className="text-[#FFD978] font-mono">{goldBalance.toLocaleString()} Gold</span>
             <span aria-hidden="true">·</span>
-            <span className="text-[#A875FF] font-mono">{fragmentBalance.toLocaleString()} Fragments</span>
+            <span className="text-[#00D9FF] font-mono">{fragmentBalance.toLocaleString()} Fragments</span>
           </div>
           <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] tabular-nums">
             {rarityBreakdown.map(r => (
@@ -177,7 +177,7 @@ export const CollectibleCardsView: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1.5 p-1.5 rounded-xl bg-[#100D1C] border border-[#6638B8]/35 self-start xl:self-auto">
+        <div className="flex flex-wrap items-center gap-1.5 p-1.5 rounded-xl bg-[#061225] border border-[#1677FF]/35 self-start xl:self-auto">
           {[
             { id: 'binder', label: 'Card Binder', icon: Layers },
             { id: 'packs', label: 'Card Packs', icon: PackageOpen },
@@ -192,8 +192,8 @@ export const CollectibleCardsView: React.FC = () => {
                 onClick={() => setSubTab(tab.id as typeof subTab)}
                 className={`px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all whitespace-nowrap shrink-0 ${
                   active
-                    ? 'bg-gradient-to-r from-[#6638B8] to-[#A875FF] text-white shadow-[0_0_16px_rgba(168,117,255,0.35)] border border-[#FFD978]/45'
-                    : 'text-[#BEB4D6] hover:text-[#F7F4FF] hover:bg-[#24143D] border border-transparent'
+                    ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white shadow-[0_0_16px_rgba(0,217,255,0.35)] border border-[#FFD978]/45'
+                    : 'text-[#94A8C7] hover:text-[#F2F7FF] hover:bg-[#102440] border border-transparent'
                 }`}
               >
                 <Icon className="w-4 h-4 shrink-0" />
@@ -220,13 +220,13 @@ export const CollectibleCardsView: React.FC = () => {
       {subTab === 'binder' && (
         <div className="space-y-5">
           {/* Favorites Showcase Strip */}
-          <div className="rounded-2xl bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 p-5 space-y-3">
+          <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/35 p-5 space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="font-['Cinzel'] font-bold text-sm text-[#F7F4FF] flex items-center gap-2">
+              <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF] flex items-center gap-2">
                 <Heart className="w-4 h-4 text-[#F05B70]" />
                 Pinned Profile Favorite Cards ({favoriteIds.length} / 3)
               </h3>
-              <span className="text-xs text-[#BEB4D6]">Shown on your Public Champion Profile</span>
+              <span className="text-xs text-[#94A8C7]">Shown on your Public Champion Profile</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[0, 1, 2].map(slot => {
@@ -235,16 +235,16 @@ export const CollectibleCardsView: React.FC = () => {
                 return card ? (
                   <div
                     key={card.id}
-                    className="rounded-xl bg-[#19122B] border border-[#FFD978]/40 p-3 flex items-center justify-between gap-3"
+                    className="rounded-xl bg-[#0A1930] border border-[#FFD978]/40 p-3 flex items-center justify-between gap-3"
                   >
                     <div className="min-w-0">
                       <p className={`text-[11px] font-semibold ${RARITY_COLORS[card.rarity]}`}>{card.rarity}</p>
-                      <p className="font-['Cinzel'] font-bold text-xs text-[#F7F4FF] truncate">{card.name}</p>
+                      <p className="font-['Cinzel'] font-bold text-xs text-[#F2F7FF] truncate">{card.name}</p>
                     </div>
                     <button
                       type="button"
                       onClick={() => void handleToggleFavorite(card.id)}
-                      className="px-2.5 py-1 rounded-lg bg-[#100D1C] hover:bg-[#36111F]/70 border border-[#6638B8]/30 text-[11px] text-[#F05B70] whitespace-nowrap shrink-0 transition-colors"
+                      className="px-2.5 py-1 rounded-lg bg-[#061225] hover:bg-[#36111F]/70 border border-[#1677FF]/30 text-[11px] text-[#F05B70] whitespace-nowrap shrink-0 transition-colors"
                     >
                       Remove
                     </button>
@@ -252,7 +252,7 @@ export const CollectibleCardsView: React.FC = () => {
                 ) : (
                   <div
                     key={slot}
-                    className="rounded-xl bg-[#100D1C]/70 border border-dashed border-[#6638B8]/30 p-3 text-xs text-[#BEB4D6]/60 flex items-center justify-center"
+                    className="rounded-xl bg-[#061225]/70 border border-dashed border-[#1677FF]/30 p-3 text-xs text-[#94A8C7]/60 flex items-center justify-center"
                   >
                     Favorite Slot {slot + 1} Empty
                   </div>
@@ -272,8 +272,8 @@ export const CollectibleCardsView: React.FC = () => {
                     onClick={() => setCategoryFilter(cat)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
                       categoryFilter === cat
-                        ? 'bg-[#6638B8] text-white border border-[#FFD978]/50 shadow-[0_0_12px_rgba(102,56,184,0.35)]'
-                        : 'bg-[#19122B] hover:bg-[#2F1B4E] text-[#BEB4D6] hover:text-[#F7F4FF] border border-[#6638B8]/35'
+                        ? 'bg-[#1677FF] text-white border border-[#FFD978]/50 shadow-[0_0_12px_rgba(22,119,255,0.35)]'
+                        : 'bg-[#0A1930] hover:bg-[#152E52] text-[#94A8C7] hover:text-[#F2F7FF] border border-[#1677FF]/35'
                     }`}
                   >
                     {CATEGORY_LABELS[cat]}
@@ -286,7 +286,7 @@ export const CollectibleCardsView: React.FC = () => {
               <select
                 value={rarityFilter}
                 onChange={e => setRarityFilter(e.target.value as CollectibleCardRarity | 'all')}
-                className="rounded-lg bg-[#19122B] border border-[#6638B8]/40 px-3 py-1.5 text-xs text-[#F7F4FF] focus:border-[#FFD978] focus:outline-none"
+                className="rounded-lg bg-[#0A1930] border border-[#1677FF]/40 px-3 py-1.5 text-xs text-[#F2F7FF] focus:border-[#FFD978] focus:outline-none"
               >
                 <option value="all">All Rarities</option>
                 {(['Common', 'Rare', 'Epic', 'Legendary', 'Mythic'] as CollectibleCardRarity[]).map(r => (
@@ -298,7 +298,7 @@ export const CollectibleCardsView: React.FC = () => {
               <select
                 value={ownershipFilter}
                 onChange={e => setOwnershipFilter(e.target.value as 'all' | 'owned' | 'unowned')}
-                className="rounded-lg bg-[#19122B] border border-[#6638B8]/40 px-3 py-1.5 text-xs text-[#F7F4FF] focus:border-[#FFD978] focus:outline-none"
+                className="rounded-lg bg-[#0A1930] border border-[#1677FF]/40 px-3 py-1.5 text-xs text-[#F2F7FF] focus:border-[#FFD978] focus:outline-none"
               >
                 <option value="all">All Status</option>
                 <option value="owned">Owned Only</option>
@@ -318,14 +318,14 @@ export const CollectibleCardsView: React.FC = () => {
                   key={card.id}
                   className={`rounded-2xl p-4 border flex flex-col justify-between gap-3 transition-all ${
                     isOwned
-                      ? 'bg-[#24143D]/90 border-[#6638B8]/40 hover:border-[#FFD978]/55 shadow-[0_8px_24px_rgba(10,6,20,0.45)]'
-                      : 'bg-[#19122B]/80 border-[#6638B8]/20 opacity-75'
+                      ? 'bg-[#102440]/90 border-[#1677FF]/40 hover:border-[#FFD978]/55 shadow-[0_8px_24px_rgba(4,12,28,0.45)]'
+                      : 'bg-[#0A1930]/80 border-[#1677FF]/20 opacity-75'
                   }`}
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-[11px]">
                       <span className={`font-semibold ${RARITY_COLORS[card.rarity]}`}>{card.rarity}</span>
-                      <span className="text-[#BEB4D6] font-mono tabular-nums">
+                      <span className="text-[#94A8C7] font-mono tabular-nums">
                         {isOwned ? `Owned x${qty}` : 'Unowned'}
                       </span>
                     </div>
@@ -333,8 +333,8 @@ export const CollectibleCardsView: React.FC = () => {
                     <CollectibleCardArtwork card={card} size="sm" />
 
                     <div>
-                      <h4 className="font-['Cinzel'] font-bold text-sm text-[#F7F4FF] truncate">{card.name}</h4>
-                      <p className="text-[11px] text-[#BEB4D6] mt-0.5">
+                      <h4 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF] truncate">{card.name}</h4>
+                      <p className="text-[11px] text-[#94A8C7] mt-0.5">
                         {card.subtitle}
                         {card.limitedEdition ? ' · Limited' : ''}
                       </p>
@@ -345,7 +345,7 @@ export const CollectibleCardsView: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setInspectedCard(card)}
-                      className="flex-1 py-1.5 px-2.5 rounded-lg bg-[#19122B] hover:bg-[#2F1B4E] border border-[#6638B8]/40 hover:border-[#A875FF]/55 text-xs text-[#F7F4FF] flex items-center justify-center gap-1 whitespace-nowrap shrink-0 transition-all"
+                      className="flex-1 py-1.5 px-2.5 rounded-lg bg-[#0A1930] hover:bg-[#152E52] border border-[#1677FF]/40 hover:border-[#00D9FF]/55 text-xs text-[#F2F7FF] flex items-center justify-center gap-1 whitespace-nowrap shrink-0 transition-all"
                     >
                       <Eye className="w-3.5 h-3.5" />
                       Inspect
@@ -357,8 +357,8 @@ export const CollectibleCardsView: React.FC = () => {
                         onClick={() => void handleToggleFavorite(card.id)}
                         className={`py-1.5 px-2.5 rounded-lg text-xs border whitespace-nowrap shrink-0 transition-all ${
                           isFav
-                            ? 'bg-[#6638B8]/30 border-[#FFD978]/60 text-[#FFD978]'
-                            : 'bg-[#19122B] border-[#6638B8]/35 text-[#BEB4D6] hover:text-[#F7F4FF]'
+                            ? 'bg-[#1677FF]/30 border-[#FFD978]/60 text-[#FFD978]'
+                            : 'bg-[#0A1930] border-[#1677FF]/35 text-[#94A8C7] hover:text-[#F2F7FF]'
                         }`}
                       >
                         {isFav ? 'Pinned' : 'Pin'}
@@ -375,23 +375,23 @@ export const CollectibleCardsView: React.FC = () => {
       {/* PACKS TAB */}
       {subTab === 'packs' && (
         <div className="space-y-6">
-          <div className="rounded-2xl bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/35 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
-              <h3 className="font-['Cinzel'] font-bold text-base text-[#F7F4FF]">
+              <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF]">
                 Transparent Card Packs · Earned Currency Only
               </h3>
-              <p className="text-xs text-[#BEB4D6]">
+              <p className="text-xs text-[#94A8C7]">
                 Every pack displays exact rarity odds summing to 100%. Duplicate draws automatically convert into Cosmetic Fragments (Common {DUPLICATE_CARD_FRAGMENT_RATES.Common}, Rare {DUPLICATE_CARD_FRAGMENT_RATES.Rare}, Epic {DUPLICATE_CARD_FRAGMENT_RATES.Epic}, Legendary {DUPLICATE_CARD_FRAGMENT_RATES.Legendary}, Mythic {DUPLICATE_CARD_FRAGMENT_RATES.Mythic}).
               </p>
             </div>
-            <div className="flex items-center gap-1 p-1 rounded-xl bg-[#100D1C] border border-[#6638B8]/35 shrink-0">
+            <div className="flex items-center gap-1 p-1 rounded-xl bg-[#061225] border border-[#1677FF]/35 shrink-0">
               <button
                 type="button"
                 onClick={() => setCurrency('gold')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all ${
                   currency === 'gold'
-                    ? 'bg-gradient-to-r from-[#E7B94F] to-[#FFD978] text-[#100D1C] shadow-[0_0_12px_rgba(231,185,79,0.35)]'
-                    : 'text-[#BEB4D6] hover:text-[#F7F4FF]'
+                    ? 'bg-gradient-to-r from-[#E7B94F] to-[#FFD978] text-[#061225] shadow-[0_0_12px_rgba(231,185,79,0.35)]'
+                    : 'text-[#94A8C7] hover:text-[#F2F7FF]'
                 }`}
               >
                 <Coins className="w-3.5 h-3.5" />
@@ -402,8 +402,8 @@ export const CollectibleCardsView: React.FC = () => {
                 onClick={() => setCurrency('fragments')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all ${
                   currency === 'fragments'
-                    ? 'bg-gradient-to-r from-[#6638B8] to-[#A875FF] text-white shadow-[0_0_12px_rgba(168,117,255,0.35)]'
-                    : 'text-[#BEB4D6] hover:text-[#F7F4FF]'
+                    ? 'bg-gradient-to-r from-[#1677FF] to-[#0099FF] text-white shadow-[0_0_12px_rgba(0,217,255,0.35)]'
+                    : 'text-[#94A8C7] hover:text-[#F2F7FF]'
                 }`}
               >
                 <Sparkles className="w-3.5 h-3.5" />
@@ -419,23 +419,23 @@ export const CollectibleCardsView: React.FC = () => {
               return (
                 <div
                   key={pack.id}
-                  className="rounded-2xl bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 hover:border-[#FFD978]/50 p-5 flex flex-col justify-between gap-5 transition-all"
+                  className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/35 hover:border-[#FFD978]/50 p-5 flex flex-col justify-between gap-5 transition-all"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-semibold text-[#FFD978]">{pack.cardCount} Cards Inside</span>
-                      <span className="text-[#BEB4D6]">Min {pack.guaranteedMinRarity}</span>
+                      <span className="text-[#94A8C7]">Min {pack.guaranteedMinRarity}</span>
                     </div>
-                    <h4 className="font-['Cinzel'] font-bold text-lg text-[#F7F4FF]">{pack.name}</h4>
-                    <p className="text-xs text-[#BEB4D6] leading-relaxed">{pack.description}</p>
+                    <h4 className="font-['Cinzel'] font-bold text-lg text-[#F2F7FF]">{pack.name}</h4>
+                    <p className="text-xs text-[#94A8C7] leading-relaxed">{pack.description}</p>
 
-                    <div className="pt-2 border-t border-[#6638B8]/25 space-y-1.5">
-                      <p className="text-[11px] font-semibold text-[#BEB4D6]">Disclosed Drop Odds (100%)</p>
+                    <div className="pt-2 border-t border-[#1677FF]/25 space-y-1.5">
+                      <p className="text-[11px] font-semibold text-[#94A8C7]">Disclosed Drop Odds (100%)</p>
                       <div className="grid grid-cols-2 gap-1 text-[11px] font-mono tabular-nums">
                         {(['Common', 'Rare', 'Epic', 'Legendary', 'Mythic'] as CollectibleCardRarity[]).map(r => (
                           <div key={r} className="flex items-center justify-between pr-2">
                             <span className={RARITY_COLORS[r]}>{r}</span>
-                            <span className="text-[#F7F4FF]/90">{pack.dropRates[r]}%</span>
+                            <span className="text-[#F2F7FF]/90">{pack.dropRates[r]}%</span>
                           </div>
                         ))}
                       </div>
@@ -448,8 +448,8 @@ export const CollectibleCardsView: React.FC = () => {
                     onClick={() => void handleOpenPack(pack.id)}
                     className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                       canAfford
-                        ? 'bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#100D1C] shadow-[0_0_18px_rgba(231,185,79,0.35)]'
-                        : 'bg-[#19122B] text-[#BEB4D6]/50 border border-[#6638B8]/30'
+                        ? 'bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#061225] shadow-[0_0_18px_rgba(231,185,79,0.35)]'
+                        : 'bg-[#0A1930] text-[#94A8C7]/50 border border-[#1677FF]/30'
                     }`}
                   >
                     {busyId === `pack-${pack.id}`
@@ -477,13 +477,13 @@ export const CollectibleCardsView: React.FC = () => {
             return (
               <div
                 key={ach.id}
-                className="rounded-2xl bg-[#24143D]/90 backdrop-blur-md border border-[#6638B8]/35 p-5 flex items-center justify-between gap-4"
+                className="rounded-2xl bg-[#102440]/90 backdrop-blur-md border border-[#1677FF]/35 p-5 flex items-center justify-between gap-4"
               >
                 <div className="space-y-1">
-                  <h4 className="font-['Cinzel'] font-bold text-sm text-[#F7F4FF]">{ach.title}</h4>
-                  <p className="text-xs text-[#BEB4D6]">{ach.description}</p>
+                  <h4 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF]">{ach.title}</h4>
+                  <p className="text-xs text-[#94A8C7]">{ach.description}</p>
                   <p className="text-xs text-[#FFD978] font-mono tabular-nums pt-1">
-                    Progress: {Math.min(currentCount, ach.requiredUniqueCards)} / {ach.requiredUniqueCards} · +{ach.rewardGold} Gold · <span className="text-[#A875FF]">+{ach.rewardFragments} Fragments</span>
+                    Progress: {Math.min(currentCount, ach.requiredUniqueCards)} / {ach.requiredUniqueCards} · +{ach.rewardGold} Gold · <span className="text-[#00D9FF]">+{ach.rewardFragments} Fragments</span>
                   </p>
                 </div>
                 <button
@@ -494,8 +494,8 @@ export const CollectibleCardsView: React.FC = () => {
                     claimed
                       ? 'bg-emerald-950/60 border border-[#35D69A]/45 text-[#35D69A]'
                       : eligible
-                      ? 'bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#100D1C] shadow-[0_0_16px_rgba(231,185,79,0.35)]'
-                      : 'bg-[#19122B] border border-[#6638B8]/30 text-[#BEB4D6]/50'
+                      ? 'bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#061225] shadow-[0_0_16px_rgba(231,185,79,0.35)]'
+                      : 'bg-[#0A1930] border border-[#1677FF]/30 text-[#94A8C7]/50'
                   }`}
                 >
                   {claimed ? 'Claimed' : eligible ? 'Claim' : 'Locked'}
@@ -509,11 +509,11 @@ export const CollectibleCardsView: React.FC = () => {
       {/* Card Detail Inspection Modal */}
       {inspectedCard && (
         <div
-          className="fixed inset-0 z-50 bg-[#100D1C]/85 backdrop-blur-xs flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-[#061225]/85 backdrop-blur-xs flex items-center justify-center p-4"
           onClick={() => setInspectedCard(null)}
         >
           <div
-            className="w-full max-w-md rounded-2xl bg-[#24143D] border border-[#FFD978]/50 p-6 space-y-4 shadow-[0_16px_40px_rgba(10,6,20,0.85)]"
+            className="w-full max-w-md rounded-2xl bg-[#102440] border border-[#FFD978]/50 p-6 space-y-4 shadow-[0_16px_40px_rgba(4,12,28,0.85)]"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between gap-2">
@@ -524,19 +524,19 @@ export const CollectibleCardsView: React.FC = () => {
                 type="button"
                 onClick={() => setInspectedCard(null)}
                 aria-label="Close card preview"
-                className="text-[#BEB4D6] hover:text-[#F7F4FF]"
+                className="text-[#94A8C7] hover:text-[#F2F7FF]"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
             <CollectibleCardArtwork card={inspectedCard} size="lg" />
             <div>
-              <h3 className="font-['Cinzel'] font-black text-xl text-[#F7F4FF]">{inspectedCard.name}</h3>
+              <h3 className="font-['Cinzel'] font-black text-xl text-[#F2F7FF]">{inspectedCard.name}</h3>
               <p className="text-xs text-[#E7B94F] mt-0.5">{inspectedCard.subtitle}</p>
-              <p className="text-xs text-[#BEB4D6] mt-3 leading-relaxed">{inspectedCard.lore}</p>
+              <p className="text-xs text-[#94A8C7] mt-3 leading-relaxed">{inspectedCard.lore}</p>
             </div>
-            <div className="pt-3 border-t border-[#6638B8]/30 flex items-center justify-between text-xs">
-              <span className="text-[#BEB4D6]">{inspectedCard.flavorStatLabel}</span>
+            <div className="pt-3 border-t border-[#1677FF]/30 flex items-center justify-between text-xs">
+              <span className="text-[#94A8C7]">{inspectedCard.flavorStatLabel}</span>
               <span className="font-bold text-[#FFD978]">{inspectedCard.flavorStatValue}</span>
             </div>
           </div>
@@ -546,11 +546,11 @@ export const CollectibleCardsView: React.FC = () => {
       {/* Pack Reveal Modal */}
       {drawnModalCards && (
         <div
-          className="fixed inset-0 z-50 bg-[#100D1C]/85 backdrop-blur-xs flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-[#061225]/85 backdrop-blur-xs flex items-center justify-center p-4"
           onClick={() => setDrawnModalCards(null)}
         >
           <div
-            className="w-full max-w-2xl rounded-2xl bg-[#24143D] border border-[#FFD978]/50 p-6 space-y-5 shadow-[0_16px_40px_rgba(10,6,20,0.85)]"
+            className="w-full max-w-2xl rounded-2xl bg-[#102440] border border-[#FFD978]/50 p-6 space-y-5 shadow-[0_16px_40px_rgba(4,12,28,0.85)]"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
@@ -560,7 +560,7 @@ export const CollectibleCardsView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setDrawnModalCards(null)}
-                className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#100D1C] text-xs font-bold shadow-[0_0_14px_rgba(231,185,79,0.35)]"
+                className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#E7B94F] to-[#FFD978] hover:from-[#FFD978] hover:to-[#ffe6a3] text-[#061225] text-xs font-bold shadow-[0_0_14px_rgba(231,185,79,0.35)]"
               >
                 Done
               </button>
@@ -569,14 +569,14 @@ export const CollectibleCardsView: React.FC = () => {
               {drawnModalCards.map((d, i) => (
                 <div
                   key={`${d.card.id}-${i}`}
-                  className="rounded-xl bg-[#19122B] border border-[#6638B8]/40 p-3 space-y-2.5"
+                  className="rounded-xl bg-[#0A1930] border border-[#1677FF]/40 p-3 space-y-2.5"
                 >
                   <CollectibleCardArtwork card={d.card} size="sm" />
                   <div>
                     <p className={`text-[11px] font-bold ${RARITY_COLORS[d.card.rarity]}`}>
                       {d.card.rarity} · {d.isNew ? 'New Card' : `+${d.fragmentsConverted} Fragments`}
                     </p>
-                    <h4 className="font-['Cinzel'] font-bold text-xs text-[#F7F4FF] mt-0.5">
+                    <h4 className="font-['Cinzel'] font-bold text-xs text-[#F2F7FF] mt-0.5">
                       {d.card.name}
                     </h4>
                   </div>
