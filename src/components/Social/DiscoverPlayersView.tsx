@@ -213,31 +213,31 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
         <FeatureBanner>
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-['Cinzel'] font-bold uppercase tracking-widest text-[#E8C777] mb-1">
+              <p className="text-xs font-['Cinzel'] font-bold uppercase tracking-widest text-[#38D9F5] mb-1">
                 Social Directory · Verified Players
               </p>
-              <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2EDF7] text-balance">
+              <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2F7FF] text-balance">
                 DISCOVER &amp; FRIENDS
               </h1>
-              <p className="text-xs sm:text-sm text-[#A69AAF] max-w-2xl mt-1">
+              <p className="text-xs sm:text-sm text-[#94A8C7] max-w-2xl mt-1">
                 Find active Aetheria champions, inspect public RPG profiles, manage friend requests, and keep your social circle safe.
               </p>
             </div>
 
-            <div className="flex items-center gap-6 text-xs text-[#A69AAF] shrink-0 tabular-nums">
+            <div className="flex items-center gap-6 text-xs text-[#94A8C7] shrink-0 tabular-nums">
               <div>
-                <span className="text-[11px] text-[#766D82] block">Friends</span>
-                <span className="text-lg font-bold text-[#F2EDF7] font-mono">{acceptedFriends.length}</span>
+                <span className="text-[11px] text-[#647A9E] block">Friends</span>
+                <span className="text-lg font-bold text-[#F2F7FF] font-mono">{acceptedFriends.length}</span>
               </div>
-              <div className="w-px h-8 bg-[#362B45]" />
+              <div className="w-px h-8 bg-[#1E3A63]" />
               <div>
-                <span className="text-[11px] text-[#766D82] block">Incoming</span>
-                <span className="text-lg font-bold text-[#E8C777] font-mono">{pendingIncoming.length}</span>
+                <span className="text-[11px] text-[#647A9E] block">Incoming</span>
+                <span className="text-lg font-bold text-[#00D9FF] font-mono">{pendingIncoming.length}</span>
               </div>
-              <div className="w-px h-8 bg-[#362B45]" />
+              <div className="w-px h-8 bg-[#1E3A63]" />
               <div>
-                <span className="text-[11px] text-[#766D82] block">Sent</span>
-                <span className="text-lg font-bold text-[#9A72CC] font-mono">{pendingOutgoing.length}</span>
+                <span className="text-[11px] text-[#647A9E] block">Sent</span>
+                <span className="text-lg font-bold text-[#38D9F5] font-mono">{pendingOutgoing.length}</span>
               </div>
             </div>
           </div>
@@ -258,8 +258,8 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
         <div
           className={`p-3 rounded-xl border text-xs ${
             notice.type === 'error'
-              ? 'bg-[#D65C66]/15 border-[#D65C66]/45 text-[#D65C66]'
-              : 'bg-[#49B88A]/15 border-[#49B88A]/45 text-[#49B88A]'
+              ? 'bg-[#F43F5E]/15 border-[#F43F5E]/45 text-[#FB7185]'
+              : 'bg-[#10B981]/15 border-[#10B981]/45 text-[#10B981]'
           }`}
         >
           {notice.text}
@@ -267,7 +267,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
       )}
 
       {!unifiedBackendReady && (
-        <div className="p-4 rounded-xl bg-[#D6A84B]/10 border border-[#D6A84B]/40 text-xs text-[#E8C777]">
+        <div className="p-4 rounded-xl bg-[#00D9FF]/10 border border-[#00D9FF]/35 text-xs text-[#38D9F5]">
           Player discovery and friend requests are currently offline. Please check your connection or try again shortly.
         </div>
       )}
@@ -277,16 +277,16 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
         <div className="space-y-4">
           <form
             onSubmit={handleSearchSubmit}
-            className="lq-surface flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-4"
+            className="lq-surface rounded-2xl flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-4"
           >
             <div className="relative flex-1">
-              <Search className="w-4 h-4 text-[#A69AAF] absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-[#94A8C7] absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Search by username, character name, or class..."
-                className="lq-input pl-10 pr-4 py-2.5 text-xs"
+                className="lq-input pl-10 pr-4 py-2.5 text-xs w-full"
               />
             </div>
 
@@ -306,7 +306,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
             <button
               type="submit"
               disabled={loading}
-              className="lq-btn lq-btn-primary text-xs flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0"
+              className="lq-btn lq-btn-primary py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
             >
               <Search className="w-3.5 h-3.5" />
               Search
@@ -314,26 +314,26 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
           </form>
 
           {loading ? (
-            <div className="py-16 flex flex-col items-center justify-center gap-3 text-xs text-[#A69AAF] lq-surface">
-              <Loader2 className="w-6 h-6 animate-spin text-[#9A72CC]" />
+            <div className="py-16 flex flex-col items-center justify-center gap-3 text-xs text-[#94A8C7] lq-surface rounded-2xl">
+              <Loader2 className="w-6 h-6 animate-spin text-[#00D9FF]" />
               <span>Searching Aetheria champions...</span>
             </div>
           ) : error ? (
-            <div className="p-6 lq-surface border-[#D65C66]/45 text-center space-y-3">
-              <p className="text-xs text-[#D65C66]">{error}</p>
+            <div className="p-6 lq-surface rounded-2xl border-[#F43F5E]/45 text-center space-y-3">
+              <p className="text-xs text-[#FB7185]">{error}</p>
               <button
                 type="button"
                 onClick={() => loadDirectory(searchQuery)}
-                className="lq-btn lq-btn-primary text-xs"
+                className="lq-btn lq-btn-primary py-2 px-4 rounded-xl text-xs cursor-pointer"
               >
                 Retry
               </button>
             </div>
           ) : enrichedChampions.length === 0 ? (
-            <div className="p-10 lq-surface text-center space-y-2">
-              <Users className="w-7 h-7 text-[#9A72CC] mx-auto" />
-              <p className="text-sm font-semibold text-[#F2EDF7]">No matching players found</p>
-              <p className="text-xs text-[#A69AAF]">
+            <div className="p-10 lq-surface rounded-2xl text-center space-y-2">
+              <Users className="w-7 h-7 text-[#00D9FF] mx-auto" />
+              <p className="text-sm font-semibold text-[#F2F7FF]">No matching players found</p>
+              <p className="text-xs text-[#94A8C7]">
                 Try another username or clear your class filter to view all public champions.
               </p>
             </div>
@@ -354,7 +354,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
 
                 return (
                   <RpgStaggerItem key={champ.id}>
-                    <div className="lq-card p-4 h-full flex flex-col justify-between gap-4">
+                    <div className="lq-card rounded-2xl p-4 h-full flex flex-col justify-between gap-4">
                       <div className="flex items-start gap-3.5 min-w-0">
                         <button
                           type="button"
@@ -365,7 +365,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                           <img
                             src={getRpgAvatarForClass(champ.characterClass)}
                             alt={`${champ.characterClass} Portrait`}
-                            className="w-14 h-14 rounded-xl object-cover object-top border border-[#7045A0]/60 group-hover:border-[#D6A84B] transition-colors"
+                            className="w-14 h-14 rounded-xl object-cover object-top border border-[#1677FF]/60 group-hover:border-[#00D9FF] transition-colors"
                           />
                         </button>
                         <div className="min-w-0 flex-1">
@@ -383,7 +383,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                               <button
                                 type="button"
                                 onClick={() => openPublicProfile(champ.id)}
-                                className="text-sm font-bold text-[#F2EDF7] hover:text-[#E8C777] truncate text-left transition-colors cursor-pointer"
+                                className="text-sm font-bold text-[#F2F7FF] hover:text-[#00D9FF] truncate text-left transition-colors cursor-pointer"
                               >
                                 {champ.username}
                               </button>
@@ -397,16 +397,16 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                             <span
                               className={`text-[11px] font-medium shrink-0 ${
                                 rel === 'friends'
-                                  ? 'text-[#49B88A]'
+                                  ? 'text-[#10B981]'
                                   : rel === 'request_sent' || rel === 'request_received'
-                                  ? 'text-[#E8C777]'
-                                  : 'text-[#766D82]'
+                                  ? 'text-[#00D9FF]'
+                                  : 'text-[#647A9E]'
                               }`}
                             >
                               {statusLabel}
                             </span>
                           </div>
-                          <p className="text-xs text-[#9A72CC] mt-0.5 tabular-nums">
+                          <p className="text-xs text-[#38D9F5] mt-0.5 tabular-nums">
                             {champ.levelHidden ? 'Level Private' : `Lv.${champ.level}`} · {champ.characterClass} · {champ.aetherRank}
                             {(() => {
                               const liveP = getPlayerPresence(champ.id);
@@ -416,25 +416,25 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                             })()}
                           </p>
                           {champ.guildName && (
-                            <p className="text-[11px] text-[#A69AAF] mt-1 truncate">
+                            <p className="text-[11px] text-[#94A8C7] mt-1 truncate">
                               [{champ.guildTag}] {champ.guildName}
                             </p>
                           )}
                           {champ.bio && (
-                            <p className="text-xs text-[#A69AAF] mt-1.5 line-clamp-2">
+                            <p className="text-xs text-[#94A8C7] mt-1.5 line-clamp-2">
                               {champ.bio}
                             </p>
                           )}
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between gap-2 pt-3 border-t border-[#362B45]">
+                      <div className="flex items-center justify-between gap-2 pt-3 border-t border-[#1E3A63]">
                         <button
                           type="button"
                           onClick={() => openPublicProfile(champ.id)}
-                          className="lq-btn lq-btn-secondary py-1.5 px-3 text-xs font-medium flex items-center gap-1.5 whitespace-nowrap"
+                          className="lq-btn lq-btn-secondary py-1.5 px-3 rounded-lg text-xs font-medium flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
                         >
-                          <Eye className="w-3.5 h-3.5 text-[#E8C777]" />
+                          <Eye className="w-3.5 h-3.5 text-[#00D9FF]" />
                           View Profile
                         </button>
 
@@ -444,7 +444,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                               type="button"
                               disabled={busyId === champ.id}
                               onClick={() => handleSendRequest(champ)}
-                              className="lq-btn lq-btn-primary py-1.5 px-3.5 text-xs flex items-center gap-1.5 whitespace-nowrap"
+                              className="lq-btn lq-btn-primary py-1.5 px-3.5 rounded-lg text-xs flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
                             >
                               <UserPlus className="w-3.5 h-3.5" />
                               Send Request
@@ -455,7 +455,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                               type="button"
                               disabled={busyId === champ.friendshipId}
                               onClick={() => handleCancelRequest(champ.friendshipId!, champ.username)}
-                              className="lq-btn lq-btn-secondary py-1.5 px-3.5 text-xs flex items-center gap-1.5 whitespace-nowrap"
+                              className="lq-btn lq-btn-secondary py-1.5 px-3.5 rounded-lg text-xs flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
                             >
                               <X className="w-3.5 h-3.5" />
                               Cancel
@@ -467,7 +467,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                                 type="button"
                                 disabled={busyId === champ.friendshipId}
                                 onClick={() => handleRespond(champ.friendshipId!, true, champ.username)}
-                                className="px-3 py-1.5 rounded-lg bg-[#49B88A] hover:brightness-110 text-[#100D18] text-xs font-bold flex items-center gap-1 whitespace-nowrap cursor-pointer"
+                                className="px-3 py-1.5 rounded-lg bg-[#10B981] hover:brightness-110 text-[#061225] text-xs font-bold flex items-center gap-1 whitespace-nowrap cursor-pointer"
                               >
                                 <Check className="w-3.5 h-3.5" />
                                 Accept
@@ -476,7 +476,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                                 type="button"
                                 disabled={busyId === champ.friendshipId}
                                 onClick={() => handleRespond(champ.friendshipId!, false, champ.username)}
-                                className="lq-btn lq-btn-secondary py-1.5 px-3 text-xs whitespace-nowrap"
+                                className="lq-btn lq-btn-secondary py-1.5 px-3 rounded-lg text-xs whitespace-nowrap cursor-pointer"
                               >
                                 Decline
                               </button>
@@ -493,7 +493,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                                   username: champ.username,
                                 })
                               }
-                              className="px-3 py-1.5 rounded-lg text-[#A69AAF] hover:text-[#D65C66] hover:bg-[#D65C66]/15 text-xs font-medium flex items-center gap-1 transition-colors whitespace-nowrap cursor-pointer"
+                              className="px-3 py-1.5 rounded-lg text-[#94A8C7] hover:text-[#FB7185] hover:bg-[#F43F5E]/15 text-xs font-medium flex items-center gap-1 transition-colors whitespace-nowrap cursor-pointer"
                             >
                               <UserMinus className="w-3.5 h-3.5" />
                               Remove
@@ -512,18 +512,18 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
 
       {/* FRIENDS LIST */}
       {section === 'friends' && (
-        <div className="lq-surface p-5 space-y-3">
+        <div className="lq-surface rounded-2xl p-5 divide-y divide-[#1E3A63]/65">
           {acceptedFriends.length === 0 ? (
             <div className="py-10 text-center space-y-3">
-              <Users className="w-7 h-7 text-[#9A72CC] mx-auto" />
-              <p className="text-sm font-semibold text-[#F2EDF7]">No friends added yet</p>
-              <p className="text-xs text-[#A69AAF]">
+              <Users className="w-7 h-7 text-[#00D9FF] mx-auto" />
+              <p className="text-sm font-semibold text-[#F2F7FF]">No friends added yet</p>
+              <p className="text-xs text-[#94A8C7]">
                 Use Discover Players to find active champions and send a friend request.
               </p>
               <button
                 type="button"
                 onClick={() => setSection('discover')}
-                className="lq-btn lq-btn-primary text-xs"
+                className="lq-btn lq-btn-primary py-2 px-4 rounded-xl text-xs cursor-pointer"
               >
                 Browse Players
               </button>
@@ -532,7 +532,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
             acceptedFriends.map(f => (
               <div
                 key={f.friendshipId}
-                className="p-3.5 rounded-xl bg-[#21152F]/70 border border-[#362B45] flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                className="py-3.5 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <button
@@ -543,7 +543,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                     <img
                       src={getRpgAvatarForClass(f.champion.characterClass)}
                       alt={f.champion.username}
-                      className="w-11 h-11 rounded-xl object-cover object-top border border-[#7045A0]/60"
+                      className="w-11 h-11 rounded-xl object-cover object-top border border-[#1677FF]/60"
                     />
                   </button>
                   <div className="min-w-0">
@@ -557,7 +557,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                       <button
                         type="button"
                         onClick={() => openPublicProfile(f.champion.id)}
-                        className="text-sm font-bold text-[#F2EDF7] hover:text-[#E8C777] truncate block transition-colors cursor-pointer"
+                        className="text-sm font-bold text-[#F2F7FF] hover:text-[#00D9FF] truncate block transition-colors cursor-pointer"
                       >
                         {f.champion.username}
                       </button>
@@ -568,7 +568,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                         size="xs"
                       />
                     </div>
-                    <p className="text-xs text-[#A69AAF] tabular-nums">
+                    <p className="text-xs text-[#94A8C7] tabular-nums">
                       Lv.{f.champion.level} · {f.champion.characterClass} · {f.champion.currentStreak}d streak
                       {(() => {
                         const liveP = getPlayerPresence(f.champion.id);
@@ -585,7 +585,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                   <button
                     type="button"
                     onClick={() => openPublicProfile(f.champion.id)}
-                    className="lq-btn lq-btn-secondary py-1.5 px-3 text-xs font-medium whitespace-nowrap"
+                    className="lq-btn lq-btn-secondary py-1.5 px-3 rounded-lg text-xs font-medium whitespace-nowrap cursor-pointer"
                   >
                     Profile
                   </button>
@@ -599,7 +599,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                         username: f.champion.username,
                       })
                     }
-                    className="px-3 py-1.5 rounded-lg text-[#A69AAF] hover:text-[#D65C66] hover:bg-[#D65C66]/15 text-xs font-medium whitespace-nowrap cursor-pointer transition-colors"
+                    className="px-3 py-1.5 rounded-lg text-[#94A8C7] hover:text-[#FB7185] hover:bg-[#F43F5E]/15 text-xs font-medium whitespace-nowrap cursor-pointer transition-colors"
                   >
                     Remove
                   </button>
@@ -612,7 +612,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                         username: f.champion.username,
                       })
                     }
-                    className="p-1.5 rounded-lg text-[#A69AAF] hover:text-[#D65C66] hover:bg-[#D65C66]/15 cursor-pointer transition-colors"
+                    className="p-1.5 rounded-lg text-[#94A8C7] hover:text-[#FB7185] hover:bg-[#F43F5E]/15 cursor-pointer transition-colors"
                     title="Block user"
                     aria-label={`Block ${f.champion.username}`}
                   >
@@ -627,12 +627,12 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
 
       {/* RECEIVED REQUESTS */}
       {section === 'received' && (
-        <div className="lq-surface p-5 space-y-3">
+        <div className="lq-surface rounded-2xl p-5 divide-y divide-[#1E3A63]/65">
           {pendingIncoming.length === 0 ? (
             <div className="py-10 text-center space-y-2">
-              <Inbox className="w-7 h-7 text-[#9A72CC] mx-auto" />
-              <p className="text-sm font-semibold text-[#F2EDF7]">No incoming friend requests</p>
-              <p className="text-xs text-[#A69AAF]">
+              <Inbox className="w-7 h-7 text-[#00D9FF] mx-auto" />
+              <p className="text-sm font-semibold text-[#F2F7FF]">No incoming friend requests</p>
+              <p className="text-xs text-[#94A8C7]">
                 When another player sends you a request, it will appear here.
               </p>
             </div>
@@ -640,7 +640,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
             pendingIncoming.map(req => (
               <div
                 key={req.friendshipId}
-                className="p-3.5 rounded-xl bg-[#21152F]/70 border border-[#7045A0]/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                className="py-3.5 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <button
@@ -651,7 +651,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                     <img
                       src={getRpgAvatarForClass(req.champion.characterClass)}
                       alt={req.champion.username}
-                      className="w-11 h-11 rounded-xl object-cover object-top border border-[#7045A0]/60"
+                      className="w-11 h-11 rounded-xl object-cover object-top border border-[#1677FF]/60"
                     />
                   </button>
                   <div className="min-w-0">
@@ -659,7 +659,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                       <button
                         type="button"
                         onClick={() => openPublicProfile(req.champion.id)}
-                        className="text-sm font-bold text-[#F2EDF7] hover:text-[#E8C777] truncate block transition-colors cursor-pointer"
+                        className="text-sm font-bold text-[#F2F7FF] hover:text-[#00D9FF] truncate block transition-colors cursor-pointer"
                       >
                         {req.champion.username}
                       </button>
@@ -670,7 +670,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                         size="xs"
                       />
                     </div>
-                    <p className="text-xs text-[#9A72CC] tabular-nums">
+                    <p className="text-xs text-[#38D9F5] tabular-nums">
                       Lv.{req.champion.level} · {req.champion.characterClass} · Wants to connect
                     </p>
                   </div>
@@ -680,7 +680,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                     type="button"
                     disabled={busyId === req.friendshipId}
                     onClick={() => handleRespond(req.friendshipId, true, req.champion.username)}
-                    className="px-3.5 py-1.5 rounded-lg bg-[#49B88A] hover:brightness-110 text-[#100D18] text-xs font-bold flex items-center gap-1 whitespace-nowrap cursor-pointer"
+                    className="px-3.5 py-1.5 rounded-lg bg-[#10B981] hover:brightness-110 text-[#061225] text-xs font-bold flex items-center gap-1 whitespace-nowrap cursor-pointer"
                   >
                     <Check className="w-3.5 h-3.5" />
                     Accept
@@ -689,7 +689,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                     type="button"
                     disabled={busyId === req.friendshipId}
                     onClick={() => handleRespond(req.friendshipId, false, req.champion.username)}
-                    className="lq-btn lq-btn-secondary py-1.5 px-3.5 text-xs flex items-center gap-1 whitespace-nowrap"
+                    className="lq-btn lq-btn-secondary py-1.5 px-3.5 rounded-lg text-xs flex items-center gap-1 whitespace-nowrap cursor-pointer"
                   >
                     <X className="w-3.5 h-3.5" />
                     Decline
@@ -703,12 +703,12 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
 
       {/* SENT REQUESTS */}
       {section === 'sent' && (
-        <div className="lq-surface p-5 space-y-3">
+        <div className="lq-surface rounded-2xl p-5 divide-y divide-[#1E3A63]/65">
           {pendingOutgoing.length === 0 ? (
             <div className="py-10 text-center space-y-2">
-              <Clock className="w-7 h-7 text-[#9A72CC] mx-auto" />
-              <p className="text-sm font-semibold text-[#F2EDF7]">No pending sent requests</p>
-              <p className="text-xs text-[#A69AAF]">
+              <Clock className="w-7 h-7 text-[#00D9FF] mx-auto" />
+              <p className="text-sm font-semibold text-[#F2F7FF]">No pending sent requests</p>
+              <p className="text-xs text-[#94A8C7]">
                 Requests you send to other champions appear here until accepted or cancelled.
               </p>
             </div>
@@ -716,7 +716,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
             pendingOutgoing.map(req => (
               <div
                 key={req.friendshipId}
-                className="p-3.5 rounded-xl bg-[#21152F]/70 border border-[#362B45] flex items-center justify-between gap-3"
+                className="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between gap-3"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <button
@@ -727,7 +727,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                     <img
                       src={getRpgAvatarForClass(req.champion.characterClass)}
                       alt={req.champion.username}
-                      className="w-11 h-11 rounded-xl object-cover object-top border border-[#7045A0]/60"
+                      className="w-11 h-11 rounded-xl object-cover object-top border border-[#1677FF]/60"
                     />
                   </button>
                   <div className="min-w-0">
@@ -735,7 +735,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                       <button
                         type="button"
                         onClick={() => openPublicProfile(req.champion.id)}
-                        className="text-sm font-bold text-[#F2EDF7] hover:text-[#E8C777] truncate block transition-colors cursor-pointer"
+                        className="text-sm font-bold text-[#F2F7FF] hover:text-[#00D9FF] truncate block transition-colors cursor-pointer"
                       >
                         {req.champion.username}
                       </button>
@@ -746,7 +746,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                         size="xs"
                       />
                     </div>
-                    <p className="text-xs text-[#A69AAF] tabular-nums">
+                    <p className="text-xs text-[#94A8C7] tabular-nums">
                       Lv.{req.champion.level} · {req.champion.characterClass} · Awaiting response
                     </p>
                   </div>
@@ -755,7 +755,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                   type="button"
                   disabled={busyId === req.friendshipId}
                   onClick={() => handleCancelRequest(req.friendshipId, req.champion.username)}
-                  className="lq-btn lq-btn-secondary py-1.5 px-3.5 text-xs whitespace-nowrap shrink-0"
+                  className="lq-btn lq-btn-secondary py-1.5 px-3.5 rounded-lg text-xs whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   Cancel Request
                 </button>
@@ -767,12 +767,12 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
 
       {/* BLOCKED USERS */}
       {section === 'blocked' && (
-        <div className="lq-surface p-5 space-y-3">
+        <div className="lq-surface rounded-2xl p-5 divide-y divide-[#1E3A63]/65">
           {blockedUsers.length === 0 ? (
             <div className="py-10 text-center space-y-2">
-              <Ban className="w-7 h-7 text-[#9A72CC] mx-auto" />
-              <p className="text-sm font-semibold text-[#F2EDF7]">No blocked users</p>
-              <p className="text-xs text-[#A69AAF]">
+              <Ban className="w-7 h-7 text-[#00D9FF] mx-auto" />
+              <p className="text-sm font-semibold text-[#F2F7FF]">No blocked users</p>
+              <p className="text-xs text-[#94A8C7]">
                 Players you block cannot send you friend requests, chat whispers, or view your profile.
               </p>
             </div>
@@ -780,17 +780,17 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
             blockedUsers.map(b => (
               <div
                 key={b.id}
-                className="p-3.5 rounded-xl bg-[#21152F]/70 border border-[#362B45] flex items-center justify-between gap-3"
+                className="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between gap-3"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <img
                     src={getRpgAvatarForClass(b.characterClass)}
                     alt={b.username}
-                    className="w-10 h-10 rounded-xl object-cover object-top border border-[#362B45] grayscale"
+                    className="w-10 h-10 rounded-xl object-cover object-top border border-[#1E3A63] grayscale"
                   />
                   <div className="min-w-0">
-                    <p className="text-sm font-bold text-[#F2EDF7] truncate">{b.username}</p>
-                    <p className="text-xs text-[#A69AAF] tabular-nums">
+                    <p className="text-sm font-bold text-[#F2F7FF] truncate">{b.username}</p>
+                    <p className="text-xs text-[#94A8C7] tabular-nums">
                       Lv.{b.level} · {b.characterClass}
                     </p>
                   </div>
@@ -799,7 +799,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                   type="button"
                   disabled={busyId === b.id}
                   onClick={() => handleUnblock(b.id, b.username)}
-                  className="lq-btn lq-btn-secondary py-1.5 px-3.5 text-xs whitespace-nowrap shrink-0"
+                  className="lq-btn lq-btn-secondary py-1.5 px-3.5 rounded-lg text-xs whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   Unblock
                 </button>
@@ -816,14 +816,14 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
         panelClassName="w-full max-w-sm"
       >
         {pendingConfirm && (
-          <div className="lq-surface-elevated border border-[#D65C66]/50 rounded-2xl p-6 space-y-4">
-            <div className="flex items-center gap-2.5 text-[#D65C66]">
+          <div className="lq-surface-elevated border border-[#F43F5E]/50 rounded-2xl p-6 space-y-4">
+            <div className="flex items-center gap-2.5 text-[#FB7185]">
               <AlertTriangle className="w-5 h-5 shrink-0" />
               <h3 className="font-['Cinzel'] font-bold text-base">
                 {pendingConfirm.kind === 'block' ? 'Block Player?' : 'Remove Friend?'}
               </h3>
             </div>
-            <p className="text-xs text-[#A69AAF] leading-relaxed">
+            <p className="text-xs text-[#94A8C7] leading-relaxed">
               {pendingConfirm.kind === 'block'
                 ? `Block ${pendingConfirm.username}? Existing friendship links will be removed and neither of you will see each other in discovery or leaderboards.`
                 : `Remove ${pendingConfirm.username} from your friends list? You can send a new friend request later if you change your mind.`}
@@ -832,7 +832,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
               <button
                 type="button"
                 onClick={() => setPendingConfirm(null)}
-                className="lq-btn lq-btn-secondary py-2 px-4 text-xs"
+                className="lq-btn lq-btn-secondary py-2 px-4 rounded-xl text-xs cursor-pointer"
               >
                 Cancel
               </button>
@@ -840,7 +840,7 @@ export const DiscoverPlayersView: React.FC<{ embedded?: boolean }> = ({ embedded
                 type="button"
                 disabled={busyId === pendingConfirm.targetUserId}
                 onClick={executeConfirmedAction}
-                className="px-4 py-2 rounded-xl bg-[#D65C66] hover:brightness-110 text-[#100D18] text-xs font-bold cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-[#F43F5E] hover:brightness-110 text-[#061225] text-xs font-bold cursor-pointer"
               >
                 {pendingConfirm.kind === 'block' ? 'Block User' : 'Remove Friend'}
               </button>

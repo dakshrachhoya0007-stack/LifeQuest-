@@ -75,12 +75,12 @@ export const ChatView: React.FC<{ embedded?: boolean }> = ({ embedded = false })
     <div className="space-y-6 pb-12">
       {/* Banner / Channel Toolbar */}
       {embedded ? (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 lq-surface p-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 lq-surface rounded-2xl p-4">
           <div>
-            <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7]">
+            <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF]">
               Realm Chat &amp; Messages
             </h2>
-            <p className="text-xs text-[#A69AAF] mt-0.5">
+            <p className="text-xs text-[#94A8C7] mt-0.5">
               Coordinate guild raids, celebrate milestones, and whisper companions.
             </p>
           </div>
@@ -97,16 +97,16 @@ export const ChatView: React.FC<{ embedded?: boolean }> = ({ embedded = false })
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1 text-xs">
-                <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#E8C777]">
+                <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#38D9F5]">
                   Tavern of Fellowship
                 </span>
-                <span className="text-[#766D82]" aria-hidden="true">·</span>
-                <span className="text-[#A69AAF] font-medium">Real-Time Web &amp; Mobile Channels</span>
+                <span className="text-[#647A9E]" aria-hidden="true">·</span>
+                <span className="text-[#94A8C7] font-medium">Real-Time Web &amp; Mobile Channels</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2EDF7] text-balance">
+              <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2F7FF] text-balance">
                 REALM CHAT &amp; MESSAGES
               </h1>
-              <p className="text-xs sm:text-sm text-[#A69AAF] max-w-2xl mt-1">
+              <p className="text-xs sm:text-sm text-[#94A8C7] max-w-2xl mt-1">
                 Coordinate guild raids, celebrate workout milestones, and share healthy culinary tips across Aetheria.
               </p>
             </div>
@@ -126,8 +126,8 @@ export const ChatView: React.FC<{ embedded?: boolean }> = ({ embedded = false })
         <div
           className={`p-3 rounded-xl border text-xs text-center ${
             notice.type === 'error'
-              ? 'bg-[#D65C66]/15 border-[#D65C66]/45 text-[#D65C66]'
-              : 'bg-[#21152F] border-[#7045A0]/50 text-[#E8C777]'
+              ? 'bg-[#F43F5E]/15 border-[#F43F5E]/45 text-[#FB7185]'
+              : 'bg-[#102440] border-[#1677FF]/50 text-[#38D9F5]'
           }`}
         >
           {notice.text}
@@ -135,12 +135,12 @@ export const ChatView: React.FC<{ embedded?: boolean }> = ({ embedded = false })
       )}
 
       {/* Chat Window */}
-      <div className="lq-surface overflow-hidden flex flex-col h-[520px]">
+      <div className="lq-surface rounded-2xl overflow-hidden flex flex-col h-[520px]">
         {/* Chat Header */}
-        <div className="px-6 py-3.5 border-b border-[#362B45] bg-[#21152F]/70 flex flex-wrap items-center justify-between gap-2">
+        <div className="px-6 py-3.5 border-b border-[#1E3A63] bg-[#102440]/75 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-[#9A72CC]" />
-            <span className="text-xs font-bold font-['Cinzel'] text-[#F2EDF7] uppercase tracking-wider">
+            <MessageSquare className="w-4 h-4 text-[#00D9FF]" />
+            <span className="text-xs font-bold font-['Cinzel'] text-[#F2F7FF] uppercase tracking-wider">
               {selectedChannel === 'guild'
                 ? myGuild
                   ? `${myGuild.name} Channel`
@@ -165,24 +165,24 @@ export const ChatView: React.FC<{ embedded?: boolean }> = ({ embedded = false })
             </select>
           )}
 
-          <span className="text-[11px] text-[#A69AAF] font-mono tabular-nums">
+          <span className="text-[11px] text-[#94A8C7] font-mono tabular-nums">
             {filteredMessages.length} Messages
           </span>
         </div>
 
         {legendAnnouncements.length > 0 && (
-          <div className="px-6 py-2 bg-[#100D18]/90 border-b border-[#362B45] flex items-center justify-between gap-3 text-[11px]">
+          <div className="px-6 py-2 bg-[#061225]/90 border-b border-[#1E3A63] flex items-center justify-between gap-3 text-[11px]">
             <div className="flex items-center gap-2 min-w-0">
-              <Crown className="w-3.5 h-3.5 text-[#D6A84B] shrink-0" />
-              <span className="text-[#A69AAF] truncate">
-                <span className="font-semibold text-[#E8C777]">Realm Herald:</span>{' '}
+              <Crown className="w-3.5 h-3.5 text-[#F59E0B] shrink-0" />
+              <span className="text-[#94A8C7] truncate">
+                <span className="font-semibold text-[#FBBF24]">Realm Herald:</span>{' '}
                 {legendAnnouncements[0].ownerUsername} became the sole worldwide bearer of [{legendAnnouncements[0].titleTag}] ({legendAnnouncements[0].achievementName})
               </span>
             </div>
             <button
               type="button"
               onClick={() => setActiveTab('hall-of-legends')}
-              className="text-[10px] font-['Cinzel'] font-bold uppercase tracking-wider text-[#D6A84B] hover:text-[#E8C777] whitespace-nowrap shrink-0 transition-colors cursor-pointer"
+              className="text-[10px] font-['Cinzel'] font-bold uppercase tracking-wider text-[#FBBF24] hover:text-[#F59E0B] whitespace-nowrap shrink-0 transition-colors cursor-pointer"
             >
               Hall of Legends →
             </button>
@@ -190,16 +190,16 @@ export const ChatView: React.FC<{ embedded?: boolean }> = ({ embedded = false })
         )}
 
         {/* Message Log */}
-        <div className="flex-1 p-6 overflow-y-auto space-y-4 bg-[#100D18]/75">
+        <div className="flex-1 p-6 overflow-y-auto space-y-4 bg-[#061225]/75">
           {filteredMessages.length === 0 ? (
-            <div className="text-xs text-[#A69AAF] text-center py-12">
+            <div className="text-xs text-[#94A8C7] text-center py-12">
               {selectedChannel === 'whisper' && acceptedFriends.length === 0 ? (
                 <span>
                   Add a companion in{' '}
                   <button
                     type="button"
                     onClick={() => setActiveTab('friends')}
-                    className="text-[#D6A84B] hover:text-[#E8C777] underline font-semibold transition-colors cursor-pointer"
+                    className="text-[#38D9F5] hover:text-[#00D9FF] underline font-semibold transition-colors cursor-pointer"
                   >
                     Discover &amp; Friends
                   </button>{' '}
@@ -229,7 +229,7 @@ export const ChatView: React.FC<{ embedded?: boolean }> = ({ embedded = false })
                     <img
                       src={avatarSrc}
                       alt={msg.senderName}
-                      className="w-9 h-9 rounded-full object-cover object-top border border-[#7045A0]/60"
+                      className="w-9 h-9 rounded-full object-cover object-top border border-[#1677FF]/60"
                     />
                   </button>
 
@@ -249,8 +249,8 @@ export const ChatView: React.FC<{ embedded?: boolean }> = ({ embedded = false })
                         type="button"
                         disabled={!canInspect}
                         onClick={() => msg.senderId && openPublicProfile(msg.senderId)}
-                        className={`text-xs font-bold text-[#F2EDF7] ${
-                          canInspect ? 'hover:text-[#E8C777] transition-colors cursor-pointer' : 'cursor-default'
+                        className={`text-xs font-bold text-[#F2F7FF] ${
+                          canInspect ? 'hover:text-[#00D9FF] transition-colors cursor-pointer' : 'cursor-default'
                         }`}
                       >
                         {msg.senderName}
@@ -270,17 +270,17 @@ export const ChatView: React.FC<{ embedded?: boolean }> = ({ embedded = false })
                         }
                         size="xs"
                       />
-                      <span className="text-[10px] text-[#9A72CC] uppercase font-mono font-medium">
+                      <span className="text-[10px] text-[#38D9F5] uppercase font-mono font-medium">
                         {msg.senderClass}
                       </span>
-                      <span className="text-[10px] text-[#766D82] font-mono tabular-nums">{msg.timestamp}</span>
+                      <span className="text-[10px] text-[#647A9E] font-mono tabular-nums">{msg.timestamp}</span>
                     </div>
 
                     <div
                       className={`p-3.5 rounded-2xl text-xs leading-relaxed inline-block group relative text-left ${
                         msg.isCurrentUser
-                          ? 'bg-[#7045A0] border border-[#9A72CC]/50 text-[#F2EDF7] rounded-tr-none shadow-[0_6px_18px_rgba(112,69,160,0.3)]'
-                          : 'bg-[#21152F] border border-[#362B45] text-[#F2EDF7] rounded-tl-none'
+                          ? 'bg-gradient-to-br from-[#1677FF] to-[#0099FF] border border-[#00D9FF]/50 text-[#F2F7FF] rounded-tr-none shadow-[0_6px_18px_rgba(22,119,255,0.3)]'
+                          : 'bg-[#102440] border border-[#1E3A63] text-[#F2F7FF] rounded-tl-none'
                       }`}
                     >
                       <p>{msg.text}</p>
@@ -288,7 +288,7 @@ export const ChatView: React.FC<{ embedded?: boolean }> = ({ embedded = false })
                         <button
                           type="button"
                           onClick={() => handleReport(msg.id)}
-                          className="opacity-0 group-hover:opacity-100 absolute -top-2 -right-2 p-1 bg-[#100D18] text-[#A69AAF] hover:text-[#D65C66] rounded-full border border-[#362B45] transition-opacity cursor-pointer"
+                          className="opacity-0 group-hover:opacity-100 absolute -top-2 -right-2 p-1 bg-[#061225] text-[#94A8C7] hover:text-[#FB7185] rounded-full border border-[#1E3A63] transition-opacity cursor-pointer"
                           title="Report message"
                         >
                           <Flag className="w-3 h-3" />
@@ -303,18 +303,18 @@ export const ChatView: React.FC<{ embedded?: boolean }> = ({ embedded = false })
         </div>
 
         {/* Chat Input Bar */}
-        <form onSubmit={handleSend} className="p-4 border-t border-[#362B45] bg-[#171220] flex items-center gap-3">
+        <form onSubmit={handleSend} className="p-4 border-t border-[#1E3A63] bg-[#0A1930] flex items-center gap-3">
           <input
             type="text"
             value={inputText}
             onChange={e => setInputText(e.target.value)}
             placeholder={`Message ${selectedChannel === 'guild' ? 'fellow guildmates' : selectedChannel === 'whisper' ? 'selected friend' : 'the realm'}...`}
-            className="lq-input flex-1"
+            className="lq-input flex-1 px-3 py-2 text-xs"
           />
 
           <button
             type="submit"
-            className="lq-btn lq-btn-primary text-xs font-['Cinzel'] tracking-wider flex items-center gap-1.5 whitespace-nowrap shrink-0"
+            className="lq-btn lq-btn-primary py-2 px-4 rounded-xl text-xs font-['Cinzel'] tracking-wider flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
           >
             <Send className="w-3.5 h-3.5" />
             Send

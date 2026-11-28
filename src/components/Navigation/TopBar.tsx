@@ -93,14 +93,14 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[#100D18]/92 backdrop-blur-md border-b border-[#362B45] px-4 sm:px-6 py-3 shadow-[0_10px_28px_-12px_rgba(5,3,10,0.85)]">
+    <header className="sticky top-0 z-40 w-full bg-[#061225]/92 backdrop-blur-md border-b border-[#1E3A63] px-4 sm:px-6 py-3 shadow-[0_10px_28px_-12px_rgba(2,8,20,0.9)]">
       <div className="max-w-[1440px] mx-auto flex items-center justify-between gap-4 sm:gap-8">
         {/* Zone 1: Brand Wordmark & Mobile Menu Trigger */}
         <div className="flex items-center gap-3 shrink-0">
           <button
             type="button"
             onClick={onToggleSidebar}
-            className="lg:hidden p-2 rounded-lg bg-[#171220] border border-[#362B45] text-[#E8C777] hover:border-[#7045A0] hover:text-[#F2EDF7] transition-colors cursor-pointer"
+            className="lg:hidden p-2 rounded-lg bg-[#0A1930] border border-[#1E3A63] text-[#00D9FF] hover:border-[#00D9FF] hover:text-[#F2F7FF] transition-colors cursor-pointer"
             aria-label="Toggle navigation menu"
           >
             <Menu className="w-5 h-5" />
@@ -111,11 +111,11 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
             onClick={() => setActiveTab('dashboard')}
             className="group flex items-center gap-2.5 text-left focus:outline-none cursor-pointer"
           >
-            <div className="w-9 h-9 rounded-lg bg-[#171220] border border-[#D6A84B]/45 flex items-center justify-center group-hover:border-[#E8C777]/80 transition-colors">
+            <div className="w-9 h-9 rounded-lg bg-[#0A1930] border border-[#00D9FF]/45 flex items-center justify-center group-hover:border-[#00D9FF]/80 transition-colors shadow-[0_0_16px_rgba(0,217,255,0.16)]">
               <GoldenWorldTreeEmblem className="w-6 h-6 transition-transform duration-200 group-hover:scale-105" />
             </div>
-            <span className="font-['Cinzel'] font-black tracking-[0.16em] text-base sm:text-lg text-[#F2EDF7] group-hover:text-[#E8C777] transition-colors whitespace-nowrap shrink-0">
-              LIFEQUEST
+            <span className="font-['Cinzel'] font-black tracking-[0.16em] text-base sm:text-lg text-[#F2F7FF] group-hover:text-[#00D9FF] transition-colors whitespace-nowrap shrink-0">
+              FITNESSFIGHT
             </span>
           </button>
         </div>
@@ -133,12 +133,12 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
                 type="button"
                 onClick={() => setActiveTab(link.id)}
                 className={`relative py-2 whitespace-nowrap shrink-0 flex items-center gap-1.5 transition-colors cursor-pointer ${
-                  active ? 'text-[#F2EDF7]' : 'text-[#A69AAF] hover:text-[#F2EDF7]'
+                  active ? 'text-[#F2F7FF]' : 'text-[#94A8C7] hover:text-[#F2F7FF]'
                 }`}
               >
                 <span>{link.label}</span>
                 {link.badge !== undefined && link.badge > 0 && (
-                  <span className="text-[10px] font-mono tabular-nums px-1.5 py-0.2 rounded bg-[#D65C66] text-[#F2EDF7] font-bold">
+                  <span className="text-[10px] font-mono tabular-nums px-1.5 py-0.2 rounded bg-[#F43F5E] text-[#F2F7FF] font-bold">
                     {link.badge}
                   </span>
                 )}
@@ -147,7 +147,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
                     layoutId={prefersReduced ? undefined : 'topbar-active-underline'}
                     transition={{ duration: 0.2, ease: LQ_EASE }}
                     aria-hidden="true"
-                    className="absolute inset-x-0 -bottom-[1px] h-0.5 rounded-full bg-gradient-to-r from-[#7045A0] via-[#E8C777] to-[#D6A84B]"
+                    className="absolute inset-x-0 -bottom-[1px] h-0.5 rounded-full bg-gradient-to-r from-[#1677FF] via-[#00D9FF] to-[#38D9F5]"
                   />
                 )}
               </button>
@@ -161,14 +161,14 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
           <button
             type="button"
             onClick={toggleSound}
-            className="lq-btn p-2 rounded-lg bg-[#171220] border border-[#362B45] text-[#A69AAF] hover:text-[#E8C777] hover:border-[#7045A0] cursor-pointer"
+            className="lq-btn p-2 rounded-lg bg-[#0A1930] border border-[#1E3A63] text-[#94A8C7] hover:text-[#00D9FF] hover:border-[#00D9FF] cursor-pointer"
             title={stats.soundEnabled ? 'Mute Sound FX' : 'Enable Sound FX'}
             aria-label="Toggle Sound"
           >
             {stats.soundEnabled ? (
-              <Volume2 className="w-4 h-4 text-[#E8C777]" />
+              <Volume2 className="w-4 h-4 text-[#00D9FF]" />
             ) : (
-              <VolumeX className="w-4 h-4 text-[#766D82]" />
+              <VolumeX className="w-4 h-4 text-[#647A9E]" />
             )}
           </button>
 
@@ -181,13 +181,13 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
                   setShowNotifMenu(v => !v);
                   setShowPresenceMenu(false);
                 }}
-                className="lq-btn relative p-2 rounded-lg bg-[#171220] border border-[#362B45] text-[#E8C777] hover:text-[#F2EDF7] hover:border-[#7045A0] cursor-pointer"
+                className="lq-btn relative p-2 rounded-lg bg-[#0A1930] border border-[#1E3A63] text-[#38D9F5] hover:text-[#F2F7FF] hover:border-[#00D9FF] cursor-pointer"
                 title="Notifications & Companion Requests"
                 aria-label="Notifications"
               >
                 <Bell className="w-4 h-4" />
                 {totalBadgeCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-[#D65C66] border border-[#100D18] text-[#F2EDF7] text-[10px] font-bold flex items-center justify-center tabular-nums">
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-[#F43F5E] border border-[#061225] text-[#F2F7FF] text-[10px] font-bold flex items-center justify-center tabular-nums">
                     {totalBadgeCount > 9 ? '9+' : totalBadgeCount}
                   </span>
                 )}
@@ -195,10 +195,10 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
 
               <RpgDropdown
                 isOpen={showNotifMenu}
-                className="absolute right-0 mt-2 w-80 max-w-[90vw] bg-[#171220] border border-[#362B45] rounded-2xl shadow-[0_24px_54px_rgba(5,3,10,0.92)] p-4 z-50 space-y-3"
+                className="absolute right-0 mt-2 w-80 max-w-[90vw] bg-[#0A1930] border border-[#1E3A63] rounded-2xl shadow-[0_24px_54px_rgba(2,8,20,0.94)] p-4 z-50 space-y-3"
               >
-                <div className="flex items-center justify-between border-b border-[#362B45] pb-2">
-                  <span className="font-['Cinzel'] font-bold text-xs text-[#E8C777] uppercase tracking-wider">
+                <div className="flex items-center justify-between border-b border-[#1E3A63] pb-2">
+                  <span className="font-['Cinzel'] font-bold text-xs text-[#38D9F5] uppercase tracking-wider">
                     Realm Alerts
                   </span>
                   <div className="flex items-center gap-2">
@@ -206,7 +206,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
                       <button
                         type="button"
                         onClick={() => markNotificationRead()}
-                        className="text-[11px] text-[#E8C777] hover:text-[#F2EDF7] font-semibold cursor-pointer"
+                        className="text-[11px] text-[#38D9F5] hover:text-[#F2F7FF] font-semibold cursor-pointer"
                       >
                         Mark all read
                       </button>
@@ -214,7 +214,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
                     <button
                       type="button"
                       onClick={() => setShowNotifMenu(false)}
-                      className="text-[#A69AAF] hover:text-[#F2EDF7] cursor-pointer"
+                      className="text-[#94A8C7] hover:text-[#F2F7FF] cursor-pointer"
                       aria-label="Close notifications"
                     >
                       <X className="w-3.5 h-3.5" />
@@ -224,17 +224,17 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
 
                 {pendingIncomingFriends.length > 0 && (
                   <div className="space-y-2">
-                    <span className="text-[10px] uppercase tracking-wider text-[#A69AAF] font-bold flex items-center gap-1">
-                      <UserPlus className="w-3 h-3 text-[#E8C777]" /> Pending Friend Requests
+                    <span className="text-[10px] uppercase tracking-wider text-[#94A8C7] font-bold flex items-center gap-1">
+                      <UserPlus className="w-3 h-3 text-[#38D9F5]" /> Pending Friend Requests
                     </span>
                     {pendingIncomingFriends.map(req => (
                       <div
                         key={req.friendshipId}
-                        className="p-2.5 rounded-xl bg-[#21152F] border border-[#362B45] flex items-center justify-between gap-2"
+                        className="p-2.5 rounded-xl bg-[#102440] border border-[#1E3A63] flex items-center justify-between gap-2"
                       >
                         <div className="min-w-0">
-                          <p className="text-xs font-bold text-[#F2EDF7] truncate">{req.champion.username}</p>
-                          <p className="text-[10px] text-[#A69AAF]">
+                          <p className="text-xs font-bold text-[#F2F7FF] truncate">{req.champion.username}</p>
+                          <p className="text-[10px] text-[#94A8C7]">
                             Lv.{req.champion.level} {req.champion.characterClass}
                           </p>
                         </div>
@@ -242,7 +242,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
                           <button
                             type="button"
                             onClick={() => respondFriendRequest(req.friendshipId, true)}
-                            className="p-1.5 rounded-lg bg-[#49B88A] hover:brightness-110 text-[#100D18] cursor-pointer"
+                            className="p-1.5 rounded-lg bg-[#10B981] hover:brightness-110 text-[#061225] cursor-pointer"
                             title="Accept"
                           >
                             <Check className="w-3 h-3" />
@@ -250,7 +250,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
                           <button
                             type="button"
                             onClick={() => respondFriendRequest(req.friendshipId, false)}
-                            className="p-1.5 rounded-lg bg-[#D65C66]/20 hover:bg-[#D65C66]/35 text-[#D65C66] cursor-pointer"
+                            className="p-1.5 rounded-lg bg-[#F43F5E]/20 hover:bg-[#F43F5E]/35 text-[#F43F5E] cursor-pointer"
                             title="Decline"
                           >
                             <X className="w-3 h-3" />
@@ -263,19 +263,19 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
 
                 {guildInvites.length > 0 && (
                   <div className="space-y-2">
-                    <span className="text-[10px] uppercase tracking-wider text-[#A69AAF] font-bold flex items-center gap-1">
-                      <Shield className="w-3 h-3 text-[#E8C777]" /> Pending Guild Invites
+                    <span className="text-[10px] uppercase tracking-wider text-[#94A8C7] font-bold flex items-center gap-1">
+                      <Shield className="w-3 h-3 text-[#38D9F5]" /> Pending Guild Invites
                     </span>
                     {guildInvites.map(inv => (
                       <div
                         key={inv.inviteId}
-                        className="p-2.5 rounded-xl bg-[#21152F] border border-[#362B45] flex items-center justify-between gap-2"
+                        className="p-2.5 rounded-xl bg-[#102440] border border-[#1E3A63] flex items-center justify-between gap-2"
                       >
                         <div className="min-w-0">
-                          <p className="text-xs font-bold text-[#F2EDF7] truncate">
+                          <p className="text-xs font-bold text-[#F2F7FF] truncate">
                             [{inv.guildTag}] {inv.guildName}
                           </p>
-                          <p className="text-[10px] text-[#A69AAF] truncate">
+                          <p className="text-[10px] text-[#94A8C7] truncate">
                             Invited by {inv.inviterName}
                           </p>
                         </div>
@@ -283,7 +283,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
                           <button
                             type="button"
                             onClick={() => respondGuildInvite(inv.inviteId, true)}
-                            className="p-1.5 rounded-lg bg-[#49B88A] hover:brightness-110 text-[#100D18] cursor-pointer"
+                            className="p-1.5 rounded-lg bg-[#10B981] hover:brightness-110 text-[#061225] cursor-pointer"
                             title="Accept guild invite"
                           >
                             <Check className="w-3 h-3" />
@@ -291,7 +291,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
                           <button
                             type="button"
                             onClick={() => respondGuildInvite(inv.inviteId, false)}
-                            className="p-1.5 rounded-lg bg-[#D65C66]/20 hover:bg-[#D65C66]/35 text-[#D65C66] cursor-pointer"
+                            className="p-1.5 rounded-lg bg-[#F43F5E]/20 hover:bg-[#F43F5E]/35 text-[#F43F5E] cursor-pointer"
                             title="Decline guild invite"
                           >
                             <X className="w-3 h-3" />
@@ -306,7 +306,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
                   {notifications.filter(n => !n.dismissedAt).length === 0 &&
                   pendingIncomingFriends.length === 0 &&
                   guildInvites.length === 0 ? (
-                    <p className="text-xs text-[#766D82] text-center py-4">
+                    <p className="text-xs text-[#647A9E] text-center py-4">
                       No alerts right now.
                     </p>
                   ) : (
@@ -321,8 +321,8 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
                             key={n.id}
                             className={`p-2.5 rounded-xl border text-xs transition-colors flex items-start justify-between gap-2 ${
                               n.readAt
-                                ? 'bg-[#100D18]/75 border-[#362B45]/70 text-[#A69AAF]'
-                                : 'bg-[#21152F] border-[#7045A0]/55 text-[#F2EDF7]'
+                                ? 'bg-[#061225]/80 border-[#1E3A63]/70 text-[#94A8C7]'
+                                : 'bg-[#102440] border-[#1677FF]/60 text-[#F2F7FF]'
                             }`}
                           >
                             <button
@@ -334,20 +334,20 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
                               className="min-w-0 flex-1 text-left cursor-pointer"
                             >
                               <div className="flex items-center gap-1.5 text-[10px]">
-                                <span className="font-semibold uppercase tracking-wider text-[#A69AAF]">
+                                <span className="font-semibold uppercase tracking-wider text-[#94A8C7]">
                                   {catLabel}
                                 </span>
                                 {!n.readAt && (
                                   <>
-                                    <span className="text-[#766D82]" aria-hidden="true">·</span>
-                                    <span className="text-[#E8C777] font-semibold">New</span>
+                                    <span className="text-[#647A9E]" aria-hidden="true">·</span>
+                                    <span className="text-[#00D9FF] font-semibold">New</span>
                                   </>
                                 )}
                               </div>
-                              <span className="font-bold text-[#F2EDF7] block mt-0.5 truncate">
+                              <span className="font-bold text-[#F2F7FF] block mt-0.5 truncate">
                                 {n.title}
                               </span>
-                              <p className="text-[11px] text-[#A69AAF] mt-0.5 line-clamp-2">
+                              <p className="text-[11px] text-[#94A8C7] mt-0.5 line-clamp-2">
                                 {n.body}
                               </p>
                             </button>
@@ -356,7 +356,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
                                 <button
                                   type="button"
                                   onClick={() => void markNotificationRead(n.id)}
-                                  className="p-1 rounded text-[#49B88A] hover:text-[#F2EDF7] hover:bg-[#49B88A]/15 cursor-pointer"
+                                  className="p-1 rounded text-[#10B981] hover:text-[#F2F7FF] hover:bg-[#10B981]/15 cursor-pointer"
                                   title="Mark read"
                                   aria-label="Mark notification read"
                                 >
@@ -366,7 +366,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
                               <button
                                 type="button"
                                 onClick={() => void dismissNotification(n.id)}
-                                className="p-1 rounded text-[#766D82] hover:text-[#D65C66] hover:bg-[#D65C66]/15 cursor-pointer"
+                                className="p-1 rounded text-[#647A9E] hover:text-[#F43F5E] hover:bg-[#F43F5E]/15 cursor-pointer"
                                 title="Dismiss"
                                 aria-label="Dismiss notification"
                               >
@@ -379,7 +379,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
                   )}
                 </div>
 
-                <div className="pt-2 border-t border-[#362B45]">
+                <div className="pt-2 border-t border-[#1E3A63]">
                   <button
                     type="button"
                     onClick={() => {
@@ -396,26 +396,26 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
           )}
 
           {/* Compact Level, XP & Gold HUD */}
-          <div className="hidden sm:flex items-center gap-3 bg-[#171220] border border-[#362B45] rounded-xl px-3 py-1.5">
+          <div className="hidden sm:flex items-center gap-3 bg-[#0A1930] border border-[#1E3A63] rounded-xl px-3 py-1.5">
             <div className="flex items-center gap-2.5">
-              <span className="text-xs font-bold font-['Cinzel'] text-[#E8C777] bg-[#21152F] px-2 py-0.5 rounded border border-[#D6A84B]/40 tabular-nums">
+              <span className="text-xs font-bold font-['Cinzel'] text-[#00D9FF] bg-[#102440] px-2 py-0.5 rounded border border-[#1677FF]/45 tabular-nums">
                 Lv.{stats.level}
               </span>
               <div className="flex flex-col min-w-[90px]">
-                <div className="flex items-center justify-between text-[11px] text-[#A69AAF] gap-1.5 font-mono tabular-nums">
-                  <AnimatedCounter value={stats.playerXP} className="text-[#F2EDF7] font-semibold" />
-                  <span className="text-[#766D82]">/ {stats.playerXPNextLevel}</span>
+                <div className="flex items-center justify-between text-[11px] text-[#94A8C7] gap-1.5 font-mono tabular-nums">
+                  <AnimatedCounter value={stats.playerXP} className="text-[#F2F7FF] font-semibold" />
+                  <span className="text-[#647A9E]">/ {stats.playerXPNextLevel}</span>
                 </div>
                 <AnimatedProgressBar
                   percentage={xpPercentage}
-                  className="w-full bg-[#100D18] h-1.5 rounded-full overflow-hidden mt-0.5 border border-[#362B45]"
-                  barClassName="bg-gradient-to-r from-[#7045A0] via-[#9A72CC] to-[#D6A84B]"
+                  className="w-full bg-[#061225] h-1.5 rounded-full overflow-hidden mt-0.5 border border-[#1E3A63]"
+                  barClassName="bg-gradient-to-r from-[#1677FF] via-[#0099FF] to-[#00D9FF]"
                   shimmer={false}
                 />
               </div>
             </div>
 
-            <div className="w-px h-6 bg-[#362B45]" />
+            <div className="w-px h-6 bg-[#1E3A63]" />
 
             <button
               type="button"
@@ -423,14 +423,14 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
               className="flex items-center gap-1.5 cursor-pointer group"
               title="Gold Coins: Spend in the Royal Treasury Store"
             >
-              <Coins className="w-4 h-4 text-[#D6A84B] group-hover:scale-110 transition-transform" />
+              <Coins className="w-4 h-4 text-[#F59E0B] group-hover:scale-110 transition-transform" />
               <div className="flex flex-col text-left">
-                <span className="text-[10px] text-[#766D82] font-semibold uppercase tracking-wider leading-none">
+                <span className="text-[10px] text-[#647A9E] font-semibold uppercase tracking-wider leading-none">
                   Gold
                 </span>
                 <AnimatedCounter
                   value={stats.gold}
-                  className="font-mono tabular-nums text-xs font-bold text-[#E8C777] leading-tight"
+                  className="font-mono tabular-nums text-xs font-bold text-[#FBBF24] leading-tight"
                 />
               </div>
             </button>
@@ -445,7 +445,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
                   setShowPresenceMenu(v => !v);
                   setShowNotifMenu(false);
                 }}
-                className="flex items-center gap-2 pl-1.5 pr-2 py-1 rounded-xl bg-[#171220] border border-[#362B45] hover:border-[#7045A0] transition-colors focus:outline-none cursor-pointer"
+                className="flex items-center gap-2 pl-1.5 pr-2 py-1 rounded-xl bg-[#0A1930] border border-[#1E3A63] hover:border-[#00D9FF] transition-colors focus:outline-none cursor-pointer"
                 title="Champion Status & Profile"
               >
                 <div className="relative">
@@ -453,7 +453,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
                     src={resolveAssetUrl(user.googleAvatar || user.avatar, characterWarriorAvatarImg)}
                     alt={user.username}
                     referrerPolicy="no-referrer"
-                    className="w-8 h-8 rounded-lg object-cover border border-[#D6A84B]/50"
+                    className="w-8 h-8 rounded-lg object-cover border border-[#00D9FF]/50"
                   />
                   <PresenceBadge
                     status={myEffectivePresence}
@@ -461,22 +461,22 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
                     className="absolute -bottom-0.5 -right-0.5"
                   />
                 </div>
-                <ChevronDown className="w-3.5 h-3.5 text-[#A69AAF] hidden sm:block" />
+                <ChevronDown className="w-3.5 h-3.5 text-[#94A8C7] hidden sm:block" />
               </button>
 
               <RpgDropdown
                 isOpen={showPresenceMenu}
-                className="absolute right-0 mt-2 w-64 bg-[#171220] border border-[#362B45] rounded-2xl shadow-[0_24px_54px_rgba(5,3,10,0.92)] p-3.5 z-50 space-y-3"
+                className="absolute right-0 mt-2 w-64 bg-[#0A1930] border border-[#1E3A63] rounded-2xl shadow-[0_24px_54px_rgba(2,8,20,0.94)] p-3.5 z-50 space-y-3"
               >
-                <div className="flex items-center justify-between border-b border-[#362B45] pb-2.5">
+                <div className="flex items-center justify-between border-b border-[#1E3A63] pb-2.5">
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-[#F2EDF7] truncate">{user.username}</p>
+                    <p className="text-xs font-bold text-[#F2F7FF] truncate">{user.username}</p>
                     <PresenceBadge status={myEffectivePresence} showLabel size="xs" className="mt-0.5" />
                   </div>
                   <button
                     type="button"
                     onClick={() => setShowPresenceMenu(false)}
-                    className="text-[#A69AAF] hover:text-[#F2EDF7] p-1 cursor-pointer"
+                    className="text-[#94A8C7] hover:text-[#F2F7FF] p-1 cursor-pointer"
                     aria-label="Close presence menu"
                   >
                     <X className="w-3.5 h-3.5" />
@@ -484,7 +484,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
                 </div>
 
                 <div className="space-y-1">
-                  <p className="text-[10px] font-['Cinzel'] font-bold uppercase tracking-widest text-[#A69AAF] px-1">
+                  <p className="text-[10px] font-['Cinzel'] font-bold uppercase tracking-widest text-[#94A8C7] px-1">
                     Presence Status
                   </p>
                   {MANUAL_PRESENCE_OPTIONS.map(option => {
@@ -499,27 +499,27 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
                         }}
                         className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-colors cursor-pointer ${
                           active
-                            ? 'bg-[#7045A0]/35 text-[#F2EDF7] border border-[#7045A0]'
-                            : 'text-[#A69AAF] hover:bg-[#21152F] hover:text-[#F2EDF7] border border-transparent'
+                            ? 'bg-[#1677FF]/25 text-[#F2F7FF] border border-[#00D9FF]/60'
+                            : 'text-[#94A8C7] hover:bg-[#102440] hover:text-[#F2F7FF] border border-transparent'
                         }`}
                       >
                         <PresenceBadge status={option} showLabel size="sm" />
-                        {active && <Check className="w-3.5 h-3.5 text-[#E8C777]" />}
+                        {active && <Check className="w-3.5 h-3.5 text-[#00D9FF]" />}
                       </button>
                     );
                   })}
                 </div>
 
-                <div className="border-t border-[#362B45] pt-2 space-y-1">
+                <div className="border-t border-[#1E3A63] pt-2 space-y-1">
                   <button
                     type="button"
                     onClick={() => {
                       setActiveTab('character');
                       setShowPresenceMenu(false);
                     }}
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#A69AAF] hover:bg-[#21152F] hover:text-[#F2EDF7] transition-colors cursor-pointer"
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#94A8C7] hover:bg-[#102440] hover:text-[#F2F7FF] transition-colors cursor-pointer"
                   >
-                    <User className="w-3.5 h-3.5 text-[#E8C777]" />
+                    <User className="w-3.5 h-3.5 text-[#00D9FF]" />
                     Character Profile
                   </button>
                   <button
@@ -528,9 +528,9 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
                       setActiveTab('settings');
                       setShowPresenceMenu(false);
                     }}
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#A69AAF] hover:bg-[#21152F] hover:text-[#F2EDF7] transition-colors cursor-pointer"
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#94A8C7] hover:bg-[#102440] hover:text-[#F2F7FF] transition-colors cursor-pointer"
                   >
-                    <Settings className="w-3.5 h-3.5 text-[#A69AAF]" />
+                    <Settings className="w-3.5 h-3.5 text-[#94A8C7]" />
                     Settings &amp; Privacy
                   </button>
                 </div>

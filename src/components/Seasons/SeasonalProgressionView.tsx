@@ -29,6 +29,7 @@ import {
   Sparkles,
   Trophy,
   X,
+  Zap,
 } from 'lucide-react';
 
 const formatCountdown = (endsAtIso: string): string => {
@@ -47,23 +48,58 @@ const REWARD_TYPE_LABELS: Record<string, string> = {
   cosmetic_banner: 'Cosmetic',
   cosmetic_outfit: 'Cosmetic',
   cosmetic_aura: 'Cosmetic',
+  cosmetic: 'Cosmetic',
   title: 'Title',
   badge: 'Title',
   achievement: 'Title',
   relic: 'Collectible',
+  card: 'Collectible Card',
   collectible_card: 'Collectible Card',
   card_pack: 'Collectible Card',
   fragments: 'Fragments',
   gold: 'Gold',
 };
 
-const getRewardCategoryIcon = (rewardType?: string) => {
+const getRewardVisualMeta = (rewardType?: string) => {
   const label = REWARD_TYPE_LABELS[rewardType || ''] || 'Cosmetic';
-  if (label === 'Gold') return Coins;
-  if (label === 'Fragments') return Gem;
-  if (label === 'Title') return Award;
-  if (label === 'Collectible Card' || label === 'Collectible') return Layers;
-  return Crown;
+  if (label === 'Gold') {
+    return {
+      label,
+      icon: Coins,
+      accentHex: '#FBBF24',
+      bgTint: 'from-[#F59E0B]/20 via-[#102440] to-[#061225]',
+    };
+  }
+  if (label === 'Fragments') {
+    return {
+      label,
+      icon: Gem,
+      accentHex: '#38D9F5',
+      bgTint: 'from-[#00D9FF]/20 via-[#102440] to-[#061225]',
+    };
+  }
+  if (label === 'Title') {
+    return {
+      label,
+      icon: Award,
+      accentHex: '#60A5FA',
+      bgTint: 'from-[#1677FF]/25 via-[#102440] to-[#061225]',
+    };
+  }
+  if (label === 'Collectible Card' || label === 'Collectible') {
+    return {
+      label,
+      icon: Layers,
+      accentHex: '#34D399',
+      bgTint: 'from-[#10B981]/20 via-[#102440] to-[#061225]',
+    };
+  }
+  return {
+    label,
+    icon: Crown,
+    accentHex: '#00D9FF',
+    bgTint: 'from-[#00D9FF]/20 via-[#1677FF]/15 to-[#061225]',
+  };
 };
 
 type TierFilter = 'all' | '1-15' | '16-35' | '36-50' | 'claimable';
@@ -181,6 +217,43 @@ export const SeasonalProgressionView: React.FC = () => {
   const milestones = seasonState?.season?.milestones || [];
   const totalTiers = milestones.length || 50;
 
+  const readyClaims = useMemo(() => {
+    if (!seasonState) return [] as Array<{ milestoneId: string; track: 'free' | 'elite' }>;
+    const claimedFree = new Set(seasonState.playerProgress.claimedMilestoneIds);
+    const claimedElite = new Set(seasonState.playerProgress.claimedEliteMilestoneIds || []);
+    const eliteActive = Boolean(seasonState.playerProgress.eliteUnlocked);
+    const list: Array<{ milestoneId: string; track: 'free' | 'elite' }> = [];
+    for (const ms of milestones) {
+      if (seasonState.playerProgress.seasonXp < ms.requiredSeasonXp) continue;
+      if (!claimedFree.has(ms.id)) {
+        list.push({ milestoneId: ms.id, track: 'free' });
+      }
+      if (eliteActive && ms.eliteRewardLabel && !claimedElite.has(ms.id)) {
+        list.push({ milestoneId: ms.id, track: 'elite' });
+      }
+    }
+    return list;
+  }, [milestones, seasonState]);
+
+  const handleClaimAllReady = async () => {
+    if (readyClaims.length === 0 || busyId) return;
+    setBusyId('claim-all');
+    let claimedNow = 0;
+    for (const item of readyClaims) {
+      const res = await claimSeasonMilestone(item.milestoneId, item.track);
+      if (res.success) claimedNow += 1;
+    }
+    setBusyId(null);
+    if (claimedNow > 0) {
+      showFeedback(
+        'success',
+        `Claimed ${claimedNow} unlocked Battle Pass ${claimedNow === 1 ? 'reward' : 'rewards'}!`
+      );
+    } else {
+      showFeedback('error', 'Could not claim available Battle Pass rewards right now.');
+    }
+  };
+
   const filteredMilestones = useMemo(() => {
     if (!seasonState) return [];
     const claimedFree = new Set(seasonState.playerProgress.claimedMilestoneIds);
@@ -203,8 +276,8 @@ export const SeasonalProgressionView: React.FC = () => {
 
   if (seasonLoading && !seasonState) {
     return (
-      <div className="py-16 flex flex-col items-center justify-center gap-3 text-[#A69AAF] text-xs">
-        <Loader2 className="w-6 h-6 animate-spin text-[#D6A84B]" />
+      <div className="py-16 flex flex-col items-center justify-center gap-3 text-[#94A8C7] text-xs">
+        <Loader2 className="w-6 h-6 animate-spin text-[#00D9FF]" />
         <span>Loading 50-Level Battle Pass...</span>
       </div>
     );
@@ -213,8 +286,8 @@ export const SeasonalProgressionView: React.FC = () => {
   if (!seasonState) {
     return (
       <div className="lq-surface rounded-2xl p-8 text-center space-y-3">
-        <Calendar className="w-7 h-7 text-[#D6A84B] mx-auto" />
-        <p className="text-sm font-semibold text-[#F2EDF7]">Battle Pass unavailable right now.</p>
+        <Calendar className="w-7 h-7 text-[#00D9FF] mx-auto" />
+        <p className="text-sm font-semibold text-[#F2F7FF]">Battle Pass unavailable right now.</p>
         <button
           type="button"
           onClick={() => void refreshSeasonState(1)}
@@ -258,106 +331,150 @@ export const SeasonalProgressionView: React.FC = () => {
     ? claimedEliteIds.has(activePreviewMilestone.id)
     : false;
 
+  const FreePreviewMeta = getRewardVisualMeta(activePreviewMilestone?.rewardType);
+  const ElitePreviewMeta = getRewardVisualMeta(activePreviewMilestone?.eliteRewardType);
+  const FreePreviewIcon = FreePreviewMeta.icon;
+  const ElitePreviewIcon = ElitePreviewMeta.icon;
+
   const landmarks = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
 
   return (
-    <div className="space-y-7 pb-12">
-      {/* 1. BATTLE PASS COMMAND BANNER */}
+    <div className="space-y-8 pb-12">
+      {/* 1. BATTLE PASS SEASON COMMAND HERO */}
       <FeatureBanner themeId="social" className="relative overflow-hidden">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-20"
+          style={{
+            backgroundImage:
+              'repeating-linear-gradient(125deg, rgba(0,217,255,0.08) 0px, rgba(0,217,255,0.08) 1px, transparent 1px, transparent 28px)',
+            maskImage: 'radial-gradient(ellipse 85% 90% at 90% 10%, #000 10%, transparent 75%)',
+            WebkitMaskImage:
+              'radial-gradient(ellipse 85% 90% at 90% 10%, #000 10%, transparent 75%)',
+          }}
+        />
+
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="flex items-start gap-4 sm:gap-5">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-[#D6A84B] to-[#7045A0] p-[2px] shadow-[0_0_24px_rgba(214,168,75,0.28)] shrink-0">
-              <div className="w-full h-full rounded-[14px] bg-[#100D18] flex flex-col items-center justify-center">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-[#E8C777]">
+            {/* Gaming-style Tier Emblem */}
+            <div
+              className={`w-18 h-18 sm:w-22 sm:h-22 rounded-2xl p-[2px] shrink-0 ${
+                eliteUnlocked
+                  ? 'bg-gradient-to-br from-[#FBBF24] via-[#00D9FF] to-[#1677FF] shadow-[0_0_26px_rgba(251,191,36,0.3)]'
+                  : 'bg-gradient-to-br from-[#00D9FF] to-[#1677FF] shadow-[0_0_26px_rgba(0,217,255,0.28)]'
+              }`}
+            >
+              <div className="w-full h-full rounded-[14px] bg-[#061225] flex flex-col items-center justify-center relative overflow-hidden">
+                <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#38D9F5]">
                   Tier
                 </span>
-                <span className="font-['Cinzel'] font-black text-2xl sm:text-3xl text-[#F2EDF7] tabular-nums leading-none">
+                <span className="font-['Cinzel'] font-black text-2xl sm:text-3xl text-[#F2F7FF] tabular-nums leading-none mt-0.5">
                   <AnimatedCounter
                     value={playerProgress.currentTier}
                     format={v => String(Math.round(v)).padStart(2, '0')}
                   />
                 </span>
+                <span className="text-[9px] font-mono text-[#647A9E] mt-0.5">/ {totalTiers}</span>
               </div>
             </div>
 
             <div className="space-y-1.5 min-w-0">
               <div className="flex flex-wrap items-center gap-2 text-xs">
-                <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#E8C777]">
+                <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#00D9FF]">
                   Season {season.seasonNumber} · Battle Pass
                 </span>
-                <span className="text-[#766D82]" aria-hidden="true">·</span>
-                <span className="text-[#F2EDF7] font-medium">{season.theme}</span>
-                <span className="text-[#766D82]" aria-hidden="true">·</span>
-                <span className="text-[#D6A84B] font-mono inline-flex items-center gap-1 tabular-nums">
+                <span className="text-[#647A9E]" aria-hidden="true">·</span>
+                <span className="text-[#F2F7FF] font-medium">{season.theme}</span>
+                <span className="text-[#647A9E]" aria-hidden="true">·</span>
+                <span className="text-[#38D9F5] font-mono inline-flex items-center gap-1 tabular-nums">
                   <Clock className="w-3.5 h-3.5" />
                   {formatCountdown(season.endsAt)}
                 </span>
               </div>
-              <h2 className="text-xl sm:text-3xl font-black font-['Cinzel'] text-[#F2EDF7]">
+              <h2 className="text-xl sm:text-3xl font-black font-['Cinzel'] text-[#F2F7FF]">
                 {season.name}
               </h2>
-              <p className="text-xs sm:text-sm text-[#A69AAF] max-w-2xl leading-relaxed">
+              <p className="text-xs sm:text-sm text-[#94A8C7] max-w-2xl leading-relaxed">
                 {season.description}
               </p>
             </div>
           </div>
 
-          {/* Season XP & Daily Cap Readout */}
-          <div className="lg:w-[340px] shrink-0 space-y-3 lg:pl-6 lg:border-l lg:border-[#362B45]">
+          {/* Season XP & Daily Cap Telemetry */}
+          <div className="lg:w-[340px] shrink-0 space-y-3 lg:pl-6 lg:border-l lg:border-[#1E3A63]">
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs font-mono tabular-nums">
-                <span className="text-[#E8C777] font-bold">
+                <span className="text-[#00D9FF] font-bold">
                   <AnimatedCounter value={playerProgress.seasonXp} /> Season XP
                 </span>
-                <span className="text-[#A69AAF]">
-                  {nextMilestone ? `Next: ${nextMilestone.requiredSeasonXp.toLocaleString()} XP` : 'Max Tier'}
+                <span className="text-[#94A8C7]">
+                  {nextMilestone
+                    ? `Next: ${nextMilestone.requiredSeasonXp.toLocaleString()} XP`
+                    : 'Max Tier Reached'}
                 </span>
               </div>
               <AnimatedProgressBar
                 percentage={Math.min(100, playerProgress.completionPercent)}
-                barClassName="bg-gradient-to-r from-[#7045A0] via-[#9A72CC] to-[#D6A84B]"
+                barClassName="bg-gradient-to-r from-[#1677FF] via-[#00D9FF] to-[#FBBF24]"
               />
-              <div className="flex items-center justify-between text-[11px] text-[#A69AAF] tabular-nums">
-                <span>Tier {playerProgress.currentTier} / {totalTiers}</span>
-                <span>{playerProgress.completionPercent}% Pass Complete</span>
+              <div className="flex items-center justify-between text-[11px] text-[#94A8C7] tabular-nums">
+                <span>
+                  Tier {playerProgress.currentTier} / {totalTiers}
+                </span>
+                <span className="text-[#38D9F5] font-semibold">
+                  {playerProgress.completionPercent}% Pass Complete
+                </span>
               </div>
             </div>
 
-            <div className="pt-2 border-t border-[#362B45] space-y-1">
-              <div className="flex items-center justify-between text-[11px] font-mono text-[#A69AAF] tabular-nums">
+            <div className="pt-2 border-t border-[#1E3A63] space-y-1">
+              <div className="flex items-center justify-between text-[11px] font-mono text-[#94A8C7] tabular-nums">
                 <span>Daily Season XP Cap</span>
-                <span className="text-[#49B88A] font-semibold">
+                <span className="text-[#34D399] font-semibold">
                   {dailyXpToday} / {dailyXpCap} XP
                 </span>
               </div>
               <AnimatedProgressBar
                 percentage={dailyCapPct}
-                className="w-full h-1.5 rounded-full bg-[#100D18] border border-[#362B45] overflow-hidden"
-                barClassName="bg-[#49B88A]"
+                className="w-full h-1.5 rounded-full bg-[#061225] border border-[#1E3A63] overflow-hidden"
+                barClassName="bg-[#10B981]"
                 shimmer={false}
               />
             </div>
           </div>
         </div>
 
-        {/* Fair Play Guarantee + Elite Pass Toggle */}
-        <div className="mt-5 pt-4 border-t border-[#362B45] flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <p className="text-xs text-[#A69AAF] flex items-center gap-2">
-            <Shield className="w-4 h-4 text-[#D6A84B] shrink-0" />
-            Balanced progression economy: Free &amp; Elite tracks award Cosmetics, Collectible Cards, Titles, Fragments, and Gold.
+        {/* Fair Play Guarantee + Action Strip */}
+        <div className="relative z-10 mt-5 pt-4 border-t border-[#1E3A63] flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <p className="text-xs text-[#94A8C7] flex items-center gap-2">
+            <Shield className="w-4 h-4 text-[#00D9FF] shrink-0" />
+            Fair-Play Pass: Free &amp; Elite tracks award Cosmetics, Collectible Cards, Titles, Fragments, and Gold.
           </p>
 
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            {readyClaims.length > 0 && (
+              <button
+                type="button"
+                disabled={busyId !== null}
+                onClick={() => void handleClaimAllReady()}
+                className="lq-btn lq-btn-primary px-4 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+              >
+                <Zap className="w-3.5 h-3.5 text-[#00D9FF]" />
+                {busyId === 'claim-all'
+                  ? 'Claiming...'
+                  : `Claim All Ready (${readyClaims.length})`}
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setShowElitePreview(true)}
               className="lq-btn lq-btn-secondary px-3.5 py-2 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
             >
-              <Eye className="w-3.5 h-3.5 text-[#E8C777]" />
+              <Eye className="w-3.5 h-3.5 text-[#00D9FF]" />
               Preview Elite Pass
             </button>
             {eliteUnlocked ? (
-              <span className="px-3.5 py-2 rounded-xl bg-[#D6A84B]/12 border border-[#D6A84B]/45 text-xs font-bold text-[#E8C777] inline-flex items-center gap-1.5 whitespace-nowrap">
+              <span className="px-3.5 py-2 rounded-xl bg-[#F59E0B]/15 border border-[#F59E0B]/50 text-xs font-bold text-[#FBBF24] inline-flex items-center gap-1.5 whitespace-nowrap">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 Elite Pass Active
               </span>
@@ -379,39 +496,45 @@ export const SeasonalProgressionView: React.FC = () => {
         <div
           className={`p-3.5 rounded-xl border text-xs text-center font-medium ${
             notice.type === 'error'
-              ? 'bg-[#D65C66]/12 border-[#D65C66]/45 text-[#D65C66]'
-              : 'bg-[#49B88A]/12 border-[#49B88A]/45 text-[#49B88A]'
+              ? 'bg-[#F43F5E]/12 border-[#F43F5E]/45 text-[#FB7185]'
+              : 'bg-[#10B981]/12 border-[#10B981]/45 text-[#34D399]'
           }`}
         >
           {notice.text}
         </div>
       )}
 
-      {/* 2. HORIZONTAL DUAL-TRACK BATTLE PASS */}
+      {/* 2. HORIZONTAL DUAL-TRACK BATTLE PASS MATRIX (FREE FIRE-INSPIRED FITNESSFIGHT PASS) */}
       <section className="space-y-4">
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3">
           <div>
-            <h3 className="font-['Cinzel'] font-bold text-lg text-[#F2EDF7] flex items-center gap-2">
-              <Crown className="w-5 h-5 text-[#D6A84B]" />
+            <h3 className="font-['Cinzel'] font-bold text-lg text-[#F2F7FF] flex items-center gap-2">
+              <Crown className="w-5 h-5 text-[#FBBF24]" />
               50-Level Reward Track
             </h3>
-            <p className="text-xs text-[#A69AAF] tabular-nums mt-0.5">
-              Free Pass Claimed: <span className="text-[#9A72CC] font-semibold">{claimedFreeCount}/{totalTiers}</span>
-              <span className="mx-2 text-[#766D82]" aria-hidden="true">·</span>
-              Elite Pass Claimed: <span className="text-[#E8C777] font-semibold">{claimedEliteCount}/{totalTiers}</span>
+            <p className="text-xs text-[#94A8C7] tabular-nums mt-0.5">
+              Free Pass Claimed:{' '}
+              <span className="text-[#00D9FF] font-semibold">
+                {claimedFreeCount}/{totalTiers}
+              </span>
+              <span className="mx-2 text-[#647A9E]" aria-hidden="true">·</span>
+              Elite Pass Claimed:{' '}
+              <span className="text-[#FBBF24] font-semibold">
+                {claimedEliteCount}/{totalTiers}
+              </span>
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
             {/* Range Filter Controls */}
-            <div className="flex flex-wrap items-center gap-1 p-1 rounded-xl bg-[#100D18] border border-[#362B45]">
+            <div className="flex flex-wrap items-center gap-1 p-1 rounded-xl bg-[#061225] border border-[#1E3A63]">
               {(
                 [
                   { id: 'all', label: 'All (1–50)' },
                   { id: '1-15', label: 'Tiers 1–15' },
                   { id: '16-35', label: 'Tiers 16–35' },
                   { id: '36-50', label: 'Tiers 36–50' },
-                  { id: 'claimable', label: 'Ready to Claim' },
+                  { id: 'claimable', label: `Ready (${readyClaims.length})` },
                 ] as const
               ).map(f => (
                 <button
@@ -420,8 +543,8 @@ export const SeasonalProgressionView: React.FC = () => {
                   onClick={() => setTierFilter(f.id)}
                   className={`px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                     tierFilter === f.id
-                      ? 'bg-[#7045A0] text-[#F2EDF7] font-bold border border-[#E8C777]/30'
-                      : 'text-[#A69AAF] hover:text-[#F2EDF7]'
+                      ? 'bg-[#1677FF] text-[#F2F7FF] font-bold border border-[#00D9FF]/45 shadow-[0_2px_10px_rgba(22,119,255,0.45)]'
+                      : 'text-[#94A8C7] hover:text-[#F2F7FF]'
                   }`}
                 >
                   {f.label}
@@ -437,7 +560,7 @@ export const SeasonalProgressionView: React.FC = () => {
                 onClick={() => scrollRailBy(-440)}
                 className="lq-btn lq-btn-secondary p-2 rounded-lg cursor-pointer"
               >
-                <ChevronLeft className="w-4 h-4 text-[#E8C777]" />
+                <ChevronLeft className="w-4 h-4 text-[#00D9FF]" />
               </button>
               <button
                 type="button"
@@ -445,7 +568,7 @@ export const SeasonalProgressionView: React.FC = () => {
                 onClick={() => scrollRailBy(440)}
                 className="lq-btn lq-btn-secondary p-2 rounded-lg cursor-pointer"
               >
-                <ChevronRight className="w-4 h-4 text-[#E8C777]" />
+                <ChevronRight className="w-4 h-4 text-[#00D9FF]" />
               </button>
             </div>
           </div>
@@ -453,7 +576,7 @@ export const SeasonalProgressionView: React.FC = () => {
 
         {/* Landmark Quick-Jump Rail */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1">
-          <span className="text-[11px] font-mono uppercase tracking-wider text-[#A69AAF] shrink-0">
+          <span className="text-[11px] font-mono uppercase tracking-wider text-[#94A8C7] shrink-0">
             Milestones:
           </span>
           {landmarks.map(tier => {
@@ -466,10 +589,10 @@ export const SeasonalProgressionView: React.FC = () => {
                 onClick={() => jumpToTier(tier)}
                 className={`px-2.5 py-1 rounded-md text-[11px] font-mono font-bold tabular-nums transition-all cursor-pointer shrink-0 ${
                   active
-                    ? 'bg-[#D6A84B] text-[#100D18]'
+                    ? 'bg-[#00D9FF] text-[#061225] shadow-[0_0_12px_rgba(0,217,255,0.4)]'
                     : reached
-                    ? 'bg-[#21152F] border border-[#7045A0] text-[#E8C777]'
-                    : 'bg-[#171220] border border-[#362B45] text-[#A69AAF] hover:text-[#F2EDF7]'
+                    ? 'bg-[#102440] border border-[#1677FF] text-[#38D9F5]'
+                    : 'bg-[#0A1930] border border-[#1E3A63] text-[#94A8C7] hover:text-[#F2F7FF]'
                 }`}
               >
                 T{tier}
@@ -478,41 +601,46 @@ export const SeasonalProgressionView: React.FC = () => {
           })}
         </div>
 
-        {/* Selected Tier Interactive Reward Preview Stage */}
+        {/* Selected Tier Interactive Reward Spotlight */}
         {activePreviewMilestone && (
-          <div className="lq-card rounded-2xl p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="lq-card rounded-2xl p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-[#00D9FF]/35">
             <div className="space-y-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono">
-                <span className="text-[#E8C777] font-bold uppercase">
+                <span className="text-[#00D9FF] font-bold uppercase">
                   Tier {String(activePreviewMilestone.tier).padStart(2, '0')} Spotlight
                 </span>
-                <span className="text-[#766D82]" aria-hidden="true">·</span>
-                <span className="text-[#A69AAF] tabular-nums">
+                <span className="text-[#647A9E]" aria-hidden="true">·</span>
+                <span className="text-[#94A8C7] tabular-nums">
                   {activePreviewMilestone.requiredSeasonXp.toLocaleString()} Season XP Required
                 </span>
-                <span className="text-[#766D82]" aria-hidden="true">·</span>
-                <span className={previewUnlocked ? 'text-[#49B88A] font-semibold' : 'text-[#A69AAF]'}>
+                <span className="text-[#647A9E]" aria-hidden="true">·</span>
+                <span className={previewUnlocked ? 'text-[#34D399] font-semibold' : 'text-[#94A8C7]'}>
                   {previewUnlocked ? 'Unlocked' : 'Locked'}
                 </span>
               </div>
-              <h4 className="font-['Cinzel'] font-bold text-base sm:text-lg text-[#F2EDF7] truncate">
+              <h4 className="font-['Cinzel'] font-bold text-base sm:text-lg text-[#F2F7FF] truncate">
                 {activePreviewMilestone.title}
               </h4>
             </div>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
               {/* Free Preview Summary */}
-              <div className="flex items-center justify-between gap-3 px-3.5 py-2 rounded-xl bg-[#100D18] border border-[#7045A0]/45">
-                <div className="min-w-0">
-                  <span className="text-[10px] font-mono uppercase text-[#9A72CC] block">
-                    Free · {REWARD_TYPE_LABELS[activePreviewMilestone.rewardType] || 'Reward'}
-                  </span>
-                  <span className="text-xs font-semibold text-[#F2EDF7] truncate block max-w-[190px]">
-                    {activePreviewMilestone.rewardLabel}
-                  </span>
+              <div className="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl bg-[#061225] border border-[#1677FF]/50">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-[#102440] border border-[#00D9FF]/35 flex items-center justify-center shrink-0">
+                    <FreePreviewIcon className="w-4 h-4 text-[#00D9FF]" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-mono uppercase text-[#38D9F5] block">
+                      Free · {FreePreviewMeta.label}
+                    </span>
+                    <span className="text-xs font-semibold text-[#F2F7FF] truncate block max-w-[190px]">
+                      {activePreviewMilestone.rewardLabel}
+                    </span>
+                  </div>
                 </div>
                 {previewFreeClaimed ? (
-                  <span className="text-[11px] font-semibold text-[#49B88A] shrink-0">Claimed</span>
+                  <span className="text-[11px] font-semibold text-[#34D399] shrink-0">Claimed</span>
                 ) : previewUnlocked ? (
                   <button
                     type="button"
@@ -523,23 +651,28 @@ export const SeasonalProgressionView: React.FC = () => {
                     Claim Free
                   </button>
                 ) : (
-                  <Lock className="w-3.5 h-3.5 text-[#766D82] shrink-0" />
+                  <Lock className="w-3.5 h-3.5 text-[#647A9E] shrink-0" />
                 )}
               </div>
 
               {/* Elite Preview Summary */}
               {activePreviewMilestone.eliteRewardLabel && (
-                <div className="flex items-center justify-between gap-3 px-3.5 py-2 rounded-xl bg-[#100D18] border border-[#D6A84B]/45">
-                  <div className="min-w-0">
-                    <span className="text-[10px] font-mono uppercase text-[#E8C777] block">
-                      Elite · {REWARD_TYPE_LABELS[activePreviewMilestone.eliteRewardType || 'cosmetic_crest'] || 'Reward'}
-                    </span>
-                    <span className="text-xs font-semibold text-[#F2EDF7] truncate block max-w-[190px]">
-                      {activePreviewMilestone.eliteRewardLabel}
-                    </span>
+                <div className="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl bg-[#061225] border border-[#F59E0B]/45">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-lg bg-[#102440] border border-[#F59E0B]/40 flex items-center justify-center shrink-0">
+                      <ElitePreviewIcon className="w-4 h-4 text-[#FBBF24]" />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-[10px] font-mono uppercase text-[#FBBF24] block">
+                        Elite · {ElitePreviewMeta.label}
+                      </span>
+                      <span className="text-xs font-semibold text-[#F2F7FF] truncate block max-w-[190px]">
+                        {activePreviewMilestone.eliteRewardLabel}
+                      </span>
+                    </div>
                   </div>
                   {previewEliteClaimed ? (
-                    <span className="text-[11px] font-semibold text-[#49B88A] shrink-0">Claimed</span>
+                    <span className="text-[11px] font-semibold text-[#34D399] shrink-0">Claimed</span>
                   ) : previewUnlocked && eliteUnlocked ? (
                     <button
                       type="button"
@@ -550,7 +683,7 @@ export const SeasonalProgressionView: React.FC = () => {
                       Claim Elite
                     </button>
                   ) : (
-                    <Lock className="w-3.5 h-3.5 text-[#D6A84B]/60 shrink-0" />
+                    <Lock className="w-3.5 h-3.5 text-[#F59E0B]/60 shrink-0" />
                   )}
                 </div>
               )}
@@ -560,35 +693,35 @@ export const SeasonalProgressionView: React.FC = () => {
 
         {/* Horizontal Dual-Track Battle Pass Matrix */}
         {filteredMilestones.length === 0 ? (
-          <div className="lq-surface rounded-2xl py-10 text-center text-xs text-[#A69AAF]">
+          <div className="lq-surface rounded-2xl py-10 text-center text-xs text-[#94A8C7]">
             No Battle Pass tiers match this filter right now.
           </div>
         ) : (
-          <div className="lq-surface rounded-2xl overflow-hidden flex">
+          <div className="lq-surface rounded-2xl overflow-hidden flex border-[#1E3A63]">
             {/* Pinned Track Legend Column */}
-            <div className="hidden md:flex flex-col w-36 shrink-0 bg-[#171220] border-r border-[#362B45] z-10">
-              <div className="h-[72px] px-3.5 flex flex-col justify-center border-b border-[#362B45]">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-[#A69AAF]">
+            <div className="hidden md:flex flex-col w-38 shrink-0 bg-[#0A1930] border-r border-[#1E3A63] z-10">
+              <div className="h-[78px] px-4 flex flex-col justify-center border-b border-[#1E3A63]">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#94A8C7]">
                   Level Rail
                 </span>
-                <span className="font-['Cinzel'] font-bold text-xs text-[#F2EDF7]">
+                <span className="font-['Cinzel'] font-bold text-xs text-[#F2F7FF]">
                   Tier &amp; XP
                 </span>
               </div>
-              <div className="h-[148px] px-3.5 flex flex-col justify-center border-b border-[#362B45] bg-[#7045A0]/[0.06]">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-[#9A72CC] font-bold">
+              <div className="h-[164px] px-4 flex flex-col justify-center border-b border-[#1E3A63] bg-gradient-to-r from-[#1677FF]/[0.12] to-transparent">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#00D9FF] font-bold">
                   Free Track
                 </span>
-                <span className="text-[11px] text-[#A69AAF] mt-1">
+                <span className="text-[11px] text-[#94A8C7] mt-1">
                   Open to all champions
                 </span>
               </div>
-              <div className="h-[148px] px-3.5 flex flex-col justify-center bg-[#D6A84B]/[0.05]">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-[#E8C777] font-bold flex items-center gap-1">
+              <div className="h-[164px] px-4 flex flex-col justify-center bg-gradient-to-r from-[#F59E0B]/[0.10] to-transparent">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#FBBF24] font-bold flex items-center gap-1">
                   <Crown className="w-3 h-3" />
-                  Elite Track
+                  Elite Pass
                 </span>
-                <span className="text-[11px] text-[#A69AAF] mt-1">
+                <span className="text-[11px] text-[#94A8C7] mt-1">
                   {eliteUnlocked ? 'Pass Active' : 'Earned Unlock'}
                 </span>
               </div>
@@ -597,7 +730,7 @@ export const SeasonalProgressionView: React.FC = () => {
             {/* Scrollable Horizontal Tier Columns */}
             <div
               ref={railRef}
-              className="flex-1 overflow-x-auto flex divide-x divide-[#362B45] scroll-smooth bg-[#100D18]"
+              className="flex-1 overflow-x-auto flex divide-x divide-[#1E3A63] scroll-smooth bg-[#061225]"
             >
               {filteredMilestones.map(ms => {
                 const unlocked = playerProgress.seasonXp >= ms.requiredSeasonXp;
@@ -606,61 +739,78 @@ export const SeasonalProgressionView: React.FC = () => {
                 const freeBusy = busyId === `${ms.id}-free`;
                 const eliteBusy = busyId === `${ms.id}-elite`;
                 const isSelected = selectedTier === ms.tier;
+                const isCurrentTier = playerProgress.currentTier === ms.tier;
                 const isLandmark = ms.tier % 5 === 0;
-                const FreeIcon = getRewardCategoryIcon(ms.rewardType);
-                const EliteIcon = getRewardCategoryIcon(ms.eliteRewardType);
+                const freeMeta = getRewardVisualMeta(ms.rewardType);
+                const eliteMeta = getRewardVisualMeta(ms.eliteRewardType);
+                const FreeIcon = freeMeta.icon;
+                const EliteIcon = eliteMeta.icon;
 
                 return (
                   <div
                     key={ms.id}
                     data-bp-tier={ms.tier}
                     onClick={() => setSelectedTier(ms.tier)}
-                    className={`w-[196px] sm:w-[210px] shrink-0 flex flex-col transition-colors cursor-pointer ${
-                      isSelected ? 'bg-[#21152F]' : 'hover:bg-[#171220]'
+                    className={`w-[202px] sm:w-[216px] shrink-0 flex flex-col transition-colors cursor-pointer ${
+                      isSelected ? 'bg-[#102440]/90' : 'hover:bg-[#0A1930]'
                     }`}
                   >
-                    {/* Top Row: Numbered Tier Node + XP Beam */}
-                    <div className="h-[72px] px-3 flex flex-col justify-center items-center relative border-b border-[#362B45]">
+                    {/* Top Row: Numbered Tier Node + XP Progress Beam */}
+                    <div className="h-[78px] px-3 flex flex-col justify-center items-center relative border-b border-[#1E3A63]">
                       <div
                         aria-hidden="true"
-                        className={`absolute left-0 right-0 top-[26px] h-[2px] ${
+                        className={`absolute left-0 right-0 top-[28px] h-[3px] ${
                           unlocked
-                            ? 'bg-gradient-to-r from-[#7045A0] to-[#D6A84B]'
-                            : 'bg-[#362B45]'
+                            ? 'bg-gradient-to-r from-[#1677FF] to-[#00D9FF]'
+                            : 'bg-[#1E3A63]'
                         }`}
                       />
                       <div
-                        className={`relative z-10 w-8 h-8 rounded-lg flex items-center justify-center font-mono text-xs font-black tabular-nums border transition-all ${
-                          unlocked
-                            ? 'bg-gradient-to-br from-[#7045A0] to-[#D6A84B] text-[#100D18] border-[#E8C777]'
+                        className={`relative z-10 w-9 h-9 rounded-xl flex items-center justify-center font-mono text-xs font-black tabular-nums border transition-all ${
+                          isCurrentTier
+                            ? 'bg-gradient-to-br from-[#00D9FF] to-[#1677FF] text-[#061225] border-[#F2F7FF] shadow-[0_0_18px_rgba(0,217,255,0.55)] scale-105'
+                            : unlocked
+                            ? 'bg-gradient-to-br from-[#1677FF] to-[#0099FF] text-[#F2F7FF] border-[#00D9FF]/60'
                             : isLandmark
-                            ? 'bg-[#21152F] text-[#F2EDF7] border-[#7045A0]'
-                            : 'bg-[#171220] text-[#A69AAF] border-[#362B45]'
+                            ? 'bg-[#102440] text-[#F2F7FF] border-[#1677FF]'
+                            : 'bg-[#0A1930] text-[#94A8C7] border-[#1E3A63]'
                         }`}
                       >
-                        {ms.tier}
+                        {String(ms.tier).padStart(2, '0')}
                       </div>
-                      <span className="mt-1 text-[10px] font-mono text-[#A69AAF] tabular-nums">
+                      <span className="mt-1 text-[10px] font-mono text-[#94A8C7] tabular-nums">
+                        {isCurrentTier ? 'CURRENT · ' : ''}
                         {ms.requiredSeasonXp.toLocaleString()} XP
                       </span>
                     </div>
 
                     {/* Middle Row: Free Pass Reward Cell */}
-                    <div className="h-[148px] p-3 border-b border-[#362B45] flex flex-col justify-between">
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between text-[10px] font-mono">
-                          <span className="text-[#9A72CC] uppercase font-bold">
-                            {REWARD_TYPE_LABELS[ms.rewardType] || 'Reward'}
-                          </span>
-                          <FreeIcon className="w-3.5 h-3.5 text-[#9A72CC]" />
+                    <div className="h-[164px] p-3 border-b border-[#1E3A63] flex flex-col justify-between">
+                      <div className="space-y-2">
+                        <div
+                          className={`rounded-xl p-2.5 border bg-gradient-to-br ${freeMeta.bgTint} ${
+                            unlocked && !freeClaimed
+                              ? 'border-[#00D9FF]/55 shadow-[0_0_16px_-6px_rgba(0,217,255,0.4)]'
+                              : 'border-[#1E3A63]'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-[10px] font-mono uppercase font-bold text-[#38D9F5] truncate">
+                              {freeMeta.label}
+                            </span>
+                            <FreeIcon
+                              className="w-4 h-4 shrink-0"
+                              style={{ color: freeMeta.accentHex }}
+                            />
+                          </div>
+                          <p className="text-xs font-semibold text-[#F2F7FF] leading-snug line-clamp-2 mt-1.5 min-h-[32px]">
+                            {ms.rewardLabel}
+                          </p>
                         </div>
-                        <p className="text-xs font-semibold text-[#F2EDF7] leading-snug line-clamp-2">
-                          {ms.rewardLabel}
-                        </p>
                       </div>
 
                       {freeClaimed ? (
-                        <div className="py-1.5 px-2.5 rounded-lg bg-[#49B88A]/12 border border-[#49B88A]/40 text-[11px] font-semibold text-[#49B88A] flex items-center justify-center gap-1">
+                        <div className="py-1.5 px-2.5 rounded-lg bg-[#10B981]/12 border border-[#10B981]/40 text-[11px] font-semibold text-[#34D399] flex items-center justify-center gap-1">
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           Claimed
                         </div>
@@ -674,10 +824,10 @@ export const SeasonalProgressionView: React.FC = () => {
                           }}
                           className="lq-btn lq-btn-primary w-full py-1.5 px-3 rounded-lg text-[11px] font-bold cursor-pointer"
                         >
-                          {freeBusy ? '...' : 'Claim'}
+                          {freeBusy ? '...' : 'Claim Free'}
                         </button>
                       ) : (
-                        <div className="py-1.5 px-2.5 rounded-lg bg-[#171220] border border-[#362B45] text-[10px] font-mono text-[#766D82] flex items-center justify-center gap-1">
+                        <div className="py-1.5 px-2.5 rounded-lg bg-[#0A1930] border border-[#1E3A63] text-[10px] font-mono text-[#647A9E] flex items-center justify-center gap-1">
                           <Lock className="w-3 h-3" />
                           Tier {ms.tier}
                         </div>
@@ -685,23 +835,29 @@ export const SeasonalProgressionView: React.FC = () => {
                     </div>
 
                     {/* Bottom Row: Elite Pass Reward Cell */}
-                    <div className="h-[148px] p-3 bg-gradient-to-b from-[#D6A84B]/[0.05] to-transparent flex flex-col justify-between">
+                    <div className="h-[164px] p-3 bg-gradient-to-b from-[#F59E0B]/[0.05] to-transparent flex flex-col justify-between">
                       {ms.eliteRewardLabel ? (
                         <>
-                          <div className="space-y-1.5">
-                            <div className="flex items-center justify-between text-[10px] font-mono">
-                              <span className="text-[#E8C777] uppercase font-bold">
-                                {REWARD_TYPE_LABELS[ms.eliteRewardType || 'cosmetic_crest'] || 'Elite'}
+                          <div
+                            className={`rounded-xl p-2.5 border bg-gradient-to-br from-[#F59E0B]/15 via-[#102440] to-[#061225] ${
+                              unlocked && eliteUnlocked && !eliteClaimed
+                                ? 'border-[#FBBF24]/65 shadow-[0_0_16px_-6px_rgba(251,191,36,0.42)]'
+                                : 'border-[#F59E0B]/25'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-[10px] font-mono uppercase font-bold text-[#FBBF24] truncate">
+                                {eliteMeta.label}
                               </span>
-                              <EliteIcon className="w-3.5 h-3.5 text-[#D6A84B]" />
+                              <EliteIcon className="w-4 h-4 text-[#FBBF24] shrink-0" />
                             </div>
-                            <p className="text-xs font-semibold text-[#F2EDF7] leading-snug line-clamp-2">
+                            <p className="text-xs font-semibold text-[#F2F7FF] leading-snug line-clamp-2 mt-1.5 min-h-[32px]">
                               {ms.eliteRewardLabel}
                             </p>
                           </div>
 
                           {eliteClaimed ? (
-                            <div className="py-1.5 px-2.5 rounded-lg bg-[#49B88A]/12 border border-[#49B88A]/40 text-[11px] font-semibold text-[#49B88A] flex items-center justify-center gap-1">
+                            <div className="py-1.5 px-2.5 rounded-lg bg-[#10B981]/12 border border-[#10B981]/40 text-[11px] font-semibold text-[#34D399] flex items-center justify-center gap-1">
                               <CheckCircle2 className="w-3.5 h-3.5" />
                               Claimed
                             </div>
@@ -715,17 +871,17 @@ export const SeasonalProgressionView: React.FC = () => {
                               }}
                               className="lq-btn lq-btn-gold w-full py-1.5 px-3 rounded-lg text-[11px] font-bold cursor-pointer"
                             >
-                              {eliteBusy ? '...' : 'Claim'}
+                              {eliteBusy ? '...' : 'Claim Elite'}
                             </button>
                           ) : (
-                            <div className="py-1.5 px-2.5 rounded-lg bg-[#171220] border border-[#D6A84B]/25 text-[10px] font-mono text-[#D6A84B]/70 flex items-center justify-center gap-1">
+                            <div className="py-1.5 px-2.5 rounded-lg bg-[#0A1930] border border-[#F59E0B]/25 text-[10px] font-mono text-[#FBBF24]/75 flex items-center justify-center gap-1">
                               <Lock className="w-3 h-3" />
                               {eliteUnlocked ? `Tier ${ms.tier}` : 'Elite Pass'}
                             </div>
                           )}
                         </>
                       ) : (
-                        <div className="m-auto text-[11px] text-[#766D82] font-mono">
+                        <div className="m-auto text-[11px] text-[#647A9E] font-mono">
                           Free Tier Only
                         </div>
                       )}
@@ -743,15 +899,15 @@ export const SeasonalProgressionView: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Seasonal Missions */}
           <section className="lg:col-span-6 space-y-4">
-            <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-[#362B45]">
-              <h3 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
-                <Flame className="w-4 h-4 text-[#E8C777]" />
+            <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-[#1E3A63]">
+              <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
+                <Flame className="w-4 h-4 text-[#00D9FF]" />
                 Seasonal Missions
               </h3>
-              <span className="text-xs text-[#A69AAF]">Earn Battle Pass XP</span>
+              <span className="text-xs text-[#94A8C7]">Earn Battle Pass XP</span>
             </div>
 
-            <div className="lq-surface rounded-2xl divide-y divide-[#362B45]">
+            <div className="lq-surface rounded-2xl divide-y divide-[#1E3A63]">
               {challenges.map(ch => {
                 const chProg = playerProgress.challengeProgress?.[ch.id] || {
                   current: 0,
@@ -766,20 +922,20 @@ export const SeasonalProgressionView: React.FC = () => {
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-                          <span className="uppercase tracking-wider font-bold text-[#9A72CC]">
+                          <span className="uppercase tracking-wider font-bold text-[#38D9F5]">
                             {ch.cadence === 'weekly' ? 'Weekly Mission' : 'Season Objective'}
                           </span>
-                          <span className="text-[#766D82]" aria-hidden="true">·</span>
-                          <span className="font-mono text-[#E8C777] tabular-nums font-semibold">
+                          <span className="text-[#647A9E]" aria-hidden="true">·</span>
+                          <span className="font-mono text-[#00D9FF] tabular-nums font-semibold">
                             +{ch.seasonalXpReward} Season XP
                           </span>
                         </div>
-                        <h4 className="text-sm font-bold text-[#F2EDF7] mt-0.5">{ch.title}</h4>
-                        <p className="text-xs text-[#A69AAF] mt-0.5">{ch.description}</p>
+                        <h4 className="text-sm font-bold text-[#F2F7FF] mt-0.5">{ch.title}</h4>
+                        <p className="text-xs text-[#94A8C7] mt-0.5">{ch.description}</p>
                       </div>
 
                       {chProg.claimed ? (
-                        <span className="text-[11px] font-semibold text-[#49B88A] flex items-center gap-1 whitespace-nowrap shrink-0">
+                        <span className="text-[11px] font-semibold text-[#34D399] flex items-center gap-1 whitespace-nowrap shrink-0">
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           Claimed
                         </span>
@@ -796,7 +952,7 @@ export const SeasonalProgressionView: React.FC = () => {
                     </div>
 
                     <div className="space-y-1">
-                      <div className="flex justify-between text-[11px] font-mono text-[#A69AAF] tabular-nums">
+                      <div className="flex justify-between text-[11px] font-mono text-[#94A8C7] tabular-nums">
                         <span>Progress</span>
                         <span>
                           {Math.min(chProg.current, chProg.target)} / {chProg.target} ({pct}%)
@@ -804,11 +960,11 @@ export const SeasonalProgressionView: React.FC = () => {
                       </div>
                       <AnimatedProgressBar
                         percentage={pct}
-                        className="w-full h-2 rounded-full bg-[#100D18] overflow-hidden border border-[#362B45]"
+                        className="w-full h-2 rounded-full bg-[#061225] overflow-hidden border border-[#1E3A63]"
                         barClassName={
                           chProg.completed
-                            ? 'bg-[#49B88A]'
-                            : 'bg-gradient-to-r from-[#7045A0] to-[#D6A84B]'
+                            ? 'bg-[#10B981]'
+                            : 'bg-gradient-to-r from-[#1677FF] to-[#00D9FF]'
                         }
                         shimmer={false}
                       />
@@ -822,22 +978,22 @@ export const SeasonalProgressionView: React.FC = () => {
           {/* Season Standings & Past Seasons */}
           <section className="lg:col-span-6 space-y-6">
             <div className="space-y-4">
-              <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-[#362B45]">
-                <h3 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
-                  <Trophy className="w-4 h-4 text-[#D6A84B]" />
+              <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-[#1E3A63]">
+                <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
+                  <Trophy className="w-4 h-4 text-[#00D9FF]" />
                   Season Standings
                 </h3>
-                <span className="text-xs text-[#A69AAF] tabular-nums font-mono">
+                <span className="text-xs text-[#94A8C7] tabular-nums font-mono">
                   Page {leaderboardPage} / {leaderboardTotalPages}
                 </span>
               </div>
 
               {leaderboard.length === 0 ? (
-                <div className="lq-surface rounded-2xl py-8 px-4 text-center text-xs text-[#A69AAF]">
+                <div className="lq-surface rounded-2xl py-8 px-4 text-center text-xs text-[#94A8C7]">
                   Complete verified workouts, habits, or boss strikes to enter Season {season.seasonNumber} standings.
                 </div>
               ) : (
-                <div className="lq-surface rounded-2xl divide-y divide-[#362B45] overflow-hidden">
+                <div className="lq-surface rounded-2xl divide-y divide-[#1E3A63] overflow-hidden">
                   {leaderboard.map(row => {
                     const isCurrent = Boolean(user && row.userId === user.id);
                     return (
@@ -846,30 +1002,30 @@ export const SeasonalProgressionView: React.FC = () => {
                         type="button"
                         onClick={() => openPublicProfile(row.userId)}
                         className={`w-full px-4 py-3 text-left flex items-center justify-between gap-3 transition-colors cursor-pointer ${
-                          isCurrent ? 'bg-[#21152F]' : 'hover:bg-[#21152F]/60'
+                          isCurrent ? 'bg-[#102440]' : 'hover:bg-[#102440]/60'
                         }`}
                       >
                         <div className="flex items-center gap-3 min-w-0">
-                          <span className="w-7 text-center font-mono font-bold text-xs text-[#E8C777] tabular-nums shrink-0">
+                          <span className="w-7 text-center font-mono font-bold text-xs text-[#00D9FF] tabular-nums shrink-0">
                             #{row.rank}
                           </span>
                           <img
                             src={getRpgAvatarForClass(row.characterClass || 'Warrior')}
                             alt={row.username}
                             referrerPolicy="no-referrer"
-                            className="w-8 h-8 rounded-full object-cover object-top border border-[#7045A0] shrink-0"
+                            className="w-8 h-8 rounded-full object-cover object-top border border-[#1677FF] shrink-0"
                           />
                           <div className="min-w-0">
-                            <p className="text-xs font-bold text-[#F2EDF7] truncate">
+                            <p className="text-xs font-bold text-[#F2F7FF] truncate">
                               {row.username}
                               {isCurrent ? ' (You)' : ''}
                             </p>
-                            <p className="text-[11px] text-[#A69AAF] truncate tabular-nums">
+                            <p className="text-[11px] text-[#94A8C7] truncate tabular-nums">
                               Tier {row.currentTier} · {row.completionPercent}% complete
                             </p>
                           </div>
                         </div>
-                        <span className="font-mono font-bold text-xs text-[#E8C777] tabular-nums shrink-0">
+                        <span className="font-mono font-bold text-xs text-[#38D9F5] tabular-nums shrink-0">
                           {row.seasonXp.toLocaleString()} XP
                         </span>
                       </button>
@@ -904,24 +1060,24 @@ export const SeasonalProgressionView: React.FC = () => {
 
             {history.length > 0 && (
               <div className="space-y-3">
-                <h3 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2 pb-2 border-b border-[#362B45]">
-                  <History className="w-4 h-4 text-[#E8C777]" />
+                <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2 pb-2 border-b border-[#1E3A63]">
+                  <History className="w-4 h-4 text-[#00D9FF]" />
                   Season History Archive
                 </h3>
-                <div className="lq-surface rounded-2xl divide-y divide-[#362B45]">
+                <div className="lq-surface rounded-2xl divide-y divide-[#1E3A63]">
                   {history.map(arch => (
                     <div key={arch.seasonId} className="p-4 space-y-1.5">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-['Cinzel'] font-bold text-xs text-[#E8C777]">
+                        <span className="font-['Cinzel'] font-bold text-xs text-[#38D9F5]">
                           {arch.name}
                         </span>
                         {arch.playerSummary && (
-                          <span className="text-[11px] font-mono text-[#F2EDF7] tabular-nums">
+                          <span className="text-[11px] font-mono text-[#F2F7FF] tabular-nums">
                             Tier {arch.playerSummary.tierReached} · {arch.playerSummary.seasonXp.toLocaleString()} XP
                           </span>
                         )}
                       </div>
-                      <p className="text-[11px] text-[#A69AAF] tabular-nums">
+                      <p className="text-[11px] text-[#94A8C7] tabular-nums">
                         {arch.playerSummary?.rank ? `Final Rank #${arch.playerSummary.rank} · ` : ''}
                         {arch.totalParticipants} participants · Champion: {arch.topPlayers?.[0]?.username || 'Realm Vanguard'}
                       </p>
@@ -938,13 +1094,13 @@ export const SeasonalProgressionView: React.FC = () => {
       {seasonalRecap && (
         <RpgScrollReveal delay={0.05}>
           <section className="lq-card rounded-2xl p-5 sm:p-6 space-y-5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#362B45]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#1E3A63]">
               <div>
-                <h3 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-[#D6A84B]" />
+                <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#00D9FF]" />
                   Seasonal Performance Recap
                 </h3>
-                <p className="text-xs text-[#A69AAF] mt-0.5">
+                <p className="text-xs text-[#94A8C7] mt-0.5">
                   {seasonalRecap.seasonName} · Verified progression chronicle
                 </p>
               </div>
@@ -953,7 +1109,7 @@ export const SeasonalProgressionView: React.FC = () => {
                 onClick={() => void handleCopyRecapSummary()}
                 className="lq-btn lq-btn-secondary px-3.5 py-2 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 whitespace-nowrap self-start sm:self-auto cursor-pointer"
               >
-                <Copy className="w-3.5 h-3.5 text-[#E8C777]" />
+                <Copy className="w-3.5 h-3.5 text-[#00D9FF]" />
                 Copy Share Card
               </button>
             </div>
@@ -961,26 +1117,26 @@ export const SeasonalProgressionView: React.FC = () => {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-y-4 gap-x-6 font-mono tabular-nums">
               {seasonalRecap.visibility.workouts && (
                 <div>
-                  <span className="text-[10px] uppercase text-[#A69AAF] block">Verified Workouts</span>
-                  <span className="text-xl font-black text-[#F2EDF7]">{seasonalRecap.verifiedWorkouts}</span>
+                  <span className="text-[10px] uppercase text-[#94A8C7] block">Verified Workouts</span>
+                  <span className="text-xl font-black text-[#F2F7FF]">{seasonalRecap.verifiedWorkouts}</span>
                 </div>
               )}
               {seasonalRecap.visibility.activeDays && (
                 <div>
-                  <span className="text-[10px] uppercase text-[#A69AAF] block">Active Days</span>
-                  <span className="text-xl font-black text-[#49B88A]">{seasonalRecap.activeDays}</span>
+                  <span className="text-[10px] uppercase text-[#94A8C7] block">Active Days</span>
+                  <span className="text-xl font-black text-[#34D399]">{seasonalRecap.activeDays}</span>
                 </div>
               )}
               {seasonalRecap.visibility.personalRecords && (
                 <div>
-                  <span className="text-[10px] uppercase text-[#A69AAF] block">Personal Records</span>
-                  <span className="text-xl font-black text-[#E8C777]">{seasonalRecap.personalRecordsSet}</span>
+                  <span className="text-[10px] uppercase text-[#94A8C7] block">Personal Records</span>
+                  <span className="text-xl font-black text-[#FBBF24]">{seasonalRecap.personalRecordsSet}</span>
                 </div>
               )}
               {seasonalRecap.visibility.xpAndLevels && (
                 <div>
-                  <span className="text-[10px] uppercase text-[#A69AAF] block">Season XP · Tier</span>
-                  <span className="text-xl font-black text-[#9A72CC]">
+                  <span className="text-[10px] uppercase text-[#94A8C7] block">Season XP · Tier</span>
+                  <span className="text-xl font-black text-[#00D9FF]">
                     T{seasonalRecap.tierReached} · {seasonalRecap.seasonXpGained.toLocaleString()}
                   </span>
                 </div>
@@ -997,23 +1153,23 @@ export const SeasonalProgressionView: React.FC = () => {
         panelClassName="w-full max-w-2xl"
       >
         <div className="lq-surface-elevated rounded-2xl max-h-[85vh] overflow-y-auto p-6 space-y-4">
-          <div className="flex items-center justify-between gap-2 pb-3 border-b border-[#362B45]">
+          <div className="flex items-center justify-between gap-2 pb-3 border-b border-[#1E3A63]">
             <div className="flex items-center gap-2">
-              <Crown className="w-5 h-5 text-[#D6A84B]" />
-              <h3 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7]">
+              <Crown className="w-5 h-5 text-[#FBBF24]" />
+              <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF]">
                 Elite Battle Pass Track Preview
               </h3>
             </div>
             <button
               type="button"
               onClick={() => setShowElitePreview(false)}
-              className="text-[#A69AAF] hover:text-[#F2EDF7] cursor-pointer"
+              className="text-[#94A8C7] hover:text-[#F2F7FF] cursor-pointer"
               aria-label="Close Elite Preview"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
-          <p className="text-xs text-[#A69AAF]">
+          <p className="text-xs text-[#94A8C7]">
             All Elite rewards are cosmetics, collectible cards, titles, and Cosmetic Fragments—zero competitive pay-to-win stats.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -1022,17 +1178,17 @@ export const SeasonalProgressionView: React.FC = () => {
               .map(ms => (
                 <div
                   key={`prev-${ms.id}`}
-                  className="p-3 rounded-xl bg-[#100D18] border border-[#D6A84B]/30 flex items-center justify-between gap-2 text-xs"
+                  className="p-3 rounded-xl bg-[#061225] border border-[#F59E0B]/35 flex items-center justify-between gap-2 text-xs"
                 >
                   <div className="min-w-0">
-                    <span className="text-[10px] font-mono text-[#E8C777] block">
+                    <span className="text-[10px] font-mono text-[#FBBF24] block">
                       Tier {ms.tier}
                     </span>
-                    <span className="font-bold text-[#F2EDF7] truncate block">
+                    <span className="font-bold text-[#F2F7FF] truncate block">
                       {ms.eliteRewardLabel}
                     </span>
                   </div>
-                  <span className="text-[10px] text-[#9A72CC] shrink-0">
+                  <span className="text-[10px] text-[#38D9F5] shrink-0">
                     {REWARD_TYPE_LABELS[ms.eliteRewardType || 'cosmetic_crest'] || ms.eliteRewardType}
                   </span>
                 </div>

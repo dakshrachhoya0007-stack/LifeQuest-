@@ -106,9 +106,9 @@ export function createScarredSteelTextures(
  * Heavy woven medieval fabric / tattered cape texture.
  */
 export function createClothWeaveTexture(
-  primaryHex = '#141420',
-  shadowHex = '#090910',
-  trimHex = '#D6A84B'
+  primaryHex = '#0A1930',
+  shadowHex = '#061225',
+  trimHex = '#F59E0B'
 ): ProceduralTextureSet {
   const size = 256;
   const [canvas, ctx] = makeCanvas(size, size);
@@ -166,7 +166,7 @@ export function createLeatherTexture(baseHex = '#141420', grainHex = '#090910'):
   }
 
   // Cross-stitched seam
-  ctx.strokeStyle = 'rgba(214, 168, 75, 0.28)';
+  ctx.strokeStyle = 'rgba(245, 158, 11, 0.28)';
   ctx.lineWidth = 1.4;
   ctx.setLineDash([6, 5]);
   ctx.strokeRect(12, 12, size - 24, size - 24);
@@ -182,7 +182,7 @@ export function createLeatherTexture(baseHex = '#141420', grainHex = '#090910'):
 /**
  * Arcane embroidered tunic & rune trim texture.
  */
-export function createArcaneClothTexture(baseHex = '#171220', accentHex = '#7045A0'): ProceduralTextureSet {
+export function createArcaneClothTexture(baseHex = '#0A1930', accentHex = '#1677FF'): ProceduralTextureSet {
   const size = 256;
   const [canvas, ctx] = makeCanvas(size, size);
   ctx.fillStyle = baseHex;
@@ -206,7 +206,7 @@ export function createArcaneClothTexture(baseHex = '#171220', accentHex = '#7045
   ctx.globalAlpha = 1;
 
   // Gold embroidered lower hem rune trim
-  ctx.fillStyle = '#D6A84B';
+  ctx.fillStyle = '#F59E0B';
   ctx.fillRect(0, size - 26, size, 4);
   ctx.fillRect(0, size - 12, size, 2);
 
@@ -255,7 +255,7 @@ export function createCastleStoneTextures(
         const sx = x + 6 + ((s * 23 + r * 11) % Math.max(8, colW - 12));
         const sy = y + 6 + ((s * 17 + c * 19) % Math.max(8, rowH - 12));
         cCtx.fillStyle =
-          s % 7 === 0 ? 'rgba(214, 168, 75, 0.12)' : 'rgba(161, 161, 181, 0.08)';
+          s % 7 === 0 ? 'rgba(245, 158, 11, 0.12)' : 'rgba(148, 168, 199, 0.08)';
         cCtx.fillRect(sx, sy, 3, 2);
       }
     }

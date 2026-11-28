@@ -15,8 +15,8 @@ interface AetheriaAtmosphericBackdropProps {
  * Automatically degrades cleanly when prefers-reduced-motion is enabled.
  */
 export const AetheriaAtmosphericBackdrop: React.FC<AetheriaAtmosphericBackdropProps> = ({
-  primaryRgb = '112, 69, 160',
-  secondaryRgb = '214, 168, 75',
+  primaryRgb = '22, 119, 255',
+  secondaryRgb = '0, 217, 255',
 }) => {
   const prefersReduced = useReducedMotion();
 
@@ -25,23 +25,23 @@ export const AetheriaAtmosphericBackdrop: React.FC<AetheriaAtmosphericBackdropPr
       aria-hidden="true"
       className="fixed inset-0 pointer-events-none overflow-hidden z-0"
     >
-      {/* Primary Royal Purple Nebula Cloud */}
+      {/* Primary Electric Blue Nebula Cloud */}
       <div
         className={`absolute -top-36 left-1/4 w-[62vw] max-w-[840px] h-[50vh] rounded-full blur-[110px] transition-colors duration-700 ${
           prefersReduced ? '' : 'lq-aurora-drift'
         }`}
         style={{
-          background: `radial-gradient(circle at 50% 50%, rgba(${primaryRgb}, 0.14) 0%, rgba(54, 43, 69, 0.08) 48%, transparent 76%)`,
+          background: `radial-gradient(circle at 50% 50%, rgba(${primaryRgb}, 0.14) 0%, rgba(16, 36, 64, 0.08) 48%, transparent 76%)`,
         }}
       />
 
-      {/* Secondary Antique Gold Ambient Glow */}
+      {/* Secondary Cyan Ambient Glow */}
       <div
         className={`absolute top-1/3 -right-24 w-[46vw] max-w-[640px] h-[44vh] rounded-full blur-[115px] transition-colors duration-700 ${
           prefersReduced ? '' : 'lq-aurora-drift-slow'
         }`}
         style={{
-          background: `radial-gradient(circle at 50% 50%, rgba(${secondaryRgb}, 0.08) 0%, rgba(112, 69, 160, 0.05) 50%, transparent 76%)`,
+          background: `radial-gradient(circle at 50% 50%, rgba(${secondaryRgb}, 0.09) 0%, rgba(22, 119, 255, 0.05) 50%, transparent 76%)`,
         }}
       />
 
@@ -232,8 +232,8 @@ interface AnimatedProgressBarProps {
  */
 export const AnimatedProgressBar: React.FC<AnimatedProgressBarProps> = ({
   percentage,
-  className = 'w-full h-2.5 rounded-full bg-[#100D18] border border-[#362B45] overflow-hidden',
-  barClassName = 'bg-gradient-to-r from-[#7045A0] via-[#9A72CC] to-[#D6A84B]',
+  className = 'w-full h-2.5 rounded-full bg-[#061225] border border-[#1E3A63] overflow-hidden',
+  barClassName = 'bg-gradient-to-r from-[#1677FF] via-[#0099FF] to-[#00D9FF]',
   barStyle,
   shimmer = true,
   delay = 0.06,
@@ -335,7 +335,7 @@ export const RpgModalWrapper: React.FC<RpgModalWrapperProps> = ({
   onClose,
   children,
   zIndexClass = 'z-50',
-  backdropClassName = 'bg-[#100D18]/85 backdrop-blur-md',
+  backdropClassName = 'bg-[#061225]/85 backdrop-blur-md',
   panelClassName = 'w-full max-w-lg',
 }) => {
   const prefersReduced = useReducedMotion();

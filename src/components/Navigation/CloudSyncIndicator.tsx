@@ -20,36 +20,36 @@ export const CloudSyncIndicator: React.FC<CloudSyncIndicatorProps> = ({
     switch (status) {
       case 'saved':
         return {
-          icon: <Cloud className="w-3.5 h-3.5 text-[#49B88A]" />,
+          icon: <Cloud className="w-3.5 h-3.5 text-[#10B981]" />,
           label: 'Saved',
-          textColor: 'text-[#49B88A]',
-          bgColor: 'bg-[#171220] border-[#49B88A]/40',
+          textColor: 'text-[#10B981]',
+          bgColor: 'bg-[#0A1930] border-[#10B981]/40',
           title: `Progress saved (${lastSavedAt ? lastSavedAt.toLocaleTimeString() : 'Up to date'})`,
         };
       case 'saving':
         return {
-          icon: <RefreshCw className="w-3.5 h-3.5 text-[#E8C777] animate-spin" />,
+          icon: <RefreshCw className="w-3.5 h-3.5 text-[#00D9FF] animate-spin" />,
           label: 'Saving...',
-          textColor: 'text-[#E8C777]',
-          bgColor: 'bg-[#171220] border-[#D6A84B]/45',
+          textColor: 'text-[#00D9FF]',
+          bgColor: 'bg-[#0A1930] border-[#00D9FF]/45',
           title: 'Saving hero progression...',
         };
       case 'error':
         return {
-          icon: <AlertCircle className="w-3.5 h-3.5 text-[#D65C66]" />,
+          icon: <AlertCircle className="w-3.5 h-3.5 text-[#F43F5E]" />,
           label: 'Sync Issue',
-          textColor: 'text-[#D65C66]',
-          bgColor: 'bg-[#171220] border-[#D65C66]/45',
+          textColor: 'text-[#F43F5E]',
+          bgColor: 'bg-[#0A1930] border-[#F43F5E]/45',
           title: 'Unable to sync right now. Click to retry.',
         };
       case 'unconfigured':
       case 'offline':
       default:
         return {
-          icon: <CloudOff className="w-3.5 h-3.5 text-[#A69AAF]" />,
+          icon: <CloudOff className="w-3.5 h-3.5 text-[#94A8C7]" />,
           label: 'Offline',
-          textColor: 'text-[#A69AAF]',
-          bgColor: 'bg-[#171220] border-[#362B45]',
+          textColor: 'text-[#94A8C7]',
+          bgColor: 'bg-[#0A1930] border-[#1E3A63]',
           title: 'Saving progress locally on this device.',
         };
     }

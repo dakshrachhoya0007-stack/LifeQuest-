@@ -513,7 +513,7 @@ export const RivalsView: React.FC = () => {
   const placementPlayed = profile?.placementMatchesPlayed ?? profile?.matchesPlayed ?? 0;
   const placementDone = Boolean(profile?.placementCompleted || placementPlayed >= PLACEMENT_MATCHES_REQUIRED);
   const demotionShieldRemaining = profile?.demotionShieldRemaining ?? 0;
-  const tierHex = TIER_ACCENT_MAP[playerTier] || playerDivisionMeta.accentHex || '#D6A84B';
+  const tierHex = TIER_ACCENT_MAP[playerTier] || playerDivisionMeta.accentHex || '#F59E0B';
   const wins = profile?.wins ?? rivalsState?.stats.wins ?? 0;
   const losses = profile?.losses ?? rivalsState?.stats.losses ?? 0;
   const ties = profile?.ties ?? rivalsState?.stats.ties ?? 0;
@@ -529,23 +529,23 @@ export const RivalsView: React.FC = () => {
       <FeatureBanner themeId="rivals" className="space-y-5">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-[#100D18] border border-[#D65C66]/45 flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-[#061225] border border-[#F43F5E]/45 flex items-center justify-center shrink-0">
               <GoldenWorldTreeEmblem className="w-9 h-9" />
             </div>
             <div>
-              <div className="flex flex-wrap items-center gap-2 text-xs text-[#D65C66] font-semibold">
+              <div className="flex flex-wrap items-center gap-2 text-xs text-[#F43F5E] font-semibold">
                 <span className="font-['Cinzel'] uppercase tracking-widest">
                   Competitive Arena
                 </span>
-                <span className="text-[#766D82]" aria-hidden="true">·</span>
-                <span className="text-[#A69AAF]">
+                <span className="text-[#647A9E]" aria-hidden="true">·</span>
+                <span className="text-[#94A8C7]">
                   Isolated 1v1 Elo Ladder · Rating &amp; H2H Only (Zero XP/Gold)
                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2EDF7] mt-0.5">
+              <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2F7FF] mt-0.5">
                 Rivals Arena
               </h1>
-              <p className="text-xs sm:text-sm text-[#A69AAF] max-w-2xl mt-1">
+              <p className="text-xs sm:text-sm text-[#94A8C7] max-w-2xl mt-1">
                 Compete head-to-head against real champions using server-verified fitness telemetry. Matches award Elo Rating, Competitive Tiers, and Head-to-Head Prestige—never Boss damage, Player XP, or Gold.
               </p>
             </div>
@@ -561,12 +561,12 @@ export const RivalsView: React.FC = () => {
             >
               {profile?.allowNonFriendChallenges !== false ? (
                 <>
-                  <Unlock className="w-3.5 h-3.5 text-[#49B88A]" />
+                  <Unlock className="w-3.5 h-3.5 text-[#10B981]" />
                   Open Challenges On
                 </>
               ) : (
                 <>
-                  <Lock className="w-3.5 h-3.5 text-[#E8C777]" />
+                  <Lock className="w-3.5 h-3.5 text-[#FBBF24]" />
                   Friends-Only Challenges
                 </>
               )}
@@ -575,7 +575,7 @@ export const RivalsView: React.FC = () => {
               type="button"
               disabled={rivalsLoading}
               onClick={() => void refreshRivalsState()}
-              className="lq-btn lq-btn-secondary px-3.5 py-2 rounded-xl text-xs font-semibold text-[#E8C777] flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+              className="lq-btn lq-btn-secondary px-3.5 py-2 rounded-xl text-xs font-semibold text-[#38D9F5] flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${rivalsLoading ? 'animate-spin' : ''}`} />
               Sync Arena
@@ -584,18 +584,18 @@ export const RivalsView: React.FC = () => {
         </div>
 
         {/* Rating & Competitive Metrics Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-4 border-t border-[#362B45]">
-          <div className="rounded-xl bg-[#100D18] border border-[#362B45] p-3.5">
-            <span className="text-[11px] text-[#A69AAF] block">Arena Elo &amp; Division</span>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-4 border-t border-[#1E3A63]">
+          <div className="rounded-xl bg-[#061225] border border-[#1E3A63] p-3.5">
+            <span className="text-[11px] text-[#94A8C7] block">Arena Elo &amp; Division</span>
             <div className="flex items-baseline gap-2 mt-0.5">
-              <span className="text-xl font-black font-mono text-[#F2EDF7] tabular-nums">
+              <span className="text-xl font-black font-mono text-[#F2F7FF] tabular-nums">
                 <AnimatedCounter value={playerRating} />
               </span>
               <span className="text-xs font-bold uppercase" style={{ color: tierHex }}>
                 {playerDivision}
               </span>
             </div>
-            <span className="text-[10px] text-[#766D82] tabular-nums block mt-0.5">
+            <span className="text-[10px] text-[#647A9E] tabular-nums block mt-0.5">
               {placementDone
                 ? demotionShieldRemaining > 0
                   ? `Shield: ${demotionShieldRemaining} games`
@@ -603,34 +603,34 @@ export const RivalsView: React.FC = () => {
                 : `Placement ${Math.min(placementPlayed, PLACEMENT_MATCHES_REQUIRED)}/${PLACEMENT_MATCHES_REQUIRED}`}
             </span>
           </div>
-          <div className="rounded-xl bg-[#100D18] border border-[#362B45] p-3.5">
-            <span className="text-[11px] text-[#A69AAF] block">Match Record</span>
-            <span className="text-xl font-bold font-mono text-[#E8C777] tabular-nums mt-0.5 block">
+          <div className="rounded-xl bg-[#061225] border border-[#1E3A63] p-3.5">
+            <span className="text-[11px] text-[#94A8C7] block">Match Record</span>
+            <span className="text-xl font-bold font-mono text-[#FBBF24] tabular-nums mt-0.5 block">
               {wins}-{losses}-{ties}
             </span>
           </div>
-          <div className="rounded-xl bg-[#100D18] border border-[#362B45] p-3.5">
-            <span className="text-[11px] text-[#A69AAF] block">Win Rate</span>
-            <span className="text-xl font-bold font-mono text-[#F2EDF7] tabular-nums mt-0.5 block">
+          <div className="rounded-xl bg-[#061225] border border-[#1E3A63] p-3.5">
+            <span className="text-[11px] text-[#94A8C7] block">Win Rate</span>
+            <span className="text-xl font-bold font-mono text-[#F2F7FF] tabular-nums mt-0.5 block">
               {winRate}%
             </span>
           </div>
-          <div className="rounded-xl bg-[#100D18] border border-[#362B45] p-3.5">
-            <span className="text-[11px] text-[#A69AAF] block">Win Streak</span>
-            <span className="text-xl font-bold font-mono text-[#49B88A] tabular-nums mt-0.5 flex items-center gap-1.5">
-              <Flame className="w-4 h-4 text-[#D6A84B]" />
+          <div className="rounded-xl bg-[#061225] border border-[#1E3A63] p-3.5">
+            <span className="text-[11px] text-[#94A8C7] block">Win Streak</span>
+            <span className="text-xl font-bold font-mono text-[#10B981] tabular-nums mt-0.5 flex items-center gap-1.5">
+              <Flame className="w-4 h-4 text-[#F59E0B]" />
               {currentStreak}
             </span>
           </div>
-          <div className="rounded-xl bg-[#100D18] border border-[#362B45] p-3.5">
-            <span className="text-[11px] text-[#A69AAF] block">Peak Rating</span>
-            <span className="text-xl font-bold font-mono text-[#E8C777] tabular-nums mt-0.5 block">
+          <div className="rounded-xl bg-[#061225] border border-[#1E3A63] p-3.5">
+            <span className="text-[11px] text-[#94A8C7] block">Peak Rating</span>
+            <span className="text-xl font-bold font-mono text-[#FBBF24] tabular-nums mt-0.5 block">
               {peakRating}
             </span>
           </div>
-          <div className="rounded-xl bg-[#100D18] border border-[#362B45] p-3.5">
-            <span className="text-[11px] text-[#A69AAF] block">Active Matches</span>
-            <span className="text-xl font-bold font-mono text-[#F2EDF7] tabular-nums mt-0.5 block">
+          <div className="rounded-xl bg-[#061225] border border-[#1E3A63] p-3.5">
+            <span className="text-[11px] text-[#94A8C7] block">Active Matches</span>
+            <span className="text-xl font-bold font-mono text-[#F2F7FF] tabular-nums mt-0.5 block">
               {activeDuels.length}
               {incomingInvites.length > 0 ? ` (${incomingInvites.length} pending)` : ''}
             </span>
@@ -638,13 +638,13 @@ export const RivalsView: React.FC = () => {
         </div>
 
         {/* Collapsible 7-Division Ranked Roadmap */}
-        <div className="pt-2 border-t border-[#362B45]">
+        <div className="pt-2 border-t border-[#1E3A63]">
           <button
             type="button"
             onClick={() => setShowDivisionRoadmap(v => !v)}
-            className="text-xs font-semibold text-[#F2EDF7] hover:text-[#E8C777] flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="text-xs font-semibold text-[#F2F7FF] hover:text-[#38D9F5] flex items-center gap-1.5 transition-colors cursor-pointer"
           >
-            <Shield className="w-3.5 h-3.5 text-[#D65C66]" />
+            <Shield className="w-3.5 h-3.5 text-[#F43F5E]" />
             <span>Ranked Divisions &amp; Milestone Rewards (7 Tiers)</span>
             {showDivisionRoadmap ? (
               <ChevronUp className="w-3.5 h-3.5" />
@@ -663,10 +663,10 @@ export const RivalsView: React.FC = () => {
                     key={div.division}
                     className={`rounded-xl p-3 border space-y-2 transition-all ${
                       isCurrent
-                        ? 'bg-[#21152F] border-[#D6A84B]'
+                        ? 'bg-[#102440] border-[#00D9FF]'
                         : unlocked
-                        ? 'bg-[#171220] border-[#D65C66]/40'
-                        : 'bg-[#100D18] border-[#362B45] opacity-75'
+                        ? 'bg-[#0A1930] border-[#F43F5E]/40'
+                        : 'bg-[#061225] border-[#1E3A63] opacity-75'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-1">
@@ -676,11 +676,11 @@ export const RivalsView: React.FC = () => {
                       >
                         {div.division}
                       </span>
-                      <span className="text-[10px] font-mono text-[#A69AAF] tabular-nums">
+                      <span className="text-[10px] font-mono text-[#94A8C7] tabular-nums">
                         {div.maxRating ? `${div.minRating}–${div.maxRating}` : `${div.minRating}+`}
                       </span>
                     </div>
-                    <p className="text-[11px] font-semibold text-[#F2EDF7] truncate">
+                    <p className="text-[11px] font-semibold text-[#F2F7FF] truncate">
                       {div.rewardTitleName}
                     </p>
                     <button
@@ -690,7 +690,7 @@ export const RivalsView: React.FC = () => {
                       className={`lq-btn w-full py-1.5 rounded-lg text-[10px] font-bold whitespace-nowrap ${
                         unlocked
                           ? 'lq-btn-gold cursor-pointer'
-                          : 'bg-[#171220] text-[#766D82] border border-[#362B45] cursor-not-allowed'
+                          : 'bg-[#0A1930] text-[#647A9E] border border-[#1E3A63] cursor-not-allowed'
                       }`}
                     >
                       {unlocked
@@ -734,8 +734,8 @@ export const RivalsView: React.FC = () => {
         <div
           className={`rounded-xl px-4 py-3 text-xs border flex items-center justify-between gap-2 font-medium ${
             feedback.type === 'success'
-              ? 'bg-[#49B88A]/12 border-[#49B88A]/45 text-[#49B88A]'
-              : 'bg-[#D65C66]/12 border-[#D65C66]/45 text-[#D65C66]'
+              ? 'bg-[#10B981]/12 border-[#10B981]/45 text-[#10B981]'
+              : 'bg-[#F43F5E]/12 border-[#F43F5E]/45 text-[#F43F5E]'
           }`}
         >
           <span>{feedback.text}</span>
@@ -757,13 +757,13 @@ export const RivalsView: React.FC = () => {
             {queueEntry && queueEntry.status === 'searching' && (
               <div className="lq-card-gold rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1">
-                  <div className="text-xs font-['Cinzel'] font-bold uppercase tracking-wider text-[#E8C777]">
+                  <div className="text-xs font-['Cinzel'] font-bold uppercase tracking-wider text-[#38D9F5]">
                     Live Matchmaking Queue · Real Players Only
                   </div>
-                  <p className="text-sm font-bold text-[#F2EDF7]">
+                  <p className="text-sm font-bold text-[#F2F7FF]">
                     Searching for {COMPETITIVE_RIVAL_MODES.find(m => m.id === queueEntry.mode)?.title || queueEntry.mode} opponent
                   </p>
-                  <p className="text-xs text-[#A69AAF] font-mono tabular-nums">
+                  <p className="text-xs text-[#94A8C7] font-mono tabular-nums">
                     Your Rating: {queueEntry.ratingSnapshot} · Bracket: {queueEntry.minRating} – {queueEntry.maxRating} · Expanding +75 every 10s
                   </p>
                 </div>
@@ -771,7 +771,7 @@ export const RivalsView: React.FC = () => {
                   type="button"
                   disabled={busyId === 'queue-cancel'}
                   onClick={() => void handleCancelQueue()}
-                  className="lq-btn px-4 py-2 rounded-xl bg-[#D65C66]/15 hover:bg-[#D65C66]/25 border border-[#D65C66]/45 text-[#D65C66] text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer"
+                  className="lq-btn px-4 py-2 rounded-xl bg-[#F43F5E]/15 hover:bg-[#F43F5E]/25 border border-[#F43F5E]/45 text-[#F43F5E] text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   Leave Queue
                 </button>
@@ -781,10 +781,10 @@ export const RivalsView: React.FC = () => {
             <div className="lq-surface rounded-2xl p-5 space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7]">
+                  <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF]">
                     Select Competitive Match Format
                   </h2>
-                  <p className="text-xs text-[#A69AAF] mt-0.5">
+                  <p className="text-xs text-[#94A8C7] mt-0.5">
                     Pairs you with a real player inside your Elo window (zero AI bots or simulated opponents).
                   </p>
                 </div>
@@ -812,20 +812,20 @@ export const RivalsView: React.FC = () => {
                       onClick={() => setQueueMode(mode.id)}
                       className={`text-left rounded-xl p-4 border transition-all space-y-1.5 cursor-pointer ${
                         selected
-                          ? 'bg-[#21152F] border-[#D6A84B] shadow-[0_0_16px_rgba(214,168,75,0.16)]'
-                          : 'bg-[#100D18] border-[#362B45] hover:border-[#7045A0]'
+                          ? 'bg-[#102440] border-[#00D9FF] shadow-[0_0_16px_rgba(0,217,255,0.18)]'
+                          : 'bg-[#061225] border-[#1E3A63] hover:border-[#1677FF]'
                       }`}
                     >
                       <div className="flex items-center justify-between gap-2 text-xs">
-                        <span className="font-['Cinzel'] font-bold text-[#F2EDF7]">
+                        <span className="font-['Cinzel'] font-bold text-[#F2F7FF]">
                           {mode.title}
                         </span>
-                        <span className="font-mono text-[11px] text-[#E8C777] tabular-nums">
+                        <span className="font-mono text-[11px] text-[#38D9F5] tabular-nums">
                           {mode.defaultDurationDays}d
                         </span>
                       </div>
-                      <p className="text-[11px] font-medium text-[#D65C66]">{mode.subtitle}</p>
-                      <p className="text-xs text-[#A69AAF] leading-relaxed">
+                      <p className="text-[11px] font-medium text-[#F43F5E]">{mode.subtitle}</p>
+                      <p className="text-xs text-[#94A8C7] leading-relaxed">
                         {mode.description}
                       </p>
                     </button>
@@ -841,15 +841,15 @@ export const RivalsView: React.FC = () => {
           <div className="lq-surface rounded-2xl p-5 space-y-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7]">
+                <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF]">
                   Direct Rival Challenge
                 </h2>
-                <p className="text-xs text-[#A69AAF] mt-0.5">
+                <p className="text-xs text-[#94A8C7] mt-0.5">
                   Issue a customized head-to-head challenge to an accepted friend or open-challenge player.
                 </p>
               </div>
               <div className="relative w-full sm:w-64">
-                <Search className="w-3.5 h-3.5 text-[#766D82] absolute left-3 top-1/2 -translate-y-1/2" />
+                <Search className="w-3.5 h-3.5 text-[#647A9E] absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   value={candidateSearch}
@@ -861,8 +861,8 @@ export const RivalsView: React.FC = () => {
             </div>
 
             {selectableOpponents.length === 0 ? (
-              <div className="rounded-xl bg-[#100D18] border border-[#362B45] p-5 text-xs text-[#A69AAF] flex items-center gap-3">
-                <Users className="w-4 h-4 text-[#D6A84B] shrink-0" />
+              <div className="rounded-xl bg-[#061225] border border-[#1E3A63] p-5 text-xs text-[#94A8C7] flex items-center gap-3">
+                <Users className="w-4 h-4 text-[#38D9F5] shrink-0" />
                 No eligible opponents matched right now. Add friends in the Friends tab or discover open-challenge champions as more players enter the Arena.
               </div>
             ) : (
@@ -879,26 +879,26 @@ export const RivalsView: React.FC = () => {
                         onClick={() => setSelectedOpponentId(opp.id)}
                         className={`text-left rounded-xl p-3 border flex items-center justify-between gap-2 transition-all cursor-pointer ${
                           chosen
-                            ? 'bg-[#21152F] border-[#D6A84B]'
-                            : 'bg-[#100D18] border-[#362B45] hover:border-[#7045A0]'
+                            ? 'bg-[#102440] border-[#00D9FF]'
+                            : 'bg-[#061225] border-[#1E3A63] hover:border-[#1677FF]'
                         }`}
                       >
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
                             <PresenceBadge status={presence.status} size="xs" />
-                            <span className="text-xs font-bold text-[#F2EDF7] truncate">
+                            <span className="text-xs font-bold text-[#F2F7FF] truncate">
                               {opp.username}
                             </span>
                           </div>
-                          <p className="text-[11px] text-[#A69AAF] tabular-nums mt-0.5">
+                          <p className="text-[11px] text-[#94A8C7] tabular-nums mt-0.5">
                             Lv.{opp.level} · {opp.characterClass} · {opp.isFriend ? 'Friend' : 'Open Arena'}
                           </p>
                         </div>
                         <div className="text-right shrink-0">
-                          <span className="text-xs font-mono font-bold text-[#E8C777] tabular-nums block">
+                          <span className="text-xs font-mono font-bold text-[#FBBF24] tabular-nums block">
                             {opp.rating}
                           </span>
-                          <span className="text-[10px] text-[#766D82]">{opp.tier}</span>
+                          <span className="text-[10px] text-[#647A9E]">{opp.tier}</span>
                         </div>
                       </button>
                     );
@@ -906,9 +906,9 @@ export const RivalsView: React.FC = () => {
                 </div>
 
                 {/* Match Rule Configuration */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2 border-t border-[#362B45]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2 border-t border-[#1E3A63]">
                   <div>
-                    <label className="text-[11px] text-[#A69AAF] font-semibold block mb-1">
+                    <label className="text-[11px] text-[#94A8C7] font-semibold block mb-1">
                       Duel Mode
                     </label>
                     <select
@@ -933,7 +933,7 @@ export const RivalsView: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="text-[11px] text-[#A69AAF] font-semibold block mb-1">
+                    <label className="text-[11px] text-[#94A8C7] font-semibold block mb-1">
                       Duration (3–14 Days)
                     </label>
                     <input
@@ -947,7 +947,7 @@ export const RivalsView: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="text-[11px] text-[#A69AAF] font-semibold block mb-1">
+                    <label className="text-[11px] text-[#94A8C7] font-semibold block mb-1">
                       Target Score Cap (100–2000)
                     </label>
                     <input
@@ -962,7 +962,7 @@ export const RivalsView: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="text-[11px] text-[#A69AAF] font-semibold block mb-1">
+                    <label className="text-[11px] text-[#94A8C7] font-semibold block mb-1">
                       Visibility
                     </label>
                     <select
@@ -978,13 +978,13 @@ export const RivalsView: React.FC = () => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="flex flex-wrap items-center gap-4 text-xs text-[#A69AAF]">
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-[#94A8C7]">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={isRanked}
                         onChange={e => setIsRanked(e.target.checked)}
-                        className="accent-[#7045A0]"
+                        className="accent-[#1677FF]"
                       />
                       <span>Ranked Elo Match</span>
                     </label>
@@ -993,7 +993,7 @@ export const RivalsView: React.FC = () => {
                         type="checkbox"
                         checked={allowRestDays}
                         onChange={e => setAllowRestDays(e.target.checked)}
-                        className="accent-[#7045A0]"
+                        className="accent-[#1677FF]"
                       />
                       <span>Healthy Recovery Rest Days Allowed</span>
                     </label>
@@ -1010,7 +1010,7 @@ export const RivalsView: React.FC = () => {
 
                 {challengeMode === 'custom' && (
                   <div>
-                    <label className="text-[11px] text-[#A69AAF] font-semibold block mb-1">
+                    <label className="text-[11px] text-[#94A8C7] font-semibold block mb-1">
                       Custom Match Stipulation (Optional)
                     </label>
                     <input
@@ -1035,7 +1035,7 @@ export const RivalsView: React.FC = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {incomingInvites.length > 0 && (
                   <div className="lq-surface rounded-2xl p-5 space-y-3">
-                    <h3 className="font-['Cinzel'] font-bold text-sm text-[#E8C777]">
+                    <h3 className="font-['Cinzel'] font-bold text-sm text-[#38D9F5]">
                       Incoming Challenges ({incomingInvites.length})
                     </h3>
                     {incomingInvites.map(inv => {
@@ -1043,7 +1043,7 @@ export const RivalsView: React.FC = () => {
                       return (
                         <div
                           key={inv.id}
-                          className="rounded-xl bg-[#100D18] border border-[#362B45] p-3.5 flex items-center justify-between gap-3"
+                          className="rounded-xl bg-[#061225] border border-[#1E3A63] p-3.5 flex items-center justify-between gap-3"
                         >
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5">
@@ -1051,15 +1051,15 @@ export const RivalsView: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => openPublicProfile(inv.challengerId)}
-                                className="text-xs font-bold text-[#F2EDF7] hover:text-[#E8C777] truncate transition-colors cursor-pointer"
+                                className="text-xs font-bold text-[#F2F7FF] hover:text-[#38D9F5] truncate transition-colors cursor-pointer"
                               >
                                 {inv.challengerName}
                               </button>
-                              <span className="text-xs text-[#A69AAF]">
+                              <span className="text-xs text-[#94A8C7]">
                                 · {inv.challengeTitle}
                               </span>
                             </div>
-                            <p className="text-[11px] text-[#766D82] font-mono tabular-nums mt-0.5">
+                            <p className="text-[11px] text-[#647A9E] font-mono tabular-nums mt-0.5">
                               {inv.isRanked ? 'Ranked Elo' : 'Casual'} · {inv.rules.durationDays}d · Target {inv.rules.targetScore} pts
                               {inv.challengerRatingSnapshot ? ` · ${inv.challengerRatingSnapshot} Elo` : ''}
                             </p>
@@ -1069,7 +1069,7 @@ export const RivalsView: React.FC = () => {
                               type="button"
                               disabled={busyId === inv.id}
                               onClick={() => void handleRespond(inv.id, 'accept')}
-                              className="lq-btn px-2.5 py-1.5 rounded-lg bg-[#49B88A] hover:brightness-110 text-[#100D18] text-xs font-bold flex items-center gap-1 cursor-pointer"
+                              className="lq-btn px-2.5 py-1.5 rounded-lg bg-[#10B981] hover:brightness-110 text-[#061225] text-xs font-bold flex items-center gap-1 cursor-pointer"
                             >
                               <Check className="w-3.5 h-3.5" /> Accept
                             </button>
@@ -1077,7 +1077,7 @@ export const RivalsView: React.FC = () => {
                               type="button"
                               disabled={busyId === inv.id}
                               onClick={() => void handleRespond(inv.id, 'decline')}
-                              className="lq-btn px-2.5 py-1.5 rounded-lg bg-[#171220] hover:bg-[#D65C66]/15 border border-[#D65C66]/45 text-[#D65C66] text-xs font-semibold flex items-center gap-1 cursor-pointer"
+                              className="lq-btn px-2.5 py-1.5 rounded-lg bg-[#0A1930] hover:bg-[#F43F5E]/15 border border-[#F43F5E]/45 text-[#F43F5E] text-xs font-semibold flex items-center gap-1 cursor-pointer"
                             >
                               <X className="w-3.5 h-3.5" /> Decline
                             </button>
@@ -1090,26 +1090,26 @@ export const RivalsView: React.FC = () => {
 
                 {outgoingInvites.length > 0 && (
                   <div className="lq-surface rounded-2xl p-5 space-y-3">
-                    <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2EDF7]">
+                    <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF]">
                       Sent Challenges ({outgoingInvites.length})
                     </h3>
                     {outgoingInvites.map(inv => (
                       <div
                         key={inv.id}
-                        className="rounded-xl bg-[#100D18] border border-[#362B45] p-3.5 flex items-center justify-between gap-3"
+                        className="rounded-xl bg-[#061225] border border-[#1E3A63] p-3.5 flex items-center justify-between gap-3"
                       >
                         <div className="min-w-0">
-                          <p className="text-xs font-bold text-[#F2EDF7] truncate">
+                          <p className="text-xs font-bold text-[#F2F7FF] truncate">
                             To {inv.opponentName} · {inv.challengeTitle}
                           </p>
-                          <p className="text-[11px] text-[#766D82] font-mono tabular-nums mt-0.5">
+                          <p className="text-[11px] text-[#647A9E] font-mono tabular-nums mt-0.5">
                             {inv.isRanked ? 'Ranked' : 'Casual'} · {inv.rules.durationDays}d · Awaiting response
                           </p>
                         </div>
                         <button
                           type="button"
                           onClick={() => void cancelRivalInvite(inv.id)}
-                          className="lq-btn px-3 py-1.5 rounded-lg bg-[#171220] hover:bg-[#D65C66]/15 border border-[#D65C66]/45 text-xs text-[#D65C66] font-semibold shrink-0 cursor-pointer"
+                          className="lq-btn px-3 py-1.5 rounded-lg bg-[#0A1930] hover:bg-[#F43F5E]/15 border border-[#F43F5E]/45 text-xs text-[#F43F5E] font-semibold shrink-0 cursor-pointer"
                         >
                           Cancel
                         </button>
@@ -1122,14 +1122,14 @@ export const RivalsView: React.FC = () => {
 
             {/* Active Head-to-Head Duels */}
             <div className="lq-surface rounded-2xl p-5 space-y-4">
-              <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
-                <Dumbbell className="w-4 h-4 text-[#D65C66]" />
+              <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
+                <Dumbbell className="w-4 h-4 text-[#F43F5E]" />
                 Active Competitive Matches
               </h2>
 
               {activeDuels.length === 0 ? (
                 <div className="py-8 text-center space-y-3">
-                  <p className="text-xs text-[#A69AAF]">
+                  <p className="text-xs text-[#94A8C7]">
                     No active matches right now. Enter the matchmaking queue or challenge a rival directly.
                   </p>
                   <div className="flex items-center justify-center gap-2">
@@ -1171,51 +1171,51 @@ export const RivalsView: React.FC = () => {
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
-                            <p className="text-[11px] font-['Cinzel'] font-bold text-[#E8C777]">
+                            <p className="text-[11px] font-['Cinzel'] font-bold text-[#38D9F5]">
                               {m.challengeTitle} · {m.isRanked ? 'Ranked' : 'Unranked'}
                             </p>
                             <div className="flex items-center gap-1.5 mt-0.5">
-                              <span className="text-sm font-bold text-[#F2EDF7]">You vs</span>
+                              <span className="text-sm font-bold text-[#F2F7FF]">You vs</span>
                               <PresenceBadge status={theirPresence.status} size="xs" />
                               <button
                                 type="button"
                                 onClick={() => openPublicProfile(theirId)}
-                                className="text-sm font-bold text-[#E8C777] hover:underline truncate cursor-pointer"
+                                className="text-sm font-bold text-[#38D9F5] hover:underline truncate cursor-pointer"
                               >
                                 {theirName}
                               </button>
                               {theirRating && (
-                                <span className="text-[11px] font-mono text-[#A69AAF] tabular-nums">
+                                <span className="text-[11px] font-mono text-[#94A8C7] tabular-nums">
                                   ({theirRating})
                                 </span>
                               )}
                             </div>
                           </div>
-                          <span className="text-[11px] font-mono text-[#A69AAF] flex items-center gap-1 tabular-nums shrink-0">
+                          <span className="text-[11px] font-mono text-[#94A8C7] flex items-center gap-1 tabular-nums shrink-0">
                             <Clock className="w-3 h-3" /> {formatRemainingTime(m.endsAt)}
                           </span>
                         </div>
 
                         <div className="flex items-center justify-between text-sm font-mono font-bold tabular-nums">
-                          <span className="text-[#49B88A]">
-                            {myScore} pts <span className="text-[10px] font-sans font-normal text-[#A69AAF]">(You)</span>
+                          <span className="text-[#10B981]">
+                            {myScore} pts <span className="text-[10px] font-sans font-normal text-[#94A8C7]">(You)</span>
                           </span>
-                          <span className="text-[11px] text-[#766D82] font-sans">
+                          <span className="text-[11px] text-[#647A9E] font-sans">
                             Goal {m.rules.targetScore} pts
                           </span>
-                          <span className="text-[#D65C66]">
-                            {theirScore} pts <span className="text-[10px] font-sans font-normal text-[#A69AAF]">({theirName})</span>
+                          <span className="text-[#F43F5E]">
+                            {theirScore} pts <span className="text-[10px] font-sans font-normal text-[#94A8C7]">({theirName})</span>
                           </span>
                         </div>
 
                         <AnimatedProgressBar
                           percentage={myShare}
-                          className="h-2 w-full rounded-full bg-[#100D18] border border-[#362B45] overflow-hidden"
-                          barClassName="bg-[#49B88A]"
+                          className="h-2 w-full rounded-full bg-[#061225] border border-[#1E3A63] overflow-hidden"
+                          barClassName="bg-[#10B981]"
                           shimmer={false}
                         />
 
-                        <div className="flex items-center justify-between gap-2 pt-1 text-[11px] text-[#A69AAF]">
+                        <div className="flex items-center justify-between gap-2 pt-1 text-[11px] text-[#94A8C7]">
                           <span>
                             {m.rules.allowRestDays ? 'Rest-day safe scoring' : 'Full active output'}
                           </span>
@@ -1230,7 +1230,7 @@ export const RivalsView: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => void blockRivalUser(theirId)}
-                              className="lq-btn px-2.5 py-1 rounded-lg bg-[#D65C66]/12 hover:bg-[#D65C66]/22 text-[#D65C66] font-semibold flex items-center gap-1 cursor-pointer"
+                              className="lq-btn px-2.5 py-1 rounded-lg bg-[#F43F5E]/12 hover:bg-[#F43F5E]/22 text-[#F43F5E] font-semibold flex items-center gap-1 cursor-pointer"
                             >
                               <Ban className="w-3 h-3" /> Block
                             </button>
@@ -1249,12 +1249,12 @@ export const RivalsView: React.FC = () => {
         {arenaTab === 'history' && (
           <div className="space-y-5">
             <div className="lq-surface rounded-2xl p-5 space-y-3">
-              <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
-                <Scale className="w-4 h-4 text-[#D6A84B]" />
+              <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
+                <Scale className="w-4 h-4 text-[#F59E0B]" />
                 Head-to-Head Rivalries ({h2hRecords.length})
               </h2>
               {h2hRecords.length === 0 ? (
-                <p className="text-xs text-[#A69AAF]">
+                <p className="text-xs text-[#94A8C7]">
                   Complete matches against rivals to build your lifetime Head-to-Head ledger.
                 </p>
               ) : (
@@ -1262,25 +1262,25 @@ export const RivalsView: React.FC = () => {
                   {h2hRecords.map(h => (
                     <div
                       key={h.opponentId}
-                      className="rounded-xl bg-[#100D18] border border-[#362B45] p-3.5 flex items-center justify-between gap-2"
+                      className="rounded-xl bg-[#061225] border border-[#1E3A63] p-3.5 flex items-center justify-between gap-2"
                     >
                       <div className="min-w-0">
                         <button
                           type="button"
                           onClick={() => openPublicProfile(h.opponentId)}
-                          className="text-xs font-bold text-[#F2EDF7] hover:text-[#E8C777] truncate block transition-colors cursor-pointer"
+                          className="text-xs font-bold text-[#F2F7FF] hover:text-[#38D9F5] truncate block transition-colors cursor-pointer"
                         >
                           {h.opponentName}
                         </button>
-                        <span className="text-[11px] text-[#A69AAF] font-mono tabular-nums">
+                        <span className="text-[11px] text-[#94A8C7] font-mono tabular-nums">
                           {h.opponentRating} Elo · {h.opponentTier}
                         </span>
                       </div>
                       <div className="text-right font-mono tabular-nums shrink-0">
-                        <span className="text-sm font-bold text-[#E8C777]">
+                        <span className="text-sm font-bold text-[#FBBF24]">
                           {h.wins}W - {h.losses}L - {h.ties}T
                         </span>
-                        <span className="text-[10px] text-[#766D82] block">
+                        <span className="text-[10px] text-[#647A9E] block">
                           {h.totalMatches} matches
                         </span>
                       </div>
@@ -1291,12 +1291,12 @@ export const RivalsView: React.FC = () => {
             </div>
 
             <div className="lq-surface rounded-2xl p-5 space-y-3">
-              <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
-                <Award className="w-4 h-4 text-[#D6A84B]" />
+              <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
+                <Award className="w-4 h-4 text-[#F59E0B]" />
                 Completed &amp; Archived Matches ({historyDuels.length})
               </h2>
               {historyDuels.length === 0 ? (
-                <p className="text-xs text-[#A69AAF]">No finished matches archived yet.</p>
+                <p className="text-xs text-[#94A8C7]">No finished matches archived yet.</p>
               ) : (
                 <div className="space-y-2">
                   {historyDuels.slice(0, 20).map(m => {
@@ -1320,38 +1320,38 @@ export const RivalsView: React.FC = () => {
                     return (
                       <div
                         key={m.id}
-                        className="rounded-xl bg-[#100D18] border border-[#362B45] px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                        className="rounded-xl bg-[#061225] border border-[#1E3A63] px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
                       >
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="font-bold text-[#F2EDF7]">{m.challengeTitle}</span>
-                            <span className="text-[#A69AAF]">vs</span>
+                            <span className="font-bold text-[#F2F7FF]">{m.challengeTitle}</span>
+                            <span className="text-[#94A8C7]">vs</span>
                             <button
                               type="button"
                               onClick={() => openPublicProfile(theirId)}
-                              className="font-semibold text-[#E8C777] hover:underline cursor-pointer"
+                              className="font-semibold text-[#38D9F5] hover:underline cursor-pointer"
                             >
                               {theirName}
                             </button>
-                            <span className="text-[11px] font-mono text-[#766D82]">
+                            <span className="text-[11px] font-mono text-[#647A9E]">
                               {m.isRanked ? 'Ranked' : 'Unranked'}
                             </span>
                           </div>
                           {m.disputeReason && (
-                            <p className="text-[11px] text-[#E8C777] mt-0.5">
+                            <p className="text-[11px] text-[#FBBF24] mt-0.5">
                               Dispute note: {m.disputeReason}
                             </p>
                           )}
                         </div>
 
                         <div className="flex flex-wrap items-center gap-3 font-mono tabular-nums shrink-0">
-                          <span className="text-[#F2EDF7]">
+                          <span className="text-[#F2F7FF]">
                             {myScore} – {theirScore}
                           </span>
                           {typeof myDelta === 'number' && m.isRanked && m.status === 'completed' && (
                             <span
                               className={
-                                myDelta >= 0 ? 'text-[#49B88A] font-bold' : 'text-[#D65C66] font-bold'
+                                myDelta >= 0 ? 'text-[#10B981] font-bold' : 'text-[#F43F5E] font-bold'
                               }
                             >
                               {myDelta >= 0 ? `+${myDelta}` : myDelta} Elo
@@ -1360,12 +1360,12 @@ export const RivalsView: React.FC = () => {
                           <span
                             className={`font-bold ${
                               verdict === 'Victory'
-                                ? 'text-[#49B88A]'
+                                ? 'text-[#10B981]'
                                 : verdict === 'Defeat'
-                                ? 'text-[#D65C66]'
+                                ? 'text-[#F43F5E]'
                                 : verdict === 'DISPUTED'
-                                ? 'text-[#E8C777]'
-                                : 'text-[#D6A84B]'
+                                ? 'text-[#FBBF24]'
+                                : 'text-[#F59E0B]'
                             }`}
                           >
                             {verdict}
@@ -1378,7 +1378,7 @@ export const RivalsView: React.FC = () => {
                                 onClick={() => void handleRematch(m.id)}
                                 className="lq-btn lq-btn-secondary px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
                               >
-                                <RotateCcw className="w-3 h-3 text-[#E8C777]" /> Rematch
+                                <RotateCcw className="w-3 h-3 text-[#38D9F5]" /> Rematch
                               </button>
                               <button
                                 type="button"
@@ -1386,7 +1386,7 @@ export const RivalsView: React.FC = () => {
                                   setDisputeTarget(m);
                                   setDisputeReason('');
                                 }}
-                                className="lq-btn lq-btn-secondary px-2 py-1 rounded-lg hover:text-[#D65C66] text-[11px] cursor-pointer"
+                                className="lq-btn lq-btn-secondary px-2 py-1 rounded-lg hover:text-[#F43F5E] text-[11px] cursor-pointer"
                               >
                                 Dispute
                               </button>
@@ -1402,16 +1402,16 @@ export const RivalsView: React.FC = () => {
 
             {events.length > 0 && (
               <div className="lq-surface rounded-2xl p-5 space-y-2.5">
-                <h3 className="font-['Cinzel'] font-bold text-sm text-[#E8C777]">
+                <h3 className="font-['Cinzel'] font-bold text-sm text-[#38D9F5]">
                   Recent Server-Verified Match Telemetry
                 </h3>
-                <div className="divide-y divide-[#362B45]">
+                <div className="divide-y divide-[#1E3A63]">
                   {events.slice(0, 10).map(ev => (
                     <div key={ev.id} className="py-2 flex items-center justify-between text-xs">
-                      <span className="text-[#A69AAF]">
+                      <span className="text-[#94A8C7]">
                         {ev.label} · {ev.activityType.replace(/_/g, ' ')}
                       </span>
-                      <span className="font-mono font-bold text-[#49B88A] tabular-nums">
+                      <span className="font-mono font-bold text-[#10B981] tabular-nums">
                         +{ev.pointsAwarded} match pts
                       </span>
                     </div>
@@ -1428,11 +1428,11 @@ export const RivalsView: React.FC = () => {
             <div className="lq-surface rounded-2xl p-5 space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
-                    <Award className="w-4 h-4 text-[#D6A84B]" />
+                  <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
+                    <Award className="w-4 h-4 text-[#F59E0B]" />
                     Community Tournaments
                   </h2>
-                  <p className="text-xs text-[#A69AAF] mt-0.5">
+                  <p className="text-xs text-[#94A8C7] mt-0.5">
                     Multi-round brackets composed strictly of real verified LIFEQUEST competitors (zero AI bots or simulated opponents).
                   </p>
                 </div>
@@ -1447,7 +1447,7 @@ export const RivalsView: React.FC = () => {
 
               <form
                 onSubmit={handleCreateTournament}
-                className="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-3 border-t border-[#362B45]"
+                className="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-3 border-t border-[#1E3A63]"
               >
                 <input
                   type="text"
@@ -1488,7 +1488,7 @@ export const RivalsView: React.FC = () => {
             </div>
 
             {tournaments.length === 0 ? (
-              <div className="lq-surface rounded-2xl p-8 text-center text-xs text-[#A69AAF]">
+              <div className="lq-surface rounded-2xl p-8 text-center text-xs text-[#94A8C7]">
                 No active community brackets yet. Host the first verified tournament above!
               </div>
             ) : (
@@ -1502,18 +1502,18 @@ export const RivalsView: React.FC = () => {
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
-                          <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider font-semibold text-[#E8C777]">
+                          <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider font-semibold text-[#38D9F5]">
                             <span>{t.status}</span>
                             <span>·</span>
                             <span>{t.mode.replace('_', ' ')}</span>
                             <span>·</span>
                             <span className="tabular-nums font-mono">{t.participants.length} Real Competitors</span>
                           </div>
-                          <h3 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] mt-0.5">
+                          <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] mt-0.5">
                             {t.title}
                           </h3>
                           {t.subtitle && (
-                            <p className="text-xs text-[#A69AAF] mt-0.5">{t.subtitle}</p>
+                            <p className="text-xs text-[#94A8C7] mt-0.5">{t.subtitle}</p>
                           )}
                         </div>
                         <button
@@ -1522,7 +1522,7 @@ export const RivalsView: React.FC = () => {
                           onClick={() => void handleJoinTournament(t.id)}
                           className={`lq-btn px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 ${
                             isJoined
-                              ? 'bg-[#49B88A]/12 border border-[#49B88A]/45 text-[#49B88A]'
+                              ? 'bg-[#10B981]/12 border border-[#10B981]/45 text-[#10B981]'
                               : 'lq-btn-gold cursor-pointer'
                           }`}
                         >
@@ -1535,37 +1535,37 @@ export const RivalsView: React.FC = () => {
                       </div>
 
                       {t.matches.length > 0 && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3 border-t border-[#362B45]">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3 border-t border-[#1E3A63]">
                           {t.matches.map(bm => (
                             <div
                               key={bm.id}
-                              className="rounded-xl bg-[#100D18] border border-[#362B45] p-3 text-xs space-y-1.5"
+                              className="rounded-xl bg-[#061225] border border-[#1E3A63] p-3 text-xs space-y-1.5"
                             >
-                              <div className="flex items-center justify-between text-[10px] text-[#E8C777] uppercase font-semibold">
+                              <div className="flex items-center justify-between text-[10px] text-[#38D9F5] uppercase font-semibold">
                                 <span>{bm.roundLabel}</span>
                                 <span>{bm.status}</span>
                               </div>
                               <div className="flex items-center justify-between gap-2">
-                                <span className="font-bold text-[#F2EDF7] truncate">
+                                <span className="font-bold text-[#F2F7FF] truncate">
                                   {bm.playerAName}{' '}
-                                  <span className="text-[10px] font-mono text-[#766D82]">
+                                  <span className="text-[10px] font-mono text-[#647A9E]">
                                     ({bm.playerARating})
                                   </span>
                                 </span>
-                                <span className="font-mono font-bold text-[#E8C777] tabular-nums">
+                                <span className="font-mono font-bold text-[#FBBF24] tabular-nums">
                                   {bm.playerAScore}
                                 </span>
                               </div>
                               <div className="flex items-center justify-between gap-2">
-                                <span className="font-bold text-[#A69AAF] truncate">
+                                <span className="font-bold text-[#94A8C7] truncate">
                                   {bm.playerBId ? bm.playerBName : 'Awaiting Opponent'}
                                   {bm.playerBRating ? (
-                                    <span className="text-[10px] font-mono text-[#766D82] ml-1">
+                                    <span className="text-[10px] font-mono text-[#647A9E] ml-1">
                                       ({bm.playerBRating})
                                     </span>
                                   ) : null}
                                 </span>
-                                <span className="font-mono font-bold text-[#D65C66] tabular-nums">
+                                <span className="font-mono font-bold text-[#F43F5E] tabular-nums">
                                   {bm.playerBScore}
                                 </span>
                               </div>
@@ -1586,11 +1586,11 @@ export const RivalsView: React.FC = () => {
           <div className="space-y-4">
             <div className="lq-surface rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
-                  <Eye className="w-4 h-4 text-[#D6A84B]" />
+                <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
+                  <Eye className="w-4 h-4 text-[#38D9F5]" />
                   Arena Spectator Gallery
                 </h2>
-                <p className="text-xs text-[#A69AAF] mt-0.5">
+                <p className="text-xs text-[#94A8C7] mt-0.5">
                   Follow top competitors and watch live public/friends Rivals matches in read-only mode. Send encouraging cheers without influencing match scores.
                 </p>
               </div>
@@ -1604,7 +1604,7 @@ export const RivalsView: React.FC = () => {
             </div>
 
             {spectatorMatches.length === 0 ? (
-              <div className="lq-surface rounded-2xl p-8 text-center text-xs text-[#A69AAF]">
+              <div className="lq-surface rounded-2xl p-8 text-center text-xs text-[#94A8C7]">
                 No public or friends-visible matches are currently live to spectate.
               </div>
             ) : (
@@ -1621,22 +1621,22 @@ export const RivalsView: React.FC = () => {
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <span className="text-[11px] font-['Cinzel'] font-bold text-[#E8C777]">
+                          <span className="text-[11px] font-['Cinzel'] font-bold text-[#38D9F5]">
                             {m.challengeTitle} · {m.isRanked ? 'Ranked' : 'Casual'} · Read-Only
                           </span>
-                          <p className="text-xs text-[#A69AAF] mt-0.5 font-mono tabular-nums">
+                          <p className="text-xs text-[#94A8C7] mt-0.5 font-mono tabular-nums">
                             Target {m.targetScore} pts · {formatRemainingTime(m.endsAt)}
                           </p>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-3 text-xs">
-                        <div className="rounded-xl bg-[#100D18] border border-[#362B45] p-3 space-y-2">
+                        <div className="rounded-xl bg-[#061225] border border-[#1E3A63] p-3 space-y-2">
                           <div className="flex items-center justify-between gap-1">
                             <button
                               type="button"
                               onClick={() => openPublicProfile(m.challengerId)}
-                              className="font-bold text-[#F2EDF7] hover:text-[#E8C777] truncate transition-colors cursor-pointer"
+                              className="font-bold text-[#F2F7FF] hover:text-[#38D9F5] truncate transition-colors cursor-pointer"
                             >
                               {m.challengerName}
                             </button>
@@ -1647,15 +1647,15 @@ export const RivalsView: React.FC = () => {
                                 onClick={() => void handleToggleFollow(m.challengerId)}
                                 className={`text-[10px] px-2 py-0.5 rounded border whitespace-nowrap transition-colors cursor-pointer ${
                                   followingChallenger
-                                    ? 'border-[#49B88A]/50 text-[#49B88A] bg-[#49B88A]/12'
-                                    : 'border-[#362B45] text-[#E8C777] hover:border-[#D6A84B]'
+                                    ? 'border-[#10B981]/50 text-[#10B981] bg-[#10B981]/12'
+                                    : 'border-[#1E3A63] text-[#38D9F5] hover:border-[#00D9FF]'
                                 }`}
                               >
                                 {followingChallenger ? 'Following' : 'Follow'}
                               </button>
                             )}
                           </div>
-                          <p className="text-[11px] text-[#A69AAF] font-mono tabular-nums">
+                          <p className="text-[11px] text-[#94A8C7] font-mono tabular-nums">
                             {m.challengerDivision} ({m.challengerRating}) · {m.challengerScore} pts
                           </p>
                           <div className="flex flex-wrap gap-1">
@@ -1664,7 +1664,7 @@ export const RivalsView: React.FC = () => {
                                 key={emoji}
                                 type="button"
                                 onClick={() => void handleCheer(m.matchId, m.challengerId, emoji)}
-                                className="px-2 py-1 rounded-lg bg-[#171220] hover:bg-[#21152F] border border-[#362B45] text-xs transition-colors cursor-pointer"
+                                className="px-2 py-1 rounded-lg bg-[#0A1930] hover:bg-[#102440] border border-[#1E3A63] text-xs transition-colors cursor-pointer"
                                 title={`Cheer ${m.challengerName}`}
                               >
                                 {emoji}
@@ -1673,12 +1673,12 @@ export const RivalsView: React.FC = () => {
                           </div>
                         </div>
 
-                        <div className="rounded-xl bg-[#100D18] border border-[#362B45] p-3 space-y-2">
+                        <div className="rounded-xl bg-[#061225] border border-[#1E3A63] p-3 space-y-2">
                           <div className="flex items-center justify-between gap-1">
                             <button
                               type="button"
                               onClick={() => openPublicProfile(m.opponentId)}
-                              className="font-bold text-[#E8C777] hover:text-[#F2EDF7] truncate transition-colors cursor-pointer"
+                              className="font-bold text-[#38D9F5] hover:text-[#F2F7FF] truncate transition-colors cursor-pointer"
                             >
                               {m.opponentName}
                             </button>
@@ -1689,15 +1689,15 @@ export const RivalsView: React.FC = () => {
                                 onClick={() => void handleToggleFollow(m.opponentId)}
                                 className={`text-[10px] px-2 py-0.5 rounded border whitespace-nowrap transition-colors cursor-pointer ${
                                   followingOpponent
-                                    ? 'border-[#49B88A]/50 text-[#49B88A] bg-[#49B88A]/12'
-                                    : 'border-[#362B45] text-[#E8C777] hover:border-[#D6A84B]'
+                                    ? 'border-[#10B981]/50 text-[#10B981] bg-[#10B981]/12'
+                                    : 'border-[#1E3A63] text-[#38D9F5] hover:border-[#00D9FF]'
                                 }`}
                               >
                                 {followingOpponent ? 'Following' : 'Follow'}
                               </button>
                             )}
                           </div>
-                          <p className="text-[11px] text-[#A69AAF] font-mono tabular-nums">
+                          <p className="text-[11px] text-[#94A8C7] font-mono tabular-nums">
                             {m.opponentDivision} ({m.opponentRating}) · {m.opponentScore} pts
                           </p>
                           <div className="flex flex-wrap gap-1">
@@ -1706,7 +1706,7 @@ export const RivalsView: React.FC = () => {
                                 key={emoji}
                                 type="button"
                                 onClick={() => void handleCheer(m.matchId, m.opponentId, emoji)}
-                                className="px-2 py-1 rounded-lg bg-[#171220] hover:bg-[#21152F] border border-[#362B45] text-xs transition-colors cursor-pointer"
+                                className="px-2 py-1 rounded-lg bg-[#0A1930] hover:bg-[#102440] border border-[#1E3A63] text-xs transition-colors cursor-pointer"
                                 title={`Cheer ${m.opponentName}`}
                               >
                                 {emoji}
@@ -1718,16 +1718,16 @@ export const RivalsView: React.FC = () => {
 
                       <AnimatedProgressBar
                         percentage={cShare}
-                        className="h-2 w-full rounded-full bg-[#100D18] border border-[#362B45] overflow-hidden"
-                        barClassName="bg-[#49B88A]"
+                        className="h-2 w-full rounded-full bg-[#061225] border border-[#1E3A63] overflow-hidden"
+                        barClassName="bg-[#10B981]"
                         shimmer={false}
                       />
 
                       {m.recentCheers && m.recentCheers.length > 0 && (
-                        <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#A69AAF]">
-                          <Heart className="w-3 h-3 text-[#D65C66] shrink-0" />
+                        <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#94A8C7]">
+                          <Heart className="w-3 h-3 text-[#F43F5E] shrink-0" />
                           {m.recentCheers.slice(0, 4).map(ch => (
-                            <span key={ch.id} className="text-[11px] text-[#F2EDF7]">
+                            <span key={ch.id} className="text-[11px] text-[#F2F7FF]">
                               {ch.emoji} {ch.spectatorName}
                             </span>
                           ))}
@@ -1744,19 +1744,19 @@ export const RivalsView: React.FC = () => {
         {/* TAB 5: COMPETITIVE ELO RANKINGS */}
         {arenaTab === 'rankings' && (
           <div className="lq-surface rounded-2xl overflow-hidden">
-            <div className="p-5 border-b border-[#362B45] flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            <div className="p-5 border-b border-[#1E3A63] flex flex-col lg:flex-row lg:items-center justify-between gap-3">
               <div>
-                <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
-                  <Crown className="w-4 h-4 text-[#D6A84B]" />
+                <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
+                  <Crown className="w-4 h-4 text-[#F59E0B]" />
                   Competitive Arena Rankings
                 </h2>
-                <p className="text-xs text-[#A69AAF] mt-0.5">
+                <p className="text-xs text-[#94A8C7] mt-0.5">
                   Ranked strictly by Arena Elo and Seasonal Match Performance—separate from Realm XP standings.
                 </p>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <div className="flex items-center gap-1 p-1 bg-[#100D18] rounded-lg border border-[#362B45]">
+                <div className="flex items-center gap-1 p-1 bg-[#061225] rounded-lg border border-[#1E3A63]">
                   {(['global', 'friends', 'seasonal', 'weekly'] as const).map(s => (
                     <button
                       key={s}
@@ -1764,8 +1764,8 @@ export const RivalsView: React.FC = () => {
                       onClick={() => setLbScope(s)}
                       className={`px-2.5 py-1 rounded text-[11px] font-semibold capitalize transition-all cursor-pointer ${
                         lbScope === s
-                          ? 'bg-[#7045A0] text-[#F2EDF7] font-bold'
-                          : 'text-[#A69AAF] hover:text-[#F2EDF7]'
+                          ? 'bg-[#1677FF] text-[#F2F7FF] font-bold'
+                          : 'text-[#94A8C7] hover:text-[#F2F7FF]'
                       }`}
                     >
                       {s}
@@ -1804,7 +1804,7 @@ export const RivalsView: React.FC = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-[#100D18] border-b border-[#362B45] text-[11px] uppercase tracking-wider text-[#E8C777]">
+                  <tr className="bg-[#061225] border-b border-[#1E3A63] text-[11px] uppercase tracking-wider text-[#38D9F5]">
                     <th className="py-3 px-4 w-20 text-center">Rank</th>
                     <th className="py-3 px-4">Competitor</th>
                     <th className="py-3 px-4">Tier</th>
@@ -1813,43 +1813,43 @@ export const RivalsView: React.FC = () => {
                     <th className="py-3 px-4 text-right">Elo</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#362B45]">
+                <tbody className="divide-y divide-[#1E3A63]">
                   {lbLoading ? (
                     <tr>
-                      <td colSpan={6} className="py-8 text-center text-[#A69AAF]">
+                      <td colSpan={6} className="py-8 text-center text-[#94A8C7]">
                         Loading competitive standings...
                       </td>
                     </tr>
                   ) : displayedLeaderboard.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-8 text-center text-[#A69AAF]">
+                      <td colSpan={6} className="py-8 text-center text-[#94A8C7]">
                         No ranked competitors in this bracket yet.
                       </td>
                     </tr>
                   ) : (
                     displayedLeaderboard.map(row => {
                       const pStatus = getPlayerPresence(row.userId).status;
-                      const rowTierHex = TIER_ACCENT_MAP[row.tier] || '#E8C777';
+                      const rowTierHex = TIER_ACCENT_MAP[row.tier] || '#FBBF24';
                       return (
                         <tr
                           key={row.userId}
                           onClick={() => openPublicProfile(row.userId)}
                           className={`cursor-pointer transition-colors ${
                             row.isCurrent
-                              ? 'bg-[#21152F] hover:bg-[#2A1C3C]'
-                              : 'hover:bg-[#21152F]/60'
+                              ? 'bg-[#102440] hover:bg-[#162E52]'
+                              : 'hover:bg-[#102440]/60'
                           }`}
                         >
                           <td className="py-3 px-4 text-center font-mono font-bold tabular-nums">
                             <span
                               className={
                                 row.rank === 1
-                                  ? 'text-[#D6A84B]'
+                                  ? 'text-[#F59E0B]'
                                   : row.rank === 2
-                                  ? 'text-[#F2EDF7]'
+                                  ? 'text-[#F2F7FF]'
                                   : row.rank === 3
-                                  ? 'text-[#E8C777]'
-                                  : 'text-[#A69AAF]'
+                                  ? 'text-[#FBBF24]'
+                                  : 'text-[#94A8C7]'
                               }
                             >
                               #{row.rank}
@@ -1858,8 +1858,8 @@ export const RivalsView: React.FC = () => {
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-2">
                               <PresenceBadge status={pStatus} size="xs" />
-                              <span className="font-bold text-[#F2EDF7]">{row.username}</span>
-                              <span className="text-[11px] text-[#A69AAF]">
+                              <span className="font-bold text-[#F2F7FF]">{row.username}</span>
+                              <span className="text-[11px] text-[#94A8C7]">
                                 · {row.characterClass}
                               </span>
                             </div>
@@ -1867,13 +1867,13 @@ export const RivalsView: React.FC = () => {
                           <td className="py-3 px-4 font-semibold" style={{ color: rowTierHex }}>
                             {row.tier}
                           </td>
-                          <td className="py-3 px-4 text-center font-mono tabular-nums text-[#A69AAF]">
+                          <td className="py-3 px-4 text-center font-mono tabular-nums text-[#94A8C7]">
                             {row.wins}-{row.losses}-{row.ties}
                           </td>
-                          <td className="py-3 px-4 text-center font-mono tabular-nums text-[#A69AAF]">
+                          <td className="py-3 px-4 text-center font-mono tabular-nums text-[#94A8C7]">
                             {row.winRate}%
                           </td>
-                          <td className="py-3 px-4 text-right font-mono font-bold text-[#E8C777] tabular-nums">
+                          <td className="py-3 px-4 text-right font-mono font-bold text-[#FBBF24] tabular-nums">
                             {row.rating}
                           </td>
                         </tr>
@@ -1894,26 +1894,26 @@ export const RivalsView: React.FC = () => {
         panelClassName="w-full max-w-md"
       >
         {disputeTarget && (
-          <div className="lq-surface-elevated border border-[#D65C66]/45 rounded-2xl p-6 space-y-4">
+          <div className="lq-surface-elevated border border-[#F43F5E]/45 rounded-2xl p-6 space-y-4">
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-[#E8C777]">
+              <div className="flex items-center gap-2 text-[#FBBF24]">
                 <AlertTriangle className="w-5 h-5" />
-                <h3 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7]">
+                <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF]">
                   File Match Integrity Dispute
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setDisputeTarget(null)}
-                className="text-[#A69AAF] hover:text-[#F2EDF7] cursor-pointer"
+                className="text-[#94A8C7] hover:text-[#F2F7FF] cursor-pointer"
                 aria-label="Close dispute dialog"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <p className="text-xs text-[#A69AAF]">
+            <p className="text-xs text-[#94A8C7]">
               Filing a dispute for{' '}
-              <strong className="text-[#F2EDF7]">{disputeTarget.challengeTitle}</strong> safely freezes
+              <strong className="text-[#F2F7FF]">{disputeTarget.challengeTitle}</strong> safely freezes
               and reverts any Elo rating shift pending verification.
             </p>
             <form onSubmit={handleSubmitDispute} className="space-y-3">
@@ -1936,7 +1936,7 @@ export const RivalsView: React.FC = () => {
                 <button
                   type="submit"
                   disabled={busyId === `dispute-${disputeTarget.id}`}
-                  className="lq-btn px-4 py-2 rounded-xl bg-[#D65C66] hover:brightness-110 text-[#100D18] font-bold text-xs cursor-pointer"
+                  className="lq-btn px-4 py-2 rounded-xl bg-[#F43F5E] hover:brightness-110 text-[#061225] font-bold text-xs cursor-pointer"
                 >
                   Submit Dispute
                 </button>

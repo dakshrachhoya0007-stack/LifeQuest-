@@ -33,16 +33,16 @@ export const BuffsView: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1 text-xs">
-              <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#D6A84B]">
+              <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#38D9F5]">
                 Arcane Synergy
               </span>
-              <span className="text-[#766D82]" aria-hidden="true">·</span>
-              <span className="text-[#A69AAF] font-semibold">Habit-Powered Abilities</span>
+              <span className="text-[#647A9E]" aria-hidden="true">·</span>
+              <span className="text-[#94A8C7] font-semibold">Habit-Powered Abilities</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2EDF7]">
+            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2F7FF]">
               Active RPG Buffs &amp; Blessings
             </h1>
-            <p className="text-xs sm:text-sm text-[#A69AAF] max-w-2xl mt-1">
+            <p className="text-xs sm:text-sm text-[#94A8C7] max-w-2xl mt-1">
               Real-world physical workouts, restful recovery, hydration, and discipline manifest as temporary RPG combat enhancements in Aetheria.
             </p>
           </div>
@@ -72,12 +72,12 @@ export const BuffsView: React.FC = () => {
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-[#100D18] text-[#D6A84B] flex items-center justify-center border border-[#362B45]">
-                        <Icon className="w-5 h-5 text-[#E8C777]" />
+                      <div className="w-10 h-10 rounded-xl bg-[#061225] text-[#38D9F5] flex items-center justify-center border border-[#1E3A63]">
+                        <Icon className="w-5 h-5 text-[#38D9F5]" />
                       </div>
                       <div>
-                        <h3 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7]">{buff.name}</h3>
-                        <span className="text-[10px] uppercase font-bold text-[#9A72CC]">
+                        <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF]">{buff.name}</h3>
+                        <span className="text-[10px] uppercase font-bold text-[#38D9F5]">
                           {buff.rarity} Blessings
                         </span>
                       </div>
@@ -85,31 +85,31 @@ export const BuffsView: React.FC = () => {
 
                     <span
                       className={`text-xs font-mono font-bold uppercase ${
-                        buff.active ? 'text-[#49B88A]' : 'text-[#766D82]'
+                        buff.active ? 'text-[#10B981]' : 'text-[#647A9E]'
                       }`}
                     >
                       {buff.active ? 'Active' : 'Ready'}
                     </span>
                   </div>
 
-                  <p className="text-xs text-[#A69AAF] leading-relaxed mb-4">
+                  <p className="text-xs text-[#94A8C7] leading-relaxed mb-4">
                     {buff.description}
                   </p>
 
                   <div className="lq-surface p-3 rounded-xl space-y-1.5 text-xs mb-4">
                     <div className="flex justify-between">
-                      <span className="text-[#A69AAF]">Combat Effect:</span>
-                      <span className="font-mono font-bold text-[#E8C777] tabular-nums">
+                      <span className="text-[#94A8C7]">Combat Effect:</span>
+                      <span className="font-mono font-bold text-[#38D9F5] tabular-nums">
                         +{buff.effectValue}% {buff.effectType.toUpperCase()}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-[#A69AAF]">Unlock Condition:</span>
-                      <span className="text-[#D6A84B]">{buff.unlockRequirement}</span>
+                      <span className="text-[#94A8C7]">Unlock Condition:</span>
+                      <span className="text-[#38D9F5]">{buff.unlockRequirement}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-[#A69AAF]">Duration:</span>
-                      <span className="font-mono text-[#F2EDF7] tabular-nums">{buff.usesRemaining} Battle Uses Remaining</span>
+                      <span className="text-[#94A8C7]">Duration:</span>
+                      <span className="font-mono text-[#F2F7FF] tabular-nums">{buff.usesRemaining} Battle Uses Remaining</span>
                     </div>
                   </div>
                 </div>
@@ -119,7 +119,7 @@ export const BuffsView: React.FC = () => {
                   onClick={() => activateBuff(buff.id)}
                   className={`lq-btn w-full py-2.5 rounded-xl font-['Cinzel'] font-bold text-xs tracking-wider cursor-pointer ${
                     buff.active
-                      ? 'bg-[#49B88A]/15 text-[#49B88A] border border-[#49B88A]/45 hover:bg-[#49B88A]/25'
+                      ? 'bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/45 hover:bg-[#10B981]/25'
                       : 'lq-btn-gold'
                   }`}
                 >
@@ -131,8 +131,8 @@ export const BuffsView: React.FC = () => {
         })}
       </RpgStaggerGrid>
 
-      <div className="lq-surface p-4 rounded-xl text-xs text-[#A69AAF] flex items-start gap-2">
-        <Info className="w-4 h-4 text-[#D6A84B] shrink-0 mt-0.5" />
+      <div className="lq-surface p-4 rounded-xl text-xs text-[#94A8C7] flex items-start gap-2">
+        <Info className="w-4 h-4 text-[#38D9F5] shrink-0 mt-0.5" />
         <span>
           Buffs represent fictional RPG game mechanics to reward consistency. Recovery and rest habits award Guardian&rsquo;s Recovery (+10% DEF), ensuring balanced health without encouraging excessive workouts.
         </span>

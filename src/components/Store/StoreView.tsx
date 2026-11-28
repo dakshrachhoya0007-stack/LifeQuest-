@@ -89,19 +89,19 @@ export const StoreView: React.FC = () => {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-2 text-xs">
-              <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#D6A84B]">
+              <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#38D9F5]">
                 Aetheria Grand Bazaar
               </span>
-              <span className="text-[#766D82]" aria-hidden="true">·</span>
-              <span className="text-[#A69AAF] font-medium tabular-nums">
+              <span className="text-[#647A9E]" aria-hidden="true">·</span>
+              <span className="text-[#94A8C7] font-medium tabular-nums">
                 Hero Level {stats.level} · {stats.aetherRank} Rank
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2EDF7] flex items-center gap-2.5">
-              <ShoppingBag className="w-7 h-7 text-[#D6A84B]" />
+            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2F7FF] flex items-center gap-2.5">
+              <ShoppingBag className="w-7 h-7 text-[#38D9F5]" />
               Royal Treasury &amp; Cosmetic Bazaar
             </h1>
-            <p className="text-xs sm:text-sm text-[#A69AAF] max-w-2xl">
+            <p className="text-xs sm:text-sm text-[#94A8C7] max-w-2xl">
               Acquire restorative Elixirs &amp; Aura Blessings to fuel your bodyweight training and boss battles, or unlock 2D outfits and realm vanity themes.
             </p>
           </div>
@@ -109,24 +109,24 @@ export const StoreView: React.FC = () => {
           {/* Currencies */}
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <div className="lq-surface-gold rounded-xl px-4 py-2.5 flex items-center gap-3">
-              <Coins className="w-5 h-5 text-[#E8C777]" />
+              <Coins className="w-5 h-5 text-[#FBBF24]" />
               <div>
-                <span className="text-[10px] uppercase tracking-wider text-[#D6A84B] font-bold block">
+                <span className="text-[10px] uppercase tracking-wider text-[#F59E0B] font-bold block">
                   Gold
                 </span>
-                <span className="font-mono text-lg font-black text-[#E8C777] tabular-nums">
+                <span className="font-mono text-lg font-black text-[#FBBF24] tabular-nums">
                   <AnimatedCounter value={stats.gold} />
                 </span>
               </div>
             </div>
 
             <div className="lq-surface rounded-xl px-4 py-2.5 flex items-center gap-3">
-              <Gem className="w-5 h-5 text-[#9A72CC]" />
+              <Gem className="w-5 h-5 text-[#38D9F5]" />
               <div>
-                <span className="text-[10px] uppercase tracking-wider text-[#9A72CC] font-bold block">
+                <span className="text-[10px] uppercase tracking-wider text-[#38D9F5] font-bold block">
                   Fragments
                 </span>
-                <span className="font-mono text-lg font-black text-[#F2EDF7] tabular-nums">
+                <span className="font-mono text-lg font-black text-[#F2F7FF] tabular-nums">
                   <AnimatedCounter value={walletState?.cosmeticFragments ?? 0} />
                 </span>
               </div>
@@ -135,7 +135,7 @@ export const StoreView: React.FC = () => {
         </div>
 
         {/* Store Mode Switcher */}
-        <div className="pt-4 border-t border-[#362B45] flex flex-wrap items-center justify-between gap-3">
+        <div className="pt-4 border-t border-[#1E3A63] flex flex-wrap items-center justify-between gap-3">
           <FeatureTabBar
             themeId="achievements"
             layoutId="store-mode-pill"
@@ -171,7 +171,7 @@ export const StoreView: React.FC = () => {
                         sound.playClick();
                       }}
                       className={`lq-btn px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 cursor-pointer ${
-                        categoryFilter === tab.id ? 'lq-btn-primary' : 'lq-btn-secondary text-[#A69AAF]'
+                        categoryFilter === tab.id ? 'lq-btn-primary' : 'lq-btn-secondary text-[#94A8C7]'
                       }`}
                     >
                       {tab.label}
@@ -180,7 +180,7 @@ export const StoreView: React.FC = () => {
                 </div>
 
                 <div className="relative w-full md:w-64 shrink-0">
-                  <Search className="w-4 h-4 text-[#A69AAF] absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Search className="w-4 h-4 text-[#94A8C7] absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={searchQuery}
@@ -196,8 +196,8 @@ export const StoreView: React.FC = () => {
               <div
                 className={`p-3.5 rounded-xl border text-xs font-medium text-center ${
                   feedback.type === 'error'
-                    ? 'bg-[#D65C66]/12 border-[#D65C66]/45 text-[#D65C66]'
-                    : 'bg-[#49B88A]/10 border-[#49B88A]/45 text-[#49B88A]'
+                    ? 'bg-[#F43F5E]/12 border-[#F43F5E]/45 text-[#F43F5E]'
+                    : 'bg-[#10B981]/10 border-[#10B981]/45 text-[#10B981]'
                 }`}
               >
                 {feedback.text}
@@ -206,10 +206,10 @@ export const StoreView: React.FC = () => {
 
             {filteredItems.length === 0 ? (
               <div className="lq-surface rounded-2xl p-10 text-center space-y-2">
-                <p className="font-['Cinzel'] font-bold text-[#F2EDF7] text-base">
+                <p className="font-['Cinzel'] font-bold text-[#F2F7FF] text-base">
                   No items match your current filter
                 </p>
-                <p className="text-xs text-[#A69AAF]">
+                <p className="text-xs text-[#94A8C7]">
                   Clear your search or switch category tabs to view more Aetherian wares.
                 </p>
               </div>
@@ -230,7 +230,7 @@ export const StoreView: React.FC = () => {
                         <div className="space-y-3">
                           <div className="flex items-start gap-4">
                             <div
-                              className={`w-14 h-14 rounded-xl bg-[#100D18] border ${rStyle.border} shrink-0 flex items-center justify-center text-[#E8C777]`}
+                              className={`w-14 h-14 rounded-xl bg-[#061225] border ${rStyle.border} shrink-0 flex items-center justify-center text-[#38D9F5]`}
                             >
                               <Sparkles className="w-6 h-6" />
                             </div>
@@ -242,38 +242,38 @@ export const StoreView: React.FC = () => {
                                 </span>
                                 <span
                                   className={`font-mono tabular-nums ${
-                                    levelMet ? 'text-[#A69AAF]' : 'text-[#D65C66]'
+                                    levelMet ? 'text-[#94A8C7]' : 'text-[#F43F5E]'
                                   }`}
                                 >
                                   Req Lv.{item.requiredLevel}
                                 </span>
                               </div>
 
-                              <h3 className="font-['Cinzel'] font-black text-base text-[#F2EDF7] leading-tight">
+                              <h3 className="font-['Cinzel'] font-black text-base text-[#F2F7FF] leading-tight">
                                 {item.name}
                               </h3>
 
-                              <p className="text-[11px] font-mono text-[#D6A84B]">
+                              <p className="text-[11px] font-mono text-[#38D9F5]">
                                 {item.itemType.toUpperCase()}
                               </p>
                             </div>
                           </div>
 
-                          <p className="text-xs text-[#A69AAF] leading-relaxed">{item.description}</p>
+                          <p className="text-xs text-[#94A8C7] leading-relaxed">{item.description}</p>
 
-                          <div className="bg-[#100D18] border border-[#362B45] rounded-xl p-2.5 text-xs font-mono">
-                            <span className="text-[#49B88A] font-bold flex items-center gap-1.5">
+                          <div className="bg-[#061225] border border-[#1E3A63] rounded-xl p-2.5 text-xs font-mono">
+                            <span className="text-[#10B981] font-bold flex items-center gap-1.5">
                               <Sparkles className="w-3.5 h-3.5" />+{Number(meta.uses || 2)} Battle Charges
                             </span>
                           </div>
                         </div>
 
-                        <div className="space-y-2.5 pt-2 border-t border-[#362B45]">
+                        <div className="space-y-2.5 pt-2 border-t border-[#1E3A63]">
                           <div className="flex items-center justify-between text-xs font-mono">
-                            <span className="text-[#A69AAF]">Price:</span>
+                            <span className="text-[#94A8C7]">Price:</span>
                             <span
                               className={`font-bold flex items-center gap-1 tabular-nums ${
-                                goldMet ? 'text-[#E8C777]' : 'text-[#D65C66]'
+                                goldMet ? 'text-[#FBBF24]' : 'text-[#F43F5E]'
                               }`}
                             >
                               <Coins className="w-3.5 h-3.5" />

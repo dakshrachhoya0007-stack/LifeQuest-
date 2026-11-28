@@ -136,16 +136,16 @@ export const InteractiveTutorialOverlay: React.FC = () => {
       {highlightRect && (
         <div
           aria-hidden="true"
-          className="fixed rounded-2xl border-2 border-[#E8C777] transition-all duration-300 pointer-events-none"
+          className="fixed rounded-2xl border-2 border-[#00D9FF] transition-all duration-300 pointer-events-none"
           style={{
             top: highlightRect.top,
             left: highlightRect.left,
             width: highlightRect.width,
             height: highlightRect.height,
-            boxShadow: '0 0 0 9999px rgba(16, 13, 24, 0.74), 0 0 28px rgba(214, 168, 75, 0.38)',
+            boxShadow: '0 0 0 9999px rgba(6, 18, 37, 0.78), 0 0 28px rgba(0, 217, 255, 0.38)',
           }}
         >
-          <span className="absolute -top-3 left-4 px-2.5 py-0.5 rounded bg-[#E8C777] text-[#100D18] font-['Cinzel'] font-black text-[10px] uppercase tracking-wider shadow-lg flex items-center gap-1">
+          <span className="absolute -top-3 left-4 px-2.5 py-0.5 rounded bg-[#00D9FF] text-[#061225] font-['Cinzel'] font-black text-[10px] uppercase tracking-wider shadow-lg flex items-center gap-1">
             <Compass className="w-3 h-3" />
             Focused Section
           </span>
@@ -156,10 +156,10 @@ export const InteractiveTutorialOverlay: React.FC = () => {
       <div className="fixed bottom-4 right-4 left-4 sm:left-auto sm:w-[430px] pointer-events-auto lq-card-gold rounded-2xl backdrop-blur-xl p-5 space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-widest text-[#E8C777] font-bold block">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-[#38D9F5] font-bold block">
               {currentStep.sectionLabel} · Guided Tour ({stepIndex + 1}/{TUTORIAL_STEPS.length})
             </span>
-            <h3 className="font-['Cinzel'] font-black text-base sm:text-lg text-[#F2EDF7] mt-0.5">
+            <h3 className="font-['Cinzel'] font-black text-base sm:text-lg text-[#F2F7FF] mt-0.5">
               {currentStep.title}
             </h3>
           </div>
@@ -167,19 +167,19 @@ export const InteractiveTutorialOverlay: React.FC = () => {
             type="button"
             onClick={skipTutorial}
             title="Skip tutorial"
-            className="lq-btn lq-btn-secondary p-1.5 rounded-lg text-[#A69AAF] hover:text-[#F2EDF7] cursor-pointer"
+            className="lq-btn lq-btn-secondary p-1.5 rounded-lg text-[#94A8C7] hover:text-[#F2F7FF] cursor-pointer"
             aria-label="Skip tutorial"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <p className="text-xs text-[#A69AAF] leading-relaxed">
+        <p className="text-xs text-[#94A8C7] leading-relaxed">
           {currentStep.description}
         </p>
 
-        <div className="p-2.5 rounded-xl bg-[#100D18] border border-[#362B45] text-[11px] text-[#E8C777] flex items-start gap-2">
-          <Sparkles className="w-3.5 h-3.5 shrink-0 mt-0.5 text-[#D6A84B]" />
+        <div className="p-2.5 rounded-xl bg-[#061225] border border-[#1E3A63] text-[11px] text-[#38D9F5] flex items-start gap-2">
+          <Sparkles className="w-3.5 h-3.5 shrink-0 mt-0.5 text-[#00D9FF]" />
           <span>{currentStep.actionTip}</span>
         </div>
 
@@ -189,7 +189,7 @@ export const InteractiveTutorialOverlay: React.FC = () => {
             <div
               key={st.id}
               className={`h-1 flex-1 rounded-full transition-colors ${
-                idx <= stepIndex ? 'bg-[#D6A84B]' : 'bg-[#362B45]'
+                idx <= stepIndex ? 'bg-[#00D9FF]' : 'bg-[#1E3A63]'
               }`}
             />
           ))}
@@ -200,7 +200,7 @@ export const InteractiveTutorialOverlay: React.FC = () => {
           <button
             type="button"
             onClick={skipTutorial}
-            className="text-xs text-[#A69AAF] hover:text-[#F2EDF7] px-2 py-1.5 transition-colors cursor-pointer"
+            className="text-xs text-[#94A8C7] hover:text-[#F2F7FF] px-2 py-1.5 transition-colors cursor-pointer"
           >
             Skip Tour
           </button>

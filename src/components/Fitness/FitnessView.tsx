@@ -112,17 +112,17 @@ export const FitnessView: React.FC = () => {
       <FeatureBanner themeId="fitness" data-tutorial-id="fitness-tracker">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="space-y-1.5">
-            <div className="flex flex-wrap items-center gap-2 text-xs text-[#A69AAF]">
-              <span className="font-['Cinzel'] font-semibold text-[#49B88A] uppercase tracking-widest">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-[#94A8C7]">
+              <span className="font-['Cinzel'] font-semibold text-[#10B981] uppercase tracking-widest">
                 Mountain of Strength
               </span>
               <span aria-hidden="true">·</span>
               <span>Physical Conditioning & Training Ledger</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold font-['Cinzel'] text-[#F2EDF7]">
+            <h1 className="text-2xl sm:text-3xl font-bold font-['Cinzel'] text-[#F2F7FF]">
               Fitness Tracker &amp; Logs
             </h1>
-            <p className="text-xs sm:text-sm text-[#A69AAF] max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#94A8C7] max-w-2xl leading-relaxed">
               Record daily workouts, walks, gym sets, and calisthenics. Camera-verified sessions in
               Aether Vision earn maximum Player XP and combat buffs.
             </p>
@@ -134,7 +134,7 @@ export const FitnessView: React.FC = () => {
               onClick={() => setActiveTab('aether-vision')}
               className="lq-btn lq-btn-secondary px-4 py-2.5 text-xs whitespace-nowrap"
             >
-              <Camera className="w-4 h-4 text-[#9A72CC]" />
+              <Camera className="w-4 h-4 text-[#38D9F5]" />
               <span>Aether Vision AI</span>
             </button>
             <button
@@ -153,14 +153,14 @@ export const FitnessView: React.FC = () => {
       <RpgScrollReveal>
         <div className="lq-card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2 text-xs text-[#A69AAF]">
-              <span className="font-['Cinzel'] font-semibold text-[#49B88A] uppercase tracking-wider">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-[#94A8C7]">
+              <span className="font-['Cinzel'] font-semibold text-[#10B981] uppercase tracking-wider">
                 Training Focus: {(user?.activityLevel || 'moderate').replace('_', ' ')}
               </span>
               <span aria-hidden="true">·</span>
               <span>
                 Units:{' '}
-                <strong className="text-[#F2EDF7] uppercase">
+                <strong className="text-[#F2F7FF] uppercase">
                   {user?.preferredUnits || 'metric'}
                 </strong>
               </span>
@@ -173,11 +173,11 @@ export const FitnessView: React.FC = () => {
                 </>
               )}
             </div>
-            <p className="text-xs text-[#A69AAF] leading-relaxed">
+            <p className="text-xs text-[#94A8C7] leading-relaxed">
               {activityPaceNote[user?.activityLevel || 'moderate'] || activityPaceNote.moderate}
             </p>
             {user?.personalGoals && user.personalGoals.length > 0 && (
-              <p className="text-[11px] text-[#E8C777]">
+              <p className="text-[11px] text-[#38D9F5]">
                 Active Goals: {user.personalGoals.join(' · ')}
               </p>
             )}
@@ -185,7 +185,7 @@ export const FitnessView: React.FC = () => {
 
           {user?.preferredActivities && user.preferredActivities.length > 0 && (
             <div className="flex flex-wrap items-center gap-2 shrink-0">
-              <span className="text-[11px] text-[#A69AAF] mr-1">Quick Log:</span>
+              <span className="text-[11px] text-[#94A8C7] mr-1">Quick Log:</span>
               {user.preferredActivities.slice(0, 4).map(act => (
                 <button
                   key={act}
@@ -205,39 +205,39 @@ export const FitnessView: React.FC = () => {
       <RpgStaggerGrid className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <RpgStaggerItem>
           <div className="lq-card p-5 h-full">
-            <span className="text-xs font-semibold text-[#A69AAF] uppercase tracking-wider block mb-1.5">
+            <span className="text-xs font-semibold text-[#94A8C7] uppercase tracking-wider block mb-1.5">
               Total Sessions
             </span>
-            <p className="font-mono text-3xl font-bold text-[#F2EDF7] tabular-nums">
+            <p className="font-mono text-3xl font-bold text-[#F2F7FF] tabular-nums">
               <AnimatedCounter value={fitnessSessions.length} />
             </p>
-            <p className="text-xs text-[#49B88A] mt-1.5">Across all training modalities</p>
+            <p className="text-xs text-[#10B981] mt-1.5">Across all training modalities</p>
           </div>
         </RpgStaggerItem>
 
         <RpgStaggerItem>
           <div className="lq-card p-5 h-full">
-            <span className="text-xs font-semibold text-[#A69AAF] uppercase tracking-wider block mb-1.5">
+            <span className="text-xs font-semibold text-[#94A8C7] uppercase tracking-wider block mb-1.5">
               Total Active Time
             </span>
-            <p className="font-mono text-3xl font-bold text-[#E8C777] tabular-nums">
+            <p className="font-mono text-3xl font-bold text-[#38D9F5] tabular-nums">
               <AnimatedCounter value={totalMinutes} />{' '}
-              <span className="text-base font-normal text-[#A69AAF]">mins</span>
+              <span className="text-base font-normal text-[#94A8C7]">mins</span>
             </p>
-            <p className="text-xs text-[#A69AAF] mt-1.5">Endurance forged in training</p>
+            <p className="text-xs text-[#94A8C7] mt-1.5">Endurance forged in training</p>
           </div>
         </RpgStaggerItem>
 
         <RpgStaggerItem>
           <div className="lq-card-gold p-5 h-full">
-            <span className="text-xs font-semibold text-[#49B88A] uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+            <span className="text-xs font-semibold text-[#10B981] uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
               <Zap className="w-3.5 h-3.5" />
               <span>AI Verified Sessions</span>
             </span>
-            <p className="font-mono text-3xl font-bold text-[#F2EDF7] tabular-nums">
+            <p className="font-mono text-3xl font-bold text-[#F2F7FF] tabular-nums">
               <AnimatedCounter value={totalVerifiedCount} />
             </p>
-            <p className="text-xs text-[#A69AAF] mt-1.5">Earned Warrior’s Momentum Buff</p>
+            <p className="text-xs text-[#94A8C7] mt-1.5">Earned Warrior’s Momentum Buff</p>
           </div>
         </RpgStaggerItem>
       </RpgStaggerGrid>
@@ -246,17 +246,17 @@ export const FitnessView: React.FC = () => {
       <RpgScrollReveal>
         <div className="lq-card p-6 space-y-4">
           <div className="flex items-center justify-between gap-2">
-            <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
-              <Activity className="w-4 h-4 text-[#49B88A]" />
+            <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
+              <Activity className="w-4 h-4 text-[#10B981]" />
               <span>Activity Log History</span>
             </h2>
-            <span className="text-xs font-mono text-[#A69AAF] tabular-nums">
+            <span className="text-xs font-mono text-[#94A8C7] tabular-nums">
               {fitnessSessions.length} recorded
             </span>
           </div>
 
           {fitnessSessions.length === 0 ? (
-            <div className="text-center py-12 text-[#A69AAF] text-xs">
+            <div className="text-center py-12 text-[#94A8C7] text-xs">
               No workouts logged yet. Start an Aether Vision session or log your first routine!
             </div>
           ) : (
@@ -264,14 +264,14 @@ export const FitnessView: React.FC = () => {
               {fitnessSessions.map(session => (
                 <div
                   key={session.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-[#100D18] border border-[#362B45] hover:border-[#49B88A]/45 transition-colors gap-3"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-[#061225] border border-[#1E3A63] hover:border-[#10B981]/45 transition-colors gap-3"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
                     <div
                       className={`w-10 h-10 rounded-xl flex items-center justify-center border shrink-0 ${
                         session.verifiedWithAetherVision
-                          ? 'bg-[#49B88A]/12 border-[#49B88A]/45 text-[#49B88A]'
-                          : 'bg-[#171220] border-[#362B45] text-[#E8C777]'
+                          ? 'bg-[#10B981]/12 border-[#10B981]/45 text-[#10B981]'
+                          : 'bg-[#0A1930] border-[#1E3A63] text-[#38D9F5]'
                       }`}
                     >
                       {session.verifiedWithAetherVision ? (
@@ -282,21 +282,21 @@ export const FitnessView: React.FC = () => {
                     </div>
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-sm font-semibold text-[#F2EDF7] truncate">
+                        <h3 className="text-sm font-semibold text-[#F2F7FF] truncate">
                           {session.exerciseName}
                         </h3>
-                        <span aria-hidden="true" className="text-[#766D82]">·</span>
+                        <span aria-hidden="true" className="text-[#647A9E]">·</span>
                         <span
                           className={`text-[11px] font-medium ${
                             session.verifiedWithAetherVision
-                              ? 'text-[#49B88A]'
-                              : 'text-[#A69AAF]'
+                              ? 'text-[#10B981]'
+                              : 'text-[#94A8C7]'
                           }`}
                         >
                           {session.verifiedWithAetherVision ? 'AI Verified' : 'Manually Logged'}
                         </span>
                       </div>
-                      <p className="text-xs text-[#A69AAF] mt-0.5 tabular-nums">
+                      <p className="text-xs text-[#94A8C7] mt-0.5 tabular-nums">
                         {session.durationMinutes} mins
                         {session.repetitions ? ` · ${session.repetitions} reps` : ''}
                         {' · '}
@@ -306,7 +306,7 @@ export const FitnessView: React.FC = () => {
                   </div>
 
                   <div className="flex items-center gap-4 text-xs font-mono tabular-nums shrink-0">
-                    <span className="text-[#49B88A] font-semibold">
+                    <span className="text-[#10B981] font-semibold">
                       +{session.playerXpEarned} Player XP
                     </span>
                   </div>
@@ -332,14 +332,14 @@ export const FitnessView: React.FC = () => {
           <div className="flex items-center justify-between gap-2">
             <h3
               id="log-workout-modal-title"
-              className="text-lg font-bold font-['Cinzel'] text-[#F2EDF7]"
+              className="text-lg font-bold font-['Cinzel'] text-[#F2F7FF]"
             >
               Record Fitness Session
             </h3>
             <button
               type="button"
               onClick={() => setShowLogModal(false)}
-              className="p-1.5 rounded-lg text-[#A69AAF] hover:text-[#F2EDF7] hover:bg-[#21152F] transition-colors"
+              className="p-1.5 rounded-lg text-[#94A8C7] hover:text-[#F2F7FF] hover:bg-[#102440] transition-colors"
               aria-label="Close modal"
             >
               <X className="w-4 h-4" />
@@ -348,7 +348,7 @@ export const FitnessView: React.FC = () => {
 
           <form onSubmit={handleManualLog} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-[#A69AAF] mb-1.5">
+              <label className="block text-xs font-medium text-[#94A8C7] mb-1.5">
                 Activity Type
               </label>
               <div className="grid grid-cols-2 gap-2">
@@ -364,13 +364,13 @@ export const FitnessView: React.FC = () => {
                       }}
                       className={`p-2.5 rounded-xl border text-xs font-medium flex items-center gap-2 transition-all ${
                         selected
-                          ? 'bg-[#7045A0] border-[#D6A84B]/60 text-[#F2EDF7] font-semibold shadow-[0_6px_16px_rgba(112,69,160,0.35)]'
-                          : 'bg-[#100D18] border-[#362B45] text-[#A69AAF] hover:text-[#F2EDF7] hover:border-[#7045A0]/55'
+                          ? 'bg-[#1677FF] border-[#00D9FF]/70 text-[#F2F7FF] font-semibold shadow-[0_6px_16px_rgba(22,119,255,0.35)]'
+                          : 'bg-[#061225] border-[#1E3A63] text-[#94A8C7] hover:text-[#F2F7FF] hover:border-[#1677FF]/55'
                       }`}
                     >
                       <opt.Icon
                         className={`w-3.5 h-3.5 shrink-0 ${
-                          selected ? 'text-[#E8C777]' : 'text-[#49B88A]'
+                          selected ? 'text-[#38D9F5]' : 'text-[#10B981]'
                         }`}
                       />
                       <span className="truncate">{opt.label}</span>
@@ -381,7 +381,7 @@ export const FitnessView: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[#A69AAF] mb-1.5">
+              <label className="block text-xs font-medium text-[#94A8C7] mb-1.5">
                 Session Title
               </label>
               <input
@@ -394,7 +394,7 @@ export const FitnessView: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-[#A69AAF] mb-1.5">
+                <label className="block text-xs font-medium text-[#94A8C7] mb-1.5">
                   Duration (Minutes)
                 </label>
                 <input
@@ -407,7 +407,7 @@ export const FitnessView: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-[#A69AAF] mb-1.5">
+                <label className="block text-xs font-medium text-[#94A8C7] mb-1.5">
                   {isImperial ? 'Distance (mi optional)' : 'Distance (km optional)'}
                 </label>
                 <input
@@ -422,7 +422,7 @@ export const FitnessView: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[#A69AAF] mb-1.5">
+              <label className="block text-xs font-medium text-[#94A8C7] mb-1.5">
                 Notes (Optional)
               </label>
               <input

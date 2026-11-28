@@ -47,36 +47,36 @@ export const DataMigrationModal: React.FC<DataMigrationModalProps> = ({
         aria-labelledby="data-migration-title"
         className="relative w-full lq-card-gold p-6 sm:p-8"
       >
-        <div className="w-12 h-12 mx-auto rounded-xl bg-[#7045A0]/25 border border-[#D6A84B]/50 flex items-center justify-center text-[#E8C777] mb-4">
+        <div className="w-12 h-12 mx-auto rounded-xl bg-[#1677FF]/25 border border-[#00D9FF]/50 flex items-center justify-center text-[#38D9F5] mb-4">
           <CloudUpload className="w-6 h-6" />
         </div>
 
         <div className="text-center mb-5">
-          <h2 id="data-migration-title" className="text-xl font-bold font-['Cinzel'] text-[#F2EDF7]">
+          <h2 id="data-migration-title" className="text-xl font-bold font-['Cinzel'] text-[#F2F7FF]">
             Local Hero Progress Detected
           </h2>
-          <p className="text-xs text-[#E8C777] mt-1.5 font-medium">
+          <p className="text-xs text-[#38D9F5] mt-1.5 font-medium">
             Save your device progress to your LifeQuest account
           </p>
         </div>
 
-        <div className="p-4 rounded-xl bg-[#100D18] border border-[#362B45] mb-5 space-y-2 text-xs">
-          <div className="flex items-center gap-2 text-[#F2EDF7] font-semibold">
-            <Shield className="w-4 h-4 text-[#E8C777]" />
+        <div className="p-4 rounded-xl bg-[#061225] border border-[#1E3A63] mb-5 space-y-2 text-xs">
+          <div className="flex items-center gap-2 text-[#F2F7FF] font-semibold">
+            <Shield className="w-4 h-4 text-[#38D9F5]" />
             <span>Detected Local Progress:</span>
           </div>
-          <div className="p-2.5 rounded-lg bg-[#171220] border border-[#362B45] text-[#A69AAF] font-mono text-[11px]">
+          <div className="p-2.5 rounded-lg bg-[#0A1930] border border-[#1E3A63] text-[#94A8C7] font-mono text-[11px]">
             {localSummary || 'Level 1+ Knight with customized character progression & habits.'}
           </div>
-          <p className="text-[11px] text-[#A69AAF] leading-relaxed pt-1">
+          <p className="text-[11px] text-[#94A8C7] leading-relaxed pt-1">
             Transferring will securely link your bodyweight strength, habits, fitness sessions, and
             Aether Rank to your account so you can continue seamlessly across all your devices.
           </p>
         </div>
 
         {error && (
-          <div className="p-3 mb-4 rounded-xl bg-[#D65C66]/12 border border-[#D65C66]/45 text-xs text-[#F2EDF7] flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-[#D65C66] shrink-0" />
+          <div className="p-3 mb-4 rounded-xl bg-[#F43F5E]/12 border border-[#F43F5E]/45 text-xs text-[#F2F7FF] flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-[#F43F5E] shrink-0" />
             <span>{error}</span>
           </div>
         )}

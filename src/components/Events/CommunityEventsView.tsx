@@ -99,7 +99,7 @@ export const CommunityEventsView: React.FC = () => {
         {eventsSubTab === 'decisions' ? (
           <CommunityDecisionsView />
         ) : communityEventLoading && !evt ? (
-          <div className="lq-surface rounded-2xl p-8 text-center text-sm text-[#A69AAF]">
+          <div className="lq-surface rounded-2xl p-8 text-center text-sm text-[#94A8C7]">
             Loading Realm Community Event...
           </div>
         ) : !evt || !communityEventState ? (
@@ -117,8 +117,8 @@ export const CommunityEventsView: React.FC = () => {
             {/* Announcements Banner Strip */}
             {announcements.length > 0 && (
               <div className="lq-surface rounded-2xl p-4 space-y-2.5">
-                <div className="flex items-center gap-2 text-xs font-['Cinzel'] font-bold uppercase tracking-wider text-[#E8C777]">
-                  <Megaphone className="w-4 h-4 text-[#D6A84B]" />
+                <div className="flex items-center gap-2 text-xs font-['Cinzel'] font-bold uppercase tracking-wider text-[#38D9F5]">
+                  <Megaphone className="w-4 h-4 text-[#00D9FF]" />
                   Realm Herald Announcements
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
@@ -127,14 +127,14 @@ export const CommunityEventsView: React.FC = () => {
                       key={ann.id}
                       className={`rounded-xl p-3 border text-xs ${
                         ann.severity === 'milestone'
-                          ? 'bg-[#49B88A]/10 border-[#49B88A]/40'
+                          ? 'bg-[#10B981]/10 border-[#10B981]/40'
                           : ann.severity === 'alert'
-                          ? 'bg-[#D6A84B]/12 border-[#D6A84B]/45'
-                          : 'bg-[#100D18] border-[#362B45]'
+                          ? 'bg-[#F59E0B]/12 border-[#F59E0B]/45'
+                          : 'bg-[#061225] border-[#1E3A63]'
                       }`}
                     >
-                      <p className="font-bold text-[#F2EDF7]">{ann.title}</p>
-                      <p className="text-[#A69AAF] mt-0.5 leading-snug">{ann.message}</p>
+                      <p className="font-bold text-[#F2F7FF]">{ann.title}</p>
+                      <p className="text-[#94A8C7] mt-0.5 leading-snug">{ann.message}</p>
                     </div>
                   ))}
                 </div>
@@ -145,21 +145,21 @@ export const CommunityEventsView: React.FC = () => {
             <FeatureBanner themeId="events" className="space-y-5">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-[#100D18] border border-[#D6A84B]/45 flex items-center justify-center shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-[#061225] border border-[#00D9FF]/45 flex items-center justify-center shrink-0">
                     <GoldenWorldTreeEmblem className="w-8 h-8" />
                   </div>
                   <div>
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-[#E8C777] font-semibold uppercase tracking-widest">
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-[#38D9F5] font-semibold uppercase tracking-widest">
                       <span className="font-['Cinzel']">Realm-Wide Event</span>
-                      <span className="text-[#766D82]" aria-hidden="true">·</span>
+                      <span className="text-[#647A9E]" aria-hidden="true">·</span>
                       <span className="tabular-nums font-mono">{timeLeftDays}d remaining</span>
-                      <span className="text-[#766D82]" aria-hidden="true">·</span>
+                      <span className="text-[#647A9E]" aria-hidden="true">·</span>
                       <span className="tabular-nums font-mono">{evt.participantsCount} Participants</span>
                     </div>
-                    <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2EDF7] mt-0.5">
+                    <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2F7FF] mt-0.5">
                       {evt.title}
                     </h1>
-                    <p className="text-xs sm:text-sm text-[#A69AAF] max-w-2xl mt-1">
+                    <p className="text-xs sm:text-sm text-[#94A8C7] max-w-2xl mt-1">
                       {evt.description}
                     </p>
                   </div>
@@ -175,36 +175,36 @@ export const CommunityEventsView: React.FC = () => {
               </div>
 
               {/* Collective Progress */}
-              <div className="space-y-2 pt-3 border-t border-[#362B45]">
+              <div className="space-y-2 pt-3 border-t border-[#1E3A63]">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-['Cinzel'] font-bold text-[#F2EDF7]">Collective Realm Points</span>
-                  <span className="font-mono font-bold text-[#E8C777] tabular-nums">
+                  <span className="font-['Cinzel'] font-bold text-[#F2F7FF]">Collective Realm Points</span>
+                  <span className="font-mono font-bold text-[#38D9F5] tabular-nums">
                     {evt.currentGoalPoints.toLocaleString()} / {evt.targetGoalPoints.toLocaleString()} pts ({pct.toFixed(1)}%)
                   </span>
                 </div>
                 <AnimatedProgressBar
                   percentage={pct}
-                  className="h-3 w-full rounded-full bg-[#100D18] border border-[#362B45] overflow-hidden"
-                  barClassName="bg-gradient-to-r from-[#7045A0] via-[#D6A84B] to-[#E8C777]"
+                  className="h-3 w-full rounded-full bg-[#061225] border border-[#1E3A63] overflow-hidden"
+                  barClassName="bg-gradient-to-r from-[#1677FF] via-[#00D9FF] to-[#38D9F5]"
                 />
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <div className="rounded-xl bg-[#100D18] border border-[#362B45] p-3">
-                  <span className="text-[11px] text-[#A69AAF] block">Your Event Points</span>
-                  <span className="text-lg font-bold font-mono text-[#E8C777] tabular-nums">
+                <div className="rounded-xl bg-[#061225] border border-[#1E3A63] p-3">
+                  <span className="text-[11px] text-[#94A8C7] block">Your Event Points</span>
+                  <span className="text-lg font-bold font-mono text-[#38D9F5] tabular-nums">
                     <AnimatedCounter value={communityEventState.playerPoints} />
                   </span>
                 </div>
-                <div className="rounded-xl bg-[#100D18] border border-[#362B45] p-3">
-                  <span className="text-[11px] text-[#A69AAF] block">Your Verified Actions</span>
-                  <span className="text-lg font-bold font-mono text-[#F2EDF7] tabular-nums">
+                <div className="rounded-xl bg-[#061225] border border-[#1E3A63] p-3">
+                  <span className="text-[11px] text-[#94A8C7] block">Your Verified Actions</span>
+                  <span className="text-lg font-bold font-mono text-[#F2F7FF] tabular-nums">
                     <AnimatedCounter value={communityEventState.playerContributionsCount} />
                   </span>
                 </div>
-                <div className="rounded-xl bg-[#100D18] border border-[#362B45] p-3 col-span-2 sm:col-span-1">
-                  <span className="text-[11px] text-[#A69AAF] block">Active Champions</span>
-                  <span className="text-lg font-bold font-mono text-[#49B88A] tabular-nums">
+                <div className="rounded-xl bg-[#061225] border border-[#1E3A63] p-3 col-span-2 sm:col-span-1">
+                  <span className="text-[11px] text-[#94A8C7] block">Active Champions</span>
+                  <span className="text-lg font-bold font-mono text-[#10B981] tabular-nums">
                     <AnimatedCounter value={evt.participantsCount} />
                   </span>
                 </div>
@@ -215,8 +215,8 @@ export const CommunityEventsView: React.FC = () => {
               <div
                 className={`rounded-xl px-4 py-3 text-xs border font-medium ${
                   feedback.type === 'success'
-                    ? 'bg-[#49B88A]/12 border-[#49B88A]/45 text-[#49B88A]'
-                    : 'bg-[#D65C66]/12 border-[#D65C66]/45 text-[#D65C66]'
+                    ? 'bg-[#10B981]/12 border-[#10B981]/45 text-[#10B981]'
+                    : 'bg-[#F43F5E]/12 border-[#F43F5E]/45 text-[#F43F5E]'
                 }`}
               >
                 {feedback.text}
@@ -228,11 +228,11 @@ export const CommunityEventsView: React.FC = () => {
               <RpgScrollReveal>
                 <div className="lq-surface rounded-2xl p-5 space-y-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-[#D6A84B]" />
+                    <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-[#00D9FF]" />
                       Limited-Time Event Challenges
                     </h2>
-                    <span className="text-xs text-[#A69AAF]">
+                    <span className="text-xs text-[#94A8C7]">
                       Verified Workouts, Habits, Study &amp; Healthy Recovery Count
                     </span>
                   </div>
@@ -255,19 +255,19 @@ export const CommunityEventsView: React.FC = () => {
                           <div className="lq-card lq-card-interactive h-full rounded-xl p-4 flex flex-col justify-between gap-3">
                             <div className="space-y-1.5">
                               <div className="flex items-center justify-between text-[11px]">
-                                <span className="uppercase tracking-wider font-bold text-[#E8C777]">
+                                <span className="uppercase tracking-wider font-bold text-[#38D9F5]">
                                   {ch.metric === 'recovery_habit'
                                     ? 'Rest & Recovery'
                                     : ch.metric.replace(/_/g, ' ')}
                                 </span>
-                                <span className="font-mono text-[#A69AAF] tabular-nums">
-                                  +{ch.rewardXp} XP · +{ch.rewardGold}g
+                                <span className="font-mono text-[#94A8C7] tabular-nums">
+                                  +{ch.rewardXp} XP · <span className="text-[#FBBF24]">+{ch.rewardGold}g</span>
                                 </span>
                               </div>
-                              <p className="text-sm font-bold text-[#F2EDF7]">{ch.title}</p>
-                              <p className="text-xs text-[#A69AAF] leading-snug">{ch.description}</p>
+                              <p className="text-sm font-bold text-[#F2F7FF]">{ch.title}</p>
+                              <p className="text-xs text-[#94A8C7] leading-snug">{ch.description}</p>
                               {extras.length > 0 && (
-                                <p className="text-[11px] font-semibold text-[#E8C777]">
+                                <p className="text-[11px] font-semibold text-[#FBBF24]">
                                   Bonus Unlock: {extras.join(' + ')}
                                 </p>
                               )}
@@ -275,7 +275,7 @@ export const CommunityEventsView: React.FC = () => {
 
                             <div className="space-y-2">
                               <div className="space-y-1">
-                                <div className="flex justify-between text-[11px] font-mono text-[#A69AAF] tabular-nums">
+                                <div className="flex justify-between text-[11px] font-mono text-[#94A8C7] tabular-nums">
                                   <span>Progress</span>
                                   <span>
                                     {Math.min(prog.current, prog.target)} / {prog.target} ({chPct}%)
@@ -283,11 +283,11 @@ export const CommunityEventsView: React.FC = () => {
                                 </div>
                                 <AnimatedProgressBar
                                   percentage={chPct}
-                                  className="w-full h-1.5 rounded-full bg-[#100D18] overflow-hidden border border-[#362B45]"
+                                  className="w-full h-1.5 rounded-full bg-[#061225] overflow-hidden border border-[#1E3A63]"
                                   barClassName={
                                     prog.completed
-                                      ? 'bg-[#49B88A]'
-                                      : 'bg-gradient-to-r from-[#7045A0] to-[#D6A84B]'
+                                      ? 'bg-[#10B981]'
+                                      : 'bg-gradient-to-r from-[#1677FF] to-[#00D9FF]'
                                   }
                                   shimmer={false}
                                 />
@@ -299,10 +299,10 @@ export const CommunityEventsView: React.FC = () => {
                                 onClick={() => void handleClaimChallenge(ch.id, ch.title)}
                                 className={`lq-btn w-full py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 whitespace-nowrap ${
                                   prog.claimed
-                                    ? 'bg-[#49B88A]/12 text-[#49B88A] border border-[#49B88A]/45'
+                                    ? 'bg-[#10B981]/12 text-[#10B981] border border-[#10B981]/45'
                                     : prog.completed
                                     ? 'lq-btn-gold cursor-pointer'
-                                    : 'bg-[#100D18] text-[#766D82] border border-[#362B45] cursor-not-allowed'
+                                    : 'bg-[#061225] text-[#647A9E] border border-[#1E3A63] cursor-not-allowed'
                                 }`}
                               >
                                 {prog.claimed ? (
@@ -331,8 +331,8 @@ export const CommunityEventsView: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* Milestones */}
               <div className="lg:col-span-6 lq-surface rounded-2xl p-5 space-y-4">
-                <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
-                  <Award className="w-4 h-4 text-[#D6A84B]" />
+                <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
+                  <Award className="w-4 h-4 text-[#F59E0B]" />
                   Realm Event Milestones
                 </h2>
                 <div className="space-y-3">
@@ -348,15 +348,15 @@ export const CommunityEventsView: React.FC = () => {
                     return (
                       <div
                         key={m.id}
-                        className="rounded-xl bg-[#100D18] border border-[#362B45] p-4 flex items-center justify-between gap-3"
+                        className="rounded-xl bg-[#061225] border border-[#1E3A63] p-4 flex items-center justify-between gap-3"
                       >
                         <div>
-                          <p className="text-sm font-bold text-[#F2EDF7]">{m.title}</p>
-                          <p className="text-xs text-[#A69AAF] font-mono tabular-nums mt-0.5">
+                          <p className="text-sm font-bold text-[#F2F7FF]">{m.title}</p>
+                          <p className="text-xs text-[#94A8C7] font-mono tabular-nums mt-0.5">
                             Goal: {m.targetPoints.toLocaleString()} pts · +{m.rewardXp} XP · +{m.rewardGold}g
                           </p>
                           {exclusives.length > 0 && (
-                            <p className="text-[11px] text-[#E8C777] font-semibold mt-0.5">
+                            <p className="text-[11px] text-[#FBBF24] font-semibold mt-0.5">
                               Includes: {exclusives.join(' + ')}
                             </p>
                           )}
@@ -367,10 +367,10 @@ export const CommunityEventsView: React.FC = () => {
                           onClick={() => void handleClaim(m.id)}
                           className={`lq-btn px-3.5 py-2 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 ${
                             claimed
-                              ? 'bg-[#49B88A]/12 text-[#49B88A] border border-[#49B88A]/45'
+                              ? 'bg-[#10B981]/12 text-[#10B981] border border-[#10B981]/45'
                               : eligible
                               ? 'lq-btn-gold cursor-pointer'
-                              : 'bg-[#171220] text-[#766D82] border border-[#362B45] cursor-not-allowed'
+                              : 'bg-[#0A1930] text-[#647A9E] border border-[#1E3A63] cursor-not-allowed'
                           }`}
                         >
                           {claimed ? 'Claimed' : eligible ? 'Claim Honor' : unlocked ? 'Contribute 1+' : 'Locked'}
@@ -383,12 +383,12 @@ export const CommunityEventsView: React.FC = () => {
 
               {/* Top Contributors */}
               <div className="lg:col-span-6 lq-surface rounded-2xl p-5 space-y-4">
-                <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
-                  <Trophy className="w-4 h-4 text-[#D6A84B]" />
+                <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
+                  <Trophy className="w-4 h-4 text-[#F59E0B]" />
                   Top Event Stewards
                 </h2>
                 {communityEventState.topContributors.length === 0 ? (
-                  <p className="text-xs text-[#A69AAF]">
+                  <p className="text-xs text-[#94A8C7]">
                     Complete any verified workout, habit, or study session to open the festival chronicle.
                   </p>
                 ) : (
@@ -400,19 +400,19 @@ export const CommunityEventsView: React.FC = () => {
                           key={c.userId}
                           className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 border text-xs ${
                             isMe
-                              ? 'bg-[#21152F] border-[#D6A84B]/50'
-                              : 'bg-[#100D18] border-[#362B45]'
+                              ? 'bg-[#102440] border-[#00D9FF]/55'
+                              : 'bg-[#061225] border-[#1E3A63]'
                           }`}
                         >
                           <div className="flex items-center gap-3">
-                            <span className="font-mono font-bold text-[#E8C777] tabular-nums">
+                            <span className="font-mono font-bold text-[#FBBF24] tabular-nums">
                               #{c.rank}
                             </span>
-                            <span className="font-bold text-[#F2EDF7]">
-                              {c.username} {isMe && <span className="text-[#E8C777]">(You)</span>}
+                            <span className="font-bold text-[#F2F7FF]">
+                              {c.username} {isMe && <span className="text-[#38D9F5]">(You)</span>}
                             </span>
                           </div>
-                          <span className="font-mono font-bold text-[#49B88A] tabular-nums">
+                          <span className="font-mono font-bold text-[#10B981] tabular-nums">
                             {c.points.toLocaleString()} pts
                           </span>
                         </div>
@@ -427,12 +427,12 @@ export const CommunityEventsView: React.FC = () => {
             {(upcomingEvents.length > 0 || eventHistory.length > 0) && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="lq-surface rounded-2xl p-5 space-y-3">
-                  <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
-                    <CalendarClock className="w-4 h-4 text-[#D6A84B]" />
+                  <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
+                    <CalendarClock className="w-4 h-4 text-[#00D9FF]" />
                     Upcoming Realm Gatherings
                   </h2>
                   {upcomingEvents.length === 0 ? (
-                    <p className="text-xs text-[#A69AAF]">
+                    <p className="text-xs text-[#94A8C7]">
                       Upcoming community schedules will be posted here ahead of the next equinox.
                     </p>
                   ) : (
@@ -440,16 +440,16 @@ export const CommunityEventsView: React.FC = () => {
                       {upcomingEvents.map(up => (
                         <div
                           key={up.id}
-                          className="rounded-xl bg-[#100D18] border border-[#362B45] p-3.5 space-y-1"
+                          className="rounded-xl bg-[#061225] border border-[#1E3A63] p-3.5 space-y-1"
                         >
                           <div className="flex items-center justify-between gap-2 text-[11px]">
-                            <span className="font-bold text-[#E8C777] uppercase">{up.subtitle || 'Scheduled'}</span>
-                            <span className="font-mono text-[#A69AAF] tabular-nums">
+                            <span className="font-bold text-[#38D9F5] uppercase">{up.subtitle || 'Scheduled'}</span>
+                            <span className="font-mono text-[#94A8C7] tabular-nums">
                               Starts {new Date(up.startsAt).toLocaleDateString()}
                             </span>
                           </div>
-                          <p className="text-sm font-bold text-[#F2EDF7]">{up.title}</p>
-                          <p className="text-xs text-[#A69AAF]">{up.description}</p>
+                          <p className="text-sm font-bold text-[#F2F7FF]">{up.title}</p>
+                          <p className="text-xs text-[#94A8C7]">{up.description}</p>
                         </div>
                       ))}
                     </div>
@@ -457,12 +457,12 @@ export const CommunityEventsView: React.FC = () => {
                 </div>
 
                 <div className="lq-surface rounded-2xl p-5 space-y-3">
-                  <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
-                    <History className="w-4 h-4 text-[#D6A84B]" />
+                  <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
+                    <History className="w-4 h-4 text-[#00D9FF]" />
                     Past Event Archive
                   </h2>
                   {eventHistory.length === 0 ? (
-                    <p className="text-xs text-[#A69AAF]">
+                    <p className="text-xs text-[#94A8C7]">
                       Completed realm festivals and collective tallies are archived here permanently.
                     </p>
                   ) : (
@@ -470,15 +470,15 @@ export const CommunityEventsView: React.FC = () => {
                       {eventHistory.map(hist => (
                         <div
                           key={hist.id}
-                          className="rounded-xl bg-[#100D18] border border-[#362B45] p-3.5 space-y-1"
+                          className="rounded-xl bg-[#061225] border border-[#1E3A63] p-3.5 space-y-1"
                         >
                           <div className="flex items-center justify-between gap-2 text-[11px]">
-                            <span className="font-bold text-[#F2EDF7]">{hist.title}</span>
-                            <span className="font-mono text-[#49B88A] tabular-nums">
+                            <span className="font-bold text-[#F2F7FF]">{hist.title}</span>
+                            <span className="font-mono text-[#10B981] tabular-nums">
                               {hist.finalPoints.toLocaleString()} / {hist.targetGoalPoints.toLocaleString()} pts
                             </span>
                           </div>
-                          <p className="text-[11px] text-[#A69AAF] tabular-nums">
+                          <p className="text-[11px] text-[#94A8C7] tabular-nums">
                             {hist.participantsCount} champions · {hist.completedMilestonesCount} milestones · Concluded {new Date(hist.endedAt).toLocaleDateString()}
                           </p>
                         </div>

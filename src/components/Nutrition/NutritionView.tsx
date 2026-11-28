@@ -244,7 +244,7 @@ export const NutritionView: React.FC = () => {
       loggedRange: `${dailySummary.energyMin}–${dailySummary.energyMax} kcal`,
       targetMid: dailyPlan.nutrients.find(n => n.id === 'energy')?.targetMid,
       targetText: dailyPlan.nutrients.find(n => n.id === 'energy')?.recommendedRange || '',
-      barClass: 'bg-gradient-to-r from-[#B88930] to-[#E8C777]',
+      barClass: 'bg-gradient-to-r from-[#F59E0B] to-[#FBBF24]',
     },
     {
       id: 'protein' as const,
@@ -253,7 +253,7 @@ export const NutritionView: React.FC = () => {
       loggedRange: `${dailySummary.proteinMin}–${dailySummary.proteinMax} g`,
       targetMid: dailyPlan.nutrients.find(n => n.id === 'protein')?.targetMid || 55,
       targetText: `${dailyPlan.nutrients.find(n => n.id === 'protein')?.recommendedRange || '45–60'} g`,
-      barClass: 'bg-gradient-to-r from-[#7045A0] to-[#9A72CC]',
+      barClass: 'bg-gradient-to-r from-[#1677FF] to-[#38D9F5]',
     },
     {
       id: 'carbs' as const,
@@ -262,7 +262,7 @@ export const NutritionView: React.FC = () => {
       loggedRange: `${dailySummary.carbsMin}–${dailySummary.carbsMax} g`,
       targetMid: dailyPlan.nutrients.find(n => n.id === 'carbs')?.targetMid || 240,
       targetText: dailyPlan.nutrients.find(n => n.id === 'carbs')?.recommendedRange || '45–60% energy',
-      barClass: 'bg-gradient-to-r from-[#7045A0] via-[#9A72CC] to-[#E8C777]',
+      barClass: 'bg-gradient-to-r from-[#1677FF] to-[#00D9FF]',
     },
     {
       id: 'fats' as const,
@@ -271,7 +271,7 @@ export const NutritionView: React.FC = () => {
       loggedRange: `${dailySummary.fatMin}–${dailySummary.fatMax} g`,
       targetMid: dailyPlan.nutrients.find(n => n.id === 'fats')?.targetMid || 60,
       targetText: dailyPlan.nutrients.find(n => n.id === 'fats')?.recommendedRange || '20–30% energy',
-      barClass: 'bg-gradient-to-r from-[#34906B] to-[#49B88A]',
+      barClass: 'bg-gradient-to-r from-[#059669] to-[#10B981]',
     },
     {
       id: 'fibre' as const,
@@ -280,7 +280,7 @@ export const NutritionView: React.FC = () => {
       loggedRange: `${dailySummary.fibreMin}–${dailySummary.fibreMax} g`,
       targetMid: dailyPlan.nutrients.find(n => n.id === 'fibre')?.targetMid || 25,
       targetText: `${dailyPlan.nutrients.find(n => n.id === 'fibre')?.recommendedRange || '25–35'} g`,
-      barClass: 'bg-gradient-to-r from-[#49B88A] to-[#E8C777]',
+      barClass: 'bg-gradient-to-r from-[#10B981] to-[#38D9F5]',
     },
   ];
 
@@ -290,17 +290,17 @@ export const NutritionView: React.FC = () => {
       <FeatureBanner themeId="fitness" data-tutorial-id="nutrition-tracker">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="space-y-1.5">
-            <div className="flex flex-wrap items-center gap-2 text-xs text-[#A69AAF]">
-              <span className="font-['Cinzel'] font-semibold text-[#49B88A] uppercase tracking-widest">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-[#94A8C7]">
+              <span className="font-['Cinzel'] font-semibold text-[#10B981] uppercase tracking-widest">
                 Ocean of Balance
               </span>
               <span aria-hidden="true">·</span>
               <span>WHO &amp; ICMR–NIN 2024 Educational Nutrition</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold font-['Cinzel'] text-[#F2EDF7]">
+            <h1 className="text-2xl sm:text-3xl font-bold font-['Cinzel'] text-[#F2F7FF]">
               Personalized Daily Nutrition
             </h1>
-            <p className="text-xs sm:text-sm text-[#A69AAF] max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#94A8C7] max-w-2xl leading-relaxed">
               Explore educational daily nourishment ranges tailored to your profile, track meal
               variety and hydration without guilt or restriction, or snap a meal photo in Aether Vision.
             </p>
@@ -327,12 +327,12 @@ export const NutritionView: React.FC = () => {
             className="lq-card-gold p-5 space-y-4"
           >
             <div className="flex items-start gap-3">
-              <Info className="w-5 h-5 text-[#E8C777] shrink-0 mt-0.5" />
+              <Info className="w-5 h-5 text-[#38D9F5] shrink-0 mt-0.5" />
               <div>
-                <h2 className="font-['Cinzel'] font-bold text-sm text-[#F2EDF7]">
+                <h2 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF]">
                   Refine Your Daily Nutrition Reference
                 </h2>
-                <p className="text-xs text-[#A69AAF] mt-0.5 leading-relaxed">
+                <p className="text-xs text-[#94A8C7] mt-0.5 leading-relaxed">
                   Add only the missing profile details below so we can provide appropriate WHO /
                   ICMR–NIN 2024 age-group or adult educational guidance. Already saved details are
                   preserved automatically.
@@ -344,7 +344,7 @@ export const NutritionView: React.FC = () => {
               {dailyPlan.missingFields.includes('age') && (
                 <>
                   <div>
-                    <label className="block text-[#49B88A] font-semibold mb-1.5">
+                    <label className="block text-[#10B981] font-semibold mb-1.5">
                       Age (Years)
                     </label>
                     <input
@@ -358,7 +358,7 @@ export const NutritionView: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-[#49B88A] font-semibold mb-1.5">
+                    <label className="block text-[#10B981] font-semibold mb-1.5">
                       Or Age Group
                     </label>
                     <select
@@ -379,7 +379,7 @@ export const NutritionView: React.FC = () => {
 
               {dailyPlan.missingFields.includes('biologicalSex') && (
                 <div>
-                  <label className="block text-[#49B88A] font-semibold mb-1.5">
+                  <label className="block text-[#10B981] font-semibold mb-1.5">
                     Reference Physiology (Adult Calc)
                   </label>
                   <select
@@ -398,7 +398,7 @@ export const NutritionView: React.FC = () => {
 
               {dailyPlan.missingFields.includes('height') && (
                 <div>
-                  <label className="block text-[#49B88A] font-semibold mb-1.5">
+                  <label className="block text-[#10B981] font-semibold mb-1.5">
                     Height ({user?.preferredUnits === 'imperial' ? 'ft/in' : 'cm'})
                   </label>
                   <input
@@ -413,7 +413,7 @@ export const NutritionView: React.FC = () => {
 
               {dailyPlan.missingFields.includes('weight') && (
                 <div>
-                  <label className="block text-[#49B88A] font-semibold mb-1.5">
+                  <label className="block text-[#10B981] font-semibold mb-1.5">
                     Weight ({user?.preferredUnits === 'imperial' ? 'lb' : 'kg'})
                   </label>
                   <input
@@ -429,9 +429,9 @@ export const NutritionView: React.FC = () => {
 
             <div className="flex flex-wrap items-center justify-between gap-3">
               {profileSaveMsg ? (
-                <span className="text-xs text-[#49B88A]">{profileSaveMsg}</span>
+                <span className="text-xs text-[#10B981]">{profileSaveMsg}</span>
               ) : (
-                <span className="text-[11px] text-[#A69AAF]">
+                <span className="text-[11px] text-[#94A8C7]">
                   Optional for privacy: if omitted, safe general reference ranges are shown.
                 </span>
               )}
@@ -452,24 +452,24 @@ export const NutritionView: React.FC = () => {
         <div className="lq-card p-6 space-y-5">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
             <div>
-              <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
-                <Utensils className="w-4 h-4 text-[#49B88A]" />
+              <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
+                <Utensils className="w-4 h-4 text-[#10B981]" />
                 <span>Today&apos;s Nourishment &amp; Progress Overview</span>
               </h2>
-              <p className="text-xs text-[#E8C777] mt-0.5">{dailyPlan.profileSummaryText}</p>
+              <p className="text-xs text-[#38D9F5] mt-0.5">{dailyPlan.profileSummaryText}</p>
             </div>
-            <div className="flex items-center gap-2 text-xs text-[#A69AAF]">
-              <Heart className="w-4 h-4 text-[#49B88A] shrink-0" />
+            <div className="flex items-center gap-2 text-xs text-[#94A8C7]">
+              <Heart className="w-4 h-4 text-[#10B981] shrink-0" />
               <span>Calm educational tracking — no shame, no restrictive scoring.</span>
             </div>
           </div>
 
           {dailyPlan.isMinor && (
-            <div className="p-3.5 rounded-xl bg-[#100D18] border border-[#49B88A]/40 text-xs text-[#F2EDF7] flex items-start gap-2.5">
-              <Shield className="w-4 h-4 text-[#49B88A] shrink-0 mt-0.5" />
+            <div className="p-3.5 rounded-xl bg-[#061225] border border-[#10B981]/40 text-xs text-[#F2F7FF] flex items-start gap-2.5">
+              <Shield className="w-4 h-4 text-[#10B981] shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-[#49B88A]">Youth Growth-Safe Guidance Active</p>
-                <p className="mt-0.5 leading-relaxed text-[#A69AAF]">
+                <p className="font-semibold text-[#10B981]">Youth Growth-Safe Guidance Active</p>
+                <p className="mt-0.5 leading-relaxed text-[#94A8C7]">
                   {dailyPlan.clinicalGuidanceNote}
                 </p>
               </div>
@@ -486,21 +486,21 @@ export const NutritionView: React.FC = () => {
               return (
                 <div
                   key={row.id}
-                  className="p-3.5 rounded-xl bg-[#100D18] border border-[#362B45] space-y-2"
+                  className="p-3.5 rounded-xl bg-[#061225] border border-[#1E3A63] space-y-2"
                 >
                   <div className="flex items-center justify-between text-xs gap-1">
-                    <span className="font-semibold text-[#F2EDF7] truncate">{row.label}</span>
-                    <span className="font-mono text-[11px] text-[#49B88A] tabular-nums shrink-0">
+                    <span className="font-semibold text-[#F2F7FF] truncate">{row.label}</span>
+                    <span className="font-mono text-[11px] text-[#10B981] tabular-nums shrink-0">
                       {dailySummary.hasAnyEstimatedMacros ? row.loggedRange : '0 logged'}
                     </span>
                   </div>
                   <AnimatedProgressBar
                     percentage={dailySummary.hasAnyEstimatedMacros ? Math.max(4, pct) : 0}
-                    className="w-full h-2 rounded-full bg-[#171220] border border-[#362B45] overflow-hidden"
+                    className="w-full h-2 rounded-full bg-[#0A1930] border border-[#1E3A63] overflow-hidden"
                     barClassName={row.barClass}
                     shimmer={false}
                   />
-                  <p className="text-[11px] text-[#A69AAF] tabular-nums">
+                  <p className="text-[11px] text-[#94A8C7] tabular-nums">
                     Reference: {row.targetText}
                   </p>
                 </div>
@@ -510,69 +510,69 @@ export const NutritionView: React.FC = () => {
 
           {/* Food Groups & Today's Meals Summary */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 pt-1">
-            <div className="lg:col-span-5 p-4 rounded-xl bg-[#100D18] border border-[#362B45] space-y-2.5">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#49B88A]">
+            <div className="lg:col-span-5 p-4 rounded-xl bg-[#061225] border border-[#1E3A63] space-y-2.5">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#10B981]">
                 Food Groups Represented Today ({dailySummary.foodGroupsToday.length})
               </h3>
               {dailySummary.foodGroupsToday.length === 0 ? (
-                <p className="text-xs text-[#A69AAF] leading-relaxed">
+                <p className="text-xs text-[#94A8C7] leading-relaxed">
                   Log a meal or analyze a meal photo to see your daily food-group variety (whole
                   grains, pulses/protein, produce, healthy fats).
                 </p>
               ) : (
-                <p className="text-xs text-[#F2EDF7] leading-relaxed">
+                <p className="text-xs text-[#F2F7FF] leading-relaxed">
                   {dailySummary.foodGroupsToday.join(' · ')}
                 </p>
               )}
-              <p className="text-[11px] text-[#A69AAF] pt-1 leading-relaxed">
+              <p className="text-[11px] text-[#94A8C7] pt-1 leading-relaxed">
                 {dailySummary.imageEstimatedMealsCount > 0
                   ? `${dailySummary.imageEstimatedMealsCount} meal(s) today use visual image-based estimates (approximate ranges).`
                   : 'Tip: Use Aether Vision meal photo analysis for approximate macro, fibre, and micronutrient breakdowns.'}
               </p>
             </div>
 
-            <div className="lg:col-span-7 p-4 rounded-xl bg-[#100D18] border border-[#362B45] space-y-2.5">
+            <div className="lg:col-span-7 p-4 rounded-xl bg-[#061225] border border-[#1E3A63] space-y-2.5">
               <div className="flex items-center justify-between gap-2">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[#E8C777]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#38D9F5]">
                   Today&apos;s Meal-by-Meal Breakdown ({dailySummary.mealsToday.length})
                 </h3>
-                <span className="text-[11px] text-[#A69AAF] font-mono tabular-nums">
+                <span className="text-[11px] text-[#94A8C7] font-mono tabular-nums">
                   Hydration: {waterGlasses} glasses today
                 </span>
               </div>
               {dailySummary.mealsToday.length === 0 ? (
-                <p className="text-xs text-[#A69AAF]">No meals recorded yet today.</p>
+                <p className="text-xs text-[#94A8C7]">No meals recorded yet today.</p>
               ) : (
                 <div className="space-y-2 max-h-44 overflow-y-auto pr-1">
                   {dailySummary.mealsToday.map(m => (
                     <div
                       key={m.id}
-                      className="p-2.5 rounded-lg bg-[#171220] border border-[#362B45] text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-1.5"
+                      className="p-2.5 rounded-lg bg-[#0A1930] border border-[#1E3A63] text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-1.5"
                     >
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-semibold text-[#F2EDF7]">{m.title}</span>
-                          <span aria-hidden="true" className="text-[#766D82]">·</span>
-                          <span className="text-[11px] capitalize text-[#49B88A]">
+                          <span className="font-semibold text-[#F2F7FF]">{m.title}</span>
+                          <span aria-hidden="true" className="text-[#647A9E]">·</span>
+                          <span className="text-[11px] capitalize text-[#10B981]">
                             {m.mealType}
                           </span>
                           {m.nutritionEstimate?.isImageEstimate && (
                             <>
-                              <span aria-hidden="true" className="text-[#766D82]">·</span>
-                              <span className="text-[11px] text-[#E8C777]">
+                              <span aria-hidden="true" className="text-[#647A9E]">·</span>
+                              <span className="text-[11px] text-[#38D9F5]">
                                 Image-based estimate
                               </span>
                             </>
                           )}
                         </div>
                         {m.foodItems?.length > 0 && (
-                          <p className="text-[11px] text-[#A69AAF] truncate max-w-md mt-0.5">
+                          <p className="text-[11px] text-[#94A8C7] truncate max-w-md mt-0.5">
                             {m.foodItems.join(', ')}
                           </p>
                         )}
                       </div>
                       {m.nutritionEstimate && (
-                        <span className="text-[11px] font-mono text-[#E8C777] tabular-nums shrink-0">
+                        <span className="text-[11px] font-mono text-[#38D9F5] tabular-nums shrink-0">
                           ~{m.nutritionEstimate.estimatedTotals.energyKcal.min}–
                           {m.nutritionEstimate.estimatedTotals.energyKcal.max} kcal · P{' '}
                           {m.nutritionEstimate.estimatedTotals.proteinG.min}–
@@ -593,15 +593,15 @@ export const NutritionView: React.FC = () => {
         <div className="lq-card p-6 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-[#49B88A]" />
+              <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-[#10B981]" />
                 <span>Daily Nutrient Educational References ({dailyPlan.ageGroupLabel})</span>
               </h2>
-              <p className="text-xs text-[#A69AAF] mt-0.5">
+              <p className="text-xs text-[#94A8C7] mt-0.5">
                 {dailyPlan.referenceSources.join(' · ')}
               </p>
             </div>
-            <span className="text-[11px] font-semibold text-[#E8C777]">
+            <span className="text-[11px] font-semibold text-[#38D9F5]">
               {dailyPlan.isAdultIndividualized
                 ? 'Personalized adult estimate + public health references'
                 : 'General age-group reference ranges'}
@@ -612,18 +612,18 @@ export const NutritionView: React.FC = () => {
             {dailyPlan.nutrients.map(item => (
               <div
                 key={item.id}
-                className="p-4 rounded-xl bg-[#100D18] border border-[#362B45] space-y-1.5 text-xs"
+                className="p-4 rounded-xl bg-[#061225] border border-[#1E3A63] space-y-1.5 text-xs"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <h3 className="font-semibold text-[#F2EDF7] text-sm">{item.label}</h3>
-                    <span className="text-[11px] text-[#A69AAF]">{item.sourceAndAgeGroup}</span>
+                    <h3 className="font-semibold text-[#F2F7FF] text-sm">{item.label}</h3>
+                    <span className="text-[11px] text-[#94A8C7]">{item.sourceAndAgeGroup}</span>
                   </div>
                   <span
                     className={`text-[11px] font-medium shrink-0 ${
                       item.estimateKind === 'individualized_estimate'
-                        ? 'text-[#49B88A]'
-                        : 'text-[#A69AAF]'
+                        ? 'text-[#10B981]'
+                        : 'text-[#94A8C7]'
                     }`}
                   >
                     {item.estimateKind === 'individualized_estimate'
@@ -632,22 +632,22 @@ export const NutritionView: React.FC = () => {
                   </span>
                 </div>
 
-                <p className="font-mono font-bold text-[#E8C777] text-sm tabular-nums">
+                <p className="font-mono font-bold text-[#38D9F5] text-sm tabular-nums">
                   {item.recommendedRange}{' '}
-                  <span className="text-xs font-sans font-normal text-[#A69AAF]">
+                  <span className="text-xs font-sans font-normal text-[#94A8C7]">
                     {item.unit}
                   </span>
                 </p>
 
-                <p className="text-[#A69AAF] leading-relaxed">{item.whyItMatters}</p>
-                <p className="text-[11px] text-[#766D82] leading-relaxed pt-0.5">
+                <p className="text-[#94A8C7] leading-relaxed">{item.whyItMatters}</p>
+                <p className="text-[11px] text-[#647A9E] leading-relaxed pt-0.5">
                   Limitation: {item.confidenceAndLimitations}
                 </p>
               </div>
             ))}
           </div>
 
-          <p className="text-[11px] text-[#A69AAF] pt-1 leading-relaxed">
+          <p className="text-[11px] text-[#94A8C7] pt-1 leading-relaxed">
             {dailyPlan.clinicalGuidanceNote}
           </p>
         </div>
@@ -658,19 +658,19 @@ export const NutritionView: React.FC = () => {
         <div className="lq-card p-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <div>
-              <h3 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
-                <Droplets className="w-5 h-5 text-[#49B88A]" />
+              <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
+                <Droplets className="w-5 h-5 text-[#10B981]" />
                 <span>Daily Hydration Elixir</span>
               </h3>
-              <p className="text-xs text-[#A69AAF] mt-0.5">
+              <p className="text-xs text-[#94A8C7] mt-0.5">
                 Target 8 glasses of pure water daily to prime Nature’s Blessing (+10% quest XP).
               </p>
             </div>
 
             <div className="flex items-center gap-2.5">
-              <span className="font-mono text-2xl font-bold text-[#E8C777] tabular-nums mr-1">
+              <span className="font-mono text-2xl font-bold text-[#38D9F5] tabular-nums mr-1">
                 <AnimatedCounter value={waterGlasses} /> / 8{' '}
-                <span className="text-xs text-[#A69AAF] font-normal">Glasses</span>
+                <span className="text-xs text-[#94A8C7] font-normal">Glasses</span>
               </span>
               <button
                 type="button"
@@ -700,13 +700,13 @@ export const NutritionView: React.FC = () => {
                   key={i}
                   className={`p-3 rounded-xl border text-center transition-all ${
                     filled
-                      ? 'bg-[#49B88A]/12 border-[#49B88A]/50 text-[#49B88A]'
-                      : 'bg-[#100D18] border-[#362B45] text-[#766D82]'
+                      ? 'bg-[#10B981]/12 border-[#10B981]/50 text-[#10B981]'
+                      : 'bg-[#061225] border-[#1E3A63] text-[#647A9E]'
                   }`}
                 >
                   <Droplets
                     className={`w-5 h-5 mx-auto mb-1 ${
-                      filled ? 'text-[#49B88A]' : 'text-[#766D82]/50'
+                      filled ? 'text-[#10B981]' : 'text-[#647A9E]/50'
                     }`}
                   />
                   <span className="text-[10px] font-mono font-semibold block tabular-nums">
@@ -723,22 +723,22 @@ export const NutritionView: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-7 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#E8C777]" />
+            <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#38D9F5]" />
               <span>Balanced Meal Suggestions</span>
             </h3>
             <div className="flex items-center gap-2.5 text-xs">
-              <span className="text-[#A69AAF] capitalize">
+              <span className="text-[#94A8C7] capitalize">
                 Diet: {(user?.dietaryPreference || 'vegetarian').replace('_', '-')}
               </span>
-              <div className="flex p-0.5 rounded-lg bg-[#100D18] border border-[#362B45]">
+              <div className="flex p-0.5 rounded-lg bg-[#061225] border border-[#1E3A63]">
                 <button
                   type="button"
                   onClick={() => setDietFilter('all')}
                   className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
                     dietFilter === 'all'
-                      ? 'bg-[#7045A0] text-[#F2EDF7] font-semibold'
-                      : 'text-[#A69AAF] hover:text-[#F2EDF7]'
+                      ? 'bg-[#1677FF] text-[#F2F7FF] font-semibold'
+                      : 'text-[#94A8C7] hover:text-[#F2F7FF]'
                   }`}
                 >
                   All
@@ -748,8 +748,8 @@ export const NutritionView: React.FC = () => {
                   onClick={() => setDietFilter('matching')}
                   className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
                     dietFilter === 'matching'
-                      ? 'bg-[#7045A0] text-[#F2EDF7] font-semibold'
-                      : 'text-[#A69AAF] hover:text-[#F2EDF7]'
+                      ? 'bg-[#1677FF] text-[#F2F7FF] font-semibold'
+                      : 'text-[#94A8C7] hover:text-[#F2F7FF]'
                   }`}
                 >
                   Fits My Diet
@@ -758,15 +758,15 @@ export const NutritionView: React.FC = () => {
             </div>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-[#100D18] border border-[#D6A84B]/40 text-xs text-[#F2EDF7] flex items-start gap-2.5">
-            <AlertTriangle className="w-4 h-4 text-[#E8C777] shrink-0 mt-0.5" />
+          <div className="p-3.5 rounded-xl bg-[#061225] border border-[#F59E0B]/40 text-xs text-[#F2F7FF] flex items-start gap-2.5">
+            <AlertTriangle className="w-4 h-4 text-[#F59E0B] shrink-0 mt-0.5" />
             <div>
-              <span className="text-[#A69AAF] leading-relaxed">
+              <span className="text-[#94A8C7] leading-relaxed">
                 Meal ideas are informational and are never guaranteed allergen-free. Always check
                 ingredients carefully.
               </span>
               {(userAllergies.length > 0 || userIntolerances.length > 0) && (
-                <span className="block mt-1 text-[#E8C777] font-medium">
+                <span className="block mt-1 text-[#FBBF24] font-medium">
                   Active Profile Watchlist: {[...userAllergies, ...userIntolerances].join(', ')}
                 </span>
               )}
@@ -781,34 +781,34 @@ export const NutritionView: React.FC = () => {
                   <div
                     className={`lq-card p-4 h-full flex flex-col justify-between transition-colors ${
                       flags.length > 0
-                        ? 'border-[#D6A84B]/55'
-                        : 'hover:border-[#49B88A]/45'
+                        ? 'border-[#F59E0B]/55'
+                        : 'hover:border-[#10B981]/45'
                     }`}
                   >
                     <div>
                       <div className="flex items-center justify-between text-[11px] mb-1.5">
-                        <span className="font-semibold text-[#49B88A] uppercase tracking-wider">
+                        <span className="font-semibold text-[#10B981] uppercase tracking-wider">
                           {meal.cuisine}
                         </span>
-                        <span className="text-[#A69AAF] capitalize">{meal.category}</span>
+                        <span className="text-[#94A8C7] capitalize">{meal.category}</span>
                       </div>
-                      <h4 className="font-['Cinzel'] font-bold text-sm text-[#F2EDF7] mb-2">
+                      <h4 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF] mb-2">
                         {meal.title}
                       </h4>
                       {flags.length > 0 && (
-                        <p className="mb-2 text-[11px] text-[#E8C777] font-medium">
+                        <p className="mb-2 text-[11px] text-[#FBBF24] font-medium">
                           {flags.join(' · ')}
                         </p>
                       )}
-                      <ul className="text-xs text-[#A69AAF] space-y-1 mb-3">
+                      <ul className="text-xs text-[#94A8C7] space-y-1 mb-3">
                         {meal.items.map((it, i) => (
                           <li key={i} className="flex items-center gap-1.5">
-                            <span className="text-[#49B88A]" aria-hidden="true">·</span>
+                            <span className="text-[#10B981]" aria-hidden="true">·</span>
                             <span>{it}</span>
                           </li>
                         ))}
                       </ul>
-                      <p className="text-[11px] text-[#E8C777]/90 italic leading-relaxed mb-3">
+                      <p className="text-[11px] text-[#38D9F5]/90 italic leading-relaxed mb-3">
                         {meal.notes}
                       </p>
                     </div>
@@ -819,7 +819,7 @@ export const NutritionView: React.FC = () => {
                       disabled={isLoggingMeal}
                       className="lq-btn lq-btn-secondary w-full py-2 text-xs disabled:opacity-60"
                     >
-                      <Plus className="w-3.5 h-3.5 text-[#49B88A]" />
+                      <Plus className="w-3.5 h-3.5 text-[#10B981]" />
                       <span>Log Meal (+25 XP · +20 Gold)</span>
                     </button>
                   </div>
@@ -832,13 +832,13 @@ export const NutritionView: React.FC = () => {
         {/* Right 5 Cols: Custom Meal Logger */}
         <div className="lg:col-span-5">
           <div className="lq-card p-6 space-y-4">
-            <h3 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
-              <Apple className="w-4 h-4 text-[#49B88A]" />
+            <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
+              <Apple className="w-4 h-4 text-[#10B981]" />
               <span>Log a Meal</span>
             </h3>
 
             {logStatusMessage && (
-              <div className="p-3 rounded-xl bg-[#100D18] border border-[#49B88A]/45 text-xs text-[#49B88A] flex items-center gap-2">
+              <div className="p-3 rounded-xl bg-[#061225] border border-[#10B981]/45 text-xs text-[#10B981] flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
                 <span>{logStatusMessage}</span>
               </div>
@@ -846,7 +846,7 @@ export const NutritionView: React.FC = () => {
 
             <form onSubmit={handleCustomLog} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#49B88A] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#10B981] mb-1.5">
                   Meal Category
                 </label>
                 <div className="grid grid-cols-4 gap-1.5">
@@ -857,8 +857,8 @@ export const NutritionView: React.FC = () => {
                       onClick={() => setMealType(type)}
                       className={`py-2 text-xs font-medium rounded-lg capitalize border transition-all ${
                         mealType === type
-                          ? 'bg-[#7045A0] border-[#D6A84B]/60 text-[#F2EDF7] font-semibold'
-                          : 'bg-[#100D18] border-[#362B45] text-[#A69AAF] hover:text-[#F2EDF7]'
+                          ? 'bg-[#1677FF] border-[#00D9FF]/70 text-[#F2F7FF] font-semibold'
+                          : 'bg-[#061225] border-[#1E3A63] text-[#94A8C7] hover:text-[#F2F7FF]'
                       }`}
                     >
                       {type}
@@ -868,7 +868,7 @@ export const NutritionView: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#49B88A] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#10B981] mb-1.5">
                   Meal Name / Dish
                 </label>
                 <input
@@ -881,7 +881,7 @@ export const NutritionView: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#49B88A] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#10B981] mb-1.5">
                   Food Components (Comma-separated)
                 </label>
                 <input
@@ -894,7 +894,7 @@ export const NutritionView: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#49B88A] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#10B981] mb-1.5">
                   Dietary Category
                 </label>
                 <select
@@ -919,26 +919,26 @@ export const NutritionView: React.FC = () => {
               </button>
             </form>
 
-            <div className="pt-4 border-t border-[#362B45]">
-              <h4 className="text-xs font-bold text-[#A69AAF] uppercase tracking-wider mb-2.5">
+            <div className="pt-4 border-t border-[#1E3A63]">
+              <h4 className="text-xs font-bold text-[#94A8C7] uppercase tracking-wider mb-2.5">
                 Recent Fuel History ({meals.length})
               </h4>
               {meals.length === 0 ? (
-                <p className="text-xs text-[#766D82]">No meals logged yet.</p>
+                <p className="text-xs text-[#647A9E]">No meals logged yet.</p>
               ) : (
                 <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
                   {meals.map(m => (
                     <div
                       key={m.id}
-                      className="p-2.5 rounded-xl bg-[#100D18] border border-[#362B45] text-xs"
+                      className="p-2.5 rounded-xl bg-[#061225] border border-[#1E3A63] text-xs"
                     >
-                      <div className="flex justify-between font-semibold text-[#F2EDF7] gap-2">
+                      <div className="flex justify-between font-semibold text-[#F2F7FF] gap-2">
                         <span className="truncate">{m.title}</span>
-                        <span className="text-[11px] capitalize text-[#49B88A] shrink-0">
+                        <span className="text-[11px] capitalize text-[#10B981] shrink-0">
                           {m.mealType}
                         </span>
                       </div>
-                      <p className="text-[11px] text-[#A69AAF] mt-0.5 line-clamp-2">
+                      <p className="text-[11px] text-[#94A8C7] mt-0.5 line-clamp-2">
                         {m.balancedNotes}
                       </p>
                     </div>

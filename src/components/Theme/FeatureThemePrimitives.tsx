@@ -60,11 +60,11 @@ export const FeatureBanner: React.FC<FeatureBannerProps> = ({
   return (
     <div
       {...rest}
-      className={`rounded-2xl bg-[#171220] p-5 sm:p-6 transition-colors duration-200 ${className}`}
+      className={`rounded-2xl bg-[#0A1930] p-5 sm:p-6 transition-colors duration-200 ${className}`}
       style={{
         border: `1px solid rgba(${theme.primaryRgb}, 0.34)`,
-        backgroundImage: `radial-gradient(ellipse 75% 95% at 12% 0%, rgba(${theme.primaryRgb}, 0.14), transparent 62%), radial-gradient(ellipse 65% 85% at 92% 100%, rgba(${theme.secondaryRgb}, 0.08), transparent 60%)`,
-        boxShadow: '0 16px 38px -14px rgba(5, 3, 10, 0.86), inset 0 1px 0 rgba(242, 237, 247, 0.05)',
+        backgroundImage: `radial-gradient(ellipse 75% 95% at 12% 0%, rgba(${theme.primaryRgb}, 0.16), transparent 62%), radial-gradient(ellipse 65% 85% at 92% 100%, rgba(${theme.secondaryRgb}, 0.10), transparent 60%)`,
+        boxShadow: '0 16px 38px -14px rgba(2, 8, 20, 0.88), inset 0 1px 0 rgba(242, 247, 255, 0.06)',
       }}
     >
       {children}
@@ -88,12 +88,12 @@ export const FeatureSurfaceCard: React.FC<FeatureSurfaceCardProps> = ({
   const theme = useActiveFeatureTheme(themeId);
   return (
     <div
-      className={`rounded-2xl bg-[#171220] transition-all duration-200 ${className}`}
+      className={`rounded-2xl bg-[#0A1930] transition-all duration-200 ${className}`}
       style={{
-        border: `1px solid rgba(${theme.primaryRgb}, ${highlighted ? 0.52 : 0.24})`,
+        border: `1px solid rgba(${theme.primaryRgb}, ${highlighted ? 0.56 : 0.28})`,
         boxShadow: highlighted
-          ? `0 16px 34px -14px rgba(5, 3, 10, 0.88), 0 0 22px -12px rgba(${theme.primaryRgb}, 0.38)`
-          : '0 12px 30px -14px rgba(5, 3, 10, 0.8)',
+          ? `0 16px 34px -14px rgba(2, 8, 20, 0.9), 0 0 22px -12px rgba(${theme.primaryRgb}, 0.42)`
+          : '0 12px 30px -14px rgba(2, 8, 20, 0.84)',
       }}
     >
       {children}
@@ -134,7 +134,7 @@ export function FeatureTabBar<T extends string>({
     <div
       role="tablist"
       aria-label={ariaLabel}
-      className={`flex flex-wrap sm:flex-nowrap items-center gap-1 p-1.5 rounded-xl bg-[#100D18] border border-[#362B45] overflow-x-auto max-w-full ${className}`}
+      className={`flex flex-wrap sm:flex-nowrap items-center gap-1 p-1.5 rounded-xl bg-[#061225] border border-[#1E3A63] overflow-x-auto max-w-full ${className}`}
     >
       {tabs.map(tab => {
         const Icon = tab.icon;
@@ -148,7 +148,7 @@ export function FeatureTabBar<T extends string>({
             onClick={() => onSelect(tab.id)}
             className="relative flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors duration-150 whitespace-nowrap shrink-0 cursor-pointer"
             style={{
-              color: isActive ? '#F2EDF7' : '#A69AAF',
+              color: isActive ? '#F2F7FF' : '#94A8C7',
             }}
           >
             {isActive && (
@@ -156,14 +156,14 @@ export function FeatureTabBar<T extends string>({
                 layoutId={prefersReduced ? undefined : layoutId}
                 transition={{ duration: 0.22, ease: LQ_EASE }}
                 aria-hidden="true"
-                className="absolute inset-0 rounded-lg bg-[#7045A0] border border-[#E8C777]/30 shadow-[0_4px_16px_rgba(112,69,160,0.45)]"
+                className="absolute inset-0 rounded-lg bg-gradient-to-r from-[#1677FF] to-[#0099FF] border border-[#00D9FF]/45 shadow-[0_4px_16px_rgba(22,119,255,0.45)]"
               />
             )}
             <span className="relative z-10 flex items-center gap-2">
               {Icon && (
                 <Icon
                   className={`w-4 h-4 shrink-0 ${
-                    isActive ? 'text-[#E8C777]' : 'text-[#A69AAF]'
+                    isActive ? 'text-[#00D9FF]' : 'text-[#94A8C7]'
                   }`}
                 />
               )}
@@ -172,8 +172,8 @@ export function FeatureTabBar<T extends string>({
                 <span
                   className="px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold tabular-nums"
                   style={{
-                    backgroundColor: isActive ? '#100D18' : theme.secondaryHex,
-                    color: isActive ? '#E8C777' : '#100D18',
+                    backgroundColor: isActive ? '#061225' : theme.secondaryHex,
+                    color: isActive ? '#00D9FF' : '#061225',
                   }}
                 >
                   {tab.badge}

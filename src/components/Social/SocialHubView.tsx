@@ -65,36 +65,36 @@ export const SocialHubView: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-14 max-w-[1360px] mx-auto">
       {/* Unified Fellowship Hub Header */}
-      <FeatureBanner>
+      <FeatureBanner themeId="social" className="relative overflow-hidden">
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-5">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-1.5 text-xs">
-              <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#E8C777]">
+              <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#00D9FF]">
                 Fellowship of Aetheria
               </span>
-              <span className="text-[#766D82]" aria-hidden="true">·</span>
-              <span className="text-[#A69AAF] font-medium tabular-nums">
+              <span className="text-[#647A9E]" aria-hidden="true">·</span>
+              <span className="text-[#94A8C7] font-medium tabular-nums">
                 {acceptedFriendsCount} {acceptedFriendsCount === 1 ? 'Companion' : 'Companions'}
               </span>
-              <span className="text-[#766D82]" aria-hidden="true">·</span>
-              <span className="text-[#A69AAF] font-medium tabular-nums">
+              <span className="text-[#647A9E]" aria-hidden="true">·</span>
+              <span className="text-[#94A8C7] font-medium tabular-nums">
                 {chatMessages.length} {chatMessages.length === 1 ? 'Message' : 'Messages'}
               </span>
               {seasonState && (
                 <>
-                  <span className="text-[#766D82]" aria-hidden="true">·</span>
-                  <span className="text-[#D6A84B] font-mono font-semibold tabular-nums">
-                    Season Tier {seasonState.playerProgress.currentTier}/50
+                  <span className="text-[#647A9E]" aria-hidden="true">·</span>
+                  <span className="text-[#38D9F5] font-mono font-semibold tabular-nums">
+                    Battle Pass Tier {seasonState.playerProgress.currentTier}/50
                   </span>
                 </>
               )}
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] tracking-wide text-[#F2EDF7] text-balance">
+            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] tracking-wide text-[#F2F7FF] text-balance">
               FELLOWSHIP
             </h1>
-            <p className="text-xs sm:text-sm text-[#A69AAF] max-w-2xl mt-1">
+            <p className="text-xs sm:text-sm text-[#94A8C7] max-w-2xl mt-1">
               Advance your seasonal Battle Pass, train in live Workout Parties, track realm standings, and coordinate with companions.
             </p>
           </div>
@@ -125,4 +125,3 @@ export const SocialHubView: React.FC = () => {
     </div>
   );
 };
-

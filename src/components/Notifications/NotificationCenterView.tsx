@@ -184,22 +184,22 @@ export const NotificationCenterView: React.FC = () => {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2 text-xs mb-1">
-              <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#E8C777]">
+              <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#38D9F5]">
                 Aetheria Herald
               </span>
-              <span className="text-[#A69AAF]/45" aria-hidden="true">·</span>
-              <span className="text-[#A69AAF] font-mono font-medium tabular-nums">
+              <span className="text-[#94A8C7]/45" aria-hidden="true">·</span>
+              <span className="text-[#94A8C7] font-mono font-medium tabular-nums">
                 <AnimatedCounter value={unreadNotificationsCount} /> Unread
               </span>
-              <span className="text-[#A69AAF]/45" aria-hidden="true">·</span>
-              <span className="text-[#A69AAF]/85 font-mono font-medium tabular-nums">
+              <span className="text-[#94A8C7]/45" aria-hidden="true">·</span>
+              <span className="text-[#94A8C7]/85 font-mono font-medium tabular-nums">
                 <AnimatedCounter value={activeAlertCount} /> Active Alerts
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2EDF7] tracking-wide">
+            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2F7FF] tracking-wide">
               NOTIFICATION CENTER
             </h1>
-            <p className="text-xs sm:text-sm text-[#A69AAF] max-w-2xl mt-1">
+            <p className="text-xs sm:text-sm text-[#94A8C7] max-w-2xl mt-1">
               Follow progression breakthroughs, social invitations, raid updates, and verified fitness records without noise or duplicate clutter.
             </p>
           </div>
@@ -211,7 +211,7 @@ export const NotificationCenterView: React.FC = () => {
                 onClick={() => void markNotificationRead(undefined, selectedCategory)}
                 className="lq-btn lq-btn-primary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
               >
-                <CheckCheck className="w-4 h-4 text-[#E8C777]" />
+                <CheckCheck className="w-4 h-4 text-[#38D9F5]" />
                 {selectedCategory === 'all' ? 'Mark All Read' : 'Mark Category Read'}
               </button>
             )}
@@ -234,14 +234,14 @@ export const NotificationCenterView: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Alert Feed */}
         <div className="lg:col-span-8 lq-card rounded-2xl p-5 sm:p-6 space-y-3">
-          <div className="flex items-center justify-between gap-2 pb-3 border-b border-[#362B45]">
-            <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
-              <Bell className="w-4 h-4 text-[#E8C777]" />
+          <div className="flex items-center justify-between gap-2 pb-3 border-b border-[#1E3A63]">
+            <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
+              <Bell className="w-4 h-4 text-[#38D9F5]" />
               {selectedCategory === 'all'
                 ? 'ALL NOTIFICATIONS'
                 : `${NOTIFICATION_CATEGORY_META[selectedCategory].label.toUpperCase()} ALERTS`}
             </h2>
-            <span className="text-xs font-mono text-[#A69AAF] tabular-nums">
+            <span className="text-xs font-mono text-[#94A8C7] tabular-nums">
               {visibleNotifications.length} {visibleNotifications.length === 1 ? 'entry' : 'entries'}
             </span>
           </div>
@@ -249,11 +249,11 @@ export const NotificationCenterView: React.FC = () => {
           <RpgSubTabTransition tabKey={selectedCategory}>
             {visibleNotifications.length === 0 ? (
               <div className="py-12 text-center space-y-2.5">
-                <div className="w-11 h-11 rounded-xl bg-[#100D18] border border-[#362B45] flex items-center justify-center mx-auto text-[#E8C777]">
+                <div className="w-11 h-11 rounded-xl bg-[#061225] border border-[#1E3A63] flex items-center justify-center mx-auto text-[#38D9F5]">
                   <BellOff className="w-5 h-5" />
                 </div>
-                <p className="text-sm font-semibold text-[#F2EDF7]">No alerts in this category</p>
-                <p className="text-xs text-[#A69AAF] max-w-md mx-auto">
+                <p className="text-sm font-semibold text-[#F2F7FF]">No alerts in this category</p>
+                <p className="text-xs text-[#94A8C7] max-w-md mx-auto">
                   Complete verified workouts, unlock titles or rare badges, battle Weekly Raid Bosses, or connect with companions to receive meaningful updates here.
                 </p>
               </div>
@@ -269,8 +269,8 @@ export const NotificationCenterView: React.FC = () => {
                       <div
                         className={`p-4 rounded-xl border transition-colors flex flex-col sm:flex-row sm:items-start justify-between gap-3 ${
                           isUnread
-                            ? 'bg-[#21152F] border-[#D6A84B]/55 shadow-[0_0_16px_-6px_rgba(214,168,75,0.22)]'
-                            : 'bg-[#100D18]/85 border-[#362B45] opacity-85 hover:border-[#7045A0]/70'
+                            ? 'bg-[#102440] border-[#00D9FF]/55 shadow-[0_0_16px_-6px_rgba(0,217,255,0.22)]'
+                            : 'bg-[#061225]/85 border-[#1E3A63] opacity-85 hover:border-[#1677FF]/70'
                         }`}
                       >
                         <button
@@ -279,24 +279,24 @@ export const NotificationCenterView: React.FC = () => {
                           className="min-w-0 flex-1 text-left group space-y-1 cursor-pointer"
                         >
                           <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-                            <span className="font-semibold uppercase tracking-wider text-[#E8C777]">
+                            <span className="font-semibold uppercase tracking-wider text-[#38D9F5]">
                               {catLabel}
                             </span>
-                            <span className="text-[#A69AAF]/45" aria-hidden="true">·</span>
-                            <span className="text-[#A69AAF] font-mono tabular-nums">
+                            <span className="text-[#94A8C7]/45" aria-hidden="true">·</span>
+                            <span className="text-[#94A8C7] font-mono tabular-nums">
                               {formatAlertTimestamp(notif.createdAt)}
                             </span>
                             {isUnread && (
                               <>
-                                <span className="text-[#A69AAF]/45" aria-hidden="true">·</span>
-                                <span className="font-semibold text-[#9A72CC]">Unread</span>
+                                <span className="text-[#94A8C7]/45" aria-hidden="true">·</span>
+                                <span className="font-semibold text-[#38D9F5]">Unread</span>
                               </>
                             )}
                           </div>
-                          <h3 className="text-sm font-bold text-[#F2EDF7] group-hover:text-[#E8C777] transition-colors">
+                          <h3 className="text-sm font-bold text-[#F2F7FF] group-hover:text-[#38D9F5] transition-colors">
                             {notif.title}
                           </h3>
-                          <p className="text-xs text-[#A69AAF] leading-relaxed">{notif.body}</p>
+                          <p className="text-xs text-[#94A8C7] leading-relaxed">{notif.body}</p>
                         </button>
 
                         <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-start">
@@ -307,14 +307,14 @@ export const NotificationCenterView: React.FC = () => {
                               className="lq-btn lq-btn-secondary px-2.5 py-1.5 rounded-lg text-[11px] font-semibold flex items-center gap-1 whitespace-nowrap shrink-0 cursor-pointer"
                               title="Mark as read"
                             >
-                              <Check className="w-3.5 h-3.5 text-[#E8C777]" />
+                              <Check className="w-3.5 h-3.5 text-[#38D9F5]" />
                               Read
                             </button>
                           )}
                           <button
                             type="button"
                             onClick={() => void dismissNotification(notif.id)}
-                            className="p-1.5 rounded-lg bg-[#100D18] hover:bg-[#D65C66]/15 border border-[#362B45] hover:border-[#D65C66]/60 text-[#A69AAF] hover:text-[#D65C66] transition-colors cursor-pointer"
+                            className="p-1.5 rounded-lg bg-[#061225] hover:bg-[#F43F5E]/15 border border-[#1E3A63] hover:border-[#F43F5E]/60 text-[#94A8C7] hover:text-[#F43F5E] transition-colors cursor-pointer"
                             title="Dismiss notification"
                             aria-label="Dismiss notification"
                           >
@@ -332,12 +332,12 @@ export const NotificationCenterView: React.FC = () => {
 
         {/* Preferences Panel */}
         <div className="lg:col-span-4 lq-card rounded-2xl p-5 sm:p-6 space-y-4">
-          <div className="pb-3 border-b border-[#362B45]">
-            <h2 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
-              <SlidersHorizontal className="w-4 h-4 text-[#E8C777]" />
+          <div className="pb-3 border-b border-[#1E3A63]">
+            <h2 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
+              <SlidersHorizontal className="w-4 h-4 text-[#38D9F5]" />
               ALERT PREFERENCES
             </h2>
-            <p className="text-xs text-[#A69AAF] mt-1">
+            <p className="text-xs text-[#94A8C7] mt-1">
               Control which events generate notifications across your account.
             </p>
           </div>
@@ -346,8 +346,8 @@ export const NotificationCenterView: React.FC = () => {
             <div
               className={`p-2.5 rounded-xl border text-xs ${
                 prefNotice.type === 'error'
-                  ? 'bg-[#D65C66]/15 border-[#D65C66]/45 text-[#D65C66]'
-                  : 'bg-[#49B88A]/15 border-[#49B88A]/45 text-[#49B88A]'
+                  ? 'bg-[#F43F5E]/15 border-[#F43F5E]/45 text-[#F43F5E]'
+                  : 'bg-[#10B981]/15 border-[#10B981]/45 text-[#10B981]'
               }`}
             >
               {prefNotice.text}
@@ -355,13 +355,13 @@ export const NotificationCenterView: React.FC = () => {
           )}
 
           {/* Master Toggle */}
-          <label className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-[#100D18] border border-[#7045A0]/45 cursor-pointer hover:border-[#D6A84B]/50 transition-colors">
+          <label className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-[#061225] border border-[#1677FF]/45 cursor-pointer hover:border-[#00D9FF]/50 transition-colors">
             <div className="min-w-0">
-              <span className="text-xs font-bold text-[#F2EDF7] flex items-center gap-1.5">
-                <Shield className="w-3.5 h-3.5 text-[#E8C777]" />
+              <span className="text-xs font-bold text-[#F2F7FF] flex items-center gap-1.5">
+                <Shield className="w-3.5 h-3.5 text-[#38D9F5]" />
                 All Notifications Enabled
               </span>
-              <span className="text-[11px] text-[#A69AAF] block mt-0.5">
+              <span className="text-[11px] text-[#94A8C7] block mt-0.5">
                 Pause or resume every notification channel at once.
               </span>
             </div>
@@ -370,7 +370,7 @@ export const NotificationCenterView: React.FC = () => {
               disabled={savingPref}
               checked={notificationPreferences.masterEnabled}
               onChange={e => void handleTogglePreference('masterEnabled', e.target.checked)}
-              className="w-4 h-4 accent-[#7045A0] cursor-pointer shrink-0"
+              className="w-4 h-4 accent-[#1677FF] cursor-pointer shrink-0"
             />
           </label>
 
@@ -384,13 +384,13 @@ export const NotificationCenterView: React.FC = () => {
                   key={item.key}
                   className={`flex items-start justify-between gap-3 p-3 rounded-xl border transition-colors ${
                     disabled
-                      ? 'bg-[#100D18]/60 border-[#362B45]/50 opacity-55 cursor-not-allowed'
-                      : 'bg-[#100D18] border-[#362B45] hover:border-[#D6A84B]/45 cursor-pointer'
+                      ? 'bg-[#061225]/60 border-[#1E3A63]/50 opacity-55 cursor-not-allowed'
+                      : 'bg-[#061225] border-[#1E3A63] hover:border-[#00D9FF]/45 cursor-pointer'
                   }`}
                 >
                   <div className="min-w-0">
-                    <span className="text-xs font-semibold text-[#F2EDF7] block">{item.label}</span>
-                    <span className="text-[11px] text-[#A69AAF] block mt-0.5 leading-snug">
+                    <span className="text-xs font-semibold text-[#F2F7FF] block">{item.label}</span>
+                    <span className="text-[11px] text-[#94A8C7] block mt-0.5 leading-snug">
                       {item.description}
                     </span>
                   </div>
@@ -399,7 +399,7 @@ export const NotificationCenterView: React.FC = () => {
                     disabled={disabled}
                     checked={checked}
                     onChange={e => void handleTogglePreference(item.key, e.target.checked)}
-                    className="w-4 h-4 mt-0.5 accent-[#7045A0] cursor-pointer shrink-0"
+                    className="w-4 h-4 mt-0.5 accent-[#1677FF] cursor-pointer shrink-0"
                   />
                 </label>
               );

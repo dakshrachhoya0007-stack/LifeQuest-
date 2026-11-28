@@ -60,8 +60,8 @@ const PRESET_AVATARS = [
   { id: 'mage-portrait', label: 'Astral Mage', src: heroArcaneMageImg },
   { id: 'ranger-portrait', label: 'Verdant Ranger', src: heroRangerImg },
   { id: 'guardian-portrait', label: 'Iron Guardian', src: heroPaladinImg },
-  { id: 'warrior-crest', label: 'Solar Crest', src: makeCrestAvatar('#21152F', '#100D18', 'solar', '#E8C777') },
-  { id: 'mage-crest', label: 'Arcane Crest', src: makeCrestAvatar('#171220', '#100D18', 'arcane', '#9A72CC') },
+  { id: 'warrior-crest', label: 'Solar Crest', src: makeCrestAvatar('#102440', '#061225', 'solar', '#FBBF24') },
+  { id: 'mage-crest', label: 'Arcane Crest', src: makeCrestAvatar('#0A1930', '#061225', 'arcane', '#38D9F5') },
 ];
 
 const COMMON_ALLERGIES = ['Peanuts', 'Tree Nuts', 'Dairy', 'Gluten', 'Soy', 'Eggs', 'Shellfish', 'Sesame'];
@@ -282,7 +282,7 @@ export const OnboardingWizard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#100D18] text-[#F2EDF7] flex flex-col justify-between py-8 px-4 sm:px-6 relative overflow-x-clip">
+    <div className="min-h-screen bg-[#061225] text-[#F2F7FF] flex flex-col justify-between py-8 px-4 sm:px-6 relative overflow-x-clip">
       <AetheriaAtmosphericBackdrop />
 
       <div className="relative z-10 max-w-3xl mx-auto w-full">
@@ -291,16 +291,16 @@ export const OnboardingWizard: React.FC = () => {
           <button
             type="button"
             onClick={logout}
-            className="lq-btn lq-btn-secondary absolute right-0 top-0 text-[11px] text-[#A69AAF] hover:text-[#F2EDF7] px-2.5 py-1 rounded-lg cursor-pointer"
+            className="lq-btn lq-btn-secondary absolute right-0 top-0 text-[11px] text-[#94A8C7] hover:text-[#F2F7FF] px-2.5 py-1 rounded-lg cursor-pointer"
           >
             Sign Out
           </button>
-          <p className="text-xs font-['Cinzel'] uppercase tracking-widest text-[#E8C777] font-bold mb-2">
+          <p className="text-xs font-['Cinzel'] uppercase tracking-widest text-[#38D9F5] font-bold mb-2">
             Champion Awakening · Step {currentStep} of 5
           </p>
           <AnimatedProgressBar
             percentage={(currentStep / 5) * 100}
-            className="w-full h-2.5 rounded-full bg-[#171220] border border-[#362B45] overflow-hidden max-w-lg mx-auto mb-4"
+            className="w-full h-2.5 rounded-full bg-[#0A1930] border border-[#1E3A63] overflow-hidden max-w-lg mx-auto mb-4"
           />
 
           <div className="flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
@@ -319,10 +319,10 @@ export const OnboardingWizard: React.FC = () => {
                   }}
                   className={`px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap cursor-pointer ${
                     isActive
-                      ? 'bg-[#7045A0] border-[#D6A84B]/60 text-[#F2EDF7] shadow-[0_0_16px_rgba(112,69,160,0.45)]'
+                      ? 'bg-[#1677FF] border-[#00D9FF]/60 text-[#F2F7FF] shadow-[0_0_16px_rgba(22,119,255,0.45)]'
                       : isDone
-                      ? 'bg-[#49B88A]/15 border-[#49B88A]/50 text-[#49B88A]'
-                      : 'bg-[#171220] border-[#362B45] text-[#A69AAF] hover:text-[#F2EDF7] hover:border-[#7045A0]'
+                      ? 'bg-[#10B981]/15 border-[#10B981]/50 text-[#10B981]'
+                      : 'bg-[#0A1930] border-[#1E3A63] text-[#94A8C7] hover:text-[#F2F7FF] hover:border-[#1677FF]'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -334,8 +334,8 @@ export const OnboardingWizard: React.FC = () => {
         </div>
 
         {saveError && (
-          <div className="mb-4 p-3.5 rounded-xl bg-[#D65C66]/15 border border-[#D65C66]/55 text-xs text-[#F2EDF7] flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-[#D65C66] shrink-0" />
+          <div className="mb-4 p-3.5 rounded-xl bg-[#F43F5E]/15 border border-[#F43F5E]/55 text-xs text-[#F2F7FF] flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-[#F43F5E] shrink-0" />
             <span>{saveError}</span>
           </div>
         )}
@@ -345,17 +345,17 @@ export const OnboardingWizard: React.FC = () => {
           {currentStep === 1 && (
             <div className="lq-card rounded-2xl p-6 sm:p-8 space-y-6">
               <div>
-                <h2 className="text-2xl font-bold font-['Cinzel'] text-[#F2EDF7] mb-1">
+                <h2 className="text-2xl font-bold font-['Cinzel'] text-[#F2F7FF] mb-1">
                   STEP 1: CHARACTER PROFILE
                 </h2>
-                <p className="text-sm text-[#A69AAF]">
+                <p className="text-sm text-[#94A8C7]">
                   Choose your public hero username, in-realm character name, starting class archetype, and portrait avatar. After completing setup, you will inspect full character artwork and permanently bind your champion.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#E8C777] mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#38D9F5] mb-1.5">
                     Hero Username (Public Handle)
                   </label>
                   <input
@@ -369,7 +369,7 @@ export const OnboardingWizard: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#E8C777] mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#38D9F5] mb-1.5">
                     Character Name (In-Realm Title)
                   </label>
                   <input
@@ -385,7 +385,7 @@ export const OnboardingWizard: React.FC = () => {
 
               {/* Avatar Selector */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#E8C777] mb-2">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#38D9F5] mb-2">
                   Select Champion Avatar
                 </label>
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
@@ -398,17 +398,17 @@ export const OnboardingWizard: React.FC = () => {
                         onClick={() => setSelectedAvatar(av.src)}
                         className={`p-2 rounded-xl border flex flex-col items-center gap-1.5 transition-all cursor-pointer ${
                           active
-                            ? 'bg-[#7045A0]/25 border-[#D6A84B] ring-2 ring-[#D6A84B]/40 shadow-[0_0_16px_rgba(214,168,75,0.24)]'
-                            : 'bg-[#100D18] border-[#362B45] hover:border-[#D6A84B]/55'
+                            ? 'bg-[#1677FF]/25 border-[#00D9FF] ring-2 ring-[#00D9FF]/40 shadow-[0_0_16px_rgba(0,217,255,0.24)]'
+                            : 'bg-[#061225] border-[#1E3A63] hover:border-[#00D9FF]/55'
                         }`}
                       >
                         <img
                           src={resolveAssetUrl(av.src, characterWarriorAvatarImg)}
                           alt={av.label}
                           referrerPolicy="no-referrer"
-                          className="w-12 h-12 rounded-lg object-cover border border-[#362B45]"
+                          className="w-12 h-12 rounded-lg object-cover border border-[#1E3A63]"
                         />
-                        <span className="text-[10px] font-medium text-[#A69AAF] truncate max-w-full">
+                        <span className="text-[10px] font-medium text-[#94A8C7] truncate max-w-full">
                           {av.label}
                         </span>
                       </button>
@@ -419,7 +419,7 @@ export const OnboardingWizard: React.FC = () => {
 
               {/* Class Picker */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#E8C777] mb-2">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#38D9F5] mb-2">
                   Choose Character Class
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -435,16 +435,16 @@ export const OnboardingWizard: React.FC = () => {
                         }}
                         className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-[#7045A0]/25 border-[#D6A84B] shadow-[0_0_20px_rgba(214,168,75,0.22)] ring-1 ring-[#D6A84B]'
-                            : 'bg-[#100D18] border-[#362B45] hover:border-[#D6A84B]/50'
+                            ? 'bg-[#1677FF]/25 border-[#00D9FF] shadow-[0_0_20px_rgba(0,217,255,0.22)] ring-1 ring-[#00D9FF]'
+                            : 'bg-[#061225] border-[#1E3A63] hover:border-[#00D9FF]/50'
                         }`}
                       >
                         <div className="flex items-center gap-2.5 mb-1.5">
-                          <c.Icon className="w-5 h-5 text-[#E8C777]" />
-                          <h4 className="font-['Cinzel'] font-bold text-[#F2EDF7] text-base">{c.title}</h4>
+                          <c.Icon className="w-5 h-5 text-[#38D9F5]" />
+                          <h4 className="font-['Cinzel'] font-bold text-[#F2F7FF] text-base">{c.title}</h4>
                         </div>
-                        <p className="text-xs text-[#A69AAF] mb-1.5">{c.desc}</p>
-                        <p className="text-[11px] text-[#E8C777] font-medium">{c.perk}</p>
+                        <p className="text-xs text-[#94A8C7] mb-1.5">{c.desc}</p>
+                        <p className="text-[11px] text-[#38D9F5] font-medium">{c.perk}</p>
                       </button>
                     );
                   })}
@@ -457,18 +457,18 @@ export const OnboardingWizard: React.FC = () => {
           {currentStep === 2 && (
             <div className="lq-card rounded-2xl p-6 sm:p-8 space-y-6">
               <div>
-                <h2 className="text-2xl font-bold font-['Cinzel'] text-[#F2EDF7] mb-1">
+                <h2 className="text-2xl font-bold font-['Cinzel'] text-[#F2F7FF] mb-1">
                   STEP 2: FITNESS PROFILE
                 </h2>
-                <p className="text-sm text-[#A69AAF]">
+                <p className="text-sm text-[#94A8C7]">
                   Personalize your movement pacing and activity focus. Height and weight are strictly optional and never scored.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#E8C777] mb-1.5">
-                    Age (Years) <span className="text-[#766D82] font-normal">(Optional)</span>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#38D9F5] mb-1.5">
+                    Age (Years) <span className="text-[#647A9E] font-normal">(Optional)</span>
                   </label>
                   <input
                     type="number"
@@ -482,8 +482,8 @@ export const OnboardingWizard: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#E8C777] mb-1.5">
-                    Age Group <span className="text-[#766D82] font-normal">(Optional)</span>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#38D9F5] mb-1.5">
+                    Age Group <span className="text-[#647A9E] font-normal">(Optional)</span>
                   </label>
                   <select
                     value={ageGroup}
@@ -500,8 +500,8 @@ export const OnboardingWizard: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#E8C777] mb-1.5">
-                    Reference Sex <span className="text-[#766D82] font-normal">(Optional)</span>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#38D9F5] mb-1.5">
+                    Reference Sex <span className="text-[#647A9E] font-normal">(Optional)</span>
                   </label>
                   <select
                     value={biologicalSex}
@@ -519,15 +519,15 @@ export const OnboardingWizard: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#E8C777] mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#38D9F5] mb-1.5">
                     Measurement Units
                   </label>
-                  <div className="flex p-1 bg-[#100D18] rounded-xl border border-[#362B45]">
+                  <div className="flex p-1 bg-[#061225] rounded-xl border border-[#1E3A63]">
                     <button
                       type="button"
                       onClick={() => setPreferredUnits('metric')}
                       className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                        preferredUnits === 'metric' ? 'bg-[#7045A0] text-[#F2EDF7]' : 'text-[#A69AAF]'
+                        preferredUnits === 'metric' ? 'bg-[#1677FF] text-[#F2F7FF]' : 'text-[#94A8C7]'
                       }`}
                     >
                       Metric
@@ -536,7 +536,7 @@ export const OnboardingWizard: React.FC = () => {
                       type="button"
                       onClick={() => setPreferredUnits('imperial')}
                       className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                        preferredUnits === 'imperial' ? 'bg-[#7045A0] text-[#F2EDF7]' : 'text-[#A69AAF]'
+                        preferredUnits === 'imperial' ? 'bg-[#1677FF] text-[#F2F7FF]' : 'text-[#94A8C7]'
                       }`}
                     >
                       Imperial
@@ -545,8 +545,8 @@ export const OnboardingWizard: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#E8C777] mb-1.5">
-                    Height <span className="text-[#766D82] font-normal">(Optional)</span>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#38D9F5] mb-1.5">
+                    Height <span className="text-[#647A9E] font-normal">(Optional)</span>
                   </label>
                   <input
                     type="text"
@@ -559,8 +559,8 @@ export const OnboardingWizard: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#E8C777] mb-1.5">
-                    Weight <span className="text-[#766D82] font-normal">(Optional)</span>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#38D9F5] mb-1.5">
+                    Weight <span className="text-[#647A9E] font-normal">(Optional)</span>
                   </label>
                   <input
                     type="text"
@@ -574,7 +574,7 @@ export const OnboardingWizard: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#E8C777] mb-2">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#38D9F5] mb-2">
                   Current Activity Level
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -590,8 +590,8 @@ export const OnboardingWizard: React.FC = () => {
                       onClick={() => setActivityLevel(item.id as ActivityLevel)}
                       className={`p-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
                         activityLevel === item.id
-                          ? 'bg-[#7045A0]/25 border-[#D6A84B] text-[#F2EDF7] shadow-[0_0_14px_rgba(214,168,75,0.2)]'
-                          : 'bg-[#100D18] border-[#362B45] text-[#A69AAF] hover:text-[#F2EDF7]'
+                          ? 'bg-[#1677FF]/25 border-[#00D9FF] text-[#F2F7FF] shadow-[0_0_14px_rgba(0,217,255,0.2)]'
+                          : 'bg-[#061225] border-[#1E3A63] text-[#94A8C7] hover:text-[#F2F7FF]'
                       }`}
                     >
                       {item.label}
@@ -601,7 +601,7 @@ export const OnboardingWizard: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#E8C777] mb-2">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#38D9F5] mb-2">
                   Preferred Fitness Activities
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -614,12 +614,12 @@ export const OnboardingWizard: React.FC = () => {
                         onClick={() => toggleItem(preferredActivities, setPreferredActivities, act)}
                         className={`p-2.5 rounded-xl border text-xs font-medium flex items-center justify-between transition-all cursor-pointer ${
                           isChecked
-                            ? 'bg-[#7045A0]/25 border-[#D6A84B] text-[#F2EDF7]'
-                            : 'bg-[#100D18] border-[#362B45] text-[#A69AAF] hover:text-[#F2EDF7]'
+                            ? 'bg-[#1677FF]/25 border-[#00D9FF] text-[#F2F7FF]'
+                            : 'bg-[#061225] border-[#1E3A63] text-[#94A8C7] hover:text-[#F2F7FF]'
                         }`}
                       >
                         <span>{act}</span>
-                        {isChecked && <Check className="w-3.5 h-3.5 text-[#E8C777] shrink-0" />}
+                        {isChecked && <Check className="w-3.5 h-3.5 text-[#38D9F5] shrink-0" />}
                       </button>
                     );
                   })}
@@ -627,7 +627,7 @@ export const OnboardingWizard: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#E8C777] mb-2">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#38D9F5] mb-2">
                   Health-Focused Fitness Goals
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -647,20 +647,20 @@ export const OnboardingWizard: React.FC = () => {
                         onClick={() => toggleItem(fitnessGoals, setFitnessGoals, goal)}
                         className={`p-3 rounded-xl border text-left text-xs font-medium flex items-center justify-between transition-all cursor-pointer ${
                           isChecked
-                            ? 'bg-[#7045A0]/25 border-[#D6A84B] text-[#F2EDF7]'
-                            : 'bg-[#100D18] border-[#362B45] text-[#A69AAF] hover:text-[#F2EDF7]'
+                            ? 'bg-[#1677FF]/25 border-[#00D9FF] text-[#F2F7FF]'
+                            : 'bg-[#061225] border-[#1E3A63] text-[#94A8C7] hover:text-[#F2F7FF]'
                         }`}
                       >
                         <span>{goal}</span>
-                        {isChecked && <Check className="w-3.5 h-3.5 text-[#E8C777] shrink-0" />}
+                        {isChecked && <Check className="w-3.5 h-3.5 text-[#38D9F5] shrink-0" />}
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-[#100D18] border border-[#362B45] text-xs text-[#A69AAF] flex items-start gap-2">
-                <Heart className="w-4 h-4 text-[#E8C777] shrink-0 mt-0.5" />
+              <div className="p-3 rounded-xl bg-[#061225] border border-[#1E3A63] text-xs text-[#94A8C7] flex items-start gap-2">
+                <Heart className="w-4 h-4 text-[#38D9F5] shrink-0 mt-0.5" />
                 <span>
                   LifeQuest promotes sustainable daily movement and vitality at every pace — never restrictive targets or body-image scoring.
                 </span>
@@ -672,16 +672,16 @@ export const OnboardingWizard: React.FC = () => {
           {currentStep === 3 && (
             <div className="lq-card rounded-2xl p-6 sm:p-8 space-y-6">
               <div>
-                <h2 className="text-2xl font-bold font-['Cinzel'] text-[#F2EDF7] mb-1">
+                <h2 className="text-2xl font-bold font-['Cinzel'] text-[#F2F7FF] mb-1">
                   STEP 3: NUTRITION PREFERENCES
                 </h2>
-                <p className="text-sm text-[#A69AAF]">
+                <p className="text-sm text-[#94A8C7]">
                   Help us tailor balanced meal ideas and highlight potential allergens safely. All fields except dietary style are optional.
                 </p>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#E8C777] mb-2">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#38D9F5] mb-2">
                   Dietary Preference
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
@@ -700,8 +700,8 @@ export const OnboardingWizard: React.FC = () => {
                       onClick={() => setDietaryPreference(diet.id)}
                       className={`p-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
                         dietaryPreference === diet.id
-                          ? 'bg-[#7045A0]/25 border-[#D6A84B] text-[#F2EDF7] shadow-[0_0_14px_rgba(214,168,75,0.2)]'
-                          : 'bg-[#100D18] border-[#362B45] text-[#A69AAF] hover:text-[#F2EDF7]'
+                          ? 'bg-[#1677FF]/25 border-[#00D9FF] text-[#F2F7FF] shadow-[0_0_14px_rgba(0,217,255,0.2)]'
+                          : 'bg-[#061225] border-[#1E3A63] text-[#94A8C7] hover:text-[#F2F7FF]'
                       }`}
                     >
                       {diet.label}
@@ -712,8 +712,8 @@ export const OnboardingWizard: React.FC = () => {
 
               {/* Multiple Food Allergies */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#E8C777] mb-2">
-                  Food Allergies <span className="text-[#766D82] font-normal">(Select or add multiple)</span>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#38D9F5] mb-2">
+                  Food Allergies <span className="text-[#647A9E] font-normal">(Select or add multiple)</span>
                 </label>
                 <div className="flex flex-wrap gap-1.5 mb-2.5">
                   {COMMON_ALLERGIES.map(item => {
@@ -725,8 +725,8 @@ export const OnboardingWizard: React.FC = () => {
                         onClick={() => toggleItem(foodAllergiesList, setFoodAllergiesList, item)}
                         className={`px-2.5 py-1 rounded-lg border text-xs transition-all cursor-pointer ${
                           selected
-                            ? 'bg-[#D65C66]/20 border-[#D65C66] text-[#F2EDF7]'
-                            : 'bg-[#100D18] border-[#362B45] text-[#A69AAF] hover:text-[#F2EDF7]'
+                            ? 'bg-[#F43F5E]/20 border-[#F43F5E] text-[#F2F7FF]'
+                            : 'bg-[#061225] border-[#1E3A63] text-[#94A8C7] hover:text-[#F2F7FF]'
                         }`}
                       >
                         {selected ? `✓ ${item}` : `+ ${item}`}
@@ -763,14 +763,14 @@ export const OnboardingWizard: React.FC = () => {
                     {foodAllergiesList.map(tag => (
                       <span
                         key={tag}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#D65C66]/15 border border-[#D65C66]/60 text-[#F2EDF7] text-xs"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#F43F5E]/15 border border-[#F43F5E]/60 text-[#F2F7FF] text-xs"
                       >
                         {tag}
                         <button
                           type="button"
                           onClick={() => setFoodAllergiesList(prev => prev.filter(x => x !== tag))}
                           aria-label={`Remove allergy ${tag}`}
-                          className="hover:text-[#D65C66] cursor-pointer"
+                          className="hover:text-[#F43F5E] cursor-pointer"
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -782,8 +782,8 @@ export const OnboardingWizard: React.FC = () => {
 
               {/* Food Intolerances */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#E8C777] mb-2">
-                  Food Intolerances <span className="text-[#766D82] font-normal">(Optional)</span>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#38D9F5] mb-2">
+                  Food Intolerances <span className="text-[#647A9E] font-normal">(Optional)</span>
                 </label>
                 <div className="flex flex-wrap gap-1.5 mb-2.5">
                   {COMMON_INTOLERANCES.map(item => {
@@ -795,8 +795,8 @@ export const OnboardingWizard: React.FC = () => {
                         onClick={() => toggleItem(foodIntolerances, setFoodIntolerances, item)}
                         className={`px-2.5 py-1 rounded-lg border text-xs transition-all cursor-pointer ${
                           selected
-                            ? 'bg-[#D6A84B]/20 border-[#D6A84B] text-[#E8C777]'
-                            : 'bg-[#100D18] border-[#362B45] text-[#A69AAF] hover:text-[#F2EDF7]'
+                            ? 'bg-[#00D9FF]/20 border-[#00D9FF] text-[#38D9F5]'
+                            : 'bg-[#061225] border-[#1E3A63] text-[#94A8C7] hover:text-[#F2F7FF]'
                         }`}
                       >
                         {selected ? `✓ ${item}` : `+ ${item}`}
@@ -830,8 +830,8 @@ export const OnboardingWizard: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#E8C777] mb-1.5">
-                  Foods to Avoid <span className="text-[#766D82] font-normal">(Optional, comma-separated)</span>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#38D9F5] mb-1.5">
+                  Foods to Avoid <span className="text-[#647A9E] font-normal">(Optional, comma-separated)</span>
                 </label>
                 <input
                   type="text"
@@ -843,8 +843,8 @@ export const OnboardingWizard: React.FC = () => {
                 />
               </div>
 
-              <div className="p-3.5 rounded-xl bg-[#D6A84B]/12 border border-[#D6A84B]/45 text-xs text-[#E8C777] flex items-start gap-2">
-                <AlertTriangle className="w-4 h-4 text-[#D6A84B] shrink-0 mt-0.5" />
+              <div className="p-3.5 rounded-xl bg-[#00D9FF]/12 border border-[#00D9FF]/45 text-xs text-[#38D9F5] flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-[#F59E0B] shrink-0 mt-0.5" />
                 <span>
                   Allergen Safety Notice: Meal ideas in LifeQuest are general wellness suggestions and are never guaranteed allergen-free. Always verify real ingredients and food labels before eating.
                 </span>
@@ -856,17 +856,17 @@ export const OnboardingWizard: React.FC = () => {
           {currentStep === 4 && (
             <div className="lq-card rounded-2xl p-6 sm:p-8 space-y-6">
               <div>
-                <h2 className="text-2xl font-bold font-['Cinzel'] text-[#F2EDF7] mb-1">
+                <h2 className="text-2xl font-bold font-['Cinzel'] text-[#F2F7FF] mb-1">
                   STEP 4: REALM PREFERENCES
                 </h2>
-                <p className="text-sm text-[#A69AAF]">
+                <p className="text-sm text-[#94A8C7]">
                   Configure your daily reset timezone, alerts, sound effects, and public leaderboard privacy.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#E8C777] mb-1.5 flex items-center gap-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#38D9F5] mb-1.5 flex items-center gap-1.5">
                     <Globe className="w-3.5 h-3.5" /> Timezone (For Daily/Weekly Resets)
                   </label>
                   <select
@@ -883,15 +883,15 @@ export const OnboardingWizard: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#E8C777] mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#38D9F5] mb-1.5">
                     Preferred Measurement Units
                   </label>
-                  <div className="flex p-1 bg-[#100D18] rounded-xl border border-[#362B45]">
+                  <div className="flex p-1 bg-[#061225] rounded-xl border border-[#1E3A63]">
                     <button
                       type="button"
                       onClick={() => setPreferredUnits('metric')}
                       className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                        preferredUnits === 'metric' ? 'bg-[#7045A0] text-[#F2EDF7]' : 'text-[#A69AAF]'
+                        preferredUnits === 'metric' ? 'bg-[#1677FF] text-[#F2F7FF]' : 'text-[#94A8C7]'
                       }`}
                     >
                       Metric (cm / kg / km)
@@ -900,7 +900,7 @@ export const OnboardingWizard: React.FC = () => {
                       type="button"
                       onClick={() => setPreferredUnits('imperial')}
                       className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                        preferredUnits === 'imperial' ? 'bg-[#7045A0] text-[#F2EDF7]' : 'text-[#A69AAF]'
+                        preferredUnits === 'imperial' ? 'bg-[#1677FF] text-[#F2F7FF]' : 'text-[#94A8C7]'
                       }`}
                     >
                       Imperial (ft / lb / mi)
@@ -911,7 +911,7 @@ export const OnboardingWizard: React.FC = () => {
 
               {/* Notification Preferences */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#E8C777] mb-2 flex items-center gap-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#38D9F5] mb-2 flex items-center gap-1.5">
                   <Bell className="w-3.5 h-3.5" /> Notification Preferences
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -925,11 +925,11 @@ export const OnboardingWizard: React.FC = () => {
                   ).map(item => (
                     <label
                       key={item.key}
-                      className="p-3.5 rounded-xl bg-[#100D18] border border-[#362B45] flex items-center justify-between gap-3 cursor-pointer hover:border-[#D6A84B]/50 transition-colors"
+                      className="p-3.5 rounded-xl bg-[#061225] border border-[#1E3A63] flex items-center justify-between gap-3 cursor-pointer hover:border-[#00D9FF]/50 transition-colors"
                     >
                       <div>
-                        <span className="text-xs font-semibold text-[#F2EDF7] block">{item.title}</span>
-                        <span className="text-[11px] text-[#A69AAF]">{item.desc}</span>
+                        <span className="text-xs font-semibold text-[#F2F7FF] block">{item.title}</span>
+                        <span className="text-[11px] text-[#94A8C7]">{item.desc}</span>
                       </div>
                       <input
                         type="checkbox"
@@ -937,7 +937,7 @@ export const OnboardingWizard: React.FC = () => {
                         onChange={e =>
                           setNotificationPrefs(prev => ({ ...prev, [item.key]: e.target.checked }))
                         }
-                        className="w-4 h-4 accent-[#7045A0] cursor-pointer shrink-0"
+                        className="w-4 h-4 accent-[#1677FF] cursor-pointer shrink-0"
                       />
                     </label>
                   ))}
@@ -945,16 +945,16 @@ export const OnboardingWizard: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="p-3.5 rounded-xl bg-[#100D18] border border-[#362B45] flex items-center justify-between gap-3">
+                <div className="p-3.5 rounded-xl bg-[#061225] border border-[#1E3A63] flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2.5">
                     {soundEnabled ? (
-                      <Volume2 className="w-4 h-4 text-[#E8C777]" />
+                      <Volume2 className="w-4 h-4 text-[#38D9F5]" />
                     ) : (
-                      <VolumeX className="w-4 h-4 text-[#A69AAF]" />
+                      <VolumeX className="w-4 h-4 text-[#94A8C7]" />
                     )}
                     <div>
-                      <span className="text-xs font-semibold text-[#F2EDF7] block">RPG Sound Effects</span>
-                      <span className="text-[11px] text-[#A69AAF]">Combat &amp; habit chime audio</span>
+                      <span className="text-xs font-semibold text-[#F2F7FF] block">RPG Sound Effects</span>
+                      <span className="text-[11px] text-[#94A8C7]">Combat &amp; habit chime audio</span>
                     </div>
                   </div>
                   <button
@@ -962,24 +962,24 @@ export const OnboardingWizard: React.FC = () => {
                     onClick={() => setSoundEnabled(prev => !prev)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
                       soundEnabled
-                        ? 'bg-[#7045A0] text-[#F2EDF7]'
-                        : 'bg-[#171220] border border-[#362B45] text-[#A69AAF]'
+                        ? 'bg-[#1677FF] text-[#F2F7FF]'
+                        : 'bg-[#0A1930] border border-[#1E3A63] text-[#94A8C7]'
                     }`}
                   >
                     {soundEnabled ? 'ON' : 'OFF'}
                   </button>
                 </div>
 
-                <label className="p-3.5 rounded-xl bg-[#100D18] border border-[#362B45] flex items-center justify-between gap-3 cursor-pointer hover:border-[#D6A84B]/50 transition-colors">
+                <label className="p-3.5 rounded-xl bg-[#061225] border border-[#1E3A63] flex items-center justify-between gap-3 cursor-pointer hover:border-[#00D9FF]/50 transition-colors">
                   <div>
-                    <span className="text-xs font-semibold text-[#F2EDF7] block">Public Leaderboard</span>
-                    <span className="text-[11px] text-[#A69AAF]">Show hero username &amp; level on rankings</span>
+                    <span className="text-xs font-semibold text-[#F2F7FF] block">Public Leaderboard</span>
+                    <span className="text-[11px] text-[#94A8C7]">Show hero username &amp; level on rankings</span>
                   </div>
                   <input
                     type="checkbox"
                     checked={leaderboardVisible}
                     onChange={e => setLeaderboardVisible(e.target.checked)}
-                    className="w-4 h-4 accent-[#7045A0] cursor-pointer shrink-0"
+                    className="w-4 h-4 accent-[#1677FF] cursor-pointer shrink-0"
                   />
                 </label>
               </div>
@@ -990,7 +990,7 @@ export const OnboardingWizard: React.FC = () => {
           {currentStep === 5 && (
             <div className="lq-card-gold rounded-2xl p-6 sm:p-8 space-y-6">
               <div className="text-center">
-                <div className="inline-block p-1 rounded-2xl bg-gradient-to-r from-[#7045A0] to-[#D6A84B] mb-3 shadow-[0_0_24px_rgba(214,168,75,0.3)]">
+                <div className="inline-block p-1 rounded-2xl bg-gradient-to-r from-[#1677FF] to-[#00D9FF] mb-3 shadow-[0_0_24px_rgba(0,217,255,0.3)]">
                   <img
                     src={resolveAssetUrl(selectedAvatar, characterWarriorAvatarImg)}
                     alt={characterName}
@@ -998,97 +998,97 @@ export const OnboardingWizard: React.FC = () => {
                     className="w-24 h-24 rounded-xl object-cover"
                   />
                 </div>
-                <h2 className="text-2xl font-black font-['Cinzel'] text-[#F2EDF7]">
+                <h2 className="text-2xl font-black font-['Cinzel'] text-[#F2F7FF]">
                   CONFIRM YOUR CHAMPION PROFILE
                 </h2>
-                <p className="text-xs text-[#E8C777] mt-1">
+                <p className="text-xs text-[#38D9F5] mt-1">
                   Review your setup before entering the World of Aetheria. You can edit any preference later in Settings.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 {/* Summary Card 1 */}
-                <div className="p-4 rounded-xl bg-[#100D18] border border-[#362B45] space-y-1.5">
+                <div className="p-4 rounded-xl bg-[#061225] border border-[#1E3A63] space-y-1.5">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-['Cinzel'] font-bold text-[#E8C777] uppercase">1. Character</span>
+                    <span className="font-['Cinzel'] font-bold text-[#38D9F5] uppercase">1. Character</span>
                     <button
                       type="button"
                       onClick={() => setCurrentStep(1)}
-                      className="text-[#E8C777] hover:text-[#F2EDF7] inline-flex items-center gap-1 cursor-pointer"
+                      className="text-[#38D9F5] hover:text-[#F2F7FF] inline-flex items-center gap-1 cursor-pointer"
                     >
                       <Edit3 className="w-3 h-3" /> Edit
                     </button>
                   </div>
-                  <p className="text-[#A69AAF]">Username: <strong className="text-[#F2EDF7]">{username}</strong></p>
-                  <p className="text-[#A69AAF]">Character: <strong className="text-[#F2EDF7]">{characterName}</strong></p>
-                  <p className="text-[#A69AAF]">Class: <strong className="text-[#E8C777]">{characterClass}</strong></p>
+                  <p className="text-[#94A8C7]">Username: <strong className="text-[#F2F7FF]">{username}</strong></p>
+                  <p className="text-[#94A8C7]">Character: <strong className="text-[#F2F7FF]">{characterName}</strong></p>
+                  <p className="text-[#94A8C7]">Class: <strong className="text-[#38D9F5]">{characterClass}</strong></p>
                 </div>
 
                 {/* Summary Card 2 */}
-                <div className="p-4 rounded-xl bg-[#100D18] border border-[#362B45] space-y-1.5">
+                <div className="p-4 rounded-xl bg-[#061225] border border-[#1E3A63] space-y-1.5">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-['Cinzel'] font-bold text-[#E8C777] uppercase">2. Fitness</span>
+                    <span className="font-['Cinzel'] font-bold text-[#38D9F5] uppercase">2. Fitness</span>
                     <button
                       type="button"
                       onClick={() => setCurrentStep(2)}
-                      className="text-[#E8C777] hover:text-[#F2EDF7] inline-flex items-center gap-1 cursor-pointer"
+                      className="text-[#38D9F5] hover:text-[#F2F7FF] inline-flex items-center gap-1 cursor-pointer"
                     >
                       <Edit3 className="w-3 h-3" /> Edit
                     </button>
                   </div>
-                  <p className="text-[#A69AAF]">Activity: <strong className="text-[#F2EDF7] capitalize">{activityLevel.replace('_', ' ')}</strong></p>
-                  <p className="text-[#A69AAF]">
-                    Activities: <strong className="text-[#F2EDF7]">{preferredActivities.length > 0 ? preferredActivities.join(', ') : 'None selected'}</strong>
+                  <p className="text-[#94A8C7]">Activity: <strong className="text-[#F2F7FF] capitalize">{activityLevel.replace('_', ' ')}</strong></p>
+                  <p className="text-[#94A8C7]">
+                    Activities: <strong className="text-[#F2F7FF]">{preferredActivities.length > 0 ? preferredActivities.join(', ') : 'None selected'}</strong>
                   </p>
-                  <p className="text-[#A69AAF]">
-                    Goals: <strong className="text-[#F2EDF7]">{fitnessGoals.length > 0 ? fitnessGoals.join(', ') : 'General wellness'}</strong>
+                  <p className="text-[#94A8C7]">
+                    Goals: <strong className="text-[#F2F7FF]">{fitnessGoals.length > 0 ? fitnessGoals.join(', ') : 'General wellness'}</strong>
                   </p>
                   {(height || weight) && (
-                    <p className="text-[#766D82]">
+                    <p className="text-[#647A9E]">
                       Optional Metrics: {height || '—'} · {weight || '—'}
                     </p>
                   )}
                 </div>
 
                 {/* Summary Card 3 */}
-                <div className="p-4 rounded-xl bg-[#100D18] border border-[#362B45] space-y-1.5">
+                <div className="p-4 rounded-xl bg-[#061225] border border-[#1E3A63] space-y-1.5">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-['Cinzel'] font-bold text-[#E8C777] uppercase">3. Nutrition</span>
+                    <span className="font-['Cinzel'] font-bold text-[#38D9F5] uppercase">3. Nutrition</span>
                     <button
                       type="button"
                       onClick={() => setCurrentStep(3)}
-                      className="text-[#E8C777] hover:text-[#F2EDF7] inline-flex items-center gap-1 cursor-pointer"
+                      className="text-[#38D9F5] hover:text-[#F2F7FF] inline-flex items-center gap-1 cursor-pointer"
                     >
                       <Edit3 className="w-3 h-3" /> Edit
                     </button>
                   </div>
-                  <p className="text-[#A69AAF]">Diet: <strong className="text-[#F2EDF7]">{dietaryLabelMap[dietaryPreference]}</strong></p>
-                  <p className="text-[#A69AAF]">
-                    Allergies: <strong className="text-[#D65C66]">{foodAllergiesList.length > 0 ? foodAllergiesList.join(', ') : 'None listed'}</strong>
+                  <p className="text-[#94A8C7]">Diet: <strong className="text-[#F2F7FF]">{dietaryLabelMap[dietaryPreference]}</strong></p>
+                  <p className="text-[#94A8C7]">
+                    Allergies: <strong className="text-[#F43F5E]">{foodAllergiesList.length > 0 ? foodAllergiesList.join(', ') : 'None listed'}</strong>
                   </p>
-                  <p className="text-[#A69AAF]">
-                    Intolerances: <strong className="text-[#E8C777]">{foodIntolerances.length > 0 ? foodIntolerances.join(', ') : 'None listed'}</strong>
+                  <p className="text-[#94A8C7]">
+                    Intolerances: <strong className="text-[#38D9F5]">{foodIntolerances.length > 0 ? foodIntolerances.join(', ') : 'None listed'}</strong>
                   </p>
                   {dislikedFoods && (
-                    <p className="text-[#766D82]">Avoid: {dislikedFoods}</p>
+                    <p className="text-[#647A9E]">Avoid: {dislikedFoods}</p>
                   )}
                 </div>
 
                 {/* Summary Card 4 */}
-                <div className="p-4 rounded-xl bg-[#100D18] border border-[#362B45] space-y-1.5">
+                <div className="p-4 rounded-xl bg-[#061225] border border-[#1E3A63] space-y-1.5">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-['Cinzel'] font-bold text-[#E8C777] uppercase">4. Preferences</span>
+                    <span className="font-['Cinzel'] font-bold text-[#38D9F5] uppercase">4. Preferences</span>
                     <button
                       type="button"
                       onClick={() => setCurrentStep(4)}
-                      className="text-[#E8C777] hover:text-[#F2EDF7] inline-flex items-center gap-1 cursor-pointer"
+                      className="text-[#38D9F5] hover:text-[#F2F7FF] inline-flex items-center gap-1 cursor-pointer"
                     >
                       <Edit3 className="w-3 h-3" /> Edit
                     </button>
                   </div>
-                  <p className="text-[#A69AAF]">Units: <strong className="text-[#F2EDF7] uppercase">{preferredUnits}</strong> · Sound: <strong className="text-[#F2EDF7]">{soundEnabled ? 'On' : 'Muted'}</strong></p>
-                  <p className="text-[#A69AAF]">Timezone: <strong className="text-[#F2EDF7]">{timezone}</strong></p>
-                  <p className="text-[#A69AAF]">Leaderboard: <strong className="text-[#F2EDF7]">{leaderboardVisible ? 'Visible' : 'Hidden'}</strong></p>
+                  <p className="text-[#94A8C7]">Units: <strong className="text-[#F2F7FF] uppercase">{preferredUnits}</strong> · Sound: <strong className="text-[#F2F7FF]">{soundEnabled ? 'On' : 'Muted'}</strong></p>
+                  <p className="text-[#94A8C7]">Timezone: <strong className="text-[#F2F7FF]">{timezone}</strong></p>
+                  <p className="text-[#94A8C7]">Leaderboard: <strong className="text-[#F2F7FF]">{leaderboardVisible ? 'Visible' : 'Hidden'}</strong></p>
                 </div>
               </div>
 
@@ -1124,7 +1124,7 @@ export const OnboardingWizard: React.FC = () => {
               }}
               className="lq-btn lq-btn-secondary flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold cursor-pointer"
             >
-              <ArrowLeft className="w-4 h-4 text-[#E8C777]" />
+              <ArrowLeft className="w-4 h-4 text-[#38D9F5]" />
               Previous Step
             </button>
           ) : (

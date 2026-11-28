@@ -74,21 +74,21 @@ export const AiMentorView: React.FC = () => {
       <FeatureBanner themeId="mentor">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-[#100D18] border border-[#D6A84B]/45 flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-[#061225] border border-[#F59E0B]/45 flex items-center justify-center shrink-0">
               <GoldenWorldTreeEmblem className="w-8 h-8" />
             </div>
             <div>
-              <div className="flex flex-wrap items-center gap-2 text-xs text-[#E8C777] font-semibold uppercase tracking-widest">
+              <div className="flex flex-wrap items-center gap-2 text-xs text-[#38D9F5] font-semibold uppercase tracking-widest">
                 <span className="font-['Cinzel']">Master Eldric</span>
-                <span className="text-[#766D82]" aria-hidden="true">·</span>
-                <span className="text-[#A69AAF] normal-case tracking-normal font-medium">
+                <span className="text-[#647A9E]" aria-hidden="true">·</span>
+                <span className="text-[#94A8C7] normal-case tracking-normal font-medium">
                   AI Fitness &amp; Progression Mentor
                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold font-['Cinzel'] text-[#F2EDF7] mt-0.5">
+              <h1 className="text-2xl sm:text-3xl font-bold font-['Cinzel'] text-[#F2F7FF] mt-0.5">
                 Sanctuary of Guidance
               </h1>
-              <p className="text-xs sm:text-sm text-[#A69AAF] max-w-2xl mt-1 leading-relaxed">
+              <p className="text-xs sm:text-sm text-[#94A8C7] max-w-2xl mt-1 leading-relaxed">
                 Private coaching grounded exclusively in your workouts, goals, Skill Tree
                 attributes, and recovery habits.
               </p>
@@ -107,8 +107,8 @@ export const AiMentorView: React.FC = () => {
         </div>
 
         {/* Safety boundary note */}
-        <div className="mt-4 pt-3 border-t border-[#362B45] flex items-center gap-2 text-[11px] text-[#A69AAF]">
-          <ShieldAlert className="w-3.5 h-3.5 text-[#E8C777] shrink-0" />
+        <div className="mt-4 pt-3 border-t border-[#1E3A63] flex items-center gap-2 text-[11px] text-[#94A8C7]">
+          <ShieldAlert className="w-3.5 h-3.5 text-[#38D9F5] shrink-0" />
           <span>
             Coaching guidance is educational only and never replaces qualified medical advice.
             Mentor cannot modify XP or rankings directly.
@@ -117,14 +117,14 @@ export const AiMentorView: React.FC = () => {
       </FeatureBanner>
 
       {mentorError && (
-        <div className="rounded-xl bg-[#D65C66]/12 border border-[#D65C66]/45 px-4 py-3 text-xs text-[#D65C66] flex items-center gap-2">
+        <div className="rounded-xl bg-[#F43F5E]/12 border border-[#F43F5E]/45 px-4 py-3 text-xs text-[#F43F5E] flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span>{mentorError}</span>
         </div>
       )}
 
       {questFeedback && (
-        <div className="rounded-xl bg-[#49B88A]/12 border border-[#49B88A]/45 px-4 py-3 text-xs text-[#49B88A] flex items-center justify-between gap-3">
+        <div className="rounded-xl bg-[#10B981]/12 border border-[#10B981]/45 px-4 py-3 text-xs text-[#10B981] flex items-center justify-between gap-3">
           <span className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>{questFeedback}</span>
@@ -132,7 +132,7 @@ export const AiMentorView: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('quests')}
-            className="text-xs font-semibold text-[#E8C777] hover:underline shrink-0"
+            className="text-xs font-semibold text-[#38D9F5] hover:underline shrink-0"
           >
             Open Quest Board →
           </button>
@@ -142,11 +142,11 @@ export const AiMentorView: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Conversational Coach (8 cols) */}
         <div className="lg:col-span-8 flex flex-col lq-card overflow-hidden min-h-[520px]">
-          <div className="px-5 py-3.5 border-b border-[#362B45] flex flex-wrap items-center justify-between gap-2 bg-[#100D18]">
-            <span className="text-xs font-['Cinzel'] font-bold text-[#F2EDF7]">
+          <div className="px-5 py-3.5 border-b border-[#1E3A63] flex flex-wrap items-center justify-between gap-2 bg-[#061225]">
+            <span className="text-xs font-['Cinzel'] font-bold text-[#F2F7FF]">
               Mentor Conversation ({mentorMessages.length})
             </span>
-            <span className="text-[11px] text-[#A69AAF] font-mono tabular-nums">
+            <span className="text-[11px] text-[#94A8C7] font-mono tabular-nums">
               Lv.{stats.level} · {fitnessSessions.length} workouts · {stats.currentStreak}d streak
             </span>
           </div>
@@ -154,12 +154,12 @@ export const AiMentorView: React.FC = () => {
           <div className="flex-1 p-5 space-y-4 overflow-y-auto max-h-[520px]">
             {mentorMessages.length === 0 ? (
               <div className="py-10 text-center space-y-4">
-                <Sparkles className="w-8 h-8 text-[#E8C777] mx-auto" />
+                <Sparkles className="w-8 h-8 text-[#38D9F5] mx-auto" />
                 <div className="space-y-1 max-w-md mx-auto">
-                  <p className="text-sm font-['Cinzel'] font-bold text-[#F2EDF7]">
+                  <p className="text-sm font-['Cinzel'] font-bold text-[#F2F7FF]">
                     Greetings, {user?.username || 'Champion'}.
                   </p>
-                  <p className="text-xs text-[#A69AAF]">
+                  <p className="text-xs text-[#94A8C7]">
                     Ask for workout strategy, recovery balance, weekly review, or a tailored daily
                     quest.
                   </p>
@@ -171,7 +171,7 @@ export const AiMentorView: React.FC = () => {
                       type="button"
                       disabled={mentorLoading}
                       onClick={() => void handleSend(prompt)}
-                      className="text-left p-3.5 rounded-xl bg-[#100D18] hover:bg-[#21152F] border border-[#362B45] hover:border-[#9A72CC]/55 text-xs text-[#F2EDF7] transition-colors disabled:opacity-60"
+                      className="text-left p-3.5 rounded-xl bg-[#061225] hover:bg-[#102440] border border-[#1E3A63] hover:border-[#38D9F5]/55 text-xs text-[#F2F7FF] transition-colors disabled:opacity-60"
                     >
                       {prompt}
                     </button>
@@ -187,29 +187,29 @@ export const AiMentorView: React.FC = () => {
                   <div
                     className={`max-w-[88%] rounded-2xl px-4 py-3 text-xs sm:text-sm space-y-2 ${
                       msg.role === 'user'
-                        ? 'bg-[#7045A0]/28 border border-[#9A72CC]/45 text-[#F2EDF7]'
-                        : 'bg-[#100D18] border border-[#362B45] text-[#A69AAF]'
+                        ? 'bg-[#1677FF]/28 border border-[#38D9F5]/45 text-[#F2F7FF]'
+                        : 'bg-[#061225] border border-[#1E3A63] text-[#94A8C7]'
                     }`}
                   >
-                    <p className="whitespace-pre-wrap leading-relaxed text-[#F2EDF7]">
+                    <p className="whitespace-pre-wrap leading-relaxed text-[#F2F7FF]">
                       {msg.content}
                     </p>
 
                     {msg.safetyNotice && (
-                      <div className="rounded-lg bg-[#D6A84B]/12 border border-[#D6A84B]/40 px-3 py-2 text-xs text-[#E8C777] flex items-start gap-2">
-                        <HeartPulse className="w-4 h-4 shrink-0 mt-0.5 text-[#E8C777]" />
+                      <div className="rounded-lg bg-[#F59E0B]/12 border border-[#F59E0B]/40 px-3 py-2 text-xs text-[#FBBF24] flex items-start gap-2">
+                        <HeartPulse className="w-4 h-4 shrink-0 mt-0.5 text-[#F59E0B]" />
                         <span>{msg.safetyNotice}</span>
                       </div>
                     )}
 
                     {msg.focusAreas && msg.focusAreas.length > 0 && (
-                      <div className="pt-1 text-[11px] text-[#9A72CC]">
+                      <div className="pt-1 text-[11px] text-[#38D9F5]">
                         Focus Areas: {msg.focusAreas.join(' · ')}
                       </div>
                     )}
 
                     {msg.recoveryAdvice && (
-                      <div className="text-[11px] text-[#49B88A]">
+                      <div className="text-[11px] text-[#10B981]">
                         Recovery Note: {msg.recoveryAdvice}
                       </div>
                     )}
@@ -225,7 +225,7 @@ export const AiMentorView: React.FC = () => {
               e.preventDefault();
               void handleSend();
             }}
-            className="p-3.5 border-t border-[#362B45] bg-[#100D18] flex items-center gap-2"
+            className="p-3.5 border-t border-[#1E3A63] bg-[#061225] flex items-center gap-2"
           >
             <input
               type="text"
@@ -250,8 +250,8 @@ export const AiMentorView: React.FC = () => {
           {/* Player Context Snapshot */}
           <RpgScrollReveal>
             <div className="lq-card p-5 space-y-3">
-              <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2EDF7] flex items-center gap-2">
-                <Compass className="w-4 h-4 text-[#E8C777]" />
+              <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF] flex items-center gap-2">
+                <Compass className="w-4 h-4 text-[#38D9F5]" />
                 <span>Coaching Context Snapshot</span>
               </h3>
               <div className="grid grid-cols-2 gap-2.5 text-xs">
@@ -263,10 +263,10 @@ export const AiMentorView: React.FC = () => {
                 ].map(item => (
                   <div
                     key={item.label}
-                    className="rounded-xl bg-[#100D18] border border-[#362B45] p-3"
+                    className="rounded-xl bg-[#061225] border border-[#1E3A63] p-3"
                   >
-                    <span className="text-[11px] text-[#A69AAF] block">{item.label}</span>
-                    <span className="font-mono font-bold text-base text-[#F2EDF7] tabular-nums">
+                    <span className="text-[11px] text-[#94A8C7] block">{item.label}</span>
+                    <span className="font-mono font-bold text-base text-[#F2F7FF] tabular-nums">
                       Lv.<AnimatedCounter value={item.level} />
                     </span>
                   </div>
@@ -278,17 +278,17 @@ export const AiMentorView: React.FC = () => {
           {/* Weekly Analysis Card */}
           <RpgScrollReveal>
             <div className="lq-card p-5 space-y-3">
-              <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2EDF7]">
+              <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF]">
                 Weekly Progress Review
               </h3>
               {mentorWeeklyAnalysis ? (
-                <div className="space-y-3 text-xs text-[#A69AAF]">
-                  <p className="leading-relaxed text-[#F2EDF7]/90">
+                <div className="space-y-3 text-xs text-[#94A8C7]">
+                  <p className="leading-relaxed text-[#F2F7FF]/90">
                     {mentorWeeklyAnalysis.summary}
                   </p>
                   {mentorWeeklyAnalysis.strengths.length > 0 && (
                     <div>
-                      <p className="text-[11px] font-bold text-[#49B88A] uppercase mb-1">
+                      <p className="text-[11px] font-bold text-[#10B981] uppercase mb-1">
                         Strengths
                       </p>
                       <ul className="list-disc pl-4 space-y-1">
@@ -300,7 +300,7 @@ export const AiMentorView: React.FC = () => {
                   )}
                   {mentorWeeklyAnalysis.realisticPlan.length > 0 && (
                     <div>
-                      <p className="text-[11px] font-bold text-[#E8C777] uppercase mb-1">
+                      <p className="text-[11px] font-bold text-[#38D9F5] uppercase mb-1">
                         Next Week Plan
                       </p>
                       <ul className="list-disc pl-4 space-y-1">
@@ -310,12 +310,12 @@ export const AiMentorView: React.FC = () => {
                       </ul>
                     </div>
                   )}
-                  <p className="text-[11px] text-[#9A72CC]">
+                  <p className="text-[11px] text-[#38D9F5]">
                     Recovery: {mentorWeeklyAnalysis.recoveryRecommendation}
                   </p>
                 </div>
               ) : (
-                <p className="text-xs text-[#A69AAF] leading-relaxed">
+                <p className="text-xs text-[#94A8C7] leading-relaxed">
                   Click &ldquo;Generate Weekly Analysis&rdquo; to review your recorded workouts,
                   Skill Tree momentum, and recovery rhythm.
                 </p>
@@ -326,11 +326,11 @@ export const AiMentorView: React.FC = () => {
           {/* Mentor Recommended Quests */}
           <RpgScrollReveal>
             <div className="lq-card-gold p-5 space-y-3">
-              <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2EDF7]">
+              <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF]">
                 Mentor Quest Proposals
               </h3>
               {mentorQuests.length === 0 ? (
-                <p className="text-xs text-[#A69AAF] leading-relaxed">
+                <p className="text-xs text-[#94A8C7] leading-relaxed">
                   Personalized safe quests proposed during coaching appear here for you to review
                   and accept.
                 </p>
@@ -339,11 +339,11 @@ export const AiMentorView: React.FC = () => {
                   {mentorQuests.slice(0, 5).map(q => (
                     <div
                       key={q.id}
-                      className="rounded-xl bg-[#100D18] border border-[#362B45] p-3.5 space-y-2"
+                      className="rounded-xl bg-[#061225] border border-[#1E3A63] p-3.5 space-y-2"
                     >
-                      <p className="text-xs font-bold text-[#F2EDF7]">{q.title}</p>
-                      <p className="text-[11px] text-[#A69AAF] leading-relaxed">{q.description}</p>
-                      <p className="text-[11px] font-mono text-[#E8C777] tabular-nums">
+                      <p className="text-xs font-bold text-[#F2F7FF]">{q.title}</p>
+                      <p className="text-[11px] text-[#94A8C7] leading-relaxed">{q.description}</p>
+                      <p className="text-[11px] font-mono text-[#FBBF24] tabular-nums">
                         ~{q.estimatedMinutes}m · +{q.playerXpReward} XP · +{q.goldReward}g
                       </p>
                       <button
@@ -352,7 +352,7 @@ export const AiMentorView: React.FC = () => {
                         onClick={() => void handleAcceptQuest(q.id)}
                         className={`w-full py-2 rounded-lg text-xs font-semibold transition-all ${
                           q.accepted
-                            ? 'bg-[#49B88A]/12 text-[#49B88A] border border-[#49B88A]/45 cursor-default'
+                            ? 'bg-[#10B981]/12 text-[#10B981] border border-[#10B981]/45 cursor-default'
                             : 'lq-btn lq-btn-primary'
                         }`}
                       >

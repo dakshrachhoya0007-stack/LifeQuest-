@@ -59,17 +59,17 @@ export const Character2DAvatar: React.FC<Character2DAvatarProps> = ({
     : null;
 
   const dims = SIZE_MAP[size];
-  const frameColor = frameItem?.accentHex || '#7045A0';
-  const frameSecondary = frameItem?.primaryHex || '#171220';
-  const auraColor = auraItem?.primaryHex || '#D6A84B';
-  const colorAccent = colorItem?.accentHex || outfitItem?.accentHex || '#E8C777';
+  const frameColor = frameItem?.accentHex || '#1677FF';
+  const frameSecondary = frameItem?.primaryHex || '#0A1930';
+  const auraColor = auraItem?.primaryHex || '#00D9FF';
+  const colorAccent = colorItem?.accentHex || outfitItem?.accentHex || '#38D9F5';
 
   return (
     <div className={`relative inline-flex items-center justify-center shrink-0 ${className}`}>
       {showBannerBackdrop && bannerItem && (
         <div
           aria-hidden="true"
-          className="absolute -inset-3 rounded-3xl opacity-85 border border-[#F2EDF7]/10"
+          className="absolute -inset-3 rounded-3xl opacity-85 border border-[#F2F7FF]/10"
           style={{
             background: `radial-gradient(circle at 30% 20%, ${bannerItem.accentHex}30, transparent 58%), linear-gradient(135deg, ${bannerItem.primaryHex}, ${bannerItem.secondaryHex})`,
           }}
@@ -107,10 +107,10 @@ export const Character2DAvatar: React.FC<Character2DAvatarProps> = ({
       )}
 
       <div
-        className={`relative overflow-hidden ${dims.box} ${dims.radius} bg-[#100D18] shadow-xl`}
+        className={`relative overflow-hidden ${dims.box} ${dims.radius} bg-[#061225] shadow-xl`}
         style={{
           border: `2px solid ${frameColor}`,
-          boxShadow: `0 0 0 1px ${frameSecondary}, 0 10px 25px -8px ${auraItem ? `${auraColor}55` : 'rgba(5,3,10,0.85)'}`,
+          boxShadow: `0 0 0 1px ${frameSecondary}, 0 10px 25px -8px ${auraItem ? `${auraColor}55` : 'rgba(2,8,20,0.85)'}`,
         }}
       >
         {colorItem && (

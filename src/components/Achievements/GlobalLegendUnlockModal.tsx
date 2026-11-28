@@ -33,7 +33,7 @@ export const GlobalLegendUnlockModal: React.FC = () => {
           role="dialog"
           aria-modal="true"
           aria-labelledby="global-legend-unlock-title"
-          className={`relative w-full rounded-2xl border bg-gradient-to-b from-[#21152F] via-[#171220] to-[#100D18] p-6 sm:p-7 shadow-[0_24px_64px_rgba(5,3,10,0.92)] overflow-hidden ${rarityMeta.borderClass}`}
+          className={`relative w-full rounded-2xl border bg-gradient-to-b from-[#102440] via-[#0A1930] to-[#061225] p-6 sm:p-7 shadow-[0_24px_64px_rgba(3,10,24,0.92)] overflow-hidden ${rarityMeta.borderClass}`}
         >
           <div
             className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-80 h-48 rounded-full blur-3xl opacity-35"
@@ -44,13 +44,13 @@ export const GlobalLegendUnlockModal: React.FC = () => {
             type="button"
             onClick={dismissGlobalUnlockCelebration}
             aria-label="Close announcement"
-            className="absolute top-4 right-4 p-2 rounded-lg text-[#A69AAF] hover:text-[#F2EDF7] hover:bg-white/5 transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-2 rounded-lg text-[#94A8C7] hover:text-[#F2F7FF] hover:bg-white/5 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
 
           <div className="relative flex flex-col items-center text-center">
-            <div className="flex items-center gap-1.5 text-[11px] font-['Cinzel'] font-bold uppercase tracking-[0.2em] text-[#E8C777] mb-3">
+            <div className="flex items-center gap-1.5 text-[11px] font-['Cinzel'] font-bold uppercase tracking-[0.2em] text-[#38D9F5] mb-3">
               <Globe2 className="w-3.5 h-3.5" />
               <span>World-First Achievement Claimed Forever</span>
             </div>
@@ -67,17 +67,17 @@ export const GlobalLegendUnlockModal: React.FC = () => {
 
             <h2
               id="global-legend-unlock-title"
-              className="text-2xl font-black font-['Cinzel'] text-[#F2EDF7] tracking-wide text-balance"
+              className="text-2xl font-black font-['Cinzel'] text-[#F2F7FF] tracking-wide text-balance"
             >
               {entry.name}
             </h2>
 
-            <p className="text-xs sm:text-sm text-[#A69AAF] mt-2 max-w-md leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#94A8C7] mt-2 max-w-md leading-relaxed">
               {entry.story}
             </p>
 
-            <div className="mt-5 w-full rounded-xl bg-[#100D18] border border-[#D6A84B]/40 p-4">
-              <p className="text-[11px] uppercase tracking-wider text-[#A69AAF] mb-2">
+            <div className="mt-5 w-full rounded-xl bg-[#061225] border border-[#F59E0B]/40 p-4">
+              <p className="text-[11px] uppercase tracking-wider text-[#94A8C7] mb-2">
                 Equipped Worldwide Exclusive Nameplate
               </p>
               <div className="flex flex-wrap items-center justify-center gap-2">
@@ -87,38 +87,38 @@ export const GlobalLegendUnlockModal: React.FC = () => {
                   emblemIcon={entry.emblemIcon}
                   size="md"
                 />
-                <span className="font-['Cinzel'] font-bold text-base text-[#F2EDF7]">
+                <span className="font-['Cinzel'] font-bold text-base text-[#F2F7FF]">
                   {user?.username || entry.ownership?.ownerUsername}
                 </span>
               </div>
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-2 w-full text-xs font-mono tabular-nums">
-              <div className="rounded-xl bg-[#171220] border border-[#7045A0]/45 p-2.5">
-                <div className="text-[#B998E3] font-bold flex items-center justify-center gap-1">
+              <div className="rounded-xl bg-[#0A1930] border border-[#1677FF]/45 p-2.5">
+                <div className="text-[#38D9F5] font-bold flex items-center justify-center gap-1">
                   {entry.rewardPlayerXp > 0 ? (
                     <>
                       <Sparkles className="w-3.5 h-3.5" />+{entry.rewardPlayerXp}
                     </>
                   ) : (
                     <>
-                      <Crown className="w-3.5 h-3.5 text-[#E8C777]" />Exclusive
+                      <Crown className="w-3.5 h-3.5 text-[#FBBF24]" />Exclusive
                     </>
                   )}
                 </div>
-                <div className="text-[10px] text-[#A69AAF] mt-0.5">
+                <div className="text-[10px] text-[#94A8C7] mt-0.5">
                   {entry.rewardPlayerXp > 0 ? 'Player XP' : 'Worldwide Title'}
                 </div>
               </div>
-              <div className="rounded-xl bg-[#171220] border border-[#D6A84B]/45 p-2.5">
-                <div className="text-[#E8C777] font-bold flex items-center justify-center gap-1">
+              <div className="rounded-xl bg-[#0A1930] border border-[#F59E0B]/45 p-2.5">
+                <div className="text-[#FBBF24] font-bold flex items-center justify-center gap-1">
                   <Coins className="w-3.5 h-3.5" />+{entry.rewardGold}
                 </div>
-                <div className="text-[10px] text-[#A69AAF] mt-0.5">Gold</div>
+                <div className="text-[10px] text-[#94A8C7] mt-0.5">Gold</div>
               </div>
             </div>
 
-            <p className="text-[11px] text-[#49B88A] mt-4">
+            <p className="text-[11px] text-[#10B981] mt-4">
               A permanent Realm Herald announcement has etched your name across the Hall of Legends. No other player in the world can ever claim this title.
             </p>
 

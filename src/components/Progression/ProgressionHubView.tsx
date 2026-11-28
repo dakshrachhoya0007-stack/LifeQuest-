@@ -62,22 +62,22 @@ export const ProgressionHubView: React.FC = () => {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-1.5 text-xs">
-              <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#E8C777]">
+              <span className="font-['Cinzel'] font-bold uppercase tracking-widest text-[#00D9FF]">
                 Path of Honor
               </span>
-              <span className="text-[#766D82]" aria-hidden="true">·</span>
-              <span className="text-[#A69AAF] font-medium tabular-nums">
+              <span className="text-[#647A9E]" aria-hidden="true">·</span>
+              <span className="text-[#94A8C7] font-medium tabular-nums">
                 {activeQuestsCount} Active {activeQuestsCount === 1 ? 'Quest' : 'Quests'}
               </span>
-              <span className="text-[#766D82]" aria-hidden="true">·</span>
-              <span className="text-[#A69AAF] font-medium tabular-nums">
+              <span className="text-[#647A9E]" aria-hidden="true">·</span>
+              <span className="text-[#94A8C7] font-medium tabular-nums">
                 {unlockedAchievementsCount}/{achievements.length} Achievements
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] tracking-wide text-[#F2EDF7] text-balance">
+            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] tracking-wide text-[#F2F7FF] text-balance">
               QUESTS &amp; ACHIEVEMENTS
             </h1>
-            <p className="text-xs sm:text-sm text-[#A69AAF] max-w-2xl mt-1">
+            <p className="text-xs sm:text-sm text-[#94A8C7] max-w-2xl mt-1">
               Complete daily quests, maintain monthly recovery streaks, claim achievements, and master six real-life skill branches.
             </p>
           </div>

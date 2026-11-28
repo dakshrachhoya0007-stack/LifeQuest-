@@ -131,7 +131,7 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
     <section
       data-tutorial-id="castle-courtyard"
       aria-label="Character Command Center"
-      className="relative rounded-2xl overflow-hidden border border-[#362B45] bg-[#171220] shadow-[0_22px_50px_-16px_rgba(5,3,10,0.92)]"
+      className="relative rounded-2xl overflow-hidden border border-[#1E3A63] bg-[#0A1930] shadow-[0_22px_50px_-16px_rgba(2,8,20,0.92)]"
     >
       {/* Layered Atmospheric Citadel Backdrop */}
       <div className="absolute inset-0 pointer-events-none select-none">
@@ -144,24 +144,24 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
         <div
           className="absolute inset-0"
           style={{
-            background: `radial-gradient(ellipse 58% 72% at 50% 48%, rgba(112, 69, 160, 0.22) 0%, rgba(23, 18, 32, 0.90) 56%, #100D18 98%)`,
+            background: `radial-gradient(ellipse 58% 72% at 50% 48%, rgba(22, 119, 255, 0.22) 0%, rgba(10, 25, 48, 0.90) 56%, #061225 98%)`,
           }}
         />
         <div
           className="absolute inset-0"
           style={{
             background:
-              'radial-gradient(circle at 65% 20%, rgba(214, 168, 75, 0.11) 0%, transparent 45%), radial-gradient(circle at 28% 78%, rgba(112, 69, 160, 0.14) 0%, transparent 48%)',
+              'radial-gradient(circle at 65% 20%, rgba(0, 217, 255, 0.14) 0%, transparent 45%), radial-gradient(circle at 28% 78%, rgba(22, 119, 255, 0.16) 0%, transparent 48%)',
           }}
         />
         <AtmosphereParticlesCanvas qualityMode="rich" reducedMotion={Boolean(reducedMotion)} />
       </div>
 
       {/* TOP COMMAND HEADER: Player Identity, Level Crest & XP Progression */}
-      <div className="relative z-20 px-5 sm:px-7 py-4 border-b border-[#362B45] bg-[#100D18]/80 backdrop-blur-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="relative z-20 px-5 sm:px-7 py-4 border-b border-[#1E3A63] bg-[#061225]/82 backdrop-blur-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5 min-w-0">
           <div
-            className="w-10 h-10 rounded-xl bg-[#171220] border border-[#D6A84B]/45 flex items-center justify-center shrink-0"
+            className="w-10 h-10 rounded-xl bg-[#0A1930] border border-[#00D9FF]/45 flex items-center justify-center shrink-0"
             aria-hidden="true"
           >
             <GoldenWorldTreeEmblem className="w-6 h-6" />
@@ -169,7 +169,7 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
 
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="font-['Cinzel'] font-black text-lg sm:text-xl text-[#F2EDF7] tracking-wide truncate">
+              <h1 className="font-['Cinzel'] font-black text-lg sm:text-xl text-[#F2F7FF] tracking-wide truncate">
                 {user?.characterName || user?.username || heroDef.name}
               </h1>
               {equippedLegend && (
@@ -181,22 +181,22 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
                 />
               )}
               {equippedIdentityTitle && (
-                <span className="text-xs font-semibold text-[#E8C777]">
+                <span className="text-xs font-semibold text-[#38D9F5]">
                   · {equippedIdentityTitle.name}
                 </span>
               )}
               {equippedSecondaryTitle && (
-                <span className="text-xs font-medium text-[#A69AAF]">
+                <span className="text-xs font-medium text-[#94A8C7]">
                   · {equippedSecondaryTitle.name}
                 </span>
               )}
             </div>
-            <p className="text-xs text-[#A69AAF] mt-0.5 truncate">
-              <span className="text-[#E8C777] font-semibold">{heroDef.name}</span>
-              <span className="text-[#766D82] mx-1.5" aria-hidden="true">·</span>
+            <p className="text-xs text-[#94A8C7] mt-0.5 truncate">
+              <span className="text-[#38D9F5] font-semibold">{heroDef.name}</span>
+              <span className="text-[#647A9E] mx-1.5" aria-hidden="true">·</span>
               <span>{heroDef.mappedClass}</span>
-              <span className="text-[#766D82] mx-1.5" aria-hidden="true">·</span>
-              <span className="text-[#D6A84B]">{stats.aetherRank} Rank</span>
+              <span className="text-[#647A9E] mx-1.5" aria-hidden="true">·</span>
+              <span className="text-[#FBBF24]">{stats.aetherRank} Rank</span>
             </p>
           </div>
         </div>
@@ -205,25 +205,25 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
         <div className="flex flex-wrap items-center justify-between lg:justify-end gap-4 shrink-0">
           <div className="flex items-center gap-3.5 min-w-[220px] sm:min-w-[250px]">
             <div className="relative w-10 h-10 flex items-center justify-center shrink-0">
-              <div className="w-7 h-7 rotate-45 rounded-xs bg-[#21152F] border border-[#D6A84B]/65 shadow-[0_0_14px_rgba(214,168,75,0.22)]" />
-              <span className="relative z-10 font-['Cinzel'] font-black text-xs text-[#E8C777] tabular-nums">
+              <div className="w-7 h-7 rotate-45 rounded-xs bg-[#102440] border border-[#F59E0B]/70 shadow-[0_0_14px_rgba(245,158,11,0.24)]" />
+              <span className="relative z-10 font-['Cinzel'] font-black text-xs text-[#FBBF24] tabular-nums">
                 {stats.level}
               </span>
             </div>
 
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between text-[11px] font-mono mb-1 tabular-nums">
-                <span className="text-[#E8C777] font-semibold uppercase tracking-wider text-[10px]">
+                <span className="text-[#FBBF24] font-semibold uppercase tracking-wider text-[10px]">
                   Level {stats.level}
                 </span>
-                <span className="text-[#A69AAF]">
+                <span className="text-[#94A8C7]">
                   {stats.playerXP.toLocaleString()} / {stats.playerXPNextLevel.toLocaleString()} XP ({xpPercent}%)
                 </span>
               </div>
               <AnimatedProgressBar
                 percentage={xpPercent}
-                className="w-full h-2 rounded-full bg-[#100D18] border border-[#362B45] overflow-hidden"
-                barClassName="bg-gradient-to-r from-[#7045A0] via-[#9A72CC] to-[#D6A84B]"
+                className="w-full h-2 rounded-full bg-[#061225] border border-[#1E3A63] overflow-hidden"
+                barClassName="bg-gradient-to-r from-[#1677FF] via-[#0099FF] to-[#00D9FF]"
               />
             </div>
           </div>
@@ -244,7 +244,7 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
               onClick={() => onNavigate('rivals')}
               className="lq-btn-secondary px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
             >
-              <Trophy className="w-3.5 h-3.5 text-[#D65C66]" />
+              <Trophy className="w-3.5 h-3.5 text-[#F43F5E]" />
               Rivals
             </button>
             <button
@@ -253,7 +253,7 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
               className="lq-btn-secondary px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
               title="Open Notification Center"
             >
-              <Bell className="w-3.5 h-3.5 text-[#E8C777]" />
+              <Bell className="w-3.5 h-3.5 text-[#38D9F5]" />
               <span className="tabular-nums">
                 {unreadNotificationsCount > 0 ? `Alerts (${unreadNotificationsCount})` : 'Alerts'}
               </span>
@@ -263,7 +263,7 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
               onClick={() => onNavigate('character')}
               className="lq-btn-primary px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
             >
-              <User className="w-3.5 h-3.5 text-[#E8C777]" />
+              <User className="w-3.5 h-3.5 text-[#38D9F5]" />
               Profile
             </button>
           </div>
@@ -271,26 +271,26 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
       </div>
 
       {/* MAIN COMMAND STAGE: Integrated 3-Column Composition (Clean Surface, Minimal Boxing) */}
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 items-stretch divide-y lg:divide-y-0 lg:divide-x divide-[#362B45]/75">
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 items-stretch divide-y lg:divide-y-0 lg:divide-x divide-[#1E3A63]/75">
         {/* LEFT COLUMN (4 cols): Champion Dossier, Rank & Bodyweight Stance */}
-        <div className="lg:col-span-4 p-5 sm:p-7 flex flex-col justify-between gap-5 order-2 lg:order-1 bg-[#171220]/55">
+        <div className="lg:col-span-4 p-5 sm:p-7 flex flex-col justify-between gap-5 order-2 lg:order-1 bg-[#0A1930]/55">
           <div className="space-y-4">
-            <div className="border-b border-[#362B45] pb-3.5">
+            <div className="border-b border-[#1E3A63] pb-3.5">
               <div className="flex items-center justify-between gap-2">
-                <span className="font-['Cinzel'] font-bold text-xs tracking-wider text-[#E8C777] uppercase">
+                <span className="font-['Cinzel'] font-bold text-xs tracking-wider text-[#38D9F5] uppercase">
                   {heroDef.archetype}
                 </span>
                 {heroLocked && (
-                  <span className="text-[11px] text-[#A69AAF] flex items-center gap-1">
-                    <Lock className="w-3 h-3 text-[#D6A84B]" />
+                  <span className="text-[11px] text-[#94A8C7] flex items-center gap-1">
+                    <Lock className="w-3 h-3 text-[#00D9FF]" />
                     Bound
                   </span>
                 )}
               </div>
-              <p className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] mt-1">
+              <p className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] mt-1">
                 {heroDef.title}
               </p>
-              <p className="text-xs text-[#A69AAF] mt-1.5 leading-relaxed line-clamp-3">
+              <p className="text-xs text-[#94A8C7] mt-1.5 leading-relaxed line-clamp-3">
                 {heroDef.roleSummary}
               </p>
             </div>
@@ -298,42 +298,42 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
             {/* Aether Rank Progress */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs tabular-nums">
-                <span className="text-[#A69AAF] font-medium">Aether Rank · {stats.aetherRank}</span>
-                <span className="font-mono text-[#E8C777] text-[11px]">
+                <span className="text-[#94A8C7] font-medium">Aether Rank · {stats.aetherRank}</span>
+                <span className="font-mono text-[#FBBF24] text-[11px]">
                   {stats.aetherPoints.toLocaleString()} / {stats.aetherPointsNextRank.toLocaleString()} AP
                 </span>
               </div>
               <AnimatedProgressBar
                 percentage={rankPercent}
-                className="w-full h-1.5 rounded-full bg-[#100D18] overflow-hidden border border-[#362B45]"
-                barClassName="bg-gradient-to-r from-[#7045A0] to-[#D6A84B]"
+                className="w-full h-1.5 rounded-full bg-[#061225] overflow-hidden border border-[#1E3A63]"
+                barClassName="bg-gradient-to-r from-[#1677FF] to-[#00D9FF]"
                 shimmer={false}
               />
             </div>
 
             {/* Bodyweight Combat Stance */}
-            <div className="pt-3 border-t border-[#362B45] space-y-2.5">
+            <div className="pt-3 border-t border-[#1E3A63] space-y-2.5">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-['Cinzel'] font-bold text-[#49B88A] tracking-wider uppercase text-[11px]">
+                <span className="font-['Cinzel'] font-bold text-[#10B981] tracking-wider uppercase text-[11px]">
                   Bodyweight Discipline
                 </span>
-                <span className="text-[11px] text-[#766D82] font-mono">Hands &amp; Legs</span>
+                <span className="text-[11px] text-[#647A9E] font-mono">Hands &amp; Legs</span>
               </div>
-              <p className="text-sm font-semibold text-[#F2EDF7] truncate">
+              <p className="text-sm font-semibold text-[#F2F7FF] truncate">
                 {heroDef.bodyweightDisciplines.conditioningStyle}
               </p>
               <div className="space-y-1.5 text-[11px]">
                 <div className="flex items-center gap-2 min-w-0">
-                  <Hand className="w-3.5 h-3.5 text-[#E8C777] shrink-0" />
-                  <span className="text-[#766D82] shrink-0">Hands:</span>
-                  <span className="text-[#F2EDF7] font-medium truncate">
+                  <Hand className="w-3.5 h-3.5 text-[#38D9F5] shrink-0" />
+                  <span className="text-[#647A9E] shrink-0">Hands:</span>
+                  <span className="text-[#F2F7FF] font-medium truncate">
                     {heroDef.bodyweightDisciplines.handsFocus}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 min-w-0">
-                  <Footprints className="w-3.5 h-3.5 text-[#49B88A] shrink-0" />
-                  <span className="text-[#766D82] shrink-0">Legs:</span>
-                  <span className="text-[#F2EDF7] font-medium truncate">
+                  <Footprints className="w-3.5 h-3.5 text-[#10B981] shrink-0" />
+                  <span className="text-[#647A9E] shrink-0">Legs:</span>
+                  <span className="text-[#F2F7FF] font-medium truncate">
                     {heroDef.bodyweightDisciplines.legsFocus}
                   </span>
                 </div>
@@ -342,17 +342,17 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
           </div>
 
           {/* Active Buffs / Signature Traits */}
-          <div className="pt-3 border-t border-[#362B45] space-y-1.5">
-            <span className="font-['Cinzel'] font-bold text-[10px] tracking-wider uppercase text-[#766D82] block">
+          <div className="pt-3 border-t border-[#1E3A63] space-y-1.5">
+            <span className="font-['Cinzel'] font-bold text-[10px] tracking-wider uppercase text-[#647A9E] block">
               {activeBuffs.length > 0 ? 'Active Aura & Blessings' : 'Champion Traits'}
             </span>
             {activeBuffs.length > 0 ? (
               <div className="space-y-1">
                 {activeBuffs.slice(0, 2).map(buff => (
-                  <p key={buff.id} className="text-xs text-[#A69AAF] truncate">
-                    <span className="text-[#E8C777] font-semibold">{buff.name}</span>
-                    <span className="text-[#766D82] mx-1.5" aria-hidden="true">·</span>
-                    <span className="font-mono text-[11px] tabular-nums text-[#F2EDF7]">
+                  <p key={buff.id} className="text-xs text-[#94A8C7] truncate">
+                    <span className="text-[#38D9F5] font-semibold">{buff.name}</span>
+                    <span className="text-[#647A9E] mx-1.5" aria-hidden="true">·</span>
+                    <span className="font-mono text-[11px] tabular-nums text-[#F2F7FF]">
                       +{buff.effectValue}% {buff.effectType}
                     </span>
                   </p>
@@ -361,9 +361,9 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
             ) : (
               <div className="space-y-1">
                 {heroDef.abilities.slice(0, 2).map(ab => (
-                  <p key={ab.name} className="text-xs text-[#A69AAF] truncate">
-                    <span className="text-[#E8C777] font-medium">{ab.name}</span>
-                    <span className="text-[#766D82] mx-1.5" aria-hidden="true">·</span>
+                  <p key={ab.name} className="text-xs text-[#94A8C7] truncate">
+                    <span className="text-[#38D9F5] font-medium">{ab.name}</span>
+                    <span className="text-[#647A9E] mx-1.5" aria-hidden="true">·</span>
                     <span>{ab.description}</span>
                   </p>
                 ))}
@@ -376,20 +376,20 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
         <div className="lg:col-span-4 relative flex flex-col items-center justify-end min-h-[380px] sm:min-h-[450px] lg:min-h-[490px] py-6 px-4 order-1 lg:order-2 select-none">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-80 rounded-full blur-3xl opacity-30"
+            className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-80 rounded-full blur-3xl opacity-35"
             style={{
-              background: `radial-gradient(circle, rgba(112, 69, 160, 0.75) 0%, rgba(214, 168, 75, 0.25) 55%, transparent 80%)`,
+              background: `radial-gradient(circle, rgba(22, 119, 255, 0.75) 0%, rgba(0, 217, 255, 0.30) 55%, transparent 80%)`,
             }}
           />
 
           {/* Subtle Rotating Runic Pedestal */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute bottom-12 left-1/2 -translate-x-1/2 w-60 h-60 opacity-50"
+            className="pointer-events-none absolute bottom-12 left-1/2 -translate-x-1/2 w-60 h-60 opacity-55"
             style={{ perspective: '600px' }}
           >
-            <div className="w-full h-full rounded-full border border-[#D6A84B]/45 animate-runic-ring flex items-center justify-center shadow-[0_0_24px_rgba(112,69,160,0.28)]">
-              <div className="w-[82%] h-[82%] rounded-full border border-dashed border-[#7045A0]/70" />
+            <div className="w-full h-full rounded-full border border-[#00D9FF]/45 animate-runic-ring flex items-center justify-center shadow-[0_0_24px_rgba(22,119,255,0.32)]">
+              <div className="w-[82%] h-[82%] rounded-full border border-dashed border-[#1677FF]/70" />
             </div>
           </div>
 
@@ -398,7 +398,7 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
               src={heroArtSrc}
               alt={`${heroDef.name} — ${heroDef.archetype}`}
               referrerPolicy="no-referrer"
-              className="w-full h-full object-contain object-bottom drop-shadow-[0_24px_38px_rgba(5,3,10,0.92)]"
+              className="w-full h-full object-contain object-bottom drop-shadow-[0_24px_38px_rgba(2,8,20,0.92)]"
               style={{
                 WebkitMaskImage:
                   'radial-gradient(ellipse 76% 88% at 50% 48%, #000 56%, rgba(0,0,0,0.85) 74%, transparent 98%)',
@@ -409,12 +409,12 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
           </div>
 
           <div className="relative z-20 -mt-2 text-center">
-            <p className="font-['Cinzel'] font-black text-sm sm:text-base tracking-[0.14em] uppercase text-[#F2EDF7]">
+            <p className="font-['Cinzel'] font-black text-sm sm:text-base tracking-[0.14em] uppercase text-[#F2F7FF]">
               {heroDef.name}
             </p>
-            <p className="text-[11px] text-[#E8C777] tracking-wide tabular-nums">
+            <p className="text-[11px] text-[#38D9F5] tracking-wide tabular-nums">
               {heroDef.introFlourishLabel}
-              <span className="text-[#766D82] mx-1.5" aria-hidden="true">·</span>
+              <span className="text-[#647A9E] mx-1.5" aria-hidden="true">·</span>
               {stats.currentStreak} Day Streak
             </p>
           </div>
@@ -423,22 +423,22 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
         {/* RIGHT COLUMN (4 cols): Six Character Attributes & Combat Readiness */}
         <div
           data-tutorial-id="character-attributes"
-          className="lg:col-span-4 p-5 sm:p-7 flex flex-col justify-between gap-4 order-3 bg-[#171220]/55"
+          className="lg:col-span-4 p-5 sm:p-7 flex flex-col justify-between gap-4 order-3 bg-[#0A1930]/55"
         >
           <div className="space-y-3.5">
-            <div className="flex items-center justify-between gap-2 border-b border-[#362B45] pb-3">
+            <div className="flex items-center justify-between gap-2 border-b border-[#1E3A63] pb-3">
               <div>
-                <h2 className="font-['Cinzel'] font-bold text-sm tracking-wider uppercase text-[#F2EDF7]">
+                <h2 className="font-['Cinzel'] font-bold text-sm tracking-wider uppercase text-[#F2F7FF]">
                   Character Attributes
                 </h2>
-                <p className="text-[11px] text-[#A69AAF] mt-0.5">
+                <p className="text-[11px] text-[#94A8C7] mt-0.5">
                   Scaled directly from real-world habits &amp; workouts
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setShowAttributeSources(s => !s)}
-                className="text-[11px] text-[#E8C777] hover:text-[#F2EDF7] flex items-center gap-1 font-medium whitespace-nowrap shrink-0 transition-colors cursor-pointer"
+                className="text-[11px] text-[#38D9F5] hover:text-[#F2F7FF] flex items-center gap-1 font-medium whitespace-nowrap shrink-0 transition-colors cursor-pointer"
               >
                 {showAttributeSources ? 'Hide' : 'Sources'}
                 {showAttributeSources ? (
@@ -461,38 +461,38 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
                     <div className="flex items-baseline justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">
                         <span
-                          className="w-6 h-6 rounded bg-[#100D18] border border-[#362B45] flex items-center justify-center shrink-0"
+                          className="w-6 h-6 rounded bg-[#061225] border border-[#1E3A63] flex items-center justify-center shrink-0"
                           style={{ color: attr.accentHex }}
                         >
                           <Icon className="w-3.5 h-3.5" />
                         </span>
                         <div className="min-w-0">
-                          <span className="font-['Cinzel'] font-bold text-xs tracking-wider uppercase text-[#F2EDF7]">
+                          <span className="font-['Cinzel'] font-bold text-xs tracking-wider uppercase text-[#F2F7FF]">
                             {attr.label}
                           </span>
-                          <span className="text-[10px] text-[#766D82] ml-1.5">
+                          <span className="text-[10px] text-[#647A9E] ml-1.5">
                             {isFocus ? '· Focus' : `· ${ATTRIBUTE_SUBTITLE_MAP[attr.key]}`}
                           </span>
                         </div>
                       </div>
                       <AnimatedCounter
                         value={val}
-                        className="font-mono font-black text-base text-[#F2EDF7] shrink-0"
+                        className="font-mono font-black text-base text-[#F2F7FF] shrink-0"
                       />
                     </div>
 
                     <AnimatedProgressBar
                       percentage={pct}
-                      className="w-full h-1.5 rounded-full bg-[#100D18] border border-[#362B45] overflow-hidden"
+                      className="w-full h-1.5 rounded-full bg-[#061225] border border-[#1E3A63] overflow-hidden"
                       barClassName=""
                       barStyle={{
-                        background: `linear-gradient(90deg, #7045A0 0%, ${attr.accentHex} 100%)`,
+                        background: `linear-gradient(90deg, #1677FF 0%, ${attr.accentHex} 100%)`,
                       }}
                       shimmer={false}
                     />
 
                     {showAttributeSources && (
-                      <p className="text-[10px] text-[#A69AAF] leading-snug pl-8">
+                      <p className="text-[10px] text-[#94A8C7] leading-snug pl-8">
                         {attr.realLifeSource}
                       </p>
                     )}
@@ -503,28 +503,28 @@ export const HeroCommandStage: React.FC<HeroCommandStageProps> = ({
           </div>
 
           {/* Combat Readiness Summary Strip */}
-          <div className="pt-3 border-t border-[#362B45] grid grid-cols-3 divide-x divide-[#362B45] text-center font-mono">
+          <div className="pt-3 border-t border-[#1E3A63] grid grid-cols-3 divide-x divide-[#1E3A63] text-center font-mono">
             <div className="px-2">
-              <span className="text-[10px] uppercase tracking-wider text-[#A69AAF] block">
+              <span className="text-[10px] uppercase tracking-wider text-[#94A8C7] block">
                 Attack
               </span>
-              <span className="text-sm font-bold text-[#D65C66] tabular-nums">
+              <span className="text-sm font-bold text-[#F43F5E] tabular-nums">
                 +<AnimatedCounter value={totalAttack} />
               </span>
             </div>
             <div className="px-2">
-              <span className="text-[10px] uppercase tracking-wider text-[#A69AAF] block">
+              <span className="text-[10px] uppercase tracking-wider text-[#94A8C7] block">
                 Defense
               </span>
-              <span className="text-sm font-bold text-[#49B88A] tabular-nums">
+              <span className="text-sm font-bold text-[#10B981] tabular-nums">
                 +<AnimatedCounter value={totalDefense} />
               </span>
             </div>
             <div className="px-2">
-              <span className="text-[10px] uppercase tracking-wider text-[#A69AAF] block">
+              <span className="text-[10px] uppercase tracking-wider text-[#94A8C7] block">
                 Crit Rate
               </span>
-              <span className="text-sm font-bold text-[#E8C777] tabular-nums">
+              <span className="text-sm font-bold text-[#FBBF24] tabular-nums">
                 <AnimatedCounter value={critPercent} />%
               </span>
             </div>

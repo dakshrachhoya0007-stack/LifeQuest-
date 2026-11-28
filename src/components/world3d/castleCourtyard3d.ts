@@ -28,7 +28,7 @@ export function buildCastleCourtyard3d(
 
   const flagstoneTex = track(createCastleStoneTextures(6, 6));
   const wallStoneTex = track(createCastleStoneTextures(3, 2));
-  const bannerTex = track(createClothWeaveTexture('#141420', '#090910', '#D6A84B'));
+  const bannerTex = track(createClothWeaveTexture('#0A1930', '#061225', '#F59E0B'));
 
   const floorMat = track(
     new THREE.MeshStandardMaterial({

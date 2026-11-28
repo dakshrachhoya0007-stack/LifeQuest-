@@ -51,7 +51,7 @@ const EMBLEM_OPTIONS = [
   { id: 'Sun', label: 'Sun', Icon: Sun },
 ] as const;
 
-const renderGuildEmblem = (emblem: string, className = 'w-5 h-5 text-[#E8C777]') => {
+const renderGuildEmblem = (emblem: string, className = 'w-5 h-5 text-[#FBBF24]') => {
   if (emblem === 'Swords') return <Dumbbell className={className} />;
   const found = EMBLEM_OPTIONS.find(e => e.id === emblem);
   const Icon = found ? found.Icon : Shield;
@@ -391,13 +391,13 @@ export const GuildsView: React.FC = () => {
       <FeatureBanner themeId="social">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold text-[#E8C777] mb-1">
+            <p className="text-xs font-semibold text-[#38D9F5] mb-1">
               Player-Founded Brotherhoods · Real Member Progress Only
             </p>
-            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2EDF7]">
+            <h1 className="text-2xl sm:text-3xl font-black font-['Cinzel'] text-[#F2F7FF]">
               Guilds &amp; Cooperative Raids
             </h1>
-            <p className="text-xs sm:text-sm text-[#A69AAF] max-w-2xl mt-1">
+            <p className="text-xs sm:text-sm text-[#94A8C7] max-w-2xl mt-1">
               Found a guild or join an active fellowship. Guild XP and challenge progress advance strictly from verified member workouts, habits, and boss victories.
             </p>
           </div>
@@ -445,8 +445,8 @@ export const GuildsView: React.FC = () => {
               <div
                 className={`p-3.5 rounded-xl border text-xs font-medium ${
                   feedback.type === 'error'
-                    ? 'bg-[#D65C66]/12 border-[#D65C66]/45 text-[#D65C66]'
-                    : 'bg-[#49B88A]/12 border-[#49B88A]/45 text-[#49B88A]'
+                    ? 'bg-[#F43F5E]/12 border-[#F43F5E]/45 text-[#F43F5E]'
+                    : 'bg-[#10B981]/12 border-[#10B981]/45 text-[#10B981]'
                 }`}
               >
                 {feedback.text}
@@ -455,21 +455,21 @@ export const GuildsView: React.FC = () => {
 
             {/* Pending Incoming Guild Invites */}
             {guildInvites.length > 0 && (
-              <div className="lq-surface rounded-2xl p-4 space-y-3 border border-[#D6A84B]/35">
-                <span className="text-xs font-bold text-[#E8C777] uppercase tracking-wider block">
+              <div className="lq-surface rounded-2xl p-4 space-y-3 border border-[#F59E0B]/35">
+                <span className="text-xs font-bold text-[#FBBF24] uppercase tracking-wider block">
                   Pending Guild Invitations ({guildInvites.length})
                 </span>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {guildInvites.map(inv => (
                     <div
                       key={inv.inviteId}
-                      className="p-3.5 rounded-xl bg-[#100D18] border border-[#362B45] flex items-center justify-between gap-3"
+                      className="p-3.5 rounded-xl bg-[#061225] border border-[#1E3A63] flex items-center justify-between gap-3"
                     >
                       <div className="min-w-0">
-                        <p className="text-sm font-bold text-[#F2EDF7] truncate">
+                        <p className="text-sm font-bold text-[#F2F7FF] truncate">
                           [{inv.guildTag}] {inv.guildName}
                         </p>
-                        <p className="text-xs text-[#A69AAF] tabular-nums">
+                        <p className="text-xs text-[#94A8C7] tabular-nums">
                           Lv.{inv.guildLevel} · Invited by {inv.inviterName}
                         </p>
                       </div>
@@ -479,7 +479,7 @@ export const GuildsView: React.FC = () => {
                           disabled={isSubmitting || Boolean(myGuild)}
                           onClick={() => handleRespondInvite(inv.inviteId, true, inv.guildName)}
                           title={myGuild ? 'Leave your current guild first' : 'Accept invite'}
-                          className="lq-btn px-3 py-1.5 rounded-lg bg-[#49B88A] hover:brightness-110 disabled:opacity-40 text-[#100D18] text-xs font-bold flex items-center gap-1 whitespace-nowrap cursor-pointer"
+                          className="lq-btn px-3 py-1.5 rounded-lg bg-[#10B981] hover:brightness-110 disabled:opacity-40 text-[#061225] text-xs font-bold flex items-center gap-1 whitespace-nowrap cursor-pointer"
                         >
                           <Check className="w-3.5 h-3.5" />
                           Accept
@@ -509,7 +509,7 @@ export const GuildsView: React.FC = () => {
                     onClick={() => setSelectedGuildId(null)}
                     className="lq-btn lq-btn-secondary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
                   >
-                    <ArrowLeft className="w-4 h-4 text-[#E8C777]" />
+                    <ArrowLeft className="w-4 h-4 text-[#00D9FF]" />
                     All Guilds
                   </button>
 
@@ -530,7 +530,7 @@ export const GuildsView: React.FC = () => {
                             onClick={openEditSettings}
                             className="lq-btn lq-btn-secondary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
                           >
-                            <Settings className="w-3.5 h-3.5 text-[#E8C777]" />
+                            <Settings className="w-3.5 h-3.5 text-[#00D9FF]" />
                             Settings
                           </button>
                         </>
@@ -545,7 +545,7 @@ export const GuildsView: React.FC = () => {
                             guildName: guildDetails.guild.name,
                           })
                         }
-                        className="lq-btn px-3.5 py-2 rounded-xl bg-[#100D18] border border-[#D65C66]/45 hover:bg-[#D65C66]/15 text-[#D65C66] text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+                        className="lq-btn px-3.5 py-2 rounded-xl bg-[#061225] border border-[#F43F5E]/45 hover:bg-[#F43F5E]/15 text-[#F43F5E] text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
                       >
                         <LogOut className="w-3.5 h-3.5" />
                         Leave Guild
@@ -561,7 +561,7 @@ export const GuildsView: React.FC = () => {
                               guildName: guildDetails.guild.name,
                             })
                           }
-                          className="lq-btn px-3.5 py-2 rounded-xl bg-[#D65C66] hover:brightness-110 text-[#100D18] text-xs font-bold flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+                          className="lq-btn px-3.5 py-2 rounded-xl bg-[#F43F5E] hover:brightness-110 text-[#061225] text-xs font-bold flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                           Disband
@@ -572,8 +572,8 @@ export const GuildsView: React.FC = () => {
                 </div>
 
                 {loadingDetails || !guildDetails ? (
-                  <div className="py-16 flex flex-col items-center justify-center gap-3 lq-surface rounded-2xl text-xs text-[#A69AAF]">
-                    <Loader2 className="w-6 h-6 animate-spin text-[#D6A84B]" />
+                  <div className="py-16 flex flex-col items-center justify-center gap-3 lq-surface rounded-2xl text-xs text-[#94A8C7]">
+                    <Loader2 className="w-6 h-6 animate-spin text-[#00D9FF]" />
                     <span>Loading guild roster and challenges...</span>
                   </div>
                 ) : (
@@ -582,36 +582,36 @@ export const GuildsView: React.FC = () => {
                     <div className="lq-card rounded-2xl p-6 space-y-5">
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div className="flex items-start gap-4">
-                          <div className="w-14 h-14 rounded-xl bg-[#100D18] border border-[#D6A84B]/45 flex items-center justify-center shrink-0">
-                            {renderGuildEmblem(guildDetails.guild.emblem, 'w-7 h-7 text-[#E8C777]')}
+                          <div className="w-14 h-14 rounded-xl bg-[#061225] border border-[#F59E0B]/45 flex items-center justify-center shrink-0">
+                            {renderGuildEmblem(guildDetails.guild.emblem, 'w-7 h-7 text-[#FBBF24]')}
                           </div>
                           <div>
-                            <h2 className="font-['Cinzel'] font-bold text-xl text-[#F2EDF7]">
+                            <h2 className="font-['Cinzel'] font-bold text-xl text-[#F2F7FF]">
                               {guildDetails.guild.name}
                             </h2>
-                            <p className="text-xs text-[#E8C777] mt-0.5 tabular-nums flex items-center gap-2 flex-wrap">
-                              <span className="font-mono font-bold">[{guildDetails.guild.tag}]</span>
-                              <span aria-hidden="true" className="text-[#766D82]">·</span>
+                            <p className="text-xs text-[#38D9F5] mt-0.5 tabular-nums flex items-center gap-2 flex-wrap">
+                              <span className="font-mono font-bold text-[#FBBF24]">[{guildDetails.guild.tag}]</span>
+                              <span aria-hidden="true" className="text-[#647A9E]">·</span>
                               <span>Guild Lv.{guildDetails.guild.level}</span>
-                              <span aria-hidden="true" className="text-[#766D82]">·</span>
+                              <span aria-hidden="true" className="text-[#647A9E]">·</span>
                               <span>{(guildDetails.guild.guildXp || 0).toLocaleString()} Guild XP</span>
-                              <span aria-hidden="true" className="text-[#766D82]">·</span>
-                              <span className="inline-flex items-center gap-1 text-[#A69AAF]">
+                              <span aria-hidden="true" className="text-[#647A9E]">·</span>
+                              <span className="inline-flex items-center gap-1 text-[#94A8C7]">
                                 {guildDetails.guild.isPublic !== false ? (
                                   <>
-                                    <Globe className="w-3 h-3 text-[#9A72CC]" /> Public
+                                    <Globe className="w-3 h-3 text-[#00D9FF]" /> Public
                                   </>
                                 ) : (
                                   <>
-                                    <Lock className="w-3 h-3 text-[#E8C777]" /> Private
+                                    <Lock className="w-3 h-3 text-[#FBBF24]" /> Private
                                   </>
                                 )}
                               </span>
-                              <span aria-hidden="true" className="text-[#766D82]">·</span>
-                              <span className="text-[#A69AAF]">Min Lv.{guildDetails.guild.minLevel || 1}</span>
+                              <span aria-hidden="true" className="text-[#647A9E]">·</span>
+                              <span className="text-[#94A8C7]">Min Lv.{guildDetails.guild.minLevel || 1}</span>
                             </p>
                             {guildDetails.guild.description && (
-                              <p className="text-xs text-[#A69AAF] mt-2 max-w-2xl leading-relaxed">
+                              <p className="text-xs text-[#94A8C7] mt-2 max-w-2xl leading-relaxed">
                                 {guildDetails.guild.description}
                               </p>
                             )}
@@ -619,8 +619,8 @@ export const GuildsView: React.FC = () => {
                         </div>
 
                         <div className="text-right shrink-0 tabular-nums">
-                          <span className="text-[11px] text-[#A69AAF] block">Roster Capacity</span>
-                          <span className="text-lg font-mono font-bold text-[#F2EDF7]">
+                          <span className="text-[11px] text-[#94A8C7] block">Roster Capacity</span>
+                          <span className="text-lg font-mono font-bold text-[#F2F7FF]">
                             {guildDetails.guild.membersCount} / {guildDetails.guild.maxMembers}
                           </span>
                         </div>
@@ -632,14 +632,14 @@ export const GuildsView: React.FC = () => {
                         const levelPct = Math.min(100, Math.round(((totalGxp - levelFloor) / 1000) * 100));
                         return (
                           <div className="space-y-1.5">
-                            <div className="flex justify-between text-[11px] text-[#A69AAF] tabular-nums">
+                            <div className="flex justify-between text-[11px] text-[#94A8C7] tabular-nums">
                               <span>Guild Level Progression</span>
                               <span className="font-mono">{Math.max(0, totalGxp - levelFloor)} / 1,000 XP to next level</span>
                             </div>
                             <AnimatedProgressBar
                               percentage={Math.max(0, levelPct)}
-                              className="w-full h-2 bg-[#100D18] rounded-full overflow-hidden border border-[#362B45]"
-                              barClassName="bg-gradient-to-r from-[#7045A0] to-[#D6A84B]"
+                              className="w-full h-2 bg-[#061225] rounded-full overflow-hidden border border-[#1E3A63]"
+                              barClassName="bg-gradient-to-r from-[#1677FF] to-[#00D9FF]"
                             />
                           </div>
                         );
@@ -650,15 +650,15 @@ export const GuildsView: React.FC = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                       {/* Roster */}
                       <div className="lg:col-span-2 lq-surface rounded-2xl p-5 space-y-4">
-                        <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2EDF7] flex items-center gap-2">
-                          <Users className="w-4 h-4 text-[#D6A84B]" />
+                        <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF] flex items-center gap-2">
+                          <Users className="w-4 h-4 text-[#00D9FF]" />
                           Guild Roster ({guildDetails.members.length})
                         </h3>
 
                         {guildDetails.members.length === 0 ? (
-                          <p className="text-xs text-[#A69AAF] py-6 text-center">No members in this guild.</p>
+                          <p className="text-xs text-[#94A8C7] py-6 text-center">No members in this guild.</p>
                         ) : (
-                          <div className="divide-y divide-[#362B45]">
+                          <div className="divide-y divide-[#1E3A63]">
                             {guildDetails.members.map(member => {
                               const isSelf = member.userId === user?.id;
                               const myRole = guildDetails.guild.myRole;
@@ -680,7 +680,7 @@ export const GuildsView: React.FC = () => {
                                       <img
                                         src={getRpgAvatarForClass(member.characterClass)}
                                         alt={member.username}
-                                        className="w-10 h-10 rounded-xl object-cover object-top border border-[#7045A0]"
+                                        className="w-10 h-10 rounded-xl object-cover object-top border border-[#1677FF]"
                                       />
                                       <PresenceBadge
                                         status={getPlayerPresence(member.userId)?.status}
@@ -693,7 +693,7 @@ export const GuildsView: React.FC = () => {
                                         <button
                                           type="button"
                                           onClick={() => openPublicProfile(member.userId)}
-                                          className="text-sm font-bold text-[#F2EDF7] hover:text-[#E8C777] truncate transition-colors cursor-pointer"
+                                          className="text-sm font-bold text-[#F2F7FF] hover:text-[#38D9F5] truncate transition-colors cursor-pointer"
                                         >
                                           {member.username}
                                         </button>
@@ -706,18 +706,18 @@ export const GuildsView: React.FC = () => {
                                         <span
                                           className={`text-[11px] capitalize font-semibold ${
                                             member.role === 'leader'
-                                              ? 'text-[#E8C777]'
+                                              ? 'text-[#FBBF24]'
                                               : member.role === 'officer'
-                                              ? 'text-[#9A72CC]'
-                                              : 'text-[#A69AAF]'
+                                              ? 'text-[#38D9F5]'
+                                              : 'text-[#94A8C7]'
                                           }`}
                                         >
                                           {member.role}
                                         </span>
                                       </div>
-                                      <p className="text-xs text-[#A69AAF] tabular-nums">
+                                      <p className="text-xs text-[#94A8C7] tabular-nums">
                                         Lv.{member.level} · {member.characterClass} ·{' '}
-                                        <span className="text-[#F2EDF7] font-mono">
+                                        <span className="text-[#F2F7FF] font-mono">
                                           {member.weeklyContribution} contribution
                                         </span>
                                       </p>
@@ -734,7 +734,7 @@ export const GuildsView: React.FC = () => {
                                           className="lq-btn lq-btn-secondary px-2.5 py-1 rounded-lg text-[11px] font-medium flex items-center gap-1 cursor-pointer"
                                           title="Promote to Officer"
                                         >
-                                          <ChevronUp className="w-3 h-3 text-[#9A72CC]" />
+                                          <ChevronUp className="w-3 h-3 text-[#38D9F5]" />
                                           Promote
                                         </button>
                                       )}
@@ -762,7 +762,7 @@ export const GuildsView: React.FC = () => {
                                               targetUsername: member.username,
                                             })
                                           }
-                                          className="lq-btn px-2.5 py-1 rounded-lg bg-[#100D18] border border-[#D6A84B]/40 hover:border-[#E8C777] text-[#E8C777] text-[11px] font-medium whitespace-nowrap cursor-pointer"
+                                          className="lq-btn px-2.5 py-1 rounded-lg bg-[#061225] border border-[#F59E0B]/40 hover:border-[#FBBF24] text-[#FBBF24] text-[11px] font-medium whitespace-nowrap cursor-pointer"
                                         >
                                           Make Leader
                                         </button>
@@ -779,7 +779,7 @@ export const GuildsView: React.FC = () => {
                                             targetUsername: member.username,
                                           })
                                         }
-                                        className="px-2.5 py-1 rounded-lg text-[#D65C66] hover:bg-[#D65C66]/12 text-[11px] font-medium cursor-pointer"
+                                        className="px-2.5 py-1 rounded-lg text-[#F43F5E] hover:bg-[#F43F5E]/12 text-[11px] font-medium cursor-pointer"
                                       >
                                         Kick
                                       </button>
@@ -796,13 +796,13 @@ export const GuildsView: React.FC = () => {
                       <div className="space-y-6">
                         {/* Weekly Challenges */}
                         <div className="lq-surface rounded-2xl p-5 space-y-4">
-                          <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2EDF7] flex items-center gap-2">
-                            <Target className="w-4 h-4 text-[#D6A84B]" />
+                          <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF] flex items-center gap-2">
+                            <Target className="w-4 h-4 text-[#00D9FF]" />
                             Guild Challenges
                           </h3>
 
                           {guildDetails.challenges.length === 0 ? (
-                            <p className="text-xs text-[#A69AAF]">
+                            <p className="text-xs text-[#94A8C7]">
                               No challenges recorded yet. Complete workouts, habits, or boss battles to contribute.
                             </p>
                           ) : (
@@ -810,24 +810,24 @@ export const GuildsView: React.FC = () => {
                               {guildDetails.challenges.map(ch => {
                                 const pct = Math.min(100, Math.round((ch.currentValue / Math.max(1, ch.targetValue)) * 100));
                                 return (
-                                  <div key={ch.id} className="p-3 rounded-xl bg-[#100D18] border border-[#362B45] space-y-2">
+                                  <div key={ch.id} className="p-3 rounded-xl bg-[#061225] border border-[#1E3A63] space-y-2">
                                     <div className="flex items-start justify-between gap-2">
-                                      <span className="text-xs font-semibold text-[#F2EDF7]">{ch.title}</span>
-                                      <span className="text-[11px] font-mono text-[#E8C777] tabular-nums shrink-0">
+                                      <span className="text-xs font-semibold text-[#F2F7FF]">{ch.title}</span>
+                                      <span className="text-[11px] font-mono text-[#38D9F5] tabular-nums shrink-0">
                                         {pct}%
                                       </span>
                                     </div>
                                     <AnimatedProgressBar
                                       percentage={pct}
-                                      className="w-full h-1.5 bg-[#171220] rounded-full overflow-hidden border border-[#362B45]"
-                                      barClassName="bg-gradient-to-r from-[#7045A0] to-[#D6A84B]"
+                                      className="w-full h-1.5 bg-[#0A1930] rounded-full overflow-hidden border border-[#1E3A63]"
+                                      barClassName="bg-gradient-to-r from-[#1677FF] to-[#00D9FF]"
                                       shimmer={false}
                                     />
-                                    <div className="flex items-center justify-between text-[11px] text-[#A69AAF] tabular-nums">
+                                    <div className="flex items-center justify-between text-[11px] text-[#94A8C7] tabular-nums">
                                       <span className="font-mono">
                                         {ch.currentValue.toLocaleString()} / {ch.targetValue.toLocaleString()}
                                       </span>
-                                      <span className="text-[#E8C777] font-mono">
+                                      <span className="text-[#FBBF24] font-mono">
                                         +{ch.rewardGold}G · +{ch.rewardPlayerXp}XP
                                       </span>
                                     </div>
@@ -841,39 +841,39 @@ export const GuildsView: React.FC = () => {
                         {/* Join Requests Queue */}
                         {(guildDetails.guild.myRole === 'leader' || guildDetails.guild.myRole === 'officer') && (
                           <div className="lq-surface rounded-2xl p-5 space-y-3">
-                            <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2EDF7]">
+                            <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF]">
                               Join Requests ({guildDetails.joinRequests.length})
                             </h3>
                             {guildDetails.joinRequests.length === 0 ? (
-                              <p className="text-xs text-[#766D82]">No pending join applications.</p>
+                              <p className="text-xs text-[#647A9E]">No pending join applications.</p>
                             ) : (
                               <div className="space-y-2.5">
                                 {guildDetails.joinRequests.map(req => (
                                   <div
                                     key={req.id}
-                                    className="p-3 rounded-xl bg-[#100D18] border border-[#362B45] space-y-2"
+                                    className="p-3 rounded-xl bg-[#061225] border border-[#1E3A63] space-y-2"
                                   >
                                     <div className="flex items-center justify-between gap-2">
                                       <button
                                         type="button"
                                         onClick={() => openPublicProfile(req.userId)}
-                                        className="text-xs font-bold text-[#F2EDF7] hover:text-[#E8C777] truncate cursor-pointer"
+                                        className="text-xs font-bold text-[#F2F7FF] hover:text-[#38D9F5] truncate cursor-pointer"
                                       >
                                         {req.username}
                                       </button>
-                                      <span className="text-[11px] text-[#A69AAF] tabular-nums shrink-0 font-mono">
+                                      <span className="text-[11px] text-[#94A8C7] tabular-nums shrink-0 font-mono">
                                         Lv.{req.level} {req.characterClass}
                                       </span>
                                     </div>
                                     {req.message && (
-                                      <p className="text-[11px] text-[#A69AAF]">{req.message}</p>
+                                      <p className="text-[11px] text-[#94A8C7]">{req.message}</p>
                                     )}
                                     <div className="flex items-center gap-2">
                                       <button
                                         type="button"
                                         disabled={isSubmitting}
                                         onClick={() => handleRespondRequest(req.id, true)}
-                                        className="lq-btn flex-1 py-1.5 rounded-lg bg-[#49B88A] hover:brightness-110 text-[#100D18] text-[11px] font-bold cursor-pointer"
+                                        className="lq-btn flex-1 py-1.5 rounded-lg bg-[#10B981] hover:brightness-110 text-[#061225] text-[11px] font-bold cursor-pointer"
                                       >
                                         Accept
                                       </button>
@@ -896,8 +896,8 @@ export const GuildsView: React.FC = () => {
                         {/* Invite Players */}
                         {(guildDetails.guild.myRole === 'leader' || guildDetails.guild.myRole === 'officer') && (
                           <div className="lq-surface rounded-2xl p-5 space-y-3">
-                            <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2EDF7] flex items-center gap-1.5">
-                              <UserPlus className="w-4 h-4 text-[#D6A84B]" />
+                            <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF] flex items-center gap-1.5">
+                              <UserPlus className="w-4 h-4 text-[#00D9FF]" />
                               Invite Players
                             </h3>
 
@@ -923,11 +923,11 @@ export const GuildsView: React.FC = () => {
                                 ? inviteResults.map(c => (
                                     <div
                                       key={c.id}
-                                      className="p-2.5 rounded-xl bg-[#100D18] border border-[#362B45] flex items-center justify-between gap-2"
+                                      className="p-2.5 rounded-xl bg-[#061225] border border-[#1E3A63] flex items-center justify-between gap-2"
                                     >
                                       <div className="min-w-0">
-                                        <p className="text-xs font-bold text-[#F2EDF7] truncate">{c.username}</p>
-                                        <p className="text-[11px] text-[#A69AAF] tabular-nums">
+                                        <p className="text-xs font-bold text-[#F2F7FF] truncate">{c.username}</p>
+                                        <p className="text-[11px] text-[#94A8C7] tabular-nums">
                                           Lv.{c.level} {c.characterClass}
                                         </p>
                                       </div>
@@ -944,11 +944,11 @@ export const GuildsView: React.FC = () => {
                                 : acceptedFriends.map(f => (
                                     <div
                                       key={f.friendshipId}
-                                      className="p-2.5 rounded-xl bg-[#100D18] border border-[#362B45] flex items-center justify-between gap-2"
+                                      className="p-2.5 rounded-xl bg-[#061225] border border-[#1E3A63] flex items-center justify-between gap-2"
                                     >
                                       <div className="min-w-0">
-                                        <p className="text-xs font-bold text-[#F2EDF7] truncate">{f.champion.username}</p>
-                                        <p className="text-[11px] text-[#A69AAF] tabular-nums">
+                                        <p className="text-xs font-bold text-[#F2F7FF] truncate">{f.champion.username}</p>
+                                        <p className="text-[11px] text-[#94A8C7] tabular-nums">
                                           Friend · Lv.{f.champion.level}
                                         </p>
                                       </div>
@@ -975,27 +975,27 @@ export const GuildsView: React.FC = () => {
               <div className="space-y-5">
                 {guilds.length > 0 && (
                   <div className="lq-surface flex items-center gap-3 rounded-2xl p-4">
-                    <Search className="w-4 h-4 text-[#E8C777] shrink-0" />
+                    <Search className="w-4 h-4 text-[#00D9FF] shrink-0" />
                     <input
                       type="text"
                       value={directorySearch}
                       onChange={e => setDirectorySearch(e.target.value)}
                       placeholder="Filter guilds by name, tag, or focus..."
-                      className="flex-1 bg-transparent text-xs text-[#F2EDF7] placeholder-[#766D82] focus:outline-none"
+                      className="flex-1 bg-transparent text-xs text-[#F2F7FF] placeholder-[#647A9E] focus:outline-none"
                     />
                   </div>
                 )}
 
                 {guilds.length === 0 ? (
                   <div className="lq-surface p-12 rounded-2xl text-center space-y-4">
-                    <div className="w-14 h-14 rounded-2xl bg-[#100D18] border border-[#D6A84B]/45 flex items-center justify-center mx-auto text-[#D6A84B]">
+                    <div className="w-14 h-14 rounded-2xl bg-[#061225] border border-[#00D9FF]/45 flex items-center justify-center mx-auto text-[#00D9FF]">
                       <Shield className="w-7 h-7" />
                     </div>
                     <div className="space-y-1.5">
-                      <h2 className="font-['Cinzel'] font-bold text-lg text-[#F2EDF7]">
+                      <h2 className="font-['Cinzel'] font-bold text-lg text-[#F2F7FF]">
                         No Guilds Founded Yet
                       </h2>
-                      <p className="text-xs sm:text-sm text-[#A69AAF] max-w-md mx-auto">
+                      <p className="text-xs sm:text-sm text-[#94A8C7] max-w-md mx-auto">
                         No guilds have been founded yet. Be the first to establish one!
                       </p>
                     </div>
@@ -1011,7 +1011,7 @@ export const GuildsView: React.FC = () => {
                     )}
                   </div>
                 ) : filteredGuilds.length === 0 ? (
-                  <div className="lq-surface p-10 rounded-2xl text-center text-xs text-[#A69AAF]">
+                  <div className="lq-surface p-10 rounded-2xl text-center text-xs text-[#94A8C7]">
                     No guilds match "{directorySearch}".
                   </div>
                 ) : (
@@ -1034,19 +1034,19 @@ export const GuildsView: React.FC = () => {
                             <div>
                               <div className="flex items-start justify-between gap-2 mb-3">
                                 <div className="flex items-center gap-3 min-w-0">
-                                  <div className="w-11 h-11 rounded-xl bg-[#100D18] flex items-center justify-center border border-[#362B45] shrink-0">
-                                    {renderGuildEmblem(guild.emblem, 'w-5 h-5 text-[#E8C777]')}
+                                  <div className="w-11 h-11 rounded-xl bg-[#061225] flex items-center justify-center border border-[#1E3A63] shrink-0">
+                                    {renderGuildEmblem(guild.emblem, 'w-5 h-5 text-[#FBBF24]')}
                                   </div>
                                   <div className="min-w-0">
                                     <button
                                       type="button"
                                       onClick={() => setSelectedGuildId(guild.id)}
-                                      className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] hover:text-[#E8C777] truncate block text-left transition-colors cursor-pointer"
+                                      className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] hover:text-[#38D9F5] truncate block text-left transition-colors cursor-pointer"
                                     >
                                       {guild.name}
                                     </button>
-                                    <p className="text-[11px] text-[#A69AAF] tabular-nums mt-0.5">
-                                      <span className="font-mono font-bold text-[#E8C777]">[{guild.tag}]</span>
+                                    <p className="text-[11px] text-[#94A8C7] tabular-nums mt-0.5">
+                                      <span className="font-mono font-bold text-[#FBBF24]">[{guild.tag}]</span>
                                       {' · '}Lv.{guild.level}
                                       {' · '}
                                       {isPrivate ? 'Private' : 'Public'}
@@ -1056,36 +1056,36 @@ export const GuildsView: React.FC = () => {
                                 </div>
 
                                 {guild.isMember && (
-                                  <span className="text-[11px] font-semibold text-[#49B88A] shrink-0">
+                                  <span className="text-[11px] font-semibold text-[#10B981] shrink-0">
                                     Joined ({guild.myRole || 'member'})
                                   </span>
                                 )}
                               </div>
 
-                              <p className="text-xs text-[#A69AAF] leading-relaxed mb-4 line-clamp-2">
+                              <p className="text-xs text-[#94A8C7] leading-relaxed mb-4 line-clamp-2">
                                 {guild.description || 'Active player-led fellowship.'}
                               </p>
 
                               {/* Raid Quest Progress */}
-                              <div className="bg-[#100D18] p-3.5 rounded-xl border border-[#362B45] space-y-2 mb-4">
+                              <div className="bg-[#061225] p-3.5 rounded-xl border border-[#1E3A63] space-y-2 mb-4">
                                 <div className="flex items-center justify-between text-xs">
-                                  <span className="text-[11px] text-[#E8C777] font-semibold">
+                                  <span className="text-[11px] text-[#38D9F5] font-semibold">
                                     Weekly Guild Challenge
                                   </span>
-                                  <span className="text-[11px] text-[#E8C777] font-mono font-bold tabular-nums">
+                                  <span className="text-[11px] text-[#38D9F5] font-mono font-bold tabular-nums">
                                     {progressPercent}%
                                   </span>
                                 </div>
-                                <p className="text-xs font-semibold text-[#F2EDF7] truncate">
+                                <p className="text-xs font-semibold text-[#F2F7FF] truncate">
                                   {guild.weeklyQuestName}
                                 </p>
                                 <AnimatedProgressBar
                                   percentage={progressPercent}
-                                  className="w-full bg-[#171220] h-2 rounded-full overflow-hidden border border-[#362B45]"
-                                  barClassName="bg-gradient-to-r from-[#7045A0] to-[#D6A84B]"
+                                  className="w-full bg-[#0A1930] h-2 rounded-full overflow-hidden border border-[#1E3A63]"
+                                  barClassName="bg-gradient-to-r from-[#1677FF] to-[#00D9FF]"
                                   shimmer={false}
                                 />
-                                <div className="text-[11px] text-[#A69AAF] flex justify-between font-mono tabular-nums">
+                                <div className="text-[11px] text-[#94A8C7] flex justify-between font-mono tabular-nums">
                                   <span>Progress</span>
                                   <span>
                                     {guild.weeklyQuestProgress.toLocaleString()} /{' '}
@@ -1095,8 +1095,8 @@ export const GuildsView: React.FC = () => {
                               </div>
                             </div>
 
-                            <div className="pt-3 border-t border-[#362B45] flex items-center justify-between gap-2">
-                              <span className="text-xs text-[#A69AAF] font-mono tabular-nums">
+                            <div className="pt-3 border-t border-[#1E3A63] flex items-center justify-between gap-2">
+                              <span className="text-xs text-[#94A8C7] font-mono tabular-nums">
                                 {guild.membersCount} / {guild.maxMembers} Members
                               </span>
 
@@ -1112,7 +1112,7 @@ export const GuildsView: React.FC = () => {
                                 {!guild.isMember && !myGuild && (
                                   isPrivate ? (
                                     guild.hasPendingRequest ? (
-                                      <span className="px-3 py-2 rounded-xl bg-[#100D18] border border-[#362B45] text-[#A69AAF] text-xs font-semibold whitespace-nowrap">
+                                      <span className="px-3 py-2 rounded-xl bg-[#061225] border border-[#1E3A63] text-[#94A8C7] text-xs font-semibold whitespace-nowrap">
                                         Requested
                                       </span>
                                     ) : (
@@ -1156,14 +1156,14 @@ export const GuildsView: React.FC = () => {
         onClose={() => setShowCreateModal(false)}
         panelClassName="w-full max-w-lg"
       >
-        <div className="lq-surface-elevated rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
-          <h3 className="text-lg font-bold font-['Cinzel'] text-[#F2EDF7] mb-4">
+        <div className="lq-surface-elevated border border-[#1E3A63] rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
+          <h3 className="text-lg font-bold font-['Cinzel'] text-[#F2F7FF] mb-4">
             Establish a Guild
           </h3>
           <form onSubmit={handleCreateGuild} className="space-y-4 text-xs">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="sm:col-span-2">
-                <label className="block font-medium text-[#A69AAF] mb-1">Guild Name</label>
+                <label className="block font-medium text-[#94A8C7] mb-1">Guild Name</label>
                 <input
                   type="text"
                   required
@@ -1176,7 +1176,7 @@ export const GuildsView: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block font-medium text-[#A69AAF] mb-1">Tag (2–4 chars)</label>
+                <label className="block font-medium text-[#94A8C7] mb-1">Tag (2–4 chars)</label>
                 <input
                   type="text"
                   required
@@ -1191,7 +1191,7 @@ export const GuildsView: React.FC = () => {
             </div>
 
             <div>
-              <label className="block font-medium text-[#A69AAF] mb-1">Guild Charter</label>
+              <label className="block font-medium text-[#94A8C7] mb-1">Guild Charter</label>
               <textarea
                 value={guildDesc}
                 onChange={e => setGuildDesc(e.target.value)}
@@ -1203,7 +1203,7 @@ export const GuildsView: React.FC = () => {
             </div>
 
             <div>
-              <label className="block font-medium text-[#A69AAF] mb-1.5">Guild Emblem</label>
+              <label className="block font-medium text-[#94A8C7] mb-1.5">Guild Emblem</label>
               <div className="flex flex-wrap gap-2">
                 {EMBLEM_OPTIONS.map(opt => (
                   <button
@@ -1212,11 +1212,11 @@ export const GuildsView: React.FC = () => {
                     onClick={() => setGuildEmblem(opt.id)}
                     className={`px-3 py-2 rounded-xl border flex items-center gap-1.5 transition-colors cursor-pointer ${
                       guildEmblem === opt.id
-                        ? 'bg-[#7045A0] border-[#E8C777]/50 text-[#F2EDF7]'
-                        : 'bg-[#100D18] border-[#362B45] text-[#A69AAF] hover:text-[#F2EDF7]'
+                        ? 'bg-[#1677FF] border-[#00D9FF]/60 text-[#F2F7FF]'
+                        : 'bg-[#061225] border-[#1E3A63] text-[#94A8C7] hover:text-[#F2F7FF]'
                     }`}
                   >
-                    <opt.Icon className="w-3.5 h-3.5 text-[#E8C777]" />
+                    <opt.Icon className="w-3.5 h-3.5 text-[#FBBF24]" />
                     <span>{opt.label}</span>
                   </button>
                 ))}
@@ -1225,7 +1225,7 @@ export const GuildsView: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block font-medium text-[#A69AAF] mb-1">Membership Type</label>
+                <label className="block font-medium text-[#94A8C7] mb-1">Membership Type</label>
                 <select
                   value={guildPublic ? 'public' : 'private'}
                   onChange={e => setGuildPublic(e.target.value === 'public')}
@@ -1236,7 +1236,7 @@ export const GuildsView: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block font-medium text-[#A69AAF] mb-1">Minimum Level</label>
+                <label className="block font-medium text-[#94A8C7] mb-1">Minimum Level</label>
                 <input
                   type="number"
                   min={1}
@@ -1275,12 +1275,12 @@ export const GuildsView: React.FC = () => {
         panelClassName="w-full max-w-md"
       >
         <div className="lq-surface-elevated rounded-2xl p-6">
-          <h3 className="text-base font-bold font-['Cinzel'] text-[#F2EDF7] mb-3">
+          <h3 className="text-base font-bold font-['Cinzel'] text-[#F2F7FF] mb-3">
             Request to Join Guild
           </h3>
           <form onSubmit={handleSubmitJoinRequest} className="space-y-4 text-xs">
             <div>
-              <label className="block text-[#A69AAF] mb-1">Message to Guild Officers (Optional)</label>
+              <label className="block text-[#94A8C7] mb-1">Message to Guild Officers (Optional)</label>
               <textarea
                 value={requestNote}
                 onChange={e => setRequestNote(e.target.value)}
@@ -1317,12 +1317,12 @@ export const GuildsView: React.FC = () => {
         panelClassName="w-full max-w-md"
       >
         <div className="lq-surface-elevated rounded-2xl p-6">
-          <h3 className="text-base font-bold font-['Cinzel'] text-[#F2EDF7] mb-4">
+          <h3 className="text-base font-bold font-['Cinzel'] text-[#F2F7FF] mb-4">
             Set Weekly Guild Challenge
           </h3>
           <form onSubmit={handleCreateChallenge} className="space-y-4 text-xs">
             <div>
-              <label className="block text-[#A69AAF] mb-1">Challenge Title</label>
+              <label className="block text-[#94A8C7] mb-1">Challenge Title</label>
               <input
                 type="text"
                 required
@@ -1336,7 +1336,7 @@ export const GuildsView: React.FC = () => {
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="block text-[#A69AAF] mb-1">Target</label>
+                <label className="block text-[#94A8C7] mb-1">Target</label>
                 <input
                   type="number"
                   min={100}
@@ -1347,7 +1347,7 @@ export const GuildsView: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-[#A69AAF] mb-1">Gold Reward</label>
+                <label className="block text-[#94A8C7] mb-1">Gold Reward</label>
                 <input
                   type="number"
                   min={20}
@@ -1358,7 +1358,7 @@ export const GuildsView: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-[#A69AAF] mb-1">XP Reward</label>
+                <label className="block text-[#94A8C7] mb-1">XP Reward</label>
                 <input
                   type="number"
                   min={20}
@@ -1396,12 +1396,12 @@ export const GuildsView: React.FC = () => {
         panelClassName="w-full max-w-md"
       >
         <div className="lq-surface-elevated rounded-2xl p-6">
-          <h3 className="text-base font-bold font-['Cinzel'] text-[#F2EDF7] mb-4">
+          <h3 className="text-base font-bold font-['Cinzel'] text-[#F2F7FF] mb-4">
             Guild Settings
           </h3>
           <form onSubmit={handleSaveSettings} className="space-y-4 text-xs">
             <div>
-              <label className="block text-[#A69AAF] mb-1">Charter Description</label>
+              <label className="block text-[#94A8C7] mb-1">Charter Description</label>
               <textarea
                 value={editDesc}
                 onChange={e => setEditDesc(e.target.value)}
@@ -1411,7 +1411,7 @@ export const GuildsView: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-[#A69AAF] mb-1">Weekly Focus Name</label>
+              <label className="block text-[#94A8C7] mb-1">Weekly Focus Name</label>
               <input
                 type="text"
                 value={editQuestName}
@@ -1422,7 +1422,7 @@ export const GuildsView: React.FC = () => {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[#A69AAF] mb-1">Visibility</label>
+                <label className="block text-[#94A8C7] mb-1">Visibility</label>
                 <select
                   value={editPublic ? 'public' : 'private'}
                   onChange={e => setEditPublic(e.target.value === 'public')}
@@ -1433,7 +1433,7 @@ export const GuildsView: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-[#A69AAF] mb-1">Min Level</label>
+                <label className="block text-[#94A8C7] mb-1">Min Level</label>
                 <input
                   type="number"
                   min={1}
@@ -1445,7 +1445,7 @@ export const GuildsView: React.FC = () => {
               </div>
             </div>
             <div>
-              <label className="block text-[#A69AAF] mb-1">Emblem</label>
+              <label className="block text-[#94A8C7] mb-1">Emblem</label>
               <select
                 value={editEmblem}
                 onChange={e => setEditEmblem(e.target.value)}
@@ -1485,8 +1485,8 @@ export const GuildsView: React.FC = () => {
         panelClassName="w-full max-w-sm"
       >
         {confirmState && (
-          <div className="lq-surface-elevated border border-[#D65C66]/45 rounded-2xl p-6 space-y-4">
-            <div className="flex items-center gap-2.5 text-[#D65C66]">
+          <div className="lq-surface-elevated border border-[#F43F5E]/45 rounded-2xl p-6 space-y-4">
+            <div className="flex items-center gap-2.5 text-[#F43F5E]">
               <AlertTriangle className="w-5 h-5 shrink-0" />
               <h3 className="font-['Cinzel'] font-bold text-base">
                 {confirmState.kind === 'disband'
@@ -1498,7 +1498,7 @@ export const GuildsView: React.FC = () => {
                   : 'Transfer Leadership?'}
               </h3>
             </div>
-            <p className="text-xs text-[#A69AAF] leading-relaxed">
+            <p className="text-xs text-[#94A8C7] leading-relaxed">
               {confirmState.kind === 'disband'
                 ? `Permanently disband "${confirmState.guildName}"? All members, invites, and active challenges will be removed.`
                 : confirmState.kind === 'leave'
@@ -1519,7 +1519,7 @@ export const GuildsView: React.FC = () => {
                 type="button"
                 disabled={isSubmitting}
                 onClick={executeConfirmedAction}
-                className="lq-btn px-4 py-2 rounded-xl bg-[#D65C66] hover:brightness-110 text-[#100D18] text-xs font-bold cursor-pointer"
+                className="lq-btn px-4 py-2 rounded-xl bg-[#F43F5E] hover:brightness-110 text-[#061225] text-xs font-bold cursor-pointer"
               >
                 Confirm
               </button>

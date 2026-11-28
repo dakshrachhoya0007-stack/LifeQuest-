@@ -87,16 +87,16 @@ const MainAppContent: React.FC = () => {
   // 1. Loading gate while verifying existing Supabase session
   if (isAuthLoading) {
     return (
-      <div className="min-h-screen bg-[#100D18] text-[#F2EDF7] flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-[#061225] text-[#F2F7FF] flex flex-col items-center justify-center p-6">
         <div className="flex flex-col items-center gap-4 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-[#171220] border border-[#D6A84B]/45 flex items-center justify-center shadow-[0_14px_34px_rgba(6,4,12,0.85)]">
+          <div className="w-16 h-16 rounded-2xl bg-[#0A1930] border border-[#00D9FF]/45 flex items-center justify-center shadow-[0_14px_34px_rgba(2,8,20,0.88)]">
             <GoldenWorldTreeEmblem className="w-10 h-10 animate-ascendant-pulse" />
           </div>
           <div>
-            <h1 className="font-['Cinzel'] font-black tracking-[0.22em] text-xl text-[#E8C777]">
-              LIFEQUEST
+            <h1 className="font-['Cinzel'] font-black tracking-[0.22em] text-xl text-[#00D9FF]">
+              FITNESSFIGHT
             </h1>
-            <p className="text-xs text-[#A69AAF] mt-1.5 tracking-wide">
+            <p className="text-xs text-[#94A8C7] mt-1.5 tracking-wide">
               Entering the Citadel of Aetheria...
             </p>
           </div>
@@ -214,7 +214,7 @@ const MainAppContent: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#100D18] text-[#F2EDF7] flex flex-col antialiased selection:bg-[#7045A0] selection:text-[#F2EDF7]">
+    <div className="relative min-h-screen bg-[#061225] text-[#F2F7FF] flex flex-col antialiased selection:bg-[#1677FF] selection:text-[#F2F7FF]">
       <AetheriaAtmosphericBackdrop
         primaryRgb={activeFeatureTheme.primaryRgb}
         secondaryRgb={activeFeatureTheme.secondaryRgb}

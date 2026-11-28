@@ -32,11 +32,11 @@ import {
 } from '../Motion/RpgMotionPrimitives';
 
 const RARITY_COLORS: Record<CollectibleCardRarity, string> = {
-  Common: 'text-[#A69AAF]',
-  Rare: 'text-[#9A72CC]',
-  Epic: 'text-[#E8C777]',
-  Legendary: 'text-[#D6A84B]',
-  Mythic: 'text-[#D65C66]',
+  Common: 'text-[#94A8C7]',
+  Rare: 'text-[#65A9FF]',
+  Epic: 'text-[#38D9F5]',
+  Legendary: 'text-[#FBBF24]',
+  Mythic: 'text-[#F43F5E]',
 };
 
 const CATEGORY_LABELS: Record<CollectibleCardCategory | 'all', string> = {
@@ -163,25 +163,25 @@ export const CollectibleCardsView: React.FC = () => {
         className="flex flex-col xl:flex-row xl:items-center justify-between gap-5"
       >
         <div className="space-y-2">
-          <div className="text-xs font-['Cinzel'] font-bold uppercase tracking-widest text-[#D6A84B]">
+          <div className="text-xs font-['Cinzel'] font-bold uppercase tracking-widest text-[#38D9F5]">
             2D Collectible Chronicle Binder
           </div>
-          <h2 className="text-2xl font-black font-['Cinzel'] text-[#F2EDF7]">
+          <h2 className="text-2xl font-black font-['Cinzel'] text-[#F2F7FF]">
             Fantasy Card Collection
           </h2>
-          <div className="flex flex-wrap items-center gap-3 text-xs text-[#A69AAF] tabular-nums">
+          <div className="flex flex-wrap items-center gap-3 text-xs text-[#94A8C7] tabular-nums">
             <span>
-              <strong className="text-[#F2EDF7]">
+              <strong className="text-[#F2F7FF]">
                 <AnimatedCounter value={ownedMap.size} />
               </strong>{' '}
               / {COLLECTIBLE_CARDS_CATALOG.length} Cards Owned ({cardsState?.completionPercent || 0}%)
             </span>
-            <span aria-hidden="true" className="text-[#766D82]">·</span>
-            <span className="text-[#E8C777] font-mono">
+            <span aria-hidden="true" className="text-[#647A9E]">·</span>
+            <span className="text-[#FBBF24] font-mono">
               <AnimatedCounter value={goldBalance} /> Gold
             </span>
-            <span aria-hidden="true" className="text-[#766D82]">·</span>
-            <span className="text-[#9A72CC] font-mono">
+            <span aria-hidden="true" className="text-[#647A9E]">·</span>
+            <span className="text-[#38D9F5] font-mono">
               <AnimatedCounter value={fragmentBalance} /> Fragments
             </span>
           </div>
@@ -212,8 +212,8 @@ export const CollectibleCardsView: React.FC = () => {
         <div
           className={`rounded-xl px-4 py-3 text-xs border ${
             notice.type === 'success'
-              ? 'bg-[#49B88A]/10 border-[#49B88A]/45 text-[#49B88A]'
-              : 'bg-[#D65C66]/12 border-[#D65C66]/45 text-[#D65C66]'
+              ? 'bg-[#10B981]/10 border-[#10B981]/45 text-[#10B981]'
+              : 'bg-[#F43F5E]/12 border-[#F43F5E]/45 text-[#F43F5E]'
           }`}
         >
           {notice.text}
@@ -227,11 +227,11 @@ export const CollectibleCardsView: React.FC = () => {
             {/* Favorites Showcase Strip */}
             <div className="lq-card rounded-2xl p-5 space-y-3">
               <div className="flex items-center justify-between gap-2">
-                <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2EDF7] flex items-center gap-2">
-                  <Heart className="w-4 h-4 text-[#D65C66]" />
+                <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF] flex items-center gap-2">
+                  <Heart className="w-4 h-4 text-[#F43F5E]" />
                   Pinned Profile Favorite Cards ({favoriteIds.length} / 3)
                 </h3>
-                <span className="text-xs text-[#A69AAF]">Shown on your Public Champion Profile</span>
+                <span className="text-xs text-[#94A8C7]">Shown on your Public Champion Profile</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {[0, 1, 2].map(slot => {
@@ -244,12 +244,12 @@ export const CollectibleCardsView: React.FC = () => {
                     >
                       <div className="min-w-0">
                         <p className={`text-[11px] font-semibold ${RARITY_COLORS[card.rarity]}`}>{card.rarity}</p>
-                        <p className="font-['Cinzel'] font-bold text-xs text-[#F2EDF7] truncate">{card.name}</p>
+                        <p className="font-['Cinzel'] font-bold text-xs text-[#F2F7FF] truncate">{card.name}</p>
                       </div>
                       <button
                         type="button"
                         onClick={() => void handleToggleFavorite(card.id)}
-                        className="lq-btn px-2.5 py-1 rounded-lg bg-[#100D18] hover:bg-[#D65C66]/15 border border-[#362B45] hover:border-[#D65C66]/50 text-[11px] text-[#D65C66] whitespace-nowrap shrink-0 cursor-pointer"
+                        className="lq-btn px-2.5 py-1 rounded-lg bg-[#061225] hover:bg-[#F43F5E]/15 border border-[#1E3A63] hover:border-[#F43F5E]/50 text-[11px] text-[#F43F5E] whitespace-nowrap shrink-0 cursor-pointer"
                       >
                         Remove
                       </button>
@@ -257,7 +257,7 @@ export const CollectibleCardsView: React.FC = () => {
                   ) : (
                     <div
                       key={slot}
-                      className="rounded-xl bg-[#100D18]/70 border border-dashed border-[#362B45] p-3 text-xs text-[#766D82] flex items-center justify-center"
+                      className="rounded-xl bg-[#061225]/70 border border-dashed border-[#1E3A63] p-3 text-xs text-[#647A9E] flex items-center justify-center"
                     >
                       Favorite Slot {slot + 1} Empty
                     </div>
@@ -276,7 +276,7 @@ export const CollectibleCardsView: React.FC = () => {
                       type="button"
                       onClick={() => setCategoryFilter(cat)}
                       className={`lq-btn px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 cursor-pointer ${
-                        categoryFilter === cat ? 'lq-btn-primary' : 'lq-btn-secondary text-[#A69AAF]'
+                        categoryFilter === cat ? 'lq-btn-primary' : 'lq-btn-secondary text-[#94A8C7]'
                       }`}
                     >
                       {CATEGORY_LABELS[cat]}
@@ -333,7 +333,7 @@ export const CollectibleCardsView: React.FC = () => {
                       <div className="space-y-3">
                         <div className="flex items-center justify-between text-[11px]">
                           <span className={`font-semibold ${RARITY_COLORS[card.rarity]}`}>{card.rarity}</span>
-                          <span className="text-[#A69AAF] font-mono tabular-nums">
+                          <span className="text-[#94A8C7] font-mono tabular-nums">
                             {isOwned ? `Owned x${qty}` : 'Unowned'}
                           </span>
                         </div>
@@ -341,8 +341,8 @@ export const CollectibleCardsView: React.FC = () => {
                         <CollectibleCardArtwork card={card} size="sm" />
 
                         <div>
-                          <h4 className="font-['Cinzel'] font-bold text-sm text-[#F2EDF7] truncate">{card.name}</h4>
-                          <p className="text-[11px] text-[#A69AAF] mt-0.5">
+                          <h4 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF] truncate">{card.name}</h4>
+                          <p className="text-[11px] text-[#94A8C7] mt-0.5">
                             {card.subtitle}
                             {card.limitedEdition ? ' · Limited' : ''}
                           </p>
@@ -365,8 +365,8 @@ export const CollectibleCardsView: React.FC = () => {
                             onClick={() => void handleToggleFavorite(card.id)}
                             className={`lq-btn py-1.5 px-2.5 rounded-lg text-xs whitespace-nowrap shrink-0 cursor-pointer ${
                               isFav
-                                ? 'bg-[#7045A0]/30 border border-[#D6A84B]/60 text-[#E8C777]'
-                                : 'lq-btn-secondary text-[#A69AAF]'
+                                ? 'bg-[#1677FF]/30 border border-[#00D9FF]/60 text-[#38D9F5]'
+                                : 'lq-btn-secondary text-[#94A8C7]'
                             }`}
                           >
                             {isFav ? 'Pinned' : 'Pin'}
@@ -386,19 +386,19 @@ export const CollectibleCardsView: React.FC = () => {
           <div className="space-y-6">
             <div className="lq-card rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1">
-                <h3 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7]">
+                <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF]">
                   Transparent Card Packs · Earned Currency Only
                 </h3>
-                <p className="text-xs text-[#A69AAF]">
+                <p className="text-xs text-[#94A8C7]">
                   Every pack displays exact rarity odds summing to 100%. Duplicate draws automatically convert into Cosmetic Fragments (Common {DUPLICATE_CARD_FRAGMENT_RATES.Common}, Rare {DUPLICATE_CARD_FRAGMENT_RATES.Rare}, Epic {DUPLICATE_CARD_FRAGMENT_RATES.Epic}, Legendary {DUPLICATE_CARD_FRAGMENT_RATES.Legendary}, Mythic {DUPLICATE_CARD_FRAGMENT_RATES.Mythic}).
                 </p>
               </div>
-              <div className="flex items-center gap-1 p-1 rounded-xl bg-[#100D18] border border-[#362B45] shrink-0">
+              <div className="flex items-center gap-1 p-1 rounded-xl bg-[#061225] border border-[#1E3A63] shrink-0">
                 <button
                   type="button"
                   onClick={() => setCurrency('gold')}
                   className={`lq-btn px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer ${
-                    currency === 'gold' ? 'lq-btn-gold font-bold' : 'text-[#A69AAF] hover:text-[#F2EDF7]'
+                    currency === 'gold' ? 'lq-btn-gold font-bold' : 'text-[#94A8C7] hover:text-[#F2F7FF]'
                   }`}
                 >
                   <Coins className="w-3.5 h-3.5" />
@@ -408,7 +408,7 @@ export const CollectibleCardsView: React.FC = () => {
                   type="button"
                   onClick={() => setCurrency('fragments')}
                   className={`lq-btn px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer ${
-                    currency === 'fragments' ? 'lq-btn-primary' : 'text-[#A69AAF] hover:text-[#F2EDF7]'
+                    currency === 'fragments' ? 'lq-btn-primary' : 'text-[#94A8C7] hover:text-[#F2F7FF]'
                   }`}
                 >
                   <Sparkles className="w-3.5 h-3.5" />
@@ -426,19 +426,19 @@ export const CollectibleCardsView: React.FC = () => {
                     <div className="lq-card lq-card-interactive rounded-2xl p-5 h-full flex flex-col justify-between gap-5">
                       <div className="space-y-3">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="font-semibold text-[#E8C777]">{pack.cardCount} Cards Inside</span>
-                          <span className="text-[#A69AAF]">Min {pack.guaranteedMinRarity}</span>
+                          <span className="font-semibold text-[#38D9F5]">{pack.cardCount} Cards Inside</span>
+                          <span className="text-[#94A8C7]">Min {pack.guaranteedMinRarity}</span>
                         </div>
-                        <h4 className="font-['Cinzel'] font-bold text-lg text-[#F2EDF7]">{pack.name}</h4>
-                        <p className="text-xs text-[#A69AAF] leading-relaxed">{pack.description}</p>
+                        <h4 className="font-['Cinzel'] font-bold text-lg text-[#F2F7FF]">{pack.name}</h4>
+                        <p className="text-xs text-[#94A8C7] leading-relaxed">{pack.description}</p>
 
-                        <div className="pt-2 border-t border-[#362B45] space-y-1.5">
-                          <p className="text-[11px] font-semibold text-[#A69AAF]">Disclosed Drop Odds (100%)</p>
+                        <div className="pt-2 border-t border-[#1E3A63] space-y-1.5">
+                          <p className="text-[11px] font-semibold text-[#94A8C7]">Disclosed Drop Odds (100%)</p>
                           <div className="grid grid-cols-2 gap-1 text-[11px] font-mono tabular-nums">
                             {(['Common', 'Rare', 'Epic', 'Legendary', 'Mythic'] as CollectibleCardRarity[]).map(r => (
                               <div key={r} className="flex items-center justify-between pr-2">
                                 <span className={RARITY_COLORS[r]}>{r}</span>
-                                <span className="text-[#F2EDF7]">{pack.dropRates[r]}%</span>
+                                <span className="text-[#F2F7FF]">{pack.dropRates[r]}%</span>
                               </div>
                             ))}
                           </div>
@@ -480,10 +480,10 @@ export const CollectibleCardsView: React.FC = () => {
                 <RpgStaggerItem key={ach.id}>
                   <div className="lq-card lq-card-interactive rounded-2xl p-5 flex items-center justify-between gap-4 h-full">
                     <div className="space-y-1">
-                      <h4 className="font-['Cinzel'] font-bold text-sm text-[#F2EDF7]">{ach.title}</h4>
-                      <p className="text-xs text-[#A69AAF]">{ach.description}</p>
-                      <p className="text-xs text-[#E8C777] font-mono tabular-nums pt-1">
-                        Progress: {Math.min(currentCount, ach.requiredUniqueCards)} / {ach.requiredUniqueCards} · +{ach.rewardGold} Gold · <span className="text-[#9A72CC]">+{ach.rewardFragments} Fragments</span>
+                      <h4 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF]">{ach.title}</h4>
+                      <p className="text-xs text-[#94A8C7]">{ach.description}</p>
+                      <p className="text-xs text-[#38D9F5] font-mono tabular-nums pt-1">
+                        Progress: {Math.min(currentCount, ach.requiredUniqueCards)} / {ach.requiredUniqueCards} · <span className="text-[#FBBF24]">+{ach.rewardGold} Gold</span> · <span className="text-[#38D9F5]">+{ach.rewardFragments} Fragments</span>
                       </p>
                     </div>
                     <button
@@ -492,7 +492,7 @@ export const CollectibleCardsView: React.FC = () => {
                       onClick={() => void handleClaimAchievement(ach.id)}
                       className={`lq-btn px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 cursor-pointer ${
                         claimed
-                          ? 'bg-[#49B88A]/15 border border-[#49B88A]/45 text-[#49B88A]'
+                          ? 'bg-[#10B981]/15 border border-[#10B981]/45 text-[#10B981]'
                           : eligible
                           ? 'lq-btn-gold font-bold'
                           : 'lq-btn-secondary opacity-50'
@@ -529,20 +529,20 @@ export const CollectibleCardsView: React.FC = () => {
                 type="button"
                 onClick={() => setInspectedCard(null)}
                 aria-label="Close card preview"
-                className="text-[#A69AAF] hover:text-[#F2EDF7] cursor-pointer"
+                className="text-[#94A8C7] hover:text-[#F2F7FF] cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
             <CollectibleCardArtwork card={inspectedCard} size="lg" />
             <div>
-              <h3 className="font-['Cinzel'] font-black text-xl text-[#F2EDF7]">{inspectedCard.name}</h3>
-              <p className="text-xs text-[#D6A84B] mt-0.5">{inspectedCard.subtitle}</p>
-              <p className="text-xs text-[#A69AAF] mt-3 leading-relaxed">{inspectedCard.lore}</p>
+              <h3 className="font-['Cinzel'] font-black text-xl text-[#F2F7FF]">{inspectedCard.name}</h3>
+              <p className="text-xs text-[#38D9F5] mt-0.5">{inspectedCard.subtitle}</p>
+              <p className="text-xs text-[#94A8C7] mt-3 leading-relaxed">{inspectedCard.lore}</p>
             </div>
-            <div className="pt-3 border-t border-[#362B45] flex items-center justify-between text-xs">
-              <span className="text-[#A69AAF]">{inspectedCard.flavorStatLabel}</span>
-              <span className="font-bold text-[#E8C777]">{inspectedCard.flavorStatValue}</span>
+            <div className="pt-3 border-t border-[#1E3A63] flex items-center justify-between text-xs">
+              <span className="text-[#94A8C7]">{inspectedCard.flavorStatLabel}</span>
+              <span className="font-bold text-[#38D9F5]">{inspectedCard.flavorStatValue}</span>
             </div>
           </div>
         )}
@@ -562,7 +562,7 @@ export const CollectibleCardsView: React.FC = () => {
             className="lq-card-gold rounded-2xl p-6 space-y-5"
           >
             <div className="flex items-center justify-between">
-              <h3 className="font-['Cinzel'] font-black text-lg text-[#E8C777]">
+              <h3 className="font-['Cinzel'] font-black text-lg text-[#38D9F5]">
                 Cards Drawn From Pack
               </h3>
               <button
@@ -584,7 +584,7 @@ export const CollectibleCardsView: React.FC = () => {
                     <p className={`text-[11px] font-bold ${RARITY_COLORS[d.card.rarity]}`}>
                       {d.card.rarity} · {d.isNew ? 'New Card' : `+${d.fragmentsConverted} Fragments`}
                     </p>
-                    <h4 className="font-['Cinzel'] font-bold text-xs text-[#F2EDF7] mt-0.5">
+                    <h4 className="font-['Cinzel'] font-bold text-xs text-[#F2F7FF] mt-0.5">
                       {d.card.name}
                     </h4>
                   </div>

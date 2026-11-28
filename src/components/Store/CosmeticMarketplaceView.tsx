@@ -118,33 +118,33 @@ export const CosmeticMarketplaceView: React.FC = () => {
       {/* Integrity & Currencies Header */}
       <div className="lq-card rounded-2xl p-5 sm:p-6 flex flex-col xl:flex-row xl:items-center justify-between gap-5">
         <div className="space-y-1.5">
-          <div className="flex flex-wrap items-center gap-2 text-xs text-[#D6A84B] font-semibold">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-[#38D9F5] font-semibold">
             <ShieldCheck className="w-4 h-4 shrink-0" />
             <span>Zero Pay-to-Win Guarantee · Strictly Cosmetic &amp; Card Packs</span>
-            <span className="text-[#766D82]" aria-hidden="true">·</span>
-            <span className="text-[#E8C777] flex items-center gap-1 tabular-nums">
+            <span className="text-[#647A9E]" aria-hidden="true">·</span>
+            <span className="text-[#38D9F5] flex items-center gap-1 tabular-nums">
               <Clock className="w-3.5 h-3.5" />
               {rotationLabel}
             </span>
           </div>
-          <h2 className="text-2xl font-black font-['Cinzel'] text-[#F2EDF7]">
+          <h2 className="text-2xl font-black font-['Cinzel'] text-[#F2F7FF]">
             Cosmetic Marketplace
           </h2>
-          <p className="text-xs text-[#A69AAF] max-w-2xl">
+          <p className="text-xs text-[#94A8C7] max-w-2xl">
             Spend earned Gold or Cosmetic Fragments on bespoke frames, banners, auras, outfits, titles, and collectible card packs.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3 shrink-0">
           <div className="lq-surface-gold rounded-xl px-4 py-2 text-xs tabular-nums">
-            <span className="text-[#A69AAF] block text-[11px]">Gold Wallet</span>
-            <span className="font-mono font-bold text-[#E8C777] text-sm">
+            <span className="text-[#94A8C7] block text-[11px]">Gold Wallet</span>
+            <span className="font-mono font-bold text-[#FBBF24] text-sm">
               <AnimatedCounter value={goldBalance} />
             </span>
           </div>
           <div className="lq-surface rounded-xl px-4 py-2 text-xs tabular-nums">
-            <span className="text-[#A69AAF] block text-[11px]">Cosmetic Fragments</span>
-            <span className="font-mono font-bold text-[#9A72CC] text-sm">
+            <span className="text-[#94A8C7] block text-[11px]">Cosmetic Fragments</span>
+            <span className="font-mono font-bold text-[#38D9F5] text-sm">
               <AnimatedCounter value={fragmentBalance} />
             </span>
           </div>
@@ -152,9 +152,9 @@ export const CosmeticMarketplaceView: React.FC = () => {
             type="button"
             disabled={busyId === 'rm-check'}
             onClick={() => void handleRmCheckoutAttempt()}
-            className="lq-btn lq-btn-secondary px-3.5 py-2.5 rounded-xl text-xs text-[#A69AAF] hover:text-[#F2EDF7] flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+            className="lq-btn lq-btn-secondary px-3.5 py-2.5 rounded-xl text-xs text-[#94A8C7] hover:text-[#F2F7FF] flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
           >
-            <Lock className="w-3.5 h-3.5 text-[#D6A84B]" />
+            <Lock className="w-3.5 h-3.5 text-[#38D9F5]" />
             Payment Checkout Disabled
           </button>
         </div>
@@ -164,10 +164,10 @@ export const CosmeticMarketplaceView: React.FC = () => {
         <div
           className={`rounded-xl px-4 py-3 text-xs border ${
             notice.type === 'success'
-              ? 'bg-[#49B88A]/10 border-[#49B88A]/45 text-[#49B88A]'
+              ? 'bg-[#10B981]/10 border-[#10B981]/45 text-[#10B981]'
               : notice.type === 'info'
-              ? 'bg-[#D6A84B]/10 border-[#D6A84B]/45 text-[#E8C777]'
-              : 'bg-[#D65C66]/12 border-[#D65C66]/45 text-[#D65C66]'
+              ? 'bg-[#00D9FF]/10 border-[#00D9FF]/45 text-[#38D9F5]'
+              : 'bg-[#F43F5E]/12 border-[#F43F5E]/45 text-[#F43F5E]'
           }`}
         >
           {notice.text}
@@ -177,8 +177,8 @@ export const CosmeticMarketplaceView: React.FC = () => {
       {/* Curated Citadel Spotlight */}
       {featuredItems.length > 0 && (
         <div className="space-y-3">
-          <h3 className="font-['Cinzel'] font-bold text-sm uppercase tracking-wider text-[#E8C777] flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#D6A84B]" />
+          <h3 className="font-['Cinzel'] font-bold text-sm uppercase tracking-wider text-[#38D9F5] flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-[#38D9F5]" />
             Citadel Rotating Spotlight
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -190,16 +190,16 @@ export const CosmeticMarketplaceView: React.FC = () => {
                   key={`spot-${item.id}`}
                   className="lq-card lq-card-interactive rounded-2xl p-5 flex flex-col justify-between gap-4"
                   style={{
-                    background: `radial-gradient(circle at top right, ${item.accentHex}1e, transparent 60%), linear-gradient(165deg, #21152F 0%, #171220 100%)`,
+                    background: `radial-gradient(circle at top right, ${item.accentHex}1e, transparent 60%), linear-gradient(165deg, #102440 0%, #0A1930 100%)`,
                   }}
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-[#E8C777] font-semibold">{item.featuredCollectionTag || 'Featured'}</span>
-                      <span className="text-[#A69AAF]">{item.rarity}</span>
+                      <span className="text-[#38D9F5] font-semibold">{item.featuredCollectionTag || 'Featured'}</span>
+                      <span className="text-[#94A8C7]">{item.rarity}</span>
                     </div>
-                    <h4 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7]">{item.name}</h4>
-                    <p className="text-xs text-[#A69AAF]">{item.description}</p>
+                    <h4 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF]">{item.name}</h4>
+                    <p className="text-xs text-[#94A8C7]">{item.description}</p>
                   </div>
                   <button
                     type="button"
@@ -207,7 +207,7 @@ export const CosmeticMarketplaceView: React.FC = () => {
                     onClick={() => setConfirmItem(item)}
                     className={`lq-btn w-full py-2 px-3 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer ${
                       owned
-                        ? 'bg-[#49B88A]/15 border border-[#49B88A]/45 text-[#49B88A]'
+                        ? 'bg-[#10B981]/15 border border-[#10B981]/45 text-[#10B981]'
                         : 'lq-btn-gold'
                     }`}
                   >
@@ -231,7 +231,7 @@ export const CosmeticMarketplaceView: React.FC = () => {
               type="button"
               onClick={() => setCategory(t.id)}
               className={`lq-btn px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 cursor-pointer ${
-                category === t.id ? 'lq-btn-primary' : 'lq-btn-secondary text-[#A69AAF]'
+                category === t.id ? 'lq-btn-primary' : 'lq-btn-secondary text-[#94A8C7]'
               }`}
             >
               {t.label}
@@ -239,12 +239,12 @@ export const CosmeticMarketplaceView: React.FC = () => {
           ))}
         </div>
 
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-[#100D18] border border-[#362B45]">
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-[#061225] border border-[#1E3A63]">
           <button
             type="button"
             onClick={() => setCurrency('gold')}
             className={`lq-btn px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer ${
-              currency === 'gold' ? 'lq-btn-gold font-bold' : 'text-[#A69AAF] hover:text-[#F2EDF7]'
+              currency === 'gold' ? 'lq-btn-gold font-bold' : 'text-[#94A8C7] hover:text-[#F2F7FF]'
             }`}
           >
             <Coins className="w-3.5 h-3.5" />
@@ -254,7 +254,7 @@ export const CosmeticMarketplaceView: React.FC = () => {
             type="button"
             onClick={() => setCurrency('fragments')}
             className={`lq-btn px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer ${
-              currency === 'fragments' ? 'lq-btn-primary' : 'text-[#A69AAF] hover:text-[#F2EDF7]'
+              currency === 'fragments' ? 'lq-btn-primary' : 'text-[#94A8C7] hover:text-[#F2F7FF]'
             }`}
           >
             <Sparkles className="w-3.5 h-3.5" />
@@ -276,12 +276,12 @@ export const CosmeticMarketplaceView: React.FC = () => {
               <div className="lq-card lq-card-interactive rounded-2xl p-5 h-full flex flex-col justify-between gap-4">
                 <div className="space-y-3">
                   <div
-                    className="h-14 rounded-xl border border-[#F2EDF7]/10 flex items-center justify-between px-4"
+                    className="h-14 rounded-xl border border-[#F2F7FF]/10 flex items-center justify-between px-4"
                     style={{
-                      background: `linear-gradient(135deg, ${item.primaryHex}, #100D18)`,
+                      background: `linear-gradient(135deg, ${item.primaryHex}, #061225)`,
                     }}
                   >
-                    <span className="text-xs font-semibold capitalize text-[#F2EDF7]/85">
+                    <span className="text-xs font-semibold capitalize text-[#F2F7FF]/85">
                       {item.category}
                     </span>
                     <span className="text-xs font-bold" style={{ color: item.accentHex }}>
@@ -291,22 +291,22 @@ export const CosmeticMarketplaceView: React.FC = () => {
 
                   <div>
                     <div className="flex items-start justify-between gap-2">
-                      <h4 className="font-['Cinzel'] font-bold text-sm text-[#F2EDF7]">{item.name}</h4>
+                      <h4 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF]">{item.name}</h4>
                       <button
                         type="button"
                         onClick={() => void toggleMarketplaceWishlist(item.id)}
                         aria-label={`Wishlist ${item.name}`}
                         className={`lq-btn p-1.5 rounded-lg border shrink-0 cursor-pointer ${
                           wishlisted
-                            ? 'bg-[#D65C66]/15 border-[#D65C66]/45 text-[#D65C66]'
-                            : 'lq-btn-secondary text-[#A69AAF]'
+                            ? 'bg-[#F43F5E]/15 border-[#F43F5E]/45 text-[#F43F5E]'
+                            : 'lq-btn-secondary text-[#94A8C7]'
                         }`}
                       >
                         <Heart className="w-3.5 h-3.5" />
                       </button>
                     </div>
-                    <p className="text-xs text-[#A69AAF] mt-1">{item.description}</p>
-                    <p className="text-[11px] text-[#766D82] mt-2">
+                    <p className="text-xs text-[#94A8C7] mt-1">{item.description}</p>
+                    <p className="text-[11px] text-[#647A9E] mt-2">
                       Ref Tier: {item.realMoneyUsdDisplay}
                     </p>
                   </div>
@@ -317,7 +317,7 @@ export const CosmeticMarketplaceView: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setActiveTab('character')}
-                      className="lq-btn w-full py-2 px-3 rounded-xl bg-[#49B88A]/15 border border-[#49B88A]/45 text-xs font-semibold text-[#49B88A] flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="lq-btn w-full py-2 px-3 rounded-xl bg-[#10B981]/15 border border-[#10B981]/45 text-xs font-semibold text-[#10B981] flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Check className="w-3.5 h-3.5" />
                       Owned · View Profile
@@ -344,15 +344,15 @@ export const CosmeticMarketplaceView: React.FC = () => {
       {/* Order History */}
       {marketplaceState && marketplaceState.orders.length > 0 && (
         <RpgScrollReveal className="lq-card rounded-2xl p-5 space-y-3">
-          <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2EDF7] flex items-center gap-2">
-            <History className="w-4 h-4 text-[#D6A84B]" />
+          <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF] flex items-center gap-2">
+            <History className="w-4 h-4 text-[#38D9F5]" />
             Marketplace Order Ledger
           </h3>
-          <div className="divide-y divide-[#362B45] text-xs">
+          <div className="divide-y divide-[#1E3A63] text-xs">
             {marketplaceState.orders.slice(0, 8).map(ord => (
               <div key={ord.id} className="py-2 flex items-center justify-between gap-2">
-                <span className="text-[#F2EDF7]">{ord.itemName}</span>
-                <span className="font-mono text-[#E8C777] tabular-nums">
+                <span className="text-[#F2F7FF]">{ord.itemName}</span>
+                <span className={`font-mono tabular-nums ${ord.currency === 'gold' ? 'text-[#FBBF24]' : 'text-[#38D9F5]'}`}>
                   -{ord.pricePaid} {ord.currency} · {new Date(ord.createdAt).toLocaleDateString()}
                 </span>
               </div>
@@ -375,23 +375,23 @@ export const CosmeticMarketplaceView: React.FC = () => {
             className="lq-card-gold rounded-2xl p-6 space-y-4"
           >
             <div className="flex items-center justify-between">
-              <h3 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7] flex items-center gap-2">
-                <ShoppingBag className="w-4 h-4 text-[#D6A84B]" />
+              <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF] flex items-center gap-2">
+                <ShoppingBag className="w-4 h-4 text-[#38D9F5]" />
                 Confirm Cosmetic Acquisition
               </h3>
               <button
                 type="button"
                 onClick={() => setConfirmItem(null)}
                 aria-label="Close confirmation"
-                className="text-[#A69AAF] hover:text-[#F2EDF7] cursor-pointer"
+                className="text-[#94A8C7] hover:text-[#F2F7FF] cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
             <div className="lq-surface rounded-xl p-4 space-y-1">
-              <p className="font-['Cinzel'] font-bold text-sm text-[#E8C777]">{confirmItem.name}</p>
-              <p className="text-xs text-[#A69AAF]">{confirmItem.description}</p>
-              <p className="text-xs font-mono text-[#F2EDF7] pt-2 tabular-nums">
+              <p className="font-['Cinzel'] font-bold text-sm text-[#38D9F5]">{confirmItem.name}</p>
+              <p className="text-xs text-[#94A8C7]">{confirmItem.description}</p>
+              <p className="text-xs font-mono text-[#F2F7FF] pt-2 tabular-nums">
                 Cost: {currency === 'gold' ? confirmItem.priceGold : confirmItem.priceFragments}{' '}
                 {currency === 'gold' ? 'Gold' : 'Cosmetic Fragments'}
               </p>

@@ -178,14 +178,14 @@ const ConfidenceBadge: React.FC<{ confidence: number; level: 'low' | 'medium' | 
 }) => {
   const tone =
     level === 'high'
-      ? 'text-[#49B88A]'
+      ? 'text-[#10B981]'
       : level === 'medium'
-      ? 'text-[#E8C777]'
-      : 'text-[#D65C66]';
+      ? 'text-[#F59E0B]'
+      : 'text-[#F43F5E]';
   return (
     <span className={`inline-flex items-center gap-1.5 text-xs font-mono font-semibold tabular-nums ${tone}`}>
       <span>Confidence: {confidence}%</span>
-      <span aria-hidden="true" className="text-[#766D82]">·</span>
+      <span aria-hidden="true" className="text-[#647A9E]">·</span>
       <span className="capitalize font-sans">{level}</span>
     </span>
   );
@@ -441,7 +441,7 @@ export const AetherVisionView: React.FC = () => {
         particleCount: 75,
         spread: 65,
         origin: { y: 0.6 },
-        colors: ['#49B88A', '#D6A84B', '#9A72CC', '#F2EDF7'],
+        colors: ['#10B981', '#F59E0B', '#38D9F5', '#F2F7FF'],
       });
     }
 
@@ -548,14 +548,14 @@ export const AetherVisionView: React.FC = () => {
     if (!lms || lms.length < 29) return;
 
     const strokeColor = output.cameraUnstable
-      ? '#D65C66'
+      ? '#F43F5E'
       : output.phase === 'PEAK'
-      ? '#49B88A'
+      ? '#10B981'
       : output.confidenceLevel === 'high'
-      ? '#E8C777'
+      ? '#00D9FF'
       : output.confidenceLevel === 'medium'
-      ? '#D6A84B'
-      : '#9A72CC';
+      ? '#F59E0B'
+      : '#38D9F5';
 
     ctx.save();
     ctx.lineCap = 'round';
@@ -601,7 +601,7 @@ export const AetherVisionView: React.FC = () => {
       const y = lm.y * height;
       ctx.beginPath();
       ctx.arc(x, y, jointRadius, 0, Math.PI * 2);
-      ctx.fillStyle = '#100D18';
+      ctx.fillStyle = '#061225';
       ctx.fill();
       ctx.lineWidth = 2;
       ctx.strokeStyle = strokeColor;
@@ -641,7 +641,7 @@ export const AetherVisionView: React.FC = () => {
             ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
             ctx.restore();
 
-            ctx.fillStyle = 'rgba(16, 13, 24, 0.18)';
+            ctx.fillStyle = 'rgba(6, 18, 37, 0.18)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             // Process new video frames through MediaPipe PoseLandmarker + AetherMotionEngine
@@ -725,16 +725,16 @@ export const AetherVisionView: React.FC = () => {
               Math.round((lastOutput.motionIntensity / 100) * (canvas.width - 32))
             );
             ctx.fillStyle = lastOutput.cameraUnstable
-              ? 'rgba(214, 92, 102, 0.85)'
+              ? 'rgba(244, 63, 94, 0.85)'
               : lastOutput.confidenceLevel === 'high'
-              ? 'rgba(73, 184, 138, 0.85)'
-              : 'rgba(214, 168, 75, 0.72)';
+              ? 'rgba(16, 185, 129, 0.85)'
+              : 'rgba(0, 217, 255, 0.75)';
             ctx.fillRect(16, canvas.height - 14, Math.max(8, barW), 6);
           } else if (sandbox) {
             // Explicit Sandbox Demonstration Mode (clearly labeled, never counts as AI verified)
             canvas.width = 640;
             canvas.height = 360;
-            ctx.fillStyle = '#100D18';
+            ctx.fillStyle = '#061225';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             phaseRef.current += 0.025 * directionRef.current;
@@ -750,7 +750,7 @@ export const AetherVisionView: React.FC = () => {
             const cy = canvas.height / 2;
             const dip = activeDisplayExerciseId === 'squat' || activeDisplayExerciseId === 'lunge' ? t * 48 : 0;
 
-            ctx.strokeStyle = '#E8C777';
+            ctx.strokeStyle = '#38D9F5';
             ctx.lineWidth = 3;
             ctx.beginPath();
             ctx.arc(cx, cy - 80 + dip, 18, 0, Math.PI * 2);
@@ -764,7 +764,7 @@ export const AetherVisionView: React.FC = () => {
             ctx.lineTo(cx + 28, cy + 95);
             ctx.stroke();
 
-            ctx.fillStyle = '#A69AAF';
+            ctx.fillStyle = '#94A8C7';
             ctx.font = '12px sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText(
@@ -1109,7 +1109,7 @@ export const AetherVisionView: React.FC = () => {
         particleCount: 65,
         spread: 60,
         origin: { y: 0.6 },
-        colors: ['#49B88A', '#D6A84B', '#9A72CC', '#E8C777'],
+        colors: ['#10B981', '#F59E0B', '#38D9F5', '#FBBF24'],
       });
     }
 
@@ -1130,32 +1130,32 @@ export const AetherVisionView: React.FC = () => {
       <FeatureBanner themeId="fitness">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="space-y-1.5">
-            <div className="flex flex-wrap items-center gap-2 text-xs text-[#A69AAF]">
-              <span className="font-['Cinzel'] font-semibold text-[#49B88A] uppercase tracking-widest">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-[#94A8C7]">
+              <span className="font-['Cinzel'] font-semibold text-[#10B981] uppercase tracking-widest">
                 AI Vision Sanctuary
               </span>
               <span aria-hidden="true">·</span>
               <span>Honest Recognition · Verified Rewards</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold font-['Cinzel'] text-[#F2EDF7]">
+            <h1 className="text-2xl sm:text-3xl font-bold font-['Cinzel'] text-[#F2F7FF]">
               Aether Vision — Workout &amp; Meal AI
             </h1>
-            <p className="text-xs sm:text-sm text-[#A69AAF] max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#94A8C7] max-w-2xl leading-relaxed">
               Analyze uploaded workout images/videos, track real movement via camera, or break down
               meal photographs with transparent nutrient estimates and WHO-aligned guidance.
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5 bg-[#100D18] p-3.5 rounded-xl border border-[#49B88A]/35 text-xs max-w-sm">
-            <Shield className="w-4 h-4 text-[#49B88A] shrink-0" />
-            <span className="text-[#A69AAF]">
+          <div className="flex items-center gap-2.5 bg-[#061225] p-3.5 rounded-xl border border-[#10B981]/35 text-xs max-w-sm">
+            <Shield className="w-4 h-4 text-[#10B981] shrink-0" />
+            <span className="text-[#94A8C7]">
               All earned Player XP and Gold are verified and safely credited to your hero.
             </span>
           </div>
         </div>
 
         {/* Mode Switcher */}
-        <div className="mt-5 pt-4 border-t border-[#362B45]">
+        <div className="mt-5 pt-4 border-t border-[#1E3A63]">
           <FeatureTabBar
             themeId="fitness"
             layoutId="aether-vision-mode-pill"
@@ -1183,13 +1183,13 @@ export const AetherVisionView: React.FC = () => {
             {/* Left 5 Cols: Upload & Hint */}
             <div className="lg:col-span-5 space-y-4">
               <div className="lq-card p-5 space-y-4">
-                <h2 className="font-['Cinzel'] font-bold text-sm text-[#F2EDF7] flex items-center gap-2">
-                  <Upload className="w-4 h-4 text-[#49B88A]" />
+                <h2 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF] flex items-center gap-2">
+                  <Upload className="w-4 h-4 text-[#10B981]" />
                   <span>Upload Workout Image or Video</span>
                 </h2>
 
                 <div>
-                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#49B88A] mb-1.5">
+                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#10B981] mb-1.5">
                     Optional Activity Hint
                   </label>
                   <select
@@ -1203,25 +1203,25 @@ export const AetherVisionView: React.FC = () => {
                       </option>
                     ))}
                   </select>
-                  <p className="text-[11px] text-[#A69AAF] mt-1.5">
+                  <p className="text-[11px] text-[#94A8C7] mt-1.5">
                     AI Vision checks actual visual evidence and distinguishes similar movements honestly.
                   </p>
                 </div>
 
-                <label className="block border-2 border-dashed border-[#49B88A]/40 hover:border-[#49B88A] rounded-2xl p-6 text-center cursor-pointer bg-[#100D18] transition-colors">
+                <label className="block border-2 border-dashed border-[#10B981]/40 hover:border-[#10B981] rounded-2xl p-6 text-center cursor-pointer bg-[#061225] transition-colors">
                   <input
                     type="file"
                     accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime"
                     onChange={handleWorkoutFileSelect}
                     className="hidden"
                   />
-                  <div className="w-12 h-12 rounded-xl bg-[#171220] border border-[#49B88A]/40 flex items-center justify-center mx-auto mb-3 text-[#49B88A]">
+                  <div className="w-12 h-12 rounded-xl bg-[#0A1930] border border-[#10B981]/40 flex items-center justify-center mx-auto mb-3 text-[#10B981]">
                     <ImageIcon className="w-6 h-6" />
                   </div>
-                  <p className="text-xs font-bold text-[#F2EDF7]">
+                  <p className="text-xs font-bold text-[#F2F7FF]">
                     Choose a Workout Photo or Video Clip
                   </p>
-                  <p className="text-[11px] text-[#A69AAF] mt-1">
+                  <p className="text-[11px] text-[#94A8C7] mt-1">
                     Videos enable repetition cycle checks; single photos assess exercise &amp; form
                     only (max 16 MB).
                   </p>
@@ -1229,7 +1229,7 @@ export const AetherVisionView: React.FC = () => {
 
                 {workoutMediaPreview && (
                   <div className="space-y-3">
-                    <div className="rounded-xl overflow-hidden border border-[#362B45] bg-[#100D18] aspect-video flex items-center justify-center">
+                    <div className="rounded-xl overflow-hidden border border-[#1E3A63] bg-[#061225] aspect-video flex items-center justify-center">
                       {workoutMediaKind === 'video' ? (
                         <video
                           src={workoutMediaPreview}
@@ -1262,20 +1262,20 @@ export const AetherVisionView: React.FC = () => {
                 )}
 
                 {workoutVisionError && (
-                  <div className="p-3.5 rounded-xl bg-[#D65C66]/12 border border-[#D65C66]/45 text-xs text-[#F2EDF7] flex items-start gap-2.5">
-                    <AlertTriangle className="w-4 h-4 text-[#D65C66] shrink-0 mt-0.5" />
+                  <div className="p-3.5 rounded-xl bg-[#F43F5E]/12 border border-[#F43F5E]/45 text-xs text-[#F2F7FF] flex items-start gap-2.5">
+                    <AlertTriangle className="w-4 h-4 text-[#F43F5E] shrink-0 mt-0.5" />
                     <span>{workoutVisionError}</span>
                   </div>
                 )}
               </div>
 
               {/* Age-Appropriate WHO Physical Activity Guidance */}
-              <div className="lq-card p-5 space-y-2 border-[#49B88A]/35">
-                <div className="flex items-center gap-2 text-xs font-bold text-[#49B88A]">
+              <div className="lq-card p-5 space-y-2 border-[#10B981]/35">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#10B981]">
                   <Activity className="w-4 h-4" />
                   <span>{activityGuide.headline}</span>
                 </div>
-                <p className="text-xs text-[#A69AAF] leading-relaxed">
+                <p className="text-xs text-[#94A8C7] leading-relaxed">
                   {activityGuide.recommendation}
                 </p>
               </div>
@@ -1285,11 +1285,11 @@ export const AetherVisionView: React.FC = () => {
             <div className="lg:col-span-7 space-y-4">
               {!workoutAnalysis ? (
                 <div className="lq-card p-8 text-center space-y-3 h-full flex flex-col items-center justify-center">
-                  <Sparkles className="w-10 h-10 text-[#49B88A]" />
-                  <h3 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7]">
+                  <Sparkles className="w-10 h-10 text-[#10B981]" />
+                  <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF]">
                     Ready for Movement Analysis
                   </h3>
-                  <p className="text-xs text-[#A69AAF] max-w-md leading-relaxed">
+                  <p className="text-xs text-[#94A8C7] max-w-md leading-relaxed">
                     Upload a photo or short workout video on the left. Aether Vision will
                     distinguish similar exercises, explain confidence, note any counting limitations,
                     and let you review and correct details before claiming rewards.
@@ -1299,11 +1299,11 @@ export const AetherVisionView: React.FC = () => {
                 <div className="lq-card-gold p-6 space-y-5">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <span className="text-[11px] uppercase tracking-widest text-[#49B88A] font-semibold block">
+                      <span className="text-[11px] uppercase tracking-widest text-[#10B981] font-semibold block">
                         {workoutAnalysis.movementCategory} ·{' '}
                         {workoutAnalysis.mediaKind.toUpperCase()}
                       </span>
-                      <h3 className="font-['Cinzel'] font-bold text-xl text-[#F2EDF7] mt-0.5">
+                      <h3 className="font-['Cinzel'] font-bold text-xl text-[#F2F7FF] mt-0.5">
                         {workoutAnalysis.identified
                           ? workoutAnalysis.exerciseName
                           : 'Needs Your Confirmation'}
@@ -1316,23 +1316,23 @@ export const AetherVisionView: React.FC = () => {
                   </div>
 
                   {/* Counting Limitation & Honesty Notice */}
-                  <div className="p-3.5 rounded-xl bg-[#100D18] border border-[#D6A84B]/45 text-xs text-[#F2EDF7] flex items-start gap-2.5">
-                    <Info className="w-4 h-4 text-[#E8C777] shrink-0 mt-0.5" />
+                  <div className="p-3.5 rounded-xl bg-[#061225] border border-[#38D9F5]/45 text-xs text-[#F2F7FF] flex items-start gap-2.5">
+                    <Info className="w-4 h-4 text-[#38D9F5] shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-semibold text-[#E8C777]">
+                      <p className="font-semibold text-[#38D9F5]">
                         {workoutAnalysis.repsSupported
                           ? `Estimated ${workoutAnalysis.estimatedReps} reps (${workoutAnalysis.estimatedSets} set${workoutAnalysis.estimatedSets > 1 ? 's' : ''}) — verify below`
                           : 'Repetitions Not Auto-Invented'}
                       </p>
-                      <p className="text-[#A69AAF] mt-0.5 leading-relaxed">
+                      <p className="text-[#94A8C7] mt-0.5 leading-relaxed">
                         {workoutAnalysis.countingLimitation}
                       </p>
                     </div>
                   </div>
 
                   {workoutAnalysis.similarExerciseDistinction && (
-                    <div className="p-3.5 rounded-xl bg-[#100D18] border border-[#362B45] text-xs text-[#A69AAF]">
-                      <span className="font-semibold text-[#9A72CC] block mb-1">
+                    <div className="p-3.5 rounded-xl bg-[#061225] border border-[#1E3A63] text-xs text-[#94A8C7]">
+                      <span className="font-semibold text-[#38D9F5] block mb-1">
                         Movement Distinction
                       </span>
                       {workoutAnalysis.similarExerciseDistinction}
@@ -1340,19 +1340,19 @@ export const AetherVisionView: React.FC = () => {
                   )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="p-3.5 rounded-xl bg-[#100D18] border border-[#362B45] text-xs space-y-1.5">
-                      <span className="font-semibold text-[#E8C777] block">Visual Observations</span>
-                      <ul className="space-y-1 text-[#A69AAF]">
+                    <div className="p-3.5 rounded-xl bg-[#061225] border border-[#1E3A63] text-xs space-y-1.5">
+                      <span className="font-semibold text-[#38D9F5] block">Visual Observations</span>
+                      <ul className="space-y-1 text-[#94A8C7]">
                         {workoutAnalysis.observations.map((obs, i) => (
                           <li key={i}>• {obs}</li>
                         ))}
                       </ul>
                     </div>
-                    <div className="p-3.5 rounded-xl bg-[#100D18] border border-[#49B88A]/30 text-xs space-y-1.5">
-                      <span className="font-semibold text-[#49B88A] block">
+                    <div className="p-3.5 rounded-xl bg-[#061225] border border-[#10B981]/30 text-xs space-y-1.5">
+                      <span className="font-semibold text-[#10B981] block">
                         Form &amp; Safety Notes
                       </span>
-                      <ul className="space-y-1 text-[#A69AAF]">
+                      <ul className="space-y-1 text-[#94A8C7]">
                         {workoutAnalysis.safetyAndFormNotes.map((note, i) => (
                           <li key={i}>• {note}</li>
                         ))}
@@ -1361,25 +1361,25 @@ export const AetherVisionView: React.FC = () => {
                   </div>
 
                   {workoutAnalysis.ageAppropriateGuidance && (
-                    <div className="p-3.5 rounded-xl bg-[#100D18] border border-[#49B88A]/40 text-xs text-[#F2EDF7]">
-                      <span className="font-semibold text-[#49B88A] block mb-0.5">
+                    <div className="p-3.5 rounded-xl bg-[#061225] border border-[#10B981]/40 text-xs text-[#F2F7FF]">
+                      <span className="font-semibold text-[#10B981] block mb-0.5">
                         {minorUser ? 'Youth Movement Guidance' : 'Physical Activity Guidance'}
                       </span>
-                      <span className="text-[#A69AAF]">
+                      <span className="text-[#94A8C7]">
                         {workoutAnalysis.ageAppropriateGuidance}
                       </span>
                     </div>
                   )}
 
                   {/* User Review & Manual Correction Before Saving */}
-                  <div className="pt-4 border-t border-[#362B45] space-y-4">
-                    <h4 className="font-['Cinzel'] font-bold text-xs uppercase tracking-wider text-[#49B88A]">
+                  <div className="pt-4 border-t border-[#1E3A63] space-y-4">
+                    <h4 className="font-['Cinzel'] font-bold text-xs uppercase tracking-wider text-[#10B981]">
                       Review &amp; Correct Before Claiming Rewards
                     </h4>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                       <div>
-                        <label className="block text-[#A69AAF] font-medium mb-1">
+                        <label className="block text-[#94A8C7] font-medium mb-1">
                           Confirmed Exercise Category
                         </label>
                         <select
@@ -1401,7 +1401,7 @@ export const AetherVisionView: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="block text-[#A69AAF] font-medium mb-1">
+                        <label className="block text-[#94A8C7] font-medium mb-1">
                           Session Title
                         </label>
                         <input
@@ -1413,7 +1413,7 @@ export const AetherVisionView: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="block text-[#A69AAF] font-medium mb-1">
+                        <label className="block text-[#94A8C7] font-medium mb-1">
                           Duration (Minutes)
                         </label>
                         <input
@@ -1429,7 +1429,7 @@ export const AetherVisionView: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="block text-[#A69AAF] font-medium mb-1">
+                        <label className="block text-[#94A8C7] font-medium mb-1">
                           Repetitions{' '}
                           {workoutAnalysis.mediaKind === 'image'
                             ? '(Optional Manual Entry)'
@@ -1447,13 +1447,13 @@ export const AetherVisionView: React.FC = () => {
                     </div>
 
                     {workoutSaveError && (
-                      <div className="p-3 rounded-xl bg-[#D65C66]/12 border border-[#D65C66]/50 text-xs text-[#F2EDF7]">
+                      <div className="p-3 rounded-xl bg-[#F43F5E]/12 border border-[#F43F5E]/50 text-xs text-[#F2F7FF]">
                         {workoutSaveError}
                       </div>
                     )}
 
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <span className="text-[11px] text-[#A69AAF]">
+                      <span className="text-[11px] text-[#94A8C7]">
                         {workoutAnalysis.mediaKind === 'video' &&
                         workoutAnalysis.repsSupported &&
                         confirmReps > 0
@@ -1487,10 +1487,10 @@ export const AetherVisionView: React.FC = () => {
           <div className="space-y-6">
             <div className="lq-card p-4">
               <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                <label className="text-xs font-semibold uppercase tracking-wider text-[#49B88A]">
+                <label className="text-xs font-semibold uppercase tracking-wider text-[#10B981]">
                   Select Exercise Protocol
                 </label>
-                <span className="text-[11px] text-[#A69AAF]">
+                <span className="text-[11px] text-[#94A8C7]">
                   33-point BlazePose Landmark Tracking · Strict Form Thresholds
                 </span>
               </div>
@@ -1504,15 +1504,15 @@ export const AetherVisionView: React.FC = () => {
                   disabled={isCameraActive || isModelLoading}
                   className={`p-3 rounded-xl border text-left transition-all ${
                     selectedCameraProtocol === 'auto'
-                      ? 'bg-[#49B88A]/12 border-[#49B88A] ring-1 ring-[#49B88A]/60'
-                      : 'bg-[#100D18] border-[#362B45] hover:border-[#49B88A]/45 text-[#A69AAF]'
+                      ? 'bg-[#10B981]/12 border-[#10B981] ring-1 ring-[#10B981]/60'
+                      : 'bg-[#061225] border-[#1E3A63] hover:border-[#10B981]/45 text-[#94A8C7]'
                   } ${isCameraActive || isModelLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
                 >
-                  <p className="text-xs font-bold text-[#49B88A] flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-[#49B88A]" />
+                  <p className="text-xs font-bold text-[#10B981] flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-[#10B981]" />
                     <span>Auto-Detect</span>
                   </p>
-                  <p className="text-[10px] text-[#A69AAF] font-mono mt-0.5">
+                  <p className="text-[10px] text-[#94A8C7] font-mono mt-0.5">
                     Multi-Exercise Classifier
                   </p>
                 </button>
@@ -1530,12 +1530,12 @@ export const AetherVisionView: React.FC = () => {
                       disabled={isCameraActive || isModelLoading}
                       className={`p-3 rounded-xl border text-left transition-all ${
                         isSelected
-                          ? 'bg-[#7045A0]/25 border-[#D6A84B]/70 ring-1 ring-[#D6A84B]/40'
-                          : 'bg-[#100D18] border-[#362B45] hover:border-[#9A72CC]/55 text-[#A69AAF]'
+                          ? 'bg-[#1677FF]/25 border-[#00D9FF]/70 ring-1 ring-[#00D9FF]/40'
+                          : 'bg-[#061225] border-[#1E3A63] hover:border-[#38D9F5]/55 text-[#94A8C7]'
                       } ${isCameraActive || isModelLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
                     >
-                      <p className="text-xs font-bold text-[#F2EDF7]">{ex.name}</p>
-                      <p className="text-[10px] text-[#E8C777] font-mono mt-0.5">
+                      <p className="text-xs font-bold text-[#F2F7FF]">{ex.name}</p>
+                      <p className="text-[10px] text-[#38D9F5] font-mono mt-0.5">
                         {ex.id === 'plank' ? 'Isometric Hold Timer' : 'Pose Rep Verification'}
                       </p>
                     </button>
@@ -1546,20 +1546,20 @@ export const AetherVisionView: React.FC = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-4">
-                <div className="relative aspect-video rounded-2xl bg-[#100D18] border-2 border-[#49B88A]/40 overflow-hidden shadow-[0_16px_40px_rgba(5,3,10,0.85)] flex items-center justify-center">
+                <div className="relative aspect-video rounded-2xl bg-[#061225] border-2 border-[#10B981]/40 overflow-hidden shadow-[0_16px_40px_rgba(3,10,24,0.85)] flex items-center justify-center">
                   <video ref={videoRef} playsInline muted className="hidden" />
 
                   {isCameraActive ? (
                     <canvas ref={canvasRef} className="w-full h-full object-cover" />
                   ) : (
                     <div className="text-center p-8 max-w-md">
-                      <div className="w-16 h-16 mx-auto rounded-2xl bg-[#171220] border border-[#49B88A]/45 flex items-center justify-center text-[#49B88A] mb-4">
+                      <div className="w-16 h-16 mx-auto rounded-2xl bg-[#0A1930] border border-[#10B981]/45 flex items-center justify-center text-[#10B981] mb-4">
                         <Camera className="w-8 h-8" />
                       </div>
-                      <h3 className="font-['Cinzel'] font-bold text-lg text-[#F2EDF7] mb-2">
+                      <h3 className="font-['Cinzel'] font-bold text-lg text-[#F2F7FF] mb-2">
                         Pose Landmark Tracker Ready
                       </h3>
-                      <p className="text-xs text-[#A69AAF] leading-relaxed mb-6">
+                      <p className="text-xs text-[#94A8C7] leading-relaxed mb-6">
                         {selectedCameraProtocol === 'auto'
                           ? 'Auto-Detect classifies Squats, Push-ups, Lunges, Jumping Jacks, Planks, High Knees, Bicep Curls, and Shoulder Presses from live joint kinematics.'
                           : currentCameraExercise.instructions}
@@ -1578,14 +1578,14 @@ export const AetherVisionView: React.FC = () => {
                   {isCameraActive && (
                     <>
                       <div className="absolute top-4 left-4 right-4 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
-                        <div className="flex items-center gap-2 bg-[#100D18]/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-[#49B88A]/45 text-xs font-semibold text-[#F2EDF7]">
+                        <div className="flex items-center gap-2 bg-[#061225]/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-[#10B981]/45 text-xs font-semibold text-[#F2F7FF]">
                           <span
                             className={`w-2 h-2 rounded-full ${
                               motionOutput?.cameraUnstable
-                                ? 'bg-[#D65C66]'
+                                ? 'bg-[#F43F5E]'
                                 : motionOutput?.landmarksVisible
-                                ? 'bg-[#49B88A]'
-                                : 'bg-[#D6A84B]'
+                                ? 'bg-[#10B981]'
+                                : 'bg-[#F59E0B]'
                             }`}
                           />
                           <span>
@@ -1606,7 +1606,7 @@ export const AetherVisionView: React.FC = () => {
                               level={motionOutput.confidenceLevel}
                             />
                           )}
-                          <div className="bg-[#100D18]/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-[#D6A84B]/45 text-xs font-mono font-bold text-[#E8C777] tabular-nums">
+                          <div className="bg-[#061225]/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-[#00D9FF]/45 text-xs font-mono font-bold text-[#38D9F5] tabular-nums">
                             {Math.floor(workoutDurationSec / 60)}:
                             {(workoutDurationSec % 60).toString().padStart(2, '0')}
                           </div>
@@ -1614,25 +1614,25 @@ export const AetherVisionView: React.FC = () => {
                       </div>
 
                       <div className="absolute bottom-5 left-4 flex items-end gap-2">
-                        <div className="bg-[#100D18]/90 backdrop-blur-md px-4 py-2 rounded-xl border border-[#49B88A]/60 shadow-lg">
-                          <span className="text-[10px] text-[#49B88A] uppercase tracking-widest font-bold block">
+                        <div className="bg-[#061225]/90 backdrop-blur-md px-4 py-2 rounded-xl border border-[#10B981]/60 shadow-lg">
+                          <span className="text-[10px] text-[#10B981] uppercase tracking-widest font-bold block">
                             {isSandboxDemo
                               ? 'Demo Cycles'
                               : activeDisplayExerciseId === 'plank'
                               ? 'Endurance Units (5s)'
                               : 'Verified Reps'}
                           </span>
-                          <span className="font-mono text-3xl font-bold text-[#F2EDF7] tabular-nums">
+                          <span className="font-mono text-3xl font-bold text-[#F2F7FF] tabular-nums">
                             {repCount}
                           </span>
                         </div>
 
                         {!isSandboxDemo && activeDisplayExerciseId === 'plank' && (
-                          <div className="bg-[#100D18]/90 backdrop-blur-md px-3 py-2 rounded-xl border border-[#D6A84B]/60 shadow-lg">
-                            <span className="text-[10px] text-[#E8C777] uppercase tracking-widest font-bold block">
+                          <div className="bg-[#061225]/90 backdrop-blur-md px-3 py-2 rounded-xl border border-[#00D9FF]/60 shadow-lg">
+                            <span className="text-[10px] text-[#38D9F5] uppercase tracking-widest font-bold block">
                               Aligned Hold
                             </span>
-                            <span className="font-mono text-2xl font-bold text-[#E8C777] tabular-nums">
+                            <span className="font-mono text-2xl font-bold text-[#38D9F5] tabular-nums">
                               {holdSeconds}s
                             </span>
                           </div>
@@ -1643,7 +1643,7 @@ export const AetherVisionView: React.FC = () => {
                         <button
                           type="button"
                           onClick={handleFinishCameraWorkout}
-                          className="lq-btn bg-[#D65C66] hover:bg-[#D65C66]/90 text-[#F2EDF7] px-4 py-2 text-xs shadow-lg"
+                          className="lq-btn bg-[#F43F5E] hover:bg-[#F43F5E]/90 text-[#F2F7FF] px-4 py-2 text-xs shadow-lg"
                         >
                           <CameraOff className="w-4 h-4" />
                           <span>Review &amp; Finish</span>
@@ -1656,14 +1656,14 @@ export const AetherVisionView: React.FC = () => {
                 {isCameraActive && !isSandboxDemo && motionOutput && (
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                     <div className="lq-card px-3 py-2.5">
-                      <span className="text-[10px] uppercase text-[#A69AAF] block">Rep Phase</span>
-                      <span className="font-mono font-bold text-[#E8C777]">{motionOutput.phase}</span>
+                      <span className="text-[10px] uppercase text-[#94A8C7] block">Rep Phase</span>
+                      <span className="font-mono font-bold text-[#38D9F5]">{motionOutput.phase}</span>
                     </div>
                     <div className="lq-card px-3 py-2.5">
-                      <span className="text-[10px] uppercase text-[#A69AAF] block">
+                      <span className="text-[10px] uppercase text-[#94A8C7] block">
                         Knee / Elbow
                       </span>
-                      <span className="font-mono font-bold text-[#F2EDF7] tabular-nums">
+                      <span className="font-mono font-bold text-[#F2F7FF] tabular-nums">
                         {motionOutput.angles.primaryKneeDeg != null
                           ? `${motionOutput.angles.primaryKneeDeg}°`
                           : '—'}{' '}
@@ -1674,18 +1674,18 @@ export const AetherVisionView: React.FC = () => {
                       </span>
                     </div>
                     <div className="lq-card px-3 py-2.5">
-                      <span className="text-[10px] uppercase text-[#A69AAF] block">
+                      <span className="text-[10px] uppercase text-[#94A8C7] block">
                         Motion Intensity
                       </span>
-                      <span className="font-mono font-bold text-[#49B88A] tabular-nums">
+                      <span className="font-mono font-bold text-[#10B981] tabular-nums">
                         {motionScore}%
                       </span>
                     </div>
                     <div className="lq-card px-3 py-2.5">
-                      <span className="text-[10px] uppercase text-[#A69AAF] block">
+                      <span className="text-[10px] uppercase text-[#94A8C7] block">
                         Partial Reps Ignored
                       </span>
-                      <span className="font-mono font-bold text-[#E8C777] tabular-nums">
+                      <span className="font-mono font-bold text-[#38D9F5] tabular-nums">
                         {incompleteRepCount}
                       </span>
                     </div>
@@ -1693,18 +1693,18 @@ export const AetherVisionView: React.FC = () => {
                 )}
 
                 {motionOutput?.protocolMismatch && isCameraActive && !isSandboxDemo && (
-                  <div className="p-3.5 rounded-xl bg-[#100D18] border border-[#D6A84B]/55 text-xs text-[#E8C777] flex items-center gap-2.5">
+                  <div className="p-3.5 rounded-xl bg-[#061225] border border-[#F59E0B]/55 text-xs text-[#FBBF24] flex items-center gap-2.5">
                     <AlertTriangle className="w-4 h-4 shrink-0" />
                     <span>{motionOutput.feedback}</span>
                   </div>
                 )}
 
                 {cameraError && (
-                  <div className="p-4 rounded-xl bg-[#D65C66]/12 border border-[#D65C66]/45 text-xs text-[#F2EDF7] flex items-start gap-3">
-                    <Info className="w-5 h-5 text-[#D65C66] shrink-0 mt-0.5" />
+                  <div className="p-4 rounded-xl bg-[#F43F5E]/12 border border-[#F43F5E]/45 text-xs text-[#F2F7FF] flex items-start gap-3">
+                    <Info className="w-5 h-5 text-[#F43F5E] shrink-0 mt-0.5" />
                     <div>
                       <p className="font-bold">Camera Access Note</p>
-                      <p className="text-[#A69AAF] mt-0.5">{cameraError}</p>
+                      <p className="text-[#94A8C7] mt-0.5">{cameraError}</p>
                       <button
                         type="button"
                         onClick={() => {
@@ -1714,7 +1714,7 @@ export const AetherVisionView: React.FC = () => {
                           startOpticalMotionLoop(true);
                           startTimer();
                         }}
-                        className="mt-2 text-xs font-semibold underline text-[#E8C777] hover:text-[#F2EDF7]"
+                        className="mt-2 text-xs font-semibold underline text-[#38D9F5] hover:text-[#F2F7FF]"
                       >
                         Open Visual Demo Preview (Does NOT grant Vision Bonus XP)
                       </button>
@@ -1723,50 +1723,50 @@ export const AetherVisionView: React.FC = () => {
                 )}
 
                 <div className="lq-card p-4 flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-[#100D18] text-[#49B88A] flex items-center justify-center shrink-0 border border-[#49B88A]/40">
+                  <div className="w-9 h-9 rounded-lg bg-[#061225] text-[#10B981] flex items-center justify-center shrink-0 border border-[#10B981]/40">
                     <Sparkles className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-[10px] uppercase tracking-widest text-[#49B88A] font-bold block">
+                    <span className="text-[10px] uppercase tracking-widest text-[#10B981] font-bold block">
                       Live Biomechanical Feedback
                     </span>
-                    <p className="text-xs text-[#F2EDF7] font-medium mt-0.5">{feedback}</p>
+                    <p className="text-xs text-[#F2F7FF] font-medium mt-0.5">{feedback}</p>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-4">
                 <div className="lq-card-gold p-5 space-y-3 text-xs">
-                  <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2EDF7] flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-[#49B88A]" />
+                  <h3 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF] flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-[#10B981]" />
                     <span>Reward Rules</span>
                   </h3>
-                  <div className="p-3 rounded-xl bg-[#100D18] border border-[#362B45] flex justify-between gap-2">
-                    <span className="text-[#A69AAF]">Vision-Verified Base + Rep XP</span>
-                    <span className="font-mono font-bold text-[#49B88A] tabular-nums">
+                  <div className="p-3 rounded-xl bg-[#061225] border border-[#1E3A63] flex justify-between gap-2">
+                    <span className="text-[#94A8C7]">Vision-Verified Base + Rep XP</span>
+                    <span className="font-mono font-bold text-[#10B981] tabular-nums">
                       max(10, reps) × 4 + 30
                     </span>
                   </div>
-                  <div className="p-3 rounded-xl bg-[#100D18] border border-[#362B45] flex justify-between gap-2">
-                    <span className="text-[#A69AAF]">Gold Earned</span>
-                    <span className="font-mono font-bold text-[#E8C777] tabular-nums">
+                  <div className="p-3 rounded-xl bg-[#061225] border border-[#1E3A63] flex justify-between gap-2">
+                    <span className="text-[#94A8C7]">Gold Earned</span>
+                    <span className="font-mono font-bold text-[#FBBF24] tabular-nums">
                       40 + min(60, reps)
                     </span>
                   </div>
-                  <p className="text-[11px] text-[#A69AAF] leading-relaxed">
+                  <p className="text-[11px] text-[#94A8C7] leading-relaxed">
                     Daily cap: up to 6 rewarded workout sessions per day. Only full range-of-motion
                     reps verified at high pose confidence count.
                   </p>
                 </div>
 
                 <div className="lq-card p-5 space-y-2 text-xs">
-                  <h4 className="font-['Cinzel'] font-bold text-[#F2EDF7]">
+                  <h4 className="font-['Cinzel'] font-bold text-[#F2F7FF]">
                     {currentCameraExercise.name} Form Guide
                   </h4>
-                  <p className="text-[#A69AAF] leading-relaxed">
+                  <p className="text-[#94A8C7] leading-relaxed">
                     {currentCameraExercise.instructions}
                   </p>
-                  <p className="text-[#49B88A] font-semibold pt-1">
+                  <p className="text-[#10B981] font-semibold pt-1">
                     Target: {currentCameraExercise.targetMuscles}
                   </p>
                 </div>
@@ -1783,13 +1783,13 @@ export const AetherVisionView: React.FC = () => {
             {/* Left 5 Cols: Upload Food Photo */}
             <div className="lg:col-span-5 space-y-4">
               <div className="lq-card p-5 space-y-4">
-                <h2 className="font-['Cinzel'] font-bold text-sm text-[#F2EDF7] flex items-center gap-2">
-                  <Utensils className="w-4 h-4 text-[#49B88A]" />
+                <h2 className="font-['Cinzel'] font-bold text-sm text-[#F2F7FF] flex items-center gap-2">
+                  <Utensils className="w-4 h-4 text-[#10B981]" />
                   <span>Upload Meal Photograph</span>
                 </h2>
 
                 <div>
-                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#49B88A] mb-1.5">
+                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#10B981] mb-1.5">
                     Meal Category
                   </label>
                   <div className="grid grid-cols-4 gap-1.5">
@@ -1800,8 +1800,8 @@ export const AetherVisionView: React.FC = () => {
                         onClick={() => setMealType(type)}
                         className={`py-2 text-xs font-medium rounded-lg capitalize border transition-all ${
                           mealType === type
-                            ? 'bg-[#7045A0] border-[#D6A84B]/60 text-[#F2EDF7] font-semibold'
-                            : 'bg-[#100D18] border-[#362B45] text-[#A69AAF] hover:text-[#F2EDF7]'
+                            ? 'bg-[#1677FF] border-[#00D9FF]/60 text-[#F2F7FF] font-semibold'
+                            : 'bg-[#061225] border-[#1E3A63] text-[#94A8C7] hover:text-[#F2F7FF]'
                         }`}
                       >
                         {type}
@@ -1810,27 +1810,27 @@ export const AetherVisionView: React.FC = () => {
                   </div>
                 </div>
 
-                <label className="block border-2 border-dashed border-[#49B88A]/40 hover:border-[#49B88A] rounded-2xl p-6 text-center cursor-pointer bg-[#100D18] transition-colors">
+                <label className="block border-2 border-dashed border-[#10B981]/40 hover:border-[#10B981] rounded-2xl p-6 text-center cursor-pointer bg-[#061225] transition-colors">
                   <input
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
                     onChange={handleFoodFileSelect}
                     className="hidden"
                   />
-                  <div className="w-12 h-12 rounded-xl bg-[#171220] border border-[#49B88A]/40 flex items-center justify-center mx-auto mb-3 text-[#49B88A]">
+                  <div className="w-12 h-12 rounded-xl bg-[#0A1930] border border-[#10B981]/40 flex items-center justify-center mx-auto mb-3 text-[#10B981]">
                     <Upload className="w-6 h-6" />
                   </div>
-                  <p className="text-xs font-bold text-[#F2EDF7]">
+                  <p className="text-xs font-bold text-[#F2F7FF]">
                     Select a Meal or Snack Photograph
                   </p>
-                  <p className="text-[11px] text-[#A69AAF] mt-1">
+                  <p className="text-[11px] text-[#94A8C7] mt-1">
                     Supports home-cooked plates, thalis, bowls, fruits, and snacks (JPG, PNG, WebP).
                   </p>
                 </label>
 
                 {foodImagePreview && (
                   <div className="space-y-3">
-                    <div className="rounded-xl overflow-hidden border border-[#362B45] bg-[#100D18] aspect-video flex items-center justify-center">
+                    <div className="rounded-xl overflow-hidden border border-[#1E3A63] bg-[#061225] aspect-video flex items-center justify-center">
                       <img
                         src={foodImagePreview}
                         alt="Uploaded meal preview"
@@ -1852,18 +1852,18 @@ export const AetherVisionView: React.FC = () => {
                 )}
 
                 {foodVisionError && (
-                  <div className="p-3.5 rounded-xl bg-[#D65C66]/12 border border-[#D65C66]/45 text-xs text-[#F2EDF7] flex items-start gap-2">
-                    <AlertTriangle className="w-4 h-4 text-[#D65C66] shrink-0 mt-0.5" />
+                  <div className="p-3.5 rounded-xl bg-[#F43F5E]/12 border border-[#F43F5E]/45 text-xs text-[#F2F7FF] flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 text-[#F43F5E] shrink-0 mt-0.5" />
                     <span>{foodVisionError}</span>
                   </div>
                 )}
               </div>
 
-              <div className="lq-card p-4 text-xs text-[#A69AAF] space-y-1.5">
-                <p className="font-semibold text-[#49B88A]">
+              <div className="lq-card p-4 text-xs text-[#94A8C7] space-y-1.5">
+                <p className="font-semibold text-[#10B981]">
                   Honesty &amp; Educational Nutrition Pledge
                 </p>
-                <p className="text-[11px] text-[#A69AAF] leading-relaxed">
+                <p className="text-[11px] text-[#94A8C7] leading-relaxed">
                   Photo nutrition estimates show approximate ranges and contributing food groups—not
                   laboratory measurements. LifeQuest never shames foods or diagnoses deficiencies.
                 </p>
@@ -1874,11 +1874,11 @@ export const AetherVisionView: React.FC = () => {
             <div className="lg:col-span-7 space-y-4">
               {!foodAnalysis || !scaledTotals ? (
                 <div className="lq-card p-8 text-center space-y-3 h-full flex flex-col items-center justify-center">
-                  <Utensils className="w-10 h-10 text-[#49B88A]" />
-                  <h3 className="font-['Cinzel'] font-bold text-base text-[#F2EDF7]">
+                  <Utensils className="w-10 h-10 text-[#10B981]" />
+                  <h3 className="font-['Cinzel'] font-bold text-base text-[#F2F7FF]">
                     Meal Nutrition &amp; Education Engine
                   </h3>
-                  <p className="text-xs text-[#A69AAF] max-w-md leading-relaxed">
+                  <p className="text-xs text-[#94A8C7] max-w-md leading-relaxed">
                     Upload any meal photo to identify visible foods, estimate approximate macro
                     &amp; fibre ranges, discover micronutrient contributors, and review before adding
                     it to your daily nutrition overview.
@@ -1888,10 +1888,10 @@ export const AetherVisionView: React.FC = () => {
                 <div className="lq-card-gold p-6 space-y-5">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <span className="text-[11px] uppercase tracking-widest text-[#49B88A] font-semibold block">
+                      <span className="text-[11px] uppercase tracking-widest text-[#10B981] font-semibold block">
                         Image-Based Estimate · Verify Before Logging
                       </span>
-                      <h3 className="font-['Cinzel'] font-bold text-xl text-[#F2EDF7] mt-0.5">
+                      <h3 className="font-['Cinzel'] font-bold text-xl text-[#F2F7FF] mt-0.5">
                         {foodAnalysis.identified
                           ? editableMealTitle
                           : 'Unclear Meal — Please Confirm Items'}
@@ -1903,23 +1903,23 @@ export const AetherVisionView: React.FC = () => {
                     />
                   </div>
 
-                  <div className="p-3.5 rounded-xl bg-[#100D18] border border-[#D6A84B]/45 text-xs text-[#F2EDF7] flex items-start gap-2.5">
-                    <AlertTriangle className="w-4 h-4 text-[#E8C777] shrink-0 mt-0.5" />
+                  <div className="p-3.5 rounded-xl bg-[#061225] border border-[#F59E0B]/45 text-xs text-[#F2F7FF] flex items-start gap-2.5">
+                    <AlertTriangle className="w-4 h-4 text-[#F59E0B] shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-semibold text-[#E8C777]">
+                      <p className="font-semibold text-[#FBBF24]">
                         {foodAnalysis.estimateDisclaimer}
                       </p>
-                      <p className="mt-1 text-[#A69AAF]">{foodAnalysis.allergenWatchNotice}</p>
+                      <p className="mt-1 text-[#94A8C7]">{foodAnalysis.allergenWatchNotice}</p>
                     </div>
                   </div>
 
                   {/* Portion Calibration Control */}
-                  <div className="p-3.5 rounded-xl bg-[#100D18] border border-[#362B45] flex flex-wrap items-center justify-between gap-3">
+                  <div className="p-3.5 rounded-xl bg-[#061225] border border-[#1E3A63] flex flex-wrap items-center justify-between gap-3">
                     <div className="text-xs">
-                      <span className="font-semibold text-[#49B88A] block">
+                      <span className="font-semibold text-[#10B981] block">
                         Adjust Portion Scale (If Plate Was Smaller/Larger)
                       </span>
-                      <span className="text-[11px] text-[#A69AAF]">
+                      <span className="text-[11px] text-[#94A8C7]">
                         Scales estimated nutrient ranges transparently
                       </span>
                     </div>
@@ -1931,8 +1931,8 @@ export const AetherVisionView: React.FC = () => {
                           onClick={() => setPortionMultiplier(mult)}
                           className={`px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold border transition-colors ${
                             portionMultiplier === mult
-                              ? 'bg-[#7045A0] border-[#D6A84B]/60 text-[#F2EDF7]'
-                              : 'bg-[#171220] border-[#362B45] text-[#A69AAF] hover:text-[#F2EDF7]'
+                              ? 'bg-[#1677FF] border-[#00D9FF]/60 text-[#F2F7FF]'
+                              : 'bg-[#0A1930] border-[#1E3A63] text-[#94A8C7] hover:text-[#F2F7FF]'
                           }`}
                         >
                           {mult}x
@@ -1948,38 +1948,38 @@ export const AetherVisionView: React.FC = () => {
                         label: 'Energy (Est.)',
                         val: `${scaledTotals.energyKcal.min}–${scaledTotals.energyKcal.max}`,
                         unit: 'kcal',
-                        color: 'text-[#E8C777]',
+                        color: 'text-[#FBBF24]',
                       },
                       {
                         label: 'Protein',
                         val: `${scaledTotals.proteinG.min}–${scaledTotals.proteinG.max}`,
                         unit: 'g',
-                        color: 'text-[#9A72CC]',
+                        color: 'text-[#38D9F5]',
                       },
                       {
                         label: 'Carbohydrates',
                         val: `${scaledTotals.carbsG.min}–${scaledTotals.carbsG.max}`,
                         unit: 'g',
-                        color: 'text-[#F2EDF7]',
+                        color: 'text-[#F2F7FF]',
                       },
                       {
                         label: 'Healthy Fats',
                         val: `${scaledTotals.fatG.min}–${scaledTotals.fatG.max}`,
                         unit: 'g',
-                        color: 'text-[#49B88A]',
+                        color: 'text-[#10B981]',
                       },
                       {
                         label: 'Dietary Fibre',
                         val: `${scaledTotals.fibreG.min}–${scaledTotals.fibreG.max}`,
                         unit: 'g',
-                        color: 'text-[#49B88A]',
+                        color: 'text-[#10B981]',
                       },
                     ].map(card => (
                       <div
                         key={card.label}
-                        className="p-3 rounded-xl bg-[#100D18] border border-[#362B45]"
+                        className="p-3 rounded-xl bg-[#061225] border border-[#1E3A63]"
                       >
-                        <span className="text-[10px] uppercase tracking-wider text-[#A69AAF] block">
+                        <span className="text-[10px] uppercase tracking-wider text-[#94A8C7] block">
                           {card.label}
                         </span>
                         <span
@@ -1987,39 +1987,39 @@ export const AetherVisionView: React.FC = () => {
                         >
                           {card.val}
                         </span>
-                        <span className="text-[10px] text-[#766D82]">{card.unit}</span>
+                        <span className="text-[10px] text-[#647A9E]">{card.unit}</span>
                       </div>
                     ))}
                   </div>
 
                   {/* Detected Items & Portion Uncertainty */}
                   <div className="space-y-2">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#49B88A]">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#10B981]">
                       Identified Items &amp; Portion Notes
                     </h4>
                     <div className="space-y-2">
                       {foodAnalysis.items.map((item, idx) => (
                         <div
                           key={idx}
-                          className="p-3 rounded-xl bg-[#100D18] border border-[#362B45] text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                          className="p-3 rounded-xl bg-[#061225] border border-[#1E3A63] text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2"
                         >
                           <div>
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="font-bold text-[#F2EDF7]">{item.name}</span>
-                              <span className="text-[11px] text-[#E8C777]">
+                              <span className="font-bold text-[#F2F7FF]">{item.name}</span>
+                              <span className="text-[11px] text-[#38D9F5]">
                                 · {item.foodGroup} · {item.estimatedPortion}
                               </span>
                             </div>
                             {item.likelyIngredients.length > 0 && (
-                              <p className="text-[11px] text-[#A69AAF] mt-0.5">
+                              <p className="text-[11px] text-[#94A8C7] mt-0.5">
                                 Likely ingredients: {item.likelyIngredients.join(', ')}
                               </p>
                             )}
-                            <p className="text-[11px] text-[#D6A84B] mt-0.5">
+                            <p className="text-[11px] text-[#F59E0B] mt-0.5">
                               {item.uncertaintyNote}
                             </p>
                           </div>
-                          <div className="text-[11px] font-mono text-[#A69AAF] tabular-nums shrink-0 text-right">
+                          <div className="text-[11px] font-mono text-[#94A8C7] tabular-nums shrink-0 text-right">
                             ~{Math.round(item.energyKcal * portionMultiplier)} kcal · P{' '}
                             {Math.round(item.proteinG * portionMultiplier)}g · F{' '}
                             {Math.round(item.fibreG * portionMultiplier)}g fibre
@@ -2030,11 +2030,11 @@ export const AetherVisionView: React.FC = () => {
                   </div>
 
                   {foodAnalysis.clarifyingQuestions.length > 0 && (
-                    <div className="p-3.5 rounded-xl bg-[#100D18] border border-[#362B45] text-xs space-y-1">
-                      <span className="font-semibold text-[#E8C777] block">
+                    <div className="p-3.5 rounded-xl bg-[#061225] border border-[#1E3A63] text-xs space-y-1">
+                      <span className="font-semibold text-[#38D9F5] block">
                         What Could Change This Estimate?
                       </span>
-                      <ul className="text-[#A69AAF] space-y-1">
+                      <ul className="text-[#94A8C7] space-y-1">
                         {foodAnalysis.clarifyingQuestions.map((q, i) => (
                           <li key={i}>• {q}</li>
                         ))}
@@ -2044,45 +2044,45 @@ export const AetherVisionView: React.FC = () => {
 
                   {/* Nutrient Contributors & Micronutrients */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                    <div className="p-3.5 rounded-xl bg-[#100D18] border border-[#362B45] space-y-1.5">
-                      <span className="font-semibold text-[#E8C777] block">
+                    <div className="p-3.5 rounded-xl bg-[#061225] border border-[#1E3A63] space-y-1.5">
+                      <span className="font-semibold text-[#38D9F5] block">
                         Food Groups &amp; Macro Contributors
                       </span>
-                      <p className="text-[#A69AAF]">
-                        <strong className="text-[#F2EDF7]">Protein:</strong>{' '}
+                      <p className="text-[#94A8C7]">
+                        <strong className="text-[#F2F7FF]">Protein:</strong>{' '}
                         {foodAnalysis.nutrientContributors.proteinSources.join(', ') ||
                           'Minimal visible'}
                       </p>
-                      <p className="text-[#A69AAF]">
-                        <strong className="text-[#F2EDF7]">Carbohydrates:</strong>{' '}
+                      <p className="text-[#94A8C7]">
+                        <strong className="text-[#F2F7FF]">Carbohydrates:</strong>{' '}
                         {foodAnalysis.nutrientContributors.carbSources.join(', ') ||
                           'Minimal visible'}
                       </p>
-                      <p className="text-[#A69AAF]">
-                        <strong className="text-[#F2EDF7]">Fats:</strong>{' '}
+                      <p className="text-[#94A8C7]">
+                        <strong className="text-[#F2F7FF]">Fats:</strong>{' '}
                         {foodAnalysis.nutrientContributors.healthyFatSources.join(', ') ||
                           'Cooking oils / trace'}
                       </p>
-                      <p className="text-[#A69AAF]">
-                        <strong className="text-[#F2EDF7]">Fibre:</strong>{' '}
+                      <p className="text-[#94A8C7]">
+                        <strong className="text-[#F2F7FF]">Fibre:</strong>{' '}
                         {foodAnalysis.nutrientContributors.fibreSources.join(', ') ||
                           'Whole plant sources'}
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-xl bg-[#100D18] border border-[#49B88A]/30 space-y-1.5">
-                      <span className="font-semibold text-[#49B88A] block">
+                    <div className="p-3.5 rounded-xl bg-[#061225] border border-[#10B981]/30 space-y-1.5">
+                      <span className="font-semibold text-[#10B981] block">
                         Key Micronutrients Observed
                       </span>
                       {foodAnalysis.micronutrients.length === 0 ? (
-                        <p className="text-[#A69AAF]">
+                        <p className="text-[#94A8C7]">
                           Pair with fresh produce or whole grains for wider micronutrient variety.
                         </p>
                       ) : (
-                        <ul className="space-y-1.5 text-[#A69AAF]">
+                        <ul className="space-y-1.5 text-[#94A8C7]">
                           {foodAnalysis.micronutrients.slice(0, 4).map((m, i) => (
                             <li key={i}>
-                              <strong className="text-[#F2EDF7]">{m.name}</strong> (
+                              <strong className="text-[#F2F7FF]">{m.name}</strong> (
                               {m.qualitativeLevel})
                               {m.contributingFoods.length > 0 &&
                                 ` via ${m.contributingFoods.join(', ')}`}
@@ -2094,15 +2094,15 @@ export const AetherVisionView: React.FC = () => {
                   </div>
 
                   {/* Educational Explanation & Balance Ideas */}
-                  <div className="p-4 rounded-xl bg-[#100D18] border border-[#49B88A]/35 text-xs space-y-2">
-                    <span className="font-semibold text-[#49B88A] block">
+                  <div className="p-4 rounded-xl bg-[#061225] border border-[#10B981]/35 text-xs space-y-2">
+                    <span className="font-semibold text-[#10B981] block">
                       Educational Nutrition Notes (WHO &amp; ICMR–NIN 2024 Aligned)
                     </span>
-                    <p className="text-[#F2EDF7] leading-relaxed">
+                    <p className="text-[#F2F7FF] leading-relaxed">
                       {foodAnalysis.educationalExplanation}
                     </p>
                     {foodAnalysis.varietyAndBalanceSuggestions.length > 0 && (
-                      <ul className="space-y-1 text-[#A69AAF] pt-1">
+                      <ul className="space-y-1 text-[#94A8C7] pt-1">
                         {foodAnalysis.varietyAndBalanceSuggestions.map((s, i) => (
                           <li key={i}>• {s}</li>
                         ))}
@@ -2111,14 +2111,14 @@ export const AetherVisionView: React.FC = () => {
                   </div>
 
                   {/* Editable Confirm & Save Controls */}
-                  <div className="pt-4 border-t border-[#362B45] space-y-3 text-xs">
-                    <h4 className="font-['Cinzel'] font-bold uppercase tracking-wider text-[#49B88A]">
+                  <div className="pt-4 border-t border-[#1E3A63] space-y-3 text-xs">
+                    <h4 className="font-['Cinzel'] font-bold uppercase tracking-wider text-[#10B981]">
                       Review &amp; Correct Before Logging
                     </h4>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-[#A69AAF] font-medium mb-1">Meal Title</label>
+                        <label className="block text-[#94A8C7] font-medium mb-1">Meal Title</label>
                         <input
                           type="text"
                           value={editableMealTitle}
@@ -2127,7 +2127,7 @@ export const AetherVisionView: React.FC = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-[#A69AAF] font-medium mb-1">
+                        <label className="block text-[#94A8C7] font-medium mb-1">
                           Dietary Style
                         </label>
                         <select
@@ -2147,14 +2147,14 @@ export const AetherVisionView: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-[#A69AAF] font-medium mb-1">
+                      <label className="block text-[#94A8C7] font-medium mb-1">
                         Food Items Logged (Edit or Add Missing Items)
                       </label>
                       <div className="flex flex-wrap gap-1.5 mb-2">
                         {editableFoodItems.map((it, i) => (
                           <span
                             key={i}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#100D18] border border-[#362B45] text-[#F2EDF7]"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#061225] border border-[#1E3A63] text-[#F2F7FF]"
                           >
                             <span>{it}</span>
                             <button
@@ -2162,7 +2162,7 @@ export const AetherVisionView: React.FC = () => {
                               onClick={() =>
                                 setEditableFoodItems(prev => prev.filter((_, idx) => idx !== i))
                               }
-                              className="text-[#A69AAF] hover:text-[#D65C66]"
+                              className="text-[#94A8C7] hover:text-[#F43F5E]"
                               aria-label="Remove item"
                             >
                               <Trash2 className="w-3 h-3" />
@@ -2187,14 +2187,14 @@ export const AetherVisionView: React.FC = () => {
                           }}
                           className="lq-btn lq-btn-secondary px-3 py-2 text-xs shrink-0"
                         >
-                          <Plus className="w-3.5 h-3.5 text-[#49B88A]" />
+                          <Plus className="w-3.5 h-3.5 text-[#10B981]" />
                           <span>Add</span>
                         </button>
                       </div>
                     </div>
 
                     {mealSaveError && (
-                      <div className="p-3 rounded-xl bg-[#D65C66]/12 border border-[#D65C66]/50 text-xs text-[#F2EDF7]">
+                      <div className="p-3 rounded-xl bg-[#F43F5E]/12 border border-[#F43F5E]/50 text-xs text-[#F2F7FF]">
                         {mealSaveError}
                       </div>
                     )}
@@ -2234,11 +2234,11 @@ export const AetherVisionView: React.FC = () => {
         >
           <h3
             id="camera-review-modal-title"
-            className="text-lg font-bold font-['Cinzel'] text-[#F2EDF7]"
+            className="text-lg font-bold font-['Cinzel'] text-[#F2F7FF]"
           >
             Confirm Camera Workout Session
           </h3>
-          <p className="text-xs text-[#A69AAF] leading-relaxed">
+          <p className="text-xs text-[#94A8C7] leading-relaxed">
             {isSandboxDemo
               ? 'Demo Preview does not qualify for Vision-verified bonus XP. Adjust your actual workout duration below to save a standard workout log.'
               : confirmCameraExercise === 'plank'
@@ -2247,7 +2247,7 @@ export const AetherVisionView: React.FC = () => {
           </p>
 
           <div className="text-xs">
-            <label className="block text-[#A69AAF] mb-1">Verified Exercise</label>
+            <label className="block text-[#94A8C7] mb-1">Verified Exercise</label>
             <select
               value={confirmCameraExercise}
               onChange={e => setConfirmCameraExercise(e.target.value as CameraTrackableExercise)}
@@ -2263,7 +2263,7 @@ export const AetherVisionView: React.FC = () => {
 
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div>
-              <label className="block text-[#A69AAF] mb-1">
+              <label className="block text-[#94A8C7] mb-1">
                 {confirmCameraExercise === 'plank' ? 'Endurance Units (5s)' : 'Repetitions'}
               </label>
               <input
@@ -2276,7 +2276,7 @@ export const AetherVisionView: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-[#A69AAF] mb-1">Duration (Min)</label>
+              <label className="block text-[#94A8C7] mb-1">Duration (Min)</label>
               <input
                 type="number"
                 min={1}
@@ -2291,7 +2291,7 @@ export const AetherVisionView: React.FC = () => {
           </div>
 
           {cameraSaveError && (
-            <div className="p-3 rounded-xl bg-[#D65C66]/12 border border-[#D65C66]/50 text-xs text-[#F2EDF7]">
+            <div className="p-3 rounded-xl bg-[#F43F5E]/12 border border-[#F43F5E]/50 text-xs text-[#F2F7FF]">
               {cameraSaveError}
             </div>
           )}
@@ -2337,48 +2337,48 @@ export const AetherVisionView: React.FC = () => {
             aria-labelledby="vision-reward-modal-title"
             className="lq-card-gold p-6 sm:p-8 text-center space-y-5"
           >
-            <div className="w-14 h-14 mx-auto rounded-2xl bg-[#49B88A]/15 border border-[#49B88A]/50 flex items-center justify-center text-[#49B88A]">
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-[#10B981]/15 border border-[#10B981]/50 flex items-center justify-center text-[#10B981]">
               <CheckCircle2 className="w-8 h-8" />
             </div>
 
             <div>
               <h3
                 id="vision-reward-modal-title"
-                className="text-2xl font-bold font-['Cinzel'] text-[#F2EDF7]"
+                className="text-2xl font-bold font-['Cinzel'] text-[#F2F7FF]"
               >
                 {confirmedReward.kind === 'workout' ? 'Workout Saved!' : 'Meal Logged!'}
               </h3>
-              <p className="text-xs text-[#A69AAF] mt-1">{confirmedReward.title}</p>
+              <p className="text-xs text-[#94A8C7] mt-1">{confirmedReward.title}</p>
             </div>
 
             {confirmedReward.dailyCapReached && (
-              <div className="p-3 rounded-xl bg-[#100D18] border border-[#D6A84B]/50 text-xs text-[#E8C777]">
+              <div className="p-3 rounded-xl bg-[#061225] border border-[#F59E0B]/50 text-xs text-[#FBBF24]">
                 Daily reward limit reached for this category today — your log was saved cleanly
                 without extra XP/Gold.
               </div>
             )}
 
             {confirmedReward.deduplicated && (
-              <div className="p-3 rounded-xl bg-[#100D18] border border-[#9A72CC]/45 text-xs text-[#9A72CC] flex items-center justify-center gap-2">
+              <div className="p-3 rounded-xl bg-[#061225] border border-[#38D9F5]/45 text-xs text-[#38D9F5] flex items-center justify-center gap-2">
                 <RefreshCw className="w-4 h-4" />
                 <span>Duplicate submission prevented — rewards already credited once.</span>
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-2.5 bg-[#100D18] p-4 rounded-xl border border-[#362B45]">
+            <div className="grid grid-cols-2 gap-2.5 bg-[#061225] p-4 rounded-xl border border-[#1E3A63]">
               <div>
-                <span className="text-[10px] text-[#A69AAF] uppercase tracking-wider block">
+                <span className="text-[10px] text-[#94A8C7] uppercase tracking-wider block">
                   Player XP
                 </span>
-                <span className="font-mono text-xl font-bold text-[#49B88A] tabular-nums">
+                <span className="font-mono text-xl font-bold text-[#10B981] tabular-nums">
                   +<AnimatedCounter value={confirmedReward.playerXp} />
                 </span>
               </div>
-              <div className="border-l border-[#362B45]">
-                <span className="text-[10px] text-[#A69AAF] uppercase tracking-wider block">
+              <div className="border-l border-[#1E3A63]">
+                <span className="text-[10px] text-[#94A8C7] uppercase tracking-wider block">
                   Gold
                 </span>
-                <span className="font-mono text-xl font-bold text-[#E8C777] flex items-center justify-center gap-1 tabular-nums">
+                <span className="font-mono text-xl font-bold text-[#FBBF24] flex items-center justify-center gap-1 tabular-nums">
                   <Coins className="w-3.5 h-3.5" />+
                   <AnimatedCounter value={confirmedReward.gold} />
                 </span>
@@ -2386,7 +2386,7 @@ export const AetherVisionView: React.FC = () => {
             </div>
 
             {confirmedReward.buffActivated && (
-              <div className="p-3 rounded-xl bg-[#100D18] border border-[#49B88A]/45 text-xs text-[#49B88A] flex items-center justify-center gap-2">
+              <div className="p-3 rounded-xl bg-[#061225] border border-[#10B981]/45 text-xs text-[#10B981] flex items-center justify-center gap-2">
                 <Flame className="w-4 h-4 shrink-0" />
                 <span>Warrior’s Momentum (+10% ATK) primed for Boss Battles!</span>
               </div>
